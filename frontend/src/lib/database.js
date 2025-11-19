@@ -106,7 +106,8 @@ export default {
                 const dj = db.djs.find(d => d.id === e.dj_id);
                 return {
                   ...e,
-                  dj_nombre: dj?.nombre || ''
+                  dj_nombre: dj?.nombre || '',
+                  dj_id: e.dj_id
                 };
               });
             return { rows: eventos };
@@ -150,16 +151,14 @@ export default {
             };
           }
         }
-        if (query.includes('WHERE DJ_ID') && query.includes('AND SALON_ID') && query.includes('AND FECHA_EVENTO')) {
-          const djId = parseInt(params[0]);
-          const salonId = parseInt(params[1]);
-          const fecha = params[2];
+        // Verificar si existe evento para esa fecha y salón (cualquier DJ)
+        if (query.includes('WHERE SALON_ID') && query.includes('AND FECHA_EVENTO')) {
+          const salonId = parseInt(params[0]);
+          const fecha = params[1];
           const fechaStr = fecha instanceof Date ? fecha.toISOString().split('T')[0] : fecha.split('T')[0];
           const evento = db.eventos.find(e => {
             const eFecha = e.fecha_evento.split('T')[0];
-            return e.dj_id === djId && 
-                   e.salon_id === salonId && 
-                   eFecha === fechaStr;
+            return e.salon_id === salonId && eFecha === fechaStr;
           });
           return { rows: evento ? [evento] : [] };
         }

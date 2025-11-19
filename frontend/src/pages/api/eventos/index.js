@@ -32,7 +32,8 @@ export default async function handler(req, res) {
       const event = await Event.create({ dj_id, salon_id, fecha_evento: fecha });
       res.status(201).json(event);
     } catch (error) {
-      if (error.message === 'Ya existe un evento registrado para esta fecha y salón') {
+      if (error.message === 'Ya has registrado un evento para esta fecha y salón' || 
+          error.message === 'Esta fecha ya está ocupada por otro DJ') {
         return res.status(409).json({ error: error.message });
       }
       console.error('Error al crear evento:', error);

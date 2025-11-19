@@ -2,14 +2,21 @@ import pool from '../database.js';
 
 export class Event {
   static async create({ dj_id, salon_id, fecha_evento }) {
+    // Verificar que no exista ningún evento para esa fecha y salón (por ningún DJ)
     const checkQuery = `
-      SELECT id FROM eventos 
-      WHERE dj_id = $1 AND salon_id = $2 AND fecha_evento = $3
+      SELECT id, dj_id FROM eventos 
+      WHERE salon_id = $1 AND fecha_evento = $2
     `;
-    const checkResult = await pool.query(checkQuery, [dj_id, salon_id, fecha_evento]);
+    const checkResult = await pool.query(checkQuery, [salon_id, fecha_evento]);
     
     if (checkResult.rows.length > 0) {
-      throw new Error('Ya existe un evento registrado para esta fecha y salón');
+      // Si ya existe un evento, verificar si es del mismo DJ
+      const existingEvent = checkResult.rows[0];
+      if (existingEvent.dj_id === dj_id) {
+        throw new Error('Ya has registrado un evento para esta fecha y salón');
+      } else {
+        throw new Error('Esta fecha ya está ocupada por otro DJ');
+      }
     }
 
     const fechaMarcado = new Date().toISOString();
@@ -26,7 +33,8 @@ export class Event {
     const query = `
       SELECT 
         e.*,
-        d.nombre as dj_nombre
+        d.nombre as dj_nombre,
+        d.id as dj_id
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
       WHERE e.salon_id = $1 

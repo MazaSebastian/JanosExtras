@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI } from '@/services/api';
+import { getDJColor } from '@/utils/colors';
 import styles from '@/styles/Calendar.module.css';
 
 export default function Calendar({ salonId, onDateClick }) {
@@ -113,6 +114,7 @@ export default function Calendar({ salonId, onDateClick }) {
           const isCurrentMonth = isSameMonth(date, currentDate);
           const hasEventOnDate = hasEvent(date);
           const event = getEventForDate(date);
+          const eventColor = event?.dj_id ? getDJColor(event.dj_id) : null;
 
           return (
             <div
@@ -121,12 +123,22 @@ export default function Calendar({ salonId, onDateClick }) {
                 !isCurrentMonth ? styles.otherMonth : ''
               } ${hasEventOnDate ? styles.hasEvent : ''}`}
               onClick={() => handleDateClick(date)}
+              style={hasEventOnDate && eventColor ? {
+                backgroundColor: `${eventColor}20`,
+                borderColor: eventColor,
+                borderWidth: '2px',
+                borderStyle: 'solid'
+              } : {}}
             >
               <span className={styles.dayNumber}>
                 {format(date, 'd')}
               </span>
-              {hasEventOnDate && (
-                <div className={styles.eventIndicator} title={event?.dj_nombre}>
+              {hasEventOnDate && eventColor && (
+                <div 
+                  className={styles.eventIndicator} 
+                  title={`${event?.dj_nombre || 'Evento'}`}
+                  style={{ color: eventColor }}
+                >
                   ●
                 </div>
               )}

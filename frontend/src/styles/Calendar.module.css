@@ -83,8 +83,8 @@
 }
 
 .day.hasEvent {
-  border-color: #667eea;
-  background: #f0f4ff;
+  /* El color se aplica dinámicamente via inline styles */
+  font-weight: 600;
 }
 
 .dayNumber {
