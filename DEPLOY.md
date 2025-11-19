@@ -27,11 +27,13 @@ git push -u origin main
 1. Ve a [vercel.com](https://vercel.com) e inicia sesión con GitHub
 2. Haz clic en "Add New Project"
 3. Importa el repositorio `JanosExtras`
-4. Configura el proyecto:
-   - **Framework Preset**: Next.js
-   - **Root Directory**: `frontend`
+4. **IMPORTANTE**: Antes de hacer clic en "Deploy", haz clic en "Configure Project"
+5. Configura el proyecto:
+   - **Framework Preset**: Next.js (debería detectarse automáticamente)
+   - **Root Directory**: `frontend` ⚠️ **ESTO ES CRÍTICO - Debe estar configurado**
    - **Build Command**: `npm run build` (o dejar por defecto)
    - **Output Directory**: `.next` (o dejar por defecto)
+6. Si ya desplegaste y falló, ve a Settings → General → Root Directory y cámbialo a `frontend`
 
 ### 3. Variables de Entorno
 
