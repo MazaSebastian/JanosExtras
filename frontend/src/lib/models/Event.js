@@ -26,8 +26,7 @@ export class Event {
     const query = `
       SELECT 
         e.*,
-        d.nombre as dj_nombre,
-        d.email as dj_email
+        d.nombre as dj_nombre
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
       WHERE e.salon_id = $1 

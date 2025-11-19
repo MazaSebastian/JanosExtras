@@ -6,35 +6,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, email, password } = req.body;
+    const { nombre, password } = req.body;
 
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    if (!nombre || !password) {
+      return res.status(400).json({ error: 'Nombre y contraseña son requeridos' });
     }
 
     if (password.length < 6) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
     }
 
-    if (!email.includes('@')) {
-      return res.status(400).json({ error: 'Email inválido' });
+    if (nombre.trim().length < 2) {
+      return res.status(400).json({ error: 'El nombre debe tener al menos 2 caracteres' });
     }
 
-    // Verificar si el email ya existe
-    const existingDJ = await DJ.findByEmail(email);
+    // Verificar si el nombre ya existe
+    const existingDJ = await DJ.findByNombre(nombre);
     if (existingDJ) {
-      return res.status(400).json({ error: 'El email ya está registrado' });
+      return res.status(400).json({ error: 'Este nombre ya está registrado' });
     }
 
     // Crear nuevo DJ
-    const newDJ = await DJ.create({ nombre, email, password });
+    const newDJ = await DJ.create({ nombre, password });
 
     res.status(201).json({
       message: 'DJ registrado exitosamente',
       dj: {
         id: newDJ.id,
-        nombre: newDJ.nombre,
-        email: newDJ.email
+        nombre: newDJ.nombre
       }
     });
   } catch (error) {

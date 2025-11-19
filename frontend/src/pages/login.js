@@ -9,7 +9,6 @@ export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
-    email: '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -38,7 +37,7 @@ export default function Login() {
         }
       } else {
         const response = await authAPI.login({
-          email: formData.email,
+          nombre: formData.nombre,
           password: formData.password,
         });
         if (response.data.token) {
@@ -65,29 +64,15 @@ export default function Login() {
         {error && <div className={styles.error}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {isRegister && (
-            <div className={styles.inputGroup}>
-              <label>Nombre</label>
-              <input
-                type="text"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                required
-                placeholder="Tu nombre completo"
-              />
-            </div>
-          )}
-
           <div className={styles.inputGroup}>
-            <label>Email</label>
+            <label>Nombre</label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              name="nombre"
+              value={formData.nombre}
               onChange={handleChange}
               required
-              placeholder="tu@email.com"
+              placeholder={isRegister ? "Tu nombre completo" : "Tu nombre de usuario"}
             />
           </div>
 

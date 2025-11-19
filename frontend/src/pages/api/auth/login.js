@@ -7,14 +7,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, password } = req.body;
+    const { nombre, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+    if (!nombre || !password) {
+      return res.status(400).json({ error: 'Nombre y contraseña son requeridos' });
     }
 
-    // Buscar DJ por email
-    const dj = await DJ.findByEmail(email);
+    // Buscar DJ por nombre
+    const dj = await DJ.findByNombre(nombre);
     if (!dj) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     // Generar token JWT
     const token = jwt.sign(
-      { id: dj.id, email: dj.email },
+      { id: dj.id, nombre: dj.nombre },
       process.env.JWT_SECRET || 'sistema_djs_secreto_jwt_cambiar_en_produccion_12345',
       { expiresIn: '7d' }
     );
@@ -37,8 +37,7 @@ export default async function handler(req, res) {
       token,
       dj: {
         id: dj.id,
-        nombre: dj.nombre,
-        email: dj.email
+        nombre: dj.nombre
       }
     });
   } catch (error) {

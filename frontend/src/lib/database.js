@@ -63,9 +63,9 @@ export default {
     // SELECT queries
     if (query.startsWith('SELECT')) {
       if (query.includes('FROM DJS')) {
-        if (query.includes('WHERE EMAIL')) {
-          const email = params[0];
-          const dj = db.djs.find(d => d.email === email);
+        if (query.includes('WHERE NOMBRE')) {
+          const nombre = params[0];
+          const dj = db.djs.find(d => d.nombre === nombre);
           return { rows: dj ? [dj] : [] };
         }
         if (query.includes('WHERE ID')) {
@@ -106,8 +106,7 @@ export default {
                 const dj = db.djs.find(d => d.id === e.dj_id);
                 return {
                   ...e,
-                  dj_nombre: dj?.nombre || '',
-                  dj_email: dj?.email || ''
+                  dj_nombre: dj?.nombre || ''
                 };
               });
             return { rows: eventos };
@@ -174,9 +173,8 @@ export default {
         const newDJ = {
           id: newId,
           nombre: params[0],
-          email: params[1],
-          password: params[2],
-          fecha_registro: params[3] || new Date().toISOString()
+          password: params[1],
+          fecha_registro: params[2] || new Date().toISOString()
         };
         db.djs.push(newDJ);
         saveDB();
