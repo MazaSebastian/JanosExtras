@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfYear, endOfYear, addYears, subYears } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI } from '@/services/api';
-import { getDJColor } from '@/utils/colors';
+import { getSalonColor } from '@/utils/colors';
 import styles from '@/styles/Calendar.module.css';
 
 export default function Calendar({ salonId, onDateClick }) {
@@ -139,7 +139,8 @@ export default function Calendar({ salonId, onDateClick }) {
                 const isCurrentMonth = isSameMonth(date, month.monthDate);
                 const hasEventOnDate = hasEvent(date);
                 const event = getEventForDate(date);
-                const eventColor = event?.dj_id ? getDJColor(event.dj_id) : null;
+                // Usar el color del salón del DJ, no del DJ directamente
+                const eventColor = event?.dj_salon_id ? getSalonColor(event.dj_salon_id) : null;
 
                 return (
                   <div

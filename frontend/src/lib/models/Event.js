@@ -34,7 +34,8 @@ export class Event {
       SELECT 
         e.*,
         d.nombre as dj_nombre,
-        d.id as dj_id
+        d.id as dj_id,
+        d.salon_id as dj_salon_id
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
       WHERE e.salon_id = $1 

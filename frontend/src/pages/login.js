@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { authAPI } from '@/services/api';
+import { authAPI, salonesAPI } from '@/services/api';
 import { setAuth } from '@/utils/auth';
 import styles from '@/styles/Login.module.css';
 
@@ -10,9 +10,48 @@ export default function Login() {
   const [formData, setFormData] = useState({
     nombre: '',
     password: '',
+    salon_id: null,
   });
+  const [salones, setSalones] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingSalones, setLoadingSalones] = useState(false);
+
+  useEffect(() => {
+    if (isRegister) {
+      loadSalones();
+    }
+  }, [isRegister]);
+
+  const loadSalones = async () => {
+    try {
+      setLoadingSalones(true);
+      // Usar endpoint público para obtener salones sin autenticación
+      const response = await fetch('/api/salones/public');
+      if (!response.ok) throw new Error('Error al cargar salones');
+      const data = await response.json();
+      setSalones(data);
+      // Seleccionar "Salón Principal" por defecto
+      const salonPrincipal = data.find(s => s.nombre === 'Salón Principal');
+      if (salonPrincipal) {
+        setFormData(prev => ({ ...prev, salon_id: salonPrincipal.id }));
+      } else if (data.length > 0) {
+        // Si no existe "Salón Principal", seleccionar el primero
+        setFormData(prev => ({ ...prev, salon_id: data[0].id }));
+      }
+    } catch (err) {
+      console.error('Error al cargar salones:', err);
+      // Si falla, usar valores por defecto
+      setSalones([
+        { id: 1, nombre: 'Salón Principal' },
+        { id: 2, nombre: 'Salón VIP' },
+        { id: 3, nombre: 'Salón Terraza' }
+      ]);
+      setFormData(prev => ({ ...prev, salon_id: 1 }));
+    } finally {
+      setLoadingSalones(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -89,10 +128,34 @@ export default function Login() {
             />
           </div>
 
+          {isRegister && (
+            <div className={styles.inputGroup}>
+              <label>Salón</label>
+              {loadingSalones ? (
+                <div className={styles.loadingText}>Cargando salones...</div>
+              ) : (
+                <select
+                  name="salon_id"
+                  value={formData.salon_id || ''}
+                  onChange={(e) => setFormData({ ...formData, salon_id: parseInt(e.target.value) })}
+                  required
+                  className={styles.select}
+                >
+                  <option value="">-- Selecciona un salón --</option>
+                  {salones.map((salon) => (
+                    <option key={salon.id} value={salon.id}>
+                      {salon.nombre}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
+
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={loading}
+            disabled={loading || (isRegister && !formData.salon_id)}
           >
             {loading ? 'Procesando...' : isRegister ? 'Registrarse' : 'Iniciar Sesión'}
           </button>

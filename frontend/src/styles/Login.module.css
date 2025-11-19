@@ -53,6 +53,44 @@
   border-color: #667eea;
 }
 
+.inputGroup select {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.inputGroup select:focus {
+  border-color: #667eea;
+  outline: none;
+}
+
+.loadingText {
+  padding: 12px 16px;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+.select {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  width: 100%;
+}
+
+.select:focus {
+  border-color: #667eea;
+  outline: none;
+}
+
 .error {
   background: #fee;
   color: #c33;

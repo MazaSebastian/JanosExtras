@@ -6,10 +6,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, password } = req.body;
+    const { nombre, password, salon_id } = req.body;
 
     if (!nombre || !password) {
       return res.status(400).json({ error: 'Nombre y contraseña son requeridos' });
+    }
+
+    if (!salon_id) {
+      return res.status(400).json({ error: 'Debes seleccionar un salón' });
     }
 
     if (password.length < 6) {
@@ -26,8 +30,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Este nombre ya está registrado' });
     }
 
-    // Crear nuevo DJ
-    const newDJ = await DJ.create({ nombre, password });
+    // Crear nuevo DJ con salón asignado
+    const newDJ = await DJ.create({ nombre, password, salon_id });
 
     res.status(201).json({
       message: 'DJ registrado exitosamente',

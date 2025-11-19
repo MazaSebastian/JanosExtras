@@ -73,7 +73,8 @@ export default {
           const dj = db.djs.find(d => d.id === id);
           if (dj) {
             const { password, ...djWithoutPassword } = dj;
-            return { rows: [djWithoutPassword] };
+            // Asegurar que salon_id esté incluido
+            return { rows: [{ ...djWithoutPassword, salon_id: dj.salon_id || null }] };
           }
           return { rows: [] };
         }
@@ -107,7 +108,8 @@ export default {
                 return {
                   ...e,
                   dj_nombre: dj?.nombre || '',
-                  dj_id: e.dj_id
+                  dj_id: e.dj_id,
+                  dj_salon_id: dj?.salon_id || null
                 };
               });
             return { rows: eventos };
@@ -174,7 +176,8 @@ export default {
           id: newId,
           nombre: params[0],
           password: params[1],
-          fecha_registro: params[2] || new Date().toISOString()
+          salon_id: params[2] || null,
+          fecha_registro: params[3] || new Date().toISOString()
         };
         db.djs.push(newDJ);
         saveDB();
