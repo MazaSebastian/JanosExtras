@@ -1,0 +1,14 @@
+{
+  "name": "sistema-extras-janos",
+  "version": "1.0.0",
+  "description": "Sistema de control de eventos para DJs",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+  },
+  "keywords": ["djs", "eventos", "calendario"],
+  "author": "",
+  "license": "ISC"
+}
+
