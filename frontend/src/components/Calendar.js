@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfYear, endOfYear, addYears, subYears } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI } from '@/services/api';
 import { getDJColor } from '@/utils/colors';
 import styles from '@/styles/Calendar.module.css';
 
 export default function Calendar({ salonId, onDateClick }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -14,17 +14,24 @@ export default function Calendar({ salonId, onDateClick }) {
     if (salonId) {
       loadEvents();
     }
-  }, [salonId, currentDate]);
+  }, [salonId, currentYear]);
 
   const loadEvents = async () => {
     if (!salonId) return;
     
     try {
       setLoading(true);
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth() + 1;
-      const response = await eventosAPI.getBySalonAndMonth(salonId, year, month);
-      setEvents(response.data);
+      // Cargar eventos de todos los meses del año
+      const allEvents = [];
+      for (let month = 1; month <= 12; month++) {
+        try {
+          const response = await eventosAPI.getBySalonAndMonth(salonId, currentYear, month);
+          allEvents.push(...response.data);
+        } catch (err) {
+          console.error(`Error al cargar eventos del mes ${month}:`, err);
+        }
+      }
+      setEvents(allEvents);
     } catch (err) {
       console.error('Error al cargar eventos:', err);
     } finally {
@@ -32,30 +39,40 @@ export default function Calendar({ salonId, onDateClick }) {
     }
   };
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  // Generar todos los meses del año
+  const months = [];
+  for (let month = 0; month < 12; month++) {
+    const monthDate = new Date(currentYear, month, 1);
+    const monthStart = startOfMonth(monthDate);
+    const monthEnd = endOfMonth(monthDate);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  // Obtener días del mes anterior para completar la primera semana
-  const firstDayOfWeek = monthStart.getDay();
-  const daysBefore = [];
-  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    const date = new Date(monthStart);
-    date.setDate(date.getDate() - i - 1);
-    daysBefore.push(date);
+    // Obtener días del mes anterior para completar la primera semana
+    const firstDayOfWeek = monthStart.getDay();
+    const daysBefore = [];
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      const date = new Date(monthStart);
+      date.setDate(date.getDate() - i - 1);
+      daysBefore.push(date);
+    }
+
+    // Obtener días del mes siguiente para completar la última semana
+    const lastDayOfWeek = monthEnd.getDay();
+    const daysAfter = [];
+    const daysNeeded = 6 - lastDayOfWeek;
+    for (let i = 1; i <= daysNeeded; i++) {
+      const date = new Date(monthEnd);
+      date.setDate(date.getDate() + i);
+      daysAfter.push(date);
+    }
+
+    const allDays = [...daysBefore, ...daysInMonth, ...daysAfter];
+    months.push({
+      monthDate,
+      monthName: format(monthDate, 'MMMM', { locale: es }),
+      days: allDays
+    });
   }
-
-  // Obtener días del mes siguiente para completar la última semana
-  const lastDayOfWeek = monthEnd.getDay();
-  const daysAfter = [];
-  const daysNeeded = 6 - lastDayOfWeek;
-  for (let i = 1; i <= daysNeeded; i++) {
-    const date = new Date(monthEnd);
-    date.setDate(date.getDate() + i);
-    daysAfter.push(date);
-  }
-
-  const allDays = [...daysBefore, ...daysInMonth, ...daysAfter];
 
   const hasEvent = (date) => {
     return events.some((event) => {
@@ -71,83 +88,92 @@ export default function Calendar({ salonId, onDateClick }) {
     });
   };
 
-  const handleDateClick = (date) => {
-    if (isSameMonth(date, currentDate) && onDateClick) {
+  const handleDateClick = (date, monthDate) => {
+    // Solo permitir clics en fechas del mes actual (no en días de otros meses)
+    if (isSameMonth(date, monthDate) && onDateClick) {
       onDateClick(date);
     }
   };
 
-  const previousMonth = () => {
-    setCurrentDate(subMonths(currentDate, 1));
+  const previousYear = () => {
+    setCurrentYear(currentYear - 1);
   };
 
-  const nextMonth = () => {
-    setCurrentDate(addMonths(currentDate, 1));
+  const nextYear = () => {
+    setCurrentYear(currentYear + 1);
   };
 
-  const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const weekDays = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 
   return (
     <div className={styles.calendar}>
       <div className={styles.header}>
-        <button onClick={previousMonth} className={styles.navButton}>
+        <button onClick={previousYear} className={styles.navButton}>
           ‹
         </button>
-        <h2 className={styles.monthTitle}>
-          {format(currentDate, 'MMMM yyyy', { locale: es })}
+        <h2 className={styles.yearTitle}>
+          {currentYear}
         </h2>
-        <button onClick={nextMonth} className={styles.navButton}>
+        <button onClick={nextYear} className={styles.navButton}>
           ›
         </button>
       </div>
 
-      <div className={styles.weekDays}>
-        {weekDays.map((day) => (
-          <div key={day} className={styles.weekDay}>
-            {day}
+      {loading && <div className={styles.loading}>Cargando eventos del año...</div>}
+
+      <div className={styles.yearGrid}>
+        {months.map((month, monthIndex) => (
+          <div key={monthIndex} className={styles.monthContainer}>
+            <h3 className={styles.monthTitle}>{month.monthName}</h3>
+            
+            <div className={styles.weekDays}>
+              {weekDays.map((day) => (
+                <div key={day} className={styles.weekDay}>
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.days}>
+              {month.days.map((date, dayIndex) => {
+                const isCurrentMonth = isSameMonth(date, month.monthDate);
+                const hasEventOnDate = hasEvent(date);
+                const event = getEventForDate(date);
+                const eventColor = event?.dj_id ? getDJColor(event.dj_id) : null;
+
+                return (
+                  <div
+                    key={dayIndex}
+                    className={`${styles.day} ${
+                      !isCurrentMonth ? styles.otherMonth : ''
+                    } ${hasEventOnDate ? styles.hasEvent : ''}`}
+                    onClick={() => handleDateClick(date, month.monthDate)}
+                    style={hasEventOnDate && eventColor ? {
+                      backgroundColor: `${eventColor}20`,
+                      borderColor: eventColor,
+                      borderWidth: '1.5px',
+                      borderStyle: 'solid'
+                    } : {}}
+                  >
+                    <span className={styles.dayNumber}>
+                      {format(date, 'd')}
+                    </span>
+                    {hasEventOnDate && eventColor && (
+                      <div 
+                        className={styles.eventIndicator} 
+                        title={`${event?.dj_nombre || 'Evento'}`}
+                        style={{ color: eventColor }}
+                      >
+                        ●
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>
-
-      <div className={styles.days}>
-        {allDays.map((date, index) => {
-          const isCurrentMonth = isSameMonth(date, currentDate);
-          const hasEventOnDate = hasEvent(date);
-          const event = getEventForDate(date);
-          const eventColor = event?.dj_id ? getDJColor(event.dj_id) : null;
-
-          return (
-            <div
-              key={index}
-              className={`${styles.day} ${
-                !isCurrentMonth ? styles.otherMonth : ''
-              } ${hasEventOnDate ? styles.hasEvent : ''}`}
-              onClick={() => handleDateClick(date)}
-              style={hasEventOnDate && eventColor ? {
-                backgroundColor: `${eventColor}20`,
-                borderColor: eventColor,
-                borderWidth: '2px',
-                borderStyle: 'solid'
-              } : {}}
-            >
-              <span className={styles.dayNumber}>
-                {format(date, 'd')}
-              </span>
-              {hasEventOnDate && eventColor && (
-                <div 
-                  className={styles.eventIndicator} 
-                  title={`${event?.dj_nombre || 'Evento'}`}
-                  style={{ color: eventColor }}
-                >
-                  ●
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {loading && <div className={styles.loading}>Cargando eventos...</div>}
     </div>
   );
 }

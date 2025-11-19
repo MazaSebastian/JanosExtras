@@ -1,7 +1,7 @@
 .calendar {
   background: white;
   border-radius: 16px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -9,23 +9,32 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.yearTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
 }
 
 .monthTitle {
-  font-size: 24px;
+  font-size: 14px;
   font-weight: 700;
   color: #333;
   text-transform: capitalize;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 .navButton {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,32 +45,43 @@
   transform: scale(1.1);
 }
 
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.monthContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .weekDays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 2px;
+  margin-bottom: 4px;
 }
 
 .weekDay {
   text-align: center;
   font-weight: 600;
   color: #666;
-  font-size: 14px;
-  padding: 8px;
+  font-size: 10px;
+  padding: 2px;
 }
 
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 2px;
 }
 
 .day {
   aspect-ratio: 1;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 2px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -70,15 +90,18 @@
   transition: all 0.2s;
   position: relative;
   background: white;
+  min-height: 24px;
 }
 
 .day:hover {
   border-color: #667eea;
   background: #f5f7ff;
+  transform: scale(1.05);
+  z-index: 1;
 }
 
 .day.otherMonth {
-  opacity: 0.3;
+  opacity: 0.25;
   cursor: not-allowed;
 }
 
@@ -88,21 +111,50 @@
 }
 
 .dayNumber {
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 600;
   color: #333;
+  line-height: 1;
 }
 
 .eventIndicator {
   position: absolute;
-  bottom: 4px;
-  color: #667eea;
-  font-size: 12px;
+  bottom: 1px;
+  font-size: 8px;
+  line-height: 1;
 }
 
 .loading {
   text-align: center;
   padding: 20px;
   color: #666;
+  font-size: 14px;
+}
+
+/* Responsive: En pantallas más pequeñas, mostrar 2 columnas */
+@media (max-width: 1200px) {
+  .yearGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .yearGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .yearGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .yearTitle {
+    font-size: 24px;
+  }
+  
+  .monthTitle {
+    font-size: 16px;
+  }
 }
 

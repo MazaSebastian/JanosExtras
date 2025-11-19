@@ -152,7 +152,8 @@ export default {
           }
         }
         // Verificar si existe evento para esa fecha y salón (cualquier DJ)
-        if (query.includes('WHERE SALON_ID') && query.includes('AND FECHA_EVENTO')) {
+        // Query: SELECT id, dj_id FROM eventos WHERE salon_id = $1 AND fecha_evento = $2
+        if (query.includes('WHERE SALON_ID') && query.includes('AND FECHA_EVENTO') && query.includes('SELECT ID, DJ_ID')) {
           const salonId = parseInt(params[0]);
           const fecha = params[1];
           const fechaStr = fecha instanceof Date ? fecha.toISOString().split('T')[0] : fecha.split('T')[0];
@@ -160,7 +161,7 @@ export default {
             const eFecha = e.fecha_evento.split('T')[0];
             return e.salon_id === salonId && eFecha === fechaStr;
           });
-          return { rows: evento ? [evento] : [] };
+          return { rows: evento ? [{ id: evento.id, dj_id: evento.dj_id }] : [] };
         }
       }
     }
