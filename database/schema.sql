@@ -39,11 +39,28 @@ CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos(fecha_evento);
 CREATE INDEX IF NOT EXISTS idx_eventos_dj_fecha ON eventos(dj_id, fecha_evento);
 
 -- Datos de ejemplo (opcional)
--- Insertar algunos salones de ejemplo
+-- Insertar salones
 INSERT INTO salones (nombre, direccion) VALUES
-    ('Salón Principal', 'Av. Principal 123'),
-    ('Salón VIP', 'Calle VIP 456'),
-    ('Salón Terraza', 'Av. Terraza 789')
+    ('CABA Boutique', ''),
+    ('Caballito 1', ''),
+    ('Caballito 2', ''),
+    ('Costanera 1', ''),
+    ('Costanera 2', ''),
+    ('Dardo Rocha', ''),
+    ('Darwin 1', ''),
+    ('Darwin 2', ''),
+    ('Dot', ''),
+    ('Lahusen', ''),
+    ('Nuñez', ''),
+    ('Palermo Hollywood', ''),
+    ('Palermo Soho', ''),
+    ('Puerto Madero', ''),
+    ('Puerto Madero Boutique', ''),
+    ('San Isidro', ''),
+    ('San Telmo', ''),
+    ('San Telmo 2', ''),
+    ('San Telmo Boutique', ''),
+    ('Vicente López', '')
 ON CONFLICT DO NOTHING;
 
 -- Nota: Los DJs se registran a través de la API de registro

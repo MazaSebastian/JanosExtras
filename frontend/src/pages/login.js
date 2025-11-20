@@ -31,22 +31,40 @@ export default function Login() {
       if (!response.ok) throw new Error('Error al cargar salones');
       const data = await response.json();
       setSalones(data);
-      // Seleccionar "Salón Principal" por defecto
-      const salonPrincipal = data.find(s => s.nombre === 'Salón Principal');
-      if (salonPrincipal) {
-        setFormData(prev => ({ ...prev, salon_id: salonPrincipal.id }));
+      // Seleccionar "CABA Boutique" por defecto (primer salón de la lista)
+      const salonDefault = data.find(s => s.nombre === 'CABA Boutique');
+      if (salonDefault) {
+        setFormData(prev => ({ ...prev, salon_id: salonDefault.id }));
       } else if (data.length > 0) {
-        // Si no existe "Salón Principal", seleccionar el primero
+        // Si no existe "CABA Boutique", seleccionar el primero
         setFormData(prev => ({ ...prev, salon_id: data[0].id }));
       }
     } catch (err) {
       console.error('Error al cargar salones:', err);
       // Si falla, usar valores por defecto
-      setSalones([
-        { id: 1, nombre: 'Salón Principal' },
-        { id: 2, nombre: 'Salón VIP' },
-        { id: 3, nombre: 'Salón Terraza' }
-      ]);
+      const defaultSalones = [
+        { id: 1, nombre: 'CABA Boutique' },
+        { id: 2, nombre: 'Caballito 1' },
+        { id: 3, nombre: 'Caballito 2' },
+        { id: 4, nombre: 'Costanera 1' },
+        { id: 5, nombre: 'Costanera 2' },
+        { id: 6, nombre: 'Dardo Rocha' },
+        { id: 7, nombre: 'Darwin 1' },
+        { id: 8, nombre: 'Darwin 2' },
+        { id: 9, nombre: 'Dot' },
+        { id: 10, nombre: 'Lahusen' },
+        { id: 11, nombre: 'Nuñez' },
+        { id: 12, nombre: 'Palermo Hollywood' },
+        { id: 13, nombre: 'Palermo Soho' },
+        { id: 14, nombre: 'Puerto Madero' },
+        { id: 15, nombre: 'Puerto Madero Boutique' },
+        { id: 16, nombre: 'San Isidro' },
+        { id: 17, nombre: 'San Telmo' },
+        { id: 18, nombre: 'San Telmo 2' },
+        { id: 19, nombre: 'San Telmo Boutique' },
+        { id: 20, nombre: 'Vicente López' }
+      ];
+      setSalones(defaultSalones);
       setFormData(prev => ({ ...prev, salon_id: 1 }));
     } finally {
       setLoadingSalones(false);

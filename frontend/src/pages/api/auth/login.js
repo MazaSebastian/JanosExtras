@@ -37,7 +37,8 @@ export default async function handler(req, res) {
       token,
       dj: {
         id: dj.id,
-        nombre: dj.nombre
+        nombre: dj.nombre,
+        salon_id: dj.salon_id
       }
     });
   } catch (error) {

@@ -18,9 +18,26 @@ const DB_FILE = path.join(DATA_DIR, 'database.json');
 let db = {
   djs: [],
   salones: [
-    { id: 1, nombre: 'Salón Principal', direccion: 'Av. Principal 123', activo: true, fecha_creacion: new Date().toISOString() },
-    { id: 2, nombre: 'Salón VIP', direccion: 'Calle VIP 456', activo: true, fecha_creacion: new Date().toISOString() },
-    { id: 3, nombre: 'Salón Terraza', direccion: 'Av. Terraza 789', activo: true, fecha_creacion: new Date().toISOString() }
+    { id: 1, nombre: 'CABA Boutique', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 2, nombre: 'Caballito 1', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 3, nombre: 'Caballito 2', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 4, nombre: 'Costanera 1', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 5, nombre: 'Costanera 2', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 6, nombre: 'Dardo Rocha', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 7, nombre: 'Darwin 1', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 8, nombre: 'Darwin 2', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 9, nombre: 'Dot', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 10, nombre: 'Lahusen', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 11, nombre: 'Nuñez', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 12, nombre: 'Palermo Hollywood', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 13, nombre: 'Palermo Soho', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 14, nombre: 'Puerto Madero', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 15, nombre: 'Puerto Madero Boutique', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 16, nombre: 'San Isidro', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 17, nombre: 'San Telmo', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 18, nombre: 'San Telmo 2', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 19, nombre: 'San Telmo Boutique', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 20, nombre: 'Vicente López', direccion: '', activo: true, fecha_creacion: new Date().toISOString() }
   ],
   eventos: []
 };
