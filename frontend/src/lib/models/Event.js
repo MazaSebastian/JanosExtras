@@ -1,4 +1,4 @@
-import pool from '../database.js';
+import pool from '../database-config.js';
 
 export class Event {
   static async create({ dj_id, salon_id, fecha_evento }) {

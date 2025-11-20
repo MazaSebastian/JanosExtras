@@ -6,9 +6,9 @@
 -- Tabla de DJs
 CREATE TABLE IF NOT EXISTS djs (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    salon_id INTEGER REFERENCES salones(id) ON DELETE SET NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS eventos (
     fecha_evento DATE NOT NULL,
     confirmado BOOLEAN DEFAULT true,
     fecha_marcado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(dj_id, salon_id, fecha_evento)
+    -- Evitar que dos DJs marquen la misma fecha en el mismo salón
+    UNIQUE(salon_id, fecha_evento)
 );
 
 -- Índices para mejorar rendimiento
