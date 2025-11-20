@@ -36,9 +36,14 @@ export default function DashboardPage() {
   };
 
   const handleEventCreated = () => {
+    // Forzar recarga del calendario
     setRefreshKey((prev) => prev + 1);
     setShowEventMarker(false);
     setSelectedDate(null);
+    // Pequeño delay para asegurar que el estado se actualice
+    setTimeout(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, 100);
   };
 
   const handleLogout = () => {

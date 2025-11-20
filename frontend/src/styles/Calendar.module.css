@@ -93,7 +93,7 @@
   min-height: 24px;
 }
 
-.day:hover {
+.day:not(.blocked):not(.otherMonth):hover {
   border-color: #667eea;
   background: #f5f7ff;
   transform: scale(1.05);
@@ -106,21 +106,24 @@
 }
 
 .day.hasEvent {
-  /* El color se aplica dinámicamente via inline styles */
   font-weight: 600;
+  /* Los colores se aplican via inline styles */
 }
 
 .day.blocked {
-  cursor: not-allowed;
+  cursor: not-allowed !important;
   position: relative;
-  opacity: 0.85;
+  pointer-events: auto;
 }
 
 .day.blocked:hover {
   transform: none !important;
-  border-color: inherit !important;
-  background-color: inherit !important;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  /* Mantener los estilos del color del evento */
+}
+
+/* Asegurar que los estilos inline tengan prioridad */
+.day.hasEvent[style] {
+  /* Los estilos inline tienen prioridad automáticamente */
 }
 
 .dayNumber {

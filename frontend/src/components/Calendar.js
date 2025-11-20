@@ -13,6 +13,8 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
   useEffect(() => {
     if (salonId) {
       loadEvents();
+    } else {
+      setEvents([]);
     }
   }, [salonId, currentYear]);
 
@@ -74,17 +76,34 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
     });
   }
 
+  // Función mejorada para comparar fechas sin problemas de zona horaria
+  const isSameDate = (date1, date2) => {
+    if (!date1 || !date2) return false;
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+  };
+
   const hasEvent = (date) => {
+    if (!date || events.length === 0) return false;
     return events.some((event) => {
-      const eventDate = new Date(event.fecha_evento);
-      return isSameDay(eventDate, date);
+      if (!event.fecha_evento) return false;
+      // Normalizar la fecha del evento a formato YYYY-MM-DD
+      const eventDateStr = event.fecha_evento.split('T')[0];
+      const dateStr = format(date, 'yyyy-MM-dd');
+      return eventDateStr === dateStr;
     });
   };
 
   const getEventForDate = (date) => {
+    if (!date || events.length === 0) return null;
+    const dateStr = format(date, 'yyyy-MM-dd');
     return events.find((event) => {
-      const eventDate = new Date(event.fecha_evento);
-      return isSameDay(eventDate, date);
+      if (!event.fecha_evento) return false;
+      const eventDateStr = event.fecha_evento.split('T')[0];
+      return eventDateStr === dateStr;
     });
   };
 
@@ -98,10 +117,12 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
     const hasEventOnDate = hasEvent(date);
     if (hasEventOnDate) {
       // La fecha está bloqueada, no permitir marcar
+      // Mostrar mensaje visual (opcional)
       return;
     }
     
-    if (onDateClick) {
+    // Solo permitir clic si no está bloqueada
+    if (onDateClick && !hasEventOnDate) {
       onDateClick(date);
     }
   };
@@ -150,28 +171,41 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
                 const isCurrentMonth = isSameMonth(date, month.monthDate);
                 const hasEventOnDate = hasEvent(date);
                 const event = getEventForDate(date);
-                // Usar el color del salón del DJ, no del DJ directamente
-                const eventColor = event?.dj_salon_id ? getSalonColor(event.dj_salon_id) : null;
+                
+                // Obtener el color del salón del DJ que marcó el evento
+                let eventColor = null;
+                if (hasEventOnDate && event) {
+                  // Intentar obtener el color del salón del DJ
+                  if (event.dj_salon_id) {
+                    eventColor = getSalonColor(event.dj_salon_id);
+                  } else if (event.salon_id) {
+                    // Fallback: usar el salón del evento si no hay dj_salon_id
+                    eventColor = getSalonColor(event.salon_id);
+                  }
+                }
 
-                // Determinar si esta fecha está bloqueada para el usuario actual
+                // Determinar si esta fecha está bloqueada
                 const isBlocked = hasEventOnDate;
                 const isMyEvent = hasEventOnDate && event?.dj_salon_id === currentUserSalonId;
                 
+                // Estilos dinámicos para fechas con eventos
+                const dayStyle = {};
+                if (hasEventOnDate && eventColor) {
+                  dayStyle.backgroundColor = `${eventColor}25`;
+                  dayStyle.borderColor = eventColor;
+                  dayStyle.borderWidth = '2px';
+                  dayStyle.borderStyle = 'solid';
+                }
+                
                 return (
                   <div
-                    key={dayIndex}
+                    key={`${monthIndex}-${dayIndex}`}
                     className={`${styles.day} ${
                       !isCurrentMonth ? styles.otherMonth : ''
                     } ${hasEventOnDate ? styles.hasEvent : ''} ${isBlocked ? styles.blocked : ''}`}
                     onClick={() => handleDateClick(date, month.monthDate)}
-                    style={hasEventOnDate && eventColor ? {
-                      backgroundColor: `${eventColor}30`,
-                      borderColor: eventColor,
-                      borderWidth: '2px',
-                      borderStyle: 'solid',
-                      opacity: isBlocked ? 0.9 : 1
-                    } : {}}
-                    title={isBlocked ? (isMyEvent ? `Evento marcado por ti (${event?.dj_nombre || ''})` : `Fecha ocupada por ${event?.dj_nombre || 'otro DJ'}`) : ''}
+                    style={dayStyle}
+                    title={isBlocked ? (isMyEvent ? `Evento marcado por ti (${event?.dj_nombre || ''})` : `Fecha ocupada por ${event?.dj_nombre || 'otro DJ'}`) : format(date, 'dd/MM/yyyy')}
                   >
                     <span className={styles.dayNumber}>
                       {format(date, 'd')}
@@ -183,11 +217,6 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
                         style={{ color: eventColor }}
                       >
                         ●
-                      </div>
-                    )}
-                    {isBlocked && (
-                      <div className={styles.blockedIcon} style={{ color: eventColor }}>
-                        🔒
                       </div>
                     )}
                   </div>
