@@ -1,7 +1,9 @@
--- Base de datos para Sistema de Control de Eventos DJs
--- IMPORTANTE: Ejecuta TODO este script completo de una vez en Supabase SQL Editor
+-- ============================================
+-- ESQUEMA COMPLETO PARA SUPABASE
+-- Ejecuta TODO este script de una vez
+-- ============================================
 
--- Paso 1: Crear tabla de Salones PRIMERO (no tiene dependencias)
+-- Paso 1: Crear tabla de Salones (debe ir PRIMERO)
 CREATE TABLE IF NOT EXISTS salones (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -31,19 +33,13 @@ CREATE TABLE IF NOT EXISTS eventos (
     UNIQUE(salon_id, fecha_evento)
 );
 
--- Índices para mejorar rendimiento
-CREATE INDEX IF NOT EXISTS idx_eventos_dj_id ON eventos(dj_id);
-CREATE INDEX IF NOT EXISTS idx_eventos_salon_id ON eventos(salon_id);
-CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos(fecha_evento);
-CREATE INDEX IF NOT EXISTS idx_eventos_dj_fecha ON eventos(dj_id, fecha_evento);
-
 -- Paso 4: Crear índices para mejorar rendimiento
 CREATE INDEX IF NOT EXISTS idx_eventos_dj_id ON eventos(dj_id);
 CREATE INDEX IF NOT EXISTS idx_eventos_salon_id ON eventos(salon_id);
 CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos(fecha_evento);
 CREATE INDEX IF NOT EXISTS idx_eventos_dj_fecha ON eventos(dj_id, fecha_evento);
 
--- Paso 5: Insertar salones (ejecutar DESPUÉS de crear la tabla)
+-- Paso 5: Insertar salones (solo si no existen)
 INSERT INTO salones (nombre, direccion) VALUES
     ('CABA Boutique', ''),
     ('Caballito 1', ''),
@@ -67,6 +63,7 @@ INSERT INTO salones (nombre, direccion) VALUES
     ('Vicente López', '')
 ON CONFLICT (nombre) DO NOTHING;
 
--- Nota: Los DJs se registran a través de la API de registro
--- No se incluyen DJs de ejemplo por seguridad
+-- ============================================
+-- ¡Listo! Las tablas están creadas y los salones insertados
+-- ============================================
 
