@@ -155,16 +155,39 @@ export default {
             const djId = parseInt(params[0]);
             const year = parseInt(params[1]);
             const month = parseInt(params[2]);
+            
+            // Filtrar eventos del DJ en el mes y año especificados
             const eventos = db.eventos.filter(e => {
-              const fecha = new Date(e.fecha_evento);
-              return e.dj_id === djId && 
-                     fecha.getFullYear() === year && 
-                     fecha.getMonth() + 1 === month;
+              if (e.dj_id !== djId) return false;
+              
+              // Normalizar la fecha del evento
+              let fechaEvento;
+              if (typeof e.fecha_evento === 'string') {
+                // Si es string, puede ser YYYY-MM-DD o ISO string
+                const fechaStr = e.fecha_evento.split('T')[0];
+                const [y, m, d] = fechaStr.split('-').map(Number);
+                fechaEvento = new Date(y, m - 1, d);
+              } else {
+                fechaEvento = new Date(e.fecha_evento);
+              }
+              
+              const eventoYear = fechaEvento.getFullYear();
+              const eventoMonth = fechaEvento.getMonth() + 1;
+              
+              return eventoYear === year && eventoMonth === month;
             });
+            
             const salonesUnicos = new Set(eventos.map(e => e.salon_id));
             const totalEventos = eventos.length;
             // Calcular eventos extras (a partir del evento 9, después de los 8 del sueldo base)
             const eventosExtras = Math.max(0, totalEventos - 8);
+            
+            console.log(`Resumen para DJ ${djId}, ${year}-${month}:`, {
+              totalEventos,
+              eventosExtras,
+              eventos: eventos.map(e => ({ id: e.id, fecha: e.fecha_evento }))
+            });
+            
             return {
               rows: [{
                 total_eventos: totalEventos,
@@ -225,9 +248,15 @@ export default {
         let fechaEvento = params[2];
         if (fechaEvento instanceof Date) {
           fechaEvento = fechaEvento.toISOString().split('T')[0];
-        } else if (fechaEvento.includes('T')) {
+        } else if (fechaEvento && fechaEvento.includes('T')) {
           fechaEvento = fechaEvento.split('T')[0];
         }
+        // Asegurar formato YYYY-MM-DD
+        if (fechaEvento && !fechaEvento.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          const fecha = new Date(fechaEvento);
+          fechaEvento = fecha.toISOString().split('T')[0];
+        }
+        
         const newEvent = {
           id: newId,
           dj_id: parseInt(params[0]),
@@ -238,6 +267,9 @@ export default {
         };
         db.eventos.push(newEvent);
         saveDB();
+        
+        console.log('Evento creado:', newEvent);
+        
         return { rows: [newEvent] };
       }
     }

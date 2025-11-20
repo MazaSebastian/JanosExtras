@@ -24,6 +24,13 @@ export default function Dashboard({ refreshTrigger }) {
       const eventosExtras = Math.max(0, totalEventos - 8);
       const sueldoAdicional = (eventosExtras * (data.cotizacion_extra || 47000));
       
+      console.log('Resumen cargado:', {
+        total_eventos: totalEventos,
+        eventos_extras: eventosExtras,
+        sueldo_adicional: sueldoAdicional,
+        raw_data: data
+      });
+      
       setSummary({
         ...data,
         total_eventos: totalEventos,
@@ -32,6 +39,7 @@ export default function Dashboard({ refreshTrigger }) {
       });
     } catch (err) {
       console.error('Error al cargar resumen:', err);
+      setSummary(null);
     } finally {
       setLoading(false);
     }

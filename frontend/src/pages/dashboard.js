@@ -37,17 +37,20 @@ export default function DashboardPage() {
   };
 
   const handleEventCreated = () => {
-    // Forzar recarga del calendario
-    setRefreshKey((prev) => prev + 1);
-    // Forzar recarga del Dashboard para actualizar el resumen
-    setDashboardRefreshKey((prev) => prev + 1);
     setShowEventMarker(false);
     setSelectedDate(null);
-    // Pequeño delay para asegurar que el estado se actualice
+    
+    // Forzar recarga del calendario
+    setRefreshKey((prev) => prev + 1);
+    
+    // Forzar recarga del Dashboard con delay para asegurar que el evento se guardó
     setTimeout(() => {
-      setRefreshKey((prev) => prev + 1);
       setDashboardRefreshKey((prev) => prev + 1);
-    }, 300);
+      // Segunda recarga para asegurar
+      setTimeout(() => {
+        setDashboardRefreshKey((prev) => prev + 1);
+      }, 200);
+    }, 500);
   };
 
   const handleLogout = () => {
