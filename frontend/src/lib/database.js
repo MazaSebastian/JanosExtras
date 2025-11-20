@@ -182,11 +182,14 @@ export default {
             // Calcular eventos extras (a partir del evento 9, después de los 8 del sueldo base)
             const eventosExtras = Math.max(0, totalEventos - 8);
             
-            console.log(`Resumen para DJ ${djId}, ${year}-${month}:`, {
-              totalEventos,
-              eventosExtras,
-              eventos: eventos.map(e => ({ id: e.id, fecha: e.fecha_evento }))
-            });
+            // Log de debug
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`📈 Resumen para DJ ${djId}, ${year}-${month}:`, {
+                totalEventos,
+                eventosExtras,
+                eventos: eventos.map(e => ({ id: e.id, fecha: e.fecha_evento, salon: e.salon_id }))
+              });
+            }
             
             return {
               rows: [{
@@ -268,7 +271,16 @@ export default {
         db.eventos.push(newEvent);
         saveDB();
         
-        console.log('Evento creado:', newEvent);
+        // Log de debug
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Evento creado:', {
+            id: newEvent.id,
+            dj_id: newEvent.dj_id,
+            salon_id: newEvent.salon_id,
+            fecha_evento: newEvent.fecha_evento,
+            total_eventos_dj: db.eventos.filter(e => e.dj_id === newEvent.dj_id).length
+          });
+        }
         
         return { rows: [newEvent] };
       }

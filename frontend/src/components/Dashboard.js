@@ -31,12 +31,17 @@ export default function Dashboard({ refreshTrigger, onRefresh }) {
       const eventosExtras = Math.max(0, totalEventos - 8);
       const sueldoAdicional = (eventosExtras * (data.cotizacion_extra || 47000));
       
-      console.log('Resumen cargado:', {
-        total_eventos: totalEventos,
-        eventos_extras: eventosExtras,
-        sueldo_adicional: sueldoAdicional,
-        raw_data: data
-      });
+      // Logs de debug (remover en producción)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📊 Resumen mensual cargado:', {
+          año: selectedYear,
+          mes: selectedMonth,
+          total_eventos: totalEventos,
+          eventos_extras: eventosExtras,
+          sueldo_adicional: sueldoAdicional,
+          raw_data: data
+        });
+      }
       
       setSummary({
         ...data,
