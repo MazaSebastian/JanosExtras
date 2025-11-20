@@ -25,7 +25,16 @@ export default async function handler(req, res) {
       parseInt(month)
     );
 
-    res.json(summary);
+    // Agregar información de cotización y sueldo adicional
+    const COTIZACION_EXTRA = 47000;
+    const eventosExtras = summary.eventos_extras || 0;
+    const sueldoAdicional = eventosExtras * COTIZACION_EXTRA;
+
+    res.json({
+      ...summary,
+      cotizacion_extra: COTIZACION_EXTRA,
+      sueldo_adicional: sueldoAdicional
+    });
   } catch (error) {
     console.error('Error al obtener resumen:', error);
     res.status(500).json({ error: 'Error al obtener resumen' });

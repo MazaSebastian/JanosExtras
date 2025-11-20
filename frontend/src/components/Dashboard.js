@@ -72,19 +72,57 @@ export default function Dashboard() {
       {loading ? (
         <div className={styles.loading}>Cargando resumen...</div>
       ) : (
-        <div className={styles.summaryCards}>
-          <div className={styles.card}>
-            <div className={styles.cardTitle}>Total de Eventos</div>
-            <div className={styles.cardValue}>
-              {summary?.total_eventos || 0}
+        <div className={styles.summaryContainer}>
+          <div className={styles.summaryCards}>
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Total de Eventos</div>
+              <div className={styles.cardValue}>
+                {summary?.total_eventos || 0}
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Salones Diferentes</div>
+              <div className={styles.cardValue}>
+                {summary?.total_salones || 0}
+              </div>
             </div>
           </div>
 
-          <div className={styles.card}>
-            <div className={styles.cardTitle}>Salones Diferentes</div>
-            <div className={styles.cardValue}>
-              {summary?.total_salones || 0}
+          <div className={styles.extrasSection}>
+            <h3 className={styles.extrasTitle}>Información de Extras</h3>
+            
+            <div className={styles.extrasInfo}>
+              <div className={styles.extrasRow}>
+                <span className={styles.extrasLabel}>Cotización actual del extra:</span>
+                <span className={styles.extrasValue}>
+                  ${summary?.cotizacion_extra?.toLocaleString('es-AR') || '47.000'}
+                </span>
+              </div>
+
+              <div className={styles.extrasRow}>
+                <span className={styles.extrasLabel}>Total de eventos extras realizados:</span>
+                <span className={styles.extrasValue}>
+                  {summary?.eventos_extras || 0}
+                </span>
+              </div>
+
+              <div className={styles.extrasRow}>
+                <span className={styles.extrasLabel}>Sueldo Adicional:</span>
+                <span className={styles.extrasValueHighlight}>
+                  ${summary?.sueldo_adicional?.toLocaleString('es-AR') || '0'}
+                </span>
+              </div>
             </div>
+
+            {summary?.total_eventos > 0 && (
+              <div className={styles.extrasNote}>
+                <small>
+                  * Los primeros 8 eventos corresponden al sueldo base. 
+                  Los eventos extras se cuentan a partir del evento número 9.
+                </small>
+              </div>
+            )}
           </div>
         </div>
       )}

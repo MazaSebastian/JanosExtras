@@ -46,6 +46,12 @@
   outline: none;
 }
 
+.summaryContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .summaryCards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -71,6 +77,69 @@
 .cardValue {
   font-size: 36px;
   font-weight: 700;
+}
+
+.extrasSection {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  border: 2px solid #e0e0e0;
+}
+
+.extrasTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.extrasInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.extrasRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.extrasLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+}
+
+.extrasValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.extrasValueHighlight {
+  font-size: 20px;
+  font-weight: 700;
+  color: #43e97b;
+}
+
+.extrasNote {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fff3cd;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.extrasNote small {
+  color: #856404;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .loading {

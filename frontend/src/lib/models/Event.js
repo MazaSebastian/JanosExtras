@@ -74,7 +74,17 @@ export class Event {
         AND EXTRACT(MONTH FROM fecha_evento) = $3
     `;
     const result = await pool.query(query, [dj_id, year, month]);
-    return result.rows[0];
+    const data = result.rows[0];
+    
+    // Calcular eventos extras (a partir del evento 9, después de los 8 del sueldo base)
+    const totalEventos = parseInt(data.total_eventos) || 0;
+    const eventosExtras = Math.max(0, totalEventos - 8);
+    
+    return {
+      ...data,
+      total_eventos: totalEventos,
+      eventos_extras: eventosExtras
+    };
   }
 
   static async delete(event_id, dj_id) {

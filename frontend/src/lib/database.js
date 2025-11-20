@@ -162,10 +162,14 @@ export default {
                      fecha.getMonth() + 1 === month;
             });
             const salonesUnicos = new Set(eventos.map(e => e.salon_id));
+            const totalEventos = eventos.length;
+            // Calcular eventos extras (a partir del evento 9, después de los 8 del sueldo base)
+            const eventosExtras = Math.max(0, totalEventos - 8);
             return {
               rows: [{
-                total_eventos: eventos.length,
-                total_salones: salonesUnicos.size
+                total_eventos: totalEventos,
+                total_salones: salonesUnicos.size,
+                eventos_extras: eventosExtras
               }]
             };
           }
