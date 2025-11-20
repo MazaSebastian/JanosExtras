@@ -110,6 +110,19 @@
   font-weight: 600;
 }
 
+.day.blocked {
+  cursor: not-allowed;
+  position: relative;
+  opacity: 0.85;
+}
+
+.day.blocked:hover {
+  transform: none !important;
+  border-color: inherit !important;
+  background-color: inherit !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
 .dayNumber {
   font-size: 10px;
   font-weight: 600;
@@ -122,6 +135,15 @@
   bottom: 1px;
   font-size: 8px;
   line-height: 1;
+}
+
+.blockedIcon {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  font-size: 8px;
+  line-height: 1;
+  opacity: 0.8;
 }
 
 .loading {

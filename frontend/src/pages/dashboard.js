@@ -25,12 +25,14 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleDateClick = (date) => {
-    if (selectedSalon) {
-      setSelectedDate(date);
-      setShowEventMarker(true);
-    } else {
+    if (!selectedSalon) {
       alert('Por favor, selecciona un salón primero');
+      return;
     }
+    
+    // Verificar si la fecha ya tiene un evento (esto se hace en el Calendar también, pero por seguridad)
+    setSelectedDate(date);
+    setShowEventMarker(true);
   };
 
   const handleEventCreated = () => {
@@ -77,6 +79,7 @@ export default function DashboardPage() {
                 key={refreshKey}
                 salonId={selectedSalon}
                 onDateClick={handleDateClick}
+                currentUserSalonId={user?.salon_id}
               />
             ) : (
               <div className={styles.placeholder}>

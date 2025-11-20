@@ -5,7 +5,7 @@ import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
 import styles from '@/styles/Calendar.module.css';
 
-export default function Calendar({ salonId, onDateClick }) {
+export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,18 @@ export default function Calendar({ salonId, onDateClick }) {
 
   const handleDateClick = (date, monthDate) => {
     // Solo permitir clics en fechas del mes actual (no en días de otros meses)
-    if (isSameMonth(date, monthDate) && onDateClick) {
+    if (!isSameMonth(date, monthDate)) {
+      return;
+    }
+    
+    // Verificar si la fecha ya tiene un evento (bloqueada)
+    const hasEventOnDate = hasEvent(date);
+    if (hasEventOnDate) {
+      // La fecha está bloqueada, no permitir marcar
+      return;
+    }
+    
+    if (onDateClick) {
       onDateClick(date);
     }
   };
@@ -142,19 +153,25 @@ export default function Calendar({ salonId, onDateClick }) {
                 // Usar el color del salón del DJ, no del DJ directamente
                 const eventColor = event?.dj_salon_id ? getSalonColor(event.dj_salon_id) : null;
 
+                // Determinar si esta fecha está bloqueada para el usuario actual
+                const isBlocked = hasEventOnDate;
+                const isMyEvent = hasEventOnDate && event?.dj_salon_id === currentUserSalonId;
+                
                 return (
                   <div
                     key={dayIndex}
                     className={`${styles.day} ${
                       !isCurrentMonth ? styles.otherMonth : ''
-                    } ${hasEventOnDate ? styles.hasEvent : ''}`}
+                    } ${hasEventOnDate ? styles.hasEvent : ''} ${isBlocked ? styles.blocked : ''}`}
                     onClick={() => handleDateClick(date, month.monthDate)}
                     style={hasEventOnDate && eventColor ? {
-                      backgroundColor: `${eventColor}20`,
+                      backgroundColor: `${eventColor}30`,
                       borderColor: eventColor,
-                      borderWidth: '1.5px',
-                      borderStyle: 'solid'
+                      borderWidth: '2px',
+                      borderStyle: 'solid',
+                      opacity: isBlocked ? 0.9 : 1
                     } : {}}
+                    title={isBlocked ? (isMyEvent ? `Evento marcado por ti (${event?.dj_nombre || ''})` : `Fecha ocupada por ${event?.dj_nombre || 'otro DJ'}`) : ''}
                   >
                     <span className={styles.dayNumber}>
                       {format(date, 'd')}
@@ -166,6 +183,11 @@ export default function Calendar({ salonId, onDateClick }) {
                         style={{ color: eventColor }}
                       >
                         ●
+                      </div>
+                    )}
+                    {isBlocked && (
+                      <div className={styles.blockedIcon} style={{ color: eventColor }}>
+                        🔒
                       </div>
                     )}
                   </div>

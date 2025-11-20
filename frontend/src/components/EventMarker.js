@@ -29,9 +29,15 @@ export default function EventMarker({ date, salonId, onEventCreated, onClose }) 
       }
       onClose();
     } catch (err) {
-      setError(
-        err.response?.data?.error || 'Error al marcar el evento'
-      );
+      const errorMessage = err.response?.data?.error || 'Error al marcar el evento';
+      setError(errorMessage);
+      
+      // Si la fecha ya está ocupada, cerrar el modal después de mostrar el error
+      if (errorMessage.includes('ocupada') || errorMessage.includes('Ya existe')) {
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      }
     } finally {
       setLoading(false);
     }
