@@ -175,12 +175,20 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
                 // Obtener el color del salón del DJ que marcó el evento
                 let eventColor = null;
                 if (hasEventOnDate && event) {
-                  // Intentar obtener el color del salón del DJ
+                  // Prioridad: dj_salon_id > salon_id > dj_id (fallback)
                   if (event.dj_salon_id) {
                     eventColor = getSalonColor(event.dj_salon_id);
                   } else if (event.salon_id) {
-                    // Fallback: usar el salón del evento si no hay dj_salon_id
+                    // Fallback: usar el salón del evento
                     eventColor = getSalonColor(event.salon_id);
+                  } else if (event.dj_id) {
+                    // Último fallback: usar el ID del DJ (aunque debería usar salón)
+                    eventColor = getSalonColor(event.dj_id);
+                  }
+                  
+                  // Si aún no hay color, usar un color por defecto
+                  if (!eventColor) {
+                    eventColor = '#667eea'; // Color por defecto
                   }
                 }
 

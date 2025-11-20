@@ -118,12 +118,15 @@
 
 .day.blocked:hover {
   transform: none !important;
-  /* Mantener los estilos del color del evento */
+  /* Mantener los estilos del color del evento en hover */
+  filter: brightness(0.95);
 }
 
-/* Asegurar que los estilos inline tengan prioridad */
-.day.hasEvent[style] {
-  /* Los estilos inline tienen prioridad automáticamente */
+/* Asegurar que los estilos inline tengan prioridad sobre hover */
+.day.hasEvent.blocked[style]:hover {
+  /* Los estilos inline mantienen el color del evento */
+  border-color: inherit !important;
+  background-color: inherit !important;
 }
 
 .dayNumber {
