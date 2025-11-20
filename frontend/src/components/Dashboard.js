@@ -28,8 +28,10 @@ export default function Dashboard({ refreshTrigger, onRefresh }) {
       
       // Asegurar que los valores numéricos estén correctos
       const totalEventos = parseInt(data.total_eventos) || 0;
-      const eventosExtras = Math.max(0, totalEventos - 8);
-      const sueldoAdicional = (eventosExtras * (data.cotizacion_extra || 47000));
+      // Calcular eventos extras: a partir del evento 9 (después de los 8 del sueldo base)
+      const eventosExtras = totalEventos > 8 ? totalEventos - 8 : 0;
+      const cotizacionExtra = data.cotizacion_extra || 47000;
+      const sueldoAdicional = eventosExtras * cotizacionExtra;
       
       // Logs de debug (remover en producción)
       if (process.env.NODE_ENV === 'development') {
@@ -39,6 +41,7 @@ export default function Dashboard({ refreshTrigger, onRefresh }) {
           total_eventos: totalEventos,
           eventos_extras: eventosExtras,
           sueldo_adicional: sueldoAdicional,
+          cotizacion_extra: cotizacionExtra,
           raw_data: data
         });
       }
@@ -47,7 +50,8 @@ export default function Dashboard({ refreshTrigger, onRefresh }) {
         ...data,
         total_eventos: totalEventos,
         eventos_extras: eventosExtras,
-        sueldo_adicional: sueldoAdicional
+        sueldo_adicional: sueldoAdicional,
+        cotizacion_extra: cotizacionExtra
       });
     } catch (err) {
       console.error('Error al cargar resumen:', err);
@@ -135,14 +139,14 @@ export default function Dashboard({ refreshTrigger, onRefresh }) {
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Total de eventos extras realizados:</span>
                 <span className={styles.extrasValue}>
-                  {summary?.eventos_extras || 0}
+                  {summary?.eventos_extras !== undefined ? summary.eventos_extras : (summary?.total_eventos > 8 ? summary.total_eventos - 8 : 0)}
                 </span>
               </div>
 
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Sueldo Adicional:</span>
                 <span className={styles.extrasValueHighlight}>
-                  ${summary?.sueldo_adicional?.toLocaleString('es-AR') || '0'}
+                  ${(summary?.sueldo_adicional !== undefined ? summary.sueldo_adicional : ((summary?.eventos_extras !== undefined ? summary.eventos_extras : (summary?.total_eventos > 8 ? summary.total_eventos - 8 : 0)) * (summary?.cotizacion_extra || 47000))).toLocaleString('es-AR')}
                 </span>
               </div>
             </div>
