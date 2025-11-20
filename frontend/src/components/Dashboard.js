@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import styles from '@/styles/Dashboard.module.css';
 
-export default function Dashboard({ refreshTrigger }) {
+export default function Dashboard({ refreshTrigger, onRefresh }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -12,6 +12,13 @@ export default function Dashboard({ refreshTrigger }) {
   useEffect(() => {
     loadSummary();
   }, [selectedYear, selectedMonth, refreshTrigger]);
+
+  // Exponer función de recarga manual
+  useEffect(() => {
+    if (onRefresh) {
+      onRefresh(loadSummary);
+    }
+  }, [onRefresh]);
 
   const loadSummary = async () => {
     try {

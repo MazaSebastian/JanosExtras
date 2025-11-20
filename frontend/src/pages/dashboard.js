@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [showEventMarker, setShowEventMarker] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0);
+  const [dashboardRefreshFn, setDashboardRefreshFn] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -43,14 +44,20 @@ export default function DashboardPage() {
     // Forzar recarga del calendario
     setRefreshKey((prev) => prev + 1);
     
-    // Forzar recarga del Dashboard con delay para asegurar que el evento se guardó
+    // Forzar recarga del Dashboard inmediatamente y con delay
+    setDashboardRefreshKey((prev) => prev + 1);
+    
+    // Si hay función de recarga directa, usarla también
+    if (dashboardRefreshFn) {
+      setTimeout(() => {
+        dashboardRefreshFn();
+      }, 300);
+    }
+    
+    // Recarga adicional con delay para asegurar
     setTimeout(() => {
       setDashboardRefreshKey((prev) => prev + 1);
-      // Segunda recarga para asegurar
-      setTimeout(() => {
-        setDashboardRefreshKey((prev) => prev + 1);
-      }, 200);
-    }, 500);
+    }, 600);
   };
 
   const handleLogout = () => {
@@ -78,7 +85,11 @@ export default function DashboardPage() {
 
       <main className={styles.main}>
         <div className={styles.content}>
-          <Dashboard key={dashboardRefreshKey} refreshTrigger={dashboardRefreshKey} />
+          <Dashboard 
+            key={dashboardRefreshKey} 
+            refreshTrigger={dashboardRefreshKey}
+            onRefresh={setDashboardRefreshFn}
+          />
 
           <div className={styles.calendarSection}>
             <SalonSelector
