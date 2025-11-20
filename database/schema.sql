@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS djs (
 -- Tabla de Salones
 CREATE TABLE IF NOT EXISTS salones (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
     direccion TEXT,
     activo BOOLEAN DEFAULT true,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -39,8 +39,8 @@ CREATE INDEX IF NOT EXISTS idx_eventos_salon_id ON eventos(salon_id);
 CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos(fecha_evento);
 CREATE INDEX IF NOT EXISTS idx_eventos_dj_fecha ON eventos(dj_id, fecha_evento);
 
--- Datos de ejemplo (opcional)
 -- Insertar salones
+-- Nota: En Supabase, si hay conflicto con IDs, puedes ejecutar esto varias veces de forma segura
 INSERT INTO salones (nombre, direccion) VALUES
     ('CABA Boutique', ''),
     ('Caballito 1', ''),
@@ -62,7 +62,7 @@ INSERT INTO salones (nombre, direccion) VALUES
     ('San Telmo 2', ''),
     ('San Telmo Boutique', ''),
     ('Vicente López', '')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (nombre) DO NOTHING;
 
 -- Nota: Los DJs se registran a través de la API de registro
 -- No se incluyen DJs de ejemplo por seguridad
