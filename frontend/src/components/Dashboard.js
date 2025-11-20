@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import styles from '@/styles/Dashboard.module.css';
 
-export default function Dashboard() {
+export default function Dashboard({ refreshTrigger }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -11,13 +11,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadSummary();
-  }, [selectedYear, selectedMonth]);
+  }, [selectedYear, selectedMonth, refreshTrigger]);
 
   const loadSummary = async () => {
     try {
       setLoading(true);
       const response = await eventosAPI.getMonthlySummary(selectedYear, selectedMonth);
-      setSummary(response.data);
+      const data = response.data;
+      
+      // Asegurar que los valores numéricos estén correctos
+      const totalEventos = parseInt(data.total_eventos) || 0;
+      const eventosExtras = Math.max(0, totalEventos - 8);
+      const sueldoAdicional = (eventosExtras * (data.cotizacion_extra || 47000));
+      
+      setSummary({
+        ...data,
+        total_eventos: totalEventos,
+        eventos_extras: eventosExtras,
+        sueldo_adicional: sueldoAdicional
+      });
     } catch (err) {
       console.error('Error al cargar resumen:', err);
     } finally {

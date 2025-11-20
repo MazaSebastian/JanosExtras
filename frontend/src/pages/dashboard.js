@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showEventMarker, setShowEventMarker] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0);
 
   useEffect(() => {
     const auth = getAuth();
@@ -38,12 +39,15 @@ export default function DashboardPage() {
   const handleEventCreated = () => {
     // Forzar recarga del calendario
     setRefreshKey((prev) => prev + 1);
+    // Forzar recarga del Dashboard para actualizar el resumen
+    setDashboardRefreshKey((prev) => prev + 1);
     setShowEventMarker(false);
     setSelectedDate(null);
     // Pequeño delay para asegurar que el estado se actualice
     setTimeout(() => {
       setRefreshKey((prev) => prev + 1);
-    }, 100);
+      setDashboardRefreshKey((prev) => prev + 1);
+    }, 300);
   };
 
   const handleLogout = () => {
@@ -71,7 +75,7 @@ export default function DashboardPage() {
 
       <main className={styles.main}>
         <div className={styles.content}>
-          <Dashboard />
+          <Dashboard key={dashboardRefreshKey} refreshTrigger={dashboardRefreshKey} />
 
           <div className={styles.calendarSection}>
             <SalonSelector
