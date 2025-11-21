@@ -56,8 +56,10 @@ export const salonesAPI = {
 // Eventos API
 export const eventosAPI = {
   create: (data) => api.post('/eventos', data),
-  getBySalonAndMonth: (salonId, year, month) =>
-    api.get(`/eventos/salon/${salonId}`, { params: { year, month } }),
+  getBySalon: (salonId, year, month) =>
+    api.get(`/eventos/salon/${salonId}`, {
+      params: { year, ...(month ? { month } : {}) },
+    }),
   getMyEventsByMonth: (year, month) =>
     api.get('/eventos/mis-eventos', { params: { year, month } }),
   getMonthlySummary: (year, month) =>

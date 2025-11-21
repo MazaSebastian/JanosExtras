@@ -89,6 +89,24 @@ export class Event {
     };
   }
 
+  static async findBySalonAndYear(salon_id, year) {
+    const query = `
+      SELECT 
+        e.*,
+        d.nombre as dj_nombre,
+        d.id as dj_id,
+        d.salon_id as dj_salon_id,
+        d.color_hex as dj_color_hex
+      FROM eventos e
+      INNER JOIN djs d ON e.dj_id = d.id
+      WHERE e.salon_id = $1 
+        AND EXTRACT(YEAR FROM e.fecha_evento) = $2
+      ORDER BY e.fecha_evento
+    `;
+    const result = await pool.query(query, [salon_id, year]);
+    return result.rows;
+  }
+
   static async delete(event_id, dj_id) {
     const query = `
       DELETE FROM eventos 

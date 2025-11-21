@@ -15,15 +15,20 @@ export default async function handler(req, res) {
     const { id } = req.query;
     const { year, month } = req.query;
 
-    if (!year || !month) {
-      return res.status(400).json({ error: 'Año y mes son requeridos' });
+    if (!year) {
+      return res.status(400).json({ error: 'El año es requerido' });
     }
 
-    const events = await Event.findBySalonAndMonth(
-      parseInt(id),
-      parseInt(year),
-      parseInt(month)
-    );
+    let events;
+    if (month) {
+      events = await Event.findBySalonAndMonth(
+        parseInt(id),
+        parseInt(year),
+        parseInt(month)
+      );
+    } else {
+      events = await Event.findBySalonAndYear(parseInt(id), parseInt(year));
+    }
 
     res.json(events);
   } catch (error) {

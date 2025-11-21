@@ -31,19 +31,11 @@ export default function Calendar({
     
     try {
       setLoading(true);
-      // Cargar eventos de todos los meses del año
-      const allEvents = [];
-      for (let month = 1; month <= 12; month++) {
-        try {
-          const response = await eventosAPI.getBySalonAndMonth(salonId, currentYear, month);
-          allEvents.push(...response.data);
-        } catch (err) {
-          console.error(`Error al cargar eventos del mes ${month}:`, err);
-        }
-      }
+      const response = await eventosAPI.getBySalon(salonId, currentYear);
+      const eventsData = response.data || [];
       const filteredEvents = filterDjId
-        ? allEvents.filter((event) => event.dj_id === filterDjId)
-        : allEvents;
+        ? eventsData.filter((event) => event.dj_id === filterDjId)
+        : eventsData;
       setEvents(filteredEvents);
     } catch (err) {
       console.error('Error al cargar eventos:', err);
