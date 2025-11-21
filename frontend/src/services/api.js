@@ -65,5 +65,11 @@ export const eventosAPI = {
   delete: (id) => api.delete(`/eventos/${id}`),
 };
 
+// Admin API
+export const adminAPI = {
+  getDashboard: (year, month) =>
+    api.get('/admin/dashboard', { params: { year, month } }),
+};
+
 export default api;
 

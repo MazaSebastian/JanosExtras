@@ -7,8 +7,9 @@ Sistema para controlar la cantidad de eventos realizados por cada DJ en diferent
 - 🔐 Autenticación de DJs
 - 🏢 Gestión de múltiples salones
 - 📅 Calendario anual por salón
-- ✅ Marcado de eventos realizados
+- ✅ Marcado y liberación de eventos por DJ
 - 📊 Reportes mensuales para cálculo de sueldos
+- 🧑‍💼 Panel administrativo exclusivo para gerencia
 - 🚀 Desplegado en Vercel
 
 ## Instalación Local
@@ -63,4 +64,5 @@ GitHub: https://github.com/MazaSebastian/JanosExtras.git
 - **Base de datos actual**: Usa almacenamiento en archivo JSON para desarrollo
 - **Producción**: Se recomienda migrar a PostgreSQL, MongoDB u otra base de datos real
 - **Persistencia en Vercel**: Los archivos en `/tmp` se limpian entre invocaciones. Para producción real, usar base de datos externa.
+- **Panel admin**: ver [ADMIN_DASHBOARD.md](./ADMIN_DASHBOARD.md) para crear usuarios gerente y habilitar el panel.
 

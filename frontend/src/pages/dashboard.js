@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getAuth, clearAuth } from '@/utils/auth';
+import { salonesAPI } from '@/services/api';
 import SalonSelector from '@/components/SalonSelector';
 import Calendar from '@/components/Calendar';
 import EventMarker from '@/components/EventMarker';
+import EventDeleteModal from '@/components/EventDeleteModal';
 import Dashboard from '@/components/Dashboard';
 import styles from '@/styles/DashboardPage.module.css';
 
@@ -16,6 +18,9 @@ export default function DashboardPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0);
   const [dashboardRefreshFn, setDashboardRefreshFn] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [userSalonInfo, setUserSalonInfo] = useState(null);
+  const [loadingSalonInfo, setLoadingSalonInfo] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -23,8 +28,46 @@ export default function DashboardPage() {
       router.push('/login');
       return;
     }
+
+    if (auth.user.rol === 'admin') {
+      router.push('/admin');
+      return;
+    }
+
     setUser(auth.user);
+    if (auth.user.salon_id) {
+      setSelectedSalon(auth.user.salon_id);
+      fetchUserSalon(auth.user.salon_id);
+    }
   }, [router]);
+
+  const fetchUserSalon = async (salonId) => {
+    if (!salonId) return;
+    try {
+      setLoadingSalonInfo(true);
+      const response = await salonesAPI.getById(salonId);
+      setUserSalonInfo(response.data);
+    } catch (error) {
+      console.error('Error al cargar información del salón:', error);
+    } finally {
+      setLoadingSalonInfo(false);
+    }
+  };
+
+  const triggerRefreshSequence = () => {
+    setRefreshKey((prev) => prev + 1);
+    setDashboardRefreshKey((prev) => prev + 1);
+
+    if (dashboardRefreshFn) {
+      setTimeout(() => {
+        dashboardRefreshFn();
+      }, 300);
+    }
+
+    setTimeout(() => {
+      setDashboardRefreshKey((prev) => prev + 1);
+    }, 600);
+  };
 
   const handleDateClick = (date) => {
     if (!selectedSalon) {
@@ -40,24 +83,15 @@ export default function DashboardPage() {
   const handleEventCreated = () => {
     setShowEventMarker(false);
     setSelectedDate(null);
-    
-    // Forzar recarga del calendario
-    setRefreshKey((prev) => prev + 1);
-    
-    // Forzar recarga del Dashboard inmediatamente y con delay
-    setDashboardRefreshKey((prev) => prev + 1);
-    
-    // Si hay función de recarga directa, usarla también
-    if (dashboardRefreshFn) {
-      setTimeout(() => {
-        dashboardRefreshFn();
-      }, 300);
-    }
-    
-    // Recarga adicional con delay para asegurar
-    setTimeout(() => {
-      setDashboardRefreshKey((prev) => prev + 1);
-    }, 600);
+    triggerRefreshSequence();
+  };
+
+  const handleExistingEventClick = (event) => {
+    setEventToDelete(event);
+  };
+
+  const handleEventDeleted = () => {
+    triggerRefreshSequence();
   };
 
   const handleLogout = () => {
@@ -89,6 +123,8 @@ export default function DashboardPage() {
             key={dashboardRefreshKey} 
             refreshTrigger={dashboardRefreshKey}
             onRefresh={setDashboardRefreshFn}
+            salonInfo={userSalonInfo}
+            salonLoading={loadingSalonInfo}
           />
 
           <div className={styles.calendarSection}>
@@ -103,6 +139,8 @@ export default function DashboardPage() {
                 salonId={selectedSalon}
                 onDateClick={handleDateClick}
                 currentUserSalonId={user?.salon_id}
+                currentUserId={user?.id}
+                onExistingEventClick={handleExistingEventClick}
               />
             ) : (
               <div className={styles.placeholder}>
@@ -122,6 +160,14 @@ export default function DashboardPage() {
             setShowEventMarker(false);
             setSelectedDate(null);
           }}
+        />
+      )}
+
+      {eventToDelete && (
+        <EventDeleteModal
+          event={eventToDelete}
+          onEventDeleted={handleEventDeleted}
+          onClose={() => setEventToDelete(null)}
         />
       )}
     </div>

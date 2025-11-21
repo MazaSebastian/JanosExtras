@@ -2,15 +2,15 @@ import pool from '../database-config.js';
 import bcrypt from 'bcryptjs';
 
 export class DJ {
-  static async create({ nombre, password, salon_id }) {
+  static async create({ nombre, password, salon_id, rol = 'dj' }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const fechaRegistro = new Date().toISOString();
     const query = `
-      INSERT INTO djs (nombre, password, salon_id, fecha_registro)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, nombre, salon_id, fecha_registro
+      INSERT INTO djs (nombre, password, salon_id, rol, fecha_registro)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, nombre, salon_id, rol, fecha_registro
     `;
-    const result = await pool.query(query, [nombre, hashedPassword, salon_id, fechaRegistro]);
+    const result = await pool.query(query, [nombre, hashedPassword, salon_id, rol, fechaRegistro]);
     return result.rows[0];
   }
 
@@ -21,7 +21,7 @@ export class DJ {
   }
 
   static async findById(id) {
-    const query = 'SELECT id, nombre, salon_id, fecha_registro FROM djs WHERE id = $1';
+    const query = 'SELECT id, nombre, salon_id, rol, fecha_registro FROM djs WHERE id = $1';
     const result = await pool.query(query, [id]);
     return result.rows[0];
   }

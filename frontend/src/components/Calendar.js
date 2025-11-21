@@ -5,7 +5,13 @@ import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
 import styles from '@/styles/Calendar.module.css';
 
-export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
+export default function Calendar({
+  salonId,
+  onDateClick,
+  currentUserSalonId,
+  currentUserId,
+  onExistingEventClick
+}) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -114,10 +120,15 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
     }
     
     // Verificar si la fecha ya tiene un evento (bloqueada)
-    const hasEventOnDate = hasEvent(date);
+    const event = getEventForDate(date);
+    const hasEventOnDate = !!event;
     if (hasEventOnDate) {
-      // La fecha está bloqueada, no permitir marcar
-      // Mostrar mensaje visual (opcional)
+      if (
+        event?.dj_id === currentUserId &&
+        typeof onExistingEventClick === 'function'
+      ) {
+        onExistingEventClick(event);
+      }
       return;
     }
     
@@ -194,7 +205,10 @@ export default function Calendar({ salonId, onDateClick, currentUserSalonId }) {
 
                 // Determinar si esta fecha está bloqueada
                 const isBlocked = hasEventOnDate;
-                const isMyEvent = hasEventOnDate && event?.dj_salon_id === currentUserSalonId;
+                const isMyEvent =
+                  hasEventOnDate &&
+                  event?.dj_id === currentUserId &&
+                  event?.dj_salon_id === currentUserSalonId;
                 
                 // Estilos dinámicos para fechas con eventos
                 const dayStyle = {};

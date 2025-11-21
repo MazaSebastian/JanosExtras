@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS djs (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) NOT NULL DEFAULT 'dj',
     salon_id INTEGER REFERENCES salones(id) ON DELETE SET NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -30,12 +31,6 @@ CREATE TABLE IF NOT EXISTS eventos (
     -- Evitar que dos DJs marquen la misma fecha en el mismo salón
     UNIQUE(salon_id, fecha_evento)
 );
-
--- Índices para mejorar rendimiento
-CREATE INDEX IF NOT EXISTS idx_eventos_dj_id ON eventos(dj_id);
-CREATE INDEX IF NOT EXISTS idx_eventos_salon_id ON eventos(salon_id);
-CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos(fecha_evento);
-CREATE INDEX IF NOT EXISTS idx_eventos_dj_fecha ON eventos(dj_id, fecha_evento);
 
 -- Paso 4: Crear índices para mejorar rendimiento
 CREATE INDEX IF NOT EXISTS idx_eventos_dj_id ON eventos(dj_id);
@@ -69,4 +64,7 @@ ON CONFLICT (nombre) DO NOTHING;
 
 -- Nota: Los DJs se registran a través de la API de registro
 -- No se incluyen DJs de ejemplo por seguridad
+
+-- Para bases ya creadas, ejecutar también:
+-- ALTER TABLE djs ADD COLUMN IF NOT EXISTS rol VARCHAR(20) NOT NULL DEFAULT 'dj';
 

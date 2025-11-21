@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     // Generar token JWT
     const token = jwt.sign(
-      { id: dj.id, nombre: dj.nombre },
+      { id: dj.id, nombre: dj.nombre, rol: dj.rol },
       process.env.JWT_SECRET || 'sistema_djs_secreto_jwt_cambiar_en_produccion_12345',
       { expiresIn: '7d' }
     );
@@ -38,7 +38,8 @@ export default async function handler(req, res) {
       dj: {
         id: dj.id,
         nombre: dj.nombre,
-        salon_id: dj.salon_id
+        salon_id: dj.salon_id,
+        rol: dj.rol
       }
     });
   } catch (error) {

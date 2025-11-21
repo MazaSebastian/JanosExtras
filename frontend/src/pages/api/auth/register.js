@@ -31,13 +31,15 @@ export default async function handler(req, res) {
     }
 
     // Crear nuevo DJ con salón asignado
-    const newDJ = await DJ.create({ nombre, password, salon_id });
+    const newDJ = await DJ.create({ nombre, password, salon_id, rol: 'dj' });
 
     res.status(201).json({
       message: 'DJ registrado exitosamente',
       dj: {
         id: newDJ.id,
-        nombre: newDJ.nombre
+        nombre: newDJ.nombre,
+        salon_id: newDJ.salon_id,
+        rol: newDJ.rol
       }
     });
   } catch (error) {

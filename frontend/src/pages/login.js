@@ -99,7 +99,11 @@ export default function Login() {
         });
         if (response.data.token) {
           setAuth(response.data.token, response.data.dj);
-          router.push('/dashboard');
+          if (response.data.dj.rol === 'admin') {
+            router.push('/admin');
+          } else {
+            router.push('/dashboard');
+          }
         }
       }
     } catch (err) {

@@ -6,11 +6,47 @@
   margin-bottom: 24px;
 }
 
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .title {
   font-size: 24px;
   font-weight: 700;
   color: #333;
-  margin-bottom: 20px;
+  margin: 0;
+}
+
+.salonInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f3ff;
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
+.salonLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.salonName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4b56d2;
+}
+
+.salonBadge {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 .filters {

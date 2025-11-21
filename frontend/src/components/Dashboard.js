@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
+import { getSalonColor } from '@/utils/colors';
 import styles from '@/styles/Dashboard.module.css';
 
-export default function Dashboard({ refreshTrigger, onRefresh }) {
+export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonLoading }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -71,7 +71,27 @@ export default function Dashboard({ refreshTrigger, onRefresh }) {
 
   return (
     <div className={styles.dashboard}>
-      <h2 className={styles.title}>Resumen Mensual</h2>
+      <div className={styles.headerRow}>
+        <h2 className={styles.title}>Resumen Mensual</h2>
+
+        <div className={styles.salonInfo}>
+          <span className={styles.salonLabel}>Salón actual:</span>
+          {salonLoading ? (
+            <span className={styles.salonName}>cargando...</span>
+          ) : salonInfo ? (
+            <>
+              <span className={styles.salonName}>{salonInfo.nombre}</span>
+              <span
+                className={styles.salonBadge}
+                style={{ backgroundColor: getSalonColor(salonInfo.id) }}
+                title="Color asignado al salón"
+              />
+            </>
+          ) : (
+            <span className={styles.salonName}>Sin salón asignado</span>
+          )}
+        </div>
+      </div>
 
       <div className={styles.filters}>
         <div className={styles.filterGroup}>
