@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { DJ } from '@/lib/models/DJ.js';
 import { loginSchema } from '@/utils/validation.js';
+import * as Sentry from '@sentry/nextjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -44,6 +45,7 @@ export default async function handler(req, res) {
       }
     });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error en login:', error);
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }

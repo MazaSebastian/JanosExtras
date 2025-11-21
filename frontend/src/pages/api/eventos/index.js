@@ -2,6 +2,7 @@ import { authenticateToken } from '@/lib/auth.js';
 import { Event } from '@/lib/models/Event.js';
 import { Salon } from '@/lib/models/Salon.js';
 import { createEventSchema } from '@/utils/validation.js';
+import * as Sentry from '@sentry/nextjs';
 
 export default async function handler(req, res) {
   const auth = authenticateToken(req);
@@ -41,6 +42,7 @@ export default async function handler(req, res) {
           error.message === 'Esta fecha ya está ocupada por otro DJ') {
         return res.status(409).json({ error: error.message });
       }
+      Sentry.captureException(error);
       console.error('Error al crear evento:', error);
       res.status(500).json({ error: 'Error al crear evento' });
     }

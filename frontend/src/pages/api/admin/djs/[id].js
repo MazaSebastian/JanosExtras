@@ -1,6 +1,7 @@
 import { authenticateToken } from '@/lib/auth.js';
 import { DJ } from '@/lib/models/DJ.js';
 import { updateDjSchema } from '@/utils/validation.js';
+import * as Sentry from '@sentry/nextjs';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -49,6 +50,7 @@ export default async function handler(req, res) {
 
     res.json({ message: 'DJ actualizado', dj: updatedDJ });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error al actualizar DJ:', error);
     res.status(500).json({ error: 'Error al actualizar DJ' });
   }

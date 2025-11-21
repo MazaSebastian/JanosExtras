@@ -66,6 +66,7 @@ GitHub: https://github.com/MazaSebastian/JanosExtras.git
 - **Persistencia en Vercel**: Los archivos en `/tmp` se limpian entre invocaciones. Para producción real, usar base de datos externa.
 - **Panel admin**: ver [ADMIN_DASHBOARD.md](./ADMIN_DASHBOARD.md) para crear usuarios gerente y habilitar el panel.
 - **Migraciones**: las migraciones versionadas viven en `database/migrations/` y se ejecutan con `npm run db:migrate`. Asegúrate de tener `DATABASE_URL` configurado (por ejemplo en un `.env` en la raíz).
+- **Logging**: la app puede enviar errores a Sentry. Configura `SENTRY_DSN` (servidor) y `NEXT_PUBLIC_SENTRY_DSN` (cliente) en Vercel o en tu `.env` local para habilitarlo.
 
 ### Migraciones
 
