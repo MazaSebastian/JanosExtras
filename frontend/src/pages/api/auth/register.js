@@ -1,4 +1,5 @@
 import { DJ } from '@/lib/models/DJ.js';
+import { registerSchema } from '@/utils/validation.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -6,23 +7,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, password, salon_id } = req.body;
-
-    if (!nombre || !password) {
-      return res.status(400).json({ error: 'Nombre y contraseña son requeridos' });
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
     }
 
-    if (!salon_id) {
-      return res.status(400).json({ error: 'Debes seleccionar un salón' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
-    }
-
-    if (nombre.trim().length < 2) {
-      return res.status(400).json({ error: 'El nombre debe tener al menos 2 caracteres' });
-    }
+    const { nombre, password, salon_id } = parsed.data;
 
     // Verificar si el nombre ya existe
     const existingDJ = await DJ.findByNombre(nombre);

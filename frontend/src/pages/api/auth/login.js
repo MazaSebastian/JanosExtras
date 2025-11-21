@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { DJ } from '@/lib/models/DJ.js';
+import { loginSchema } from '@/utils/validation.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,11 +8,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, password } = req.body;
-
-    if (!nombre || !password) {
-      return res.status(400).json({ error: 'Nombre y contraseña son requeridos' });
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
     }
+    const { nombre, password } = parsed.data;
 
     // Buscar DJ por nombre
     const dj = await DJ.findByNombre(nombre);

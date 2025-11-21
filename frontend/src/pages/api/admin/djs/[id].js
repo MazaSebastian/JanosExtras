@@ -1,7 +1,6 @@
 import { authenticateToken } from '@/lib/auth.js';
 import { DJ } from '@/lib/models/DJ.js';
-
-const COLOR_REGEX = /^#([0-9A-Fa-f]{6})$/;
+import { updateDjSchema } from '@/utils/validation.js';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -20,19 +19,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, salon_id, color_hex } = req.body || {};
+    const parsed = updateDjSchema.safeParse({
+      nombre: req.body?.nombre,
+      salon_id:
+        req.body?.salon_id === null || req.body?.salon_id === ''
+          ? null
+          : req.body?.salon_id !== undefined
+          ? parseInt(req.body?.salon_id, 10)
+          : undefined,
+      color_hex: req.body?.color_hex,
+    });
 
-    if (
-      nombre === undefined &&
-      salon_id === undefined &&
-      color_hex === undefined
-    ) {
-      return res.status(400).json({ error: 'No hay datos para actualizar' });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
     }
 
-    if (color_hex !== undefined && color_hex !== null && !COLOR_REGEX.test(color_hex)) {
-      return res.status(400).json({ error: 'Color inválido. Usa formato #RRGGBB' });
-    }
+    const { nombre, salon_id, color_hex } = parsed.data;
 
     const updatedDJ = await DJ.updateAdminFields({
       id: parseInt(id, 10),

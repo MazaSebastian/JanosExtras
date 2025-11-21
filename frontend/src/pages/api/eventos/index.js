@@ -1,6 +1,7 @@
 import { authenticateToken } from '@/lib/auth.js';
 import { Event } from '@/lib/models/Event.js';
 import { Salon } from '@/lib/models/Salon.js';
+import { createEventSchema } from '@/utils/validation.js';
 
 export default async function handler(req, res) {
   const auth = authenticateToken(req);
@@ -10,12 +11,16 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { salon_id, fecha_evento } = req.body;
-      const dj_id = auth.user.id;
-
-      if (!salon_id || !fecha_evento) {
-        return res.status(400).json({ error: 'Salón y fecha son requeridos' });
+      const parsed = createEventSchema.safeParse({
+        salon_id: req.body.salon_id ? parseInt(req.body.salon_id, 10) : undefined,
+        fecha_evento: req.body.fecha_evento,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.issues[0].message });
       }
+
+      const { salon_id, fecha_evento } = parsed.data;
+      const dj_id = auth.user.id;
 
       // Verificar que el salón existe
       const salon = await Salon.findById(salon_id);
