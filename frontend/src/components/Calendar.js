@@ -10,7 +10,9 @@ export default function Calendar({
   onDateClick,
   currentUserSalonId,
   currentUserId,
-  onExistingEventClick
+  onExistingEventClick,
+  filterDjId,
+  readOnly = false
 }) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [events, setEvents] = useState([]);
@@ -39,7 +41,10 @@ export default function Calendar({
           console.error(`Error al cargar eventos del mes ${month}:`, err);
         }
       }
-      setEvents(allEvents);
+      const filteredEvents = filterDjId
+        ? allEvents.filter((event) => event.dj_id === filterDjId)
+        : allEvents;
+      setEvents(filteredEvents);
     } catch (err) {
       console.error('Error al cargar eventos:', err);
     } finally {
@@ -119,6 +124,10 @@ export default function Calendar({
       return;
     }
     
+    if (readOnly) {
+      return;
+    }
+
     // Verificar si la fecha ya tiene un evento (bloqueada)
     const event = getEventForDate(date);
     const hasEventOnDate = !!event;

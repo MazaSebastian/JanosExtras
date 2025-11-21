@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { adminAPI } from '@/services/api';
 import { getAuth, clearAuth } from '@/utils/auth';
 import { getSalonColor } from '@/utils/colors';
+import Calendar from '@/components/Calendar';
 import styles from '@/styles/AdminDashboard.module.css';
 
 const months = [
@@ -23,6 +24,7 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedDjId, setSelectedDjId] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -48,6 +50,9 @@ export default function AdminDashboardPage() {
       setError('');
       const response = await adminAPI.getDashboard(selectedYear, selectedMonth);
       setData(response.data);
+      if (!selectedDjId && response.data.djs.length > 0) {
+        setSelectedDjId(response.data.djs[0].id);
+      }
     } catch (err) {
       console.error('Error al cargar dashboard admin:', err);
       setError(err.response?.data?.error || 'Error al cargar el dashboard');
@@ -186,7 +191,7 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.djs.map((dj) => {
+            {data.djs.map((dj) => {
                       const color = getSalonColor(dj.salon_id || dj.id);
                       return (
                         <tr key={dj.id}>
@@ -253,6 +258,60 @@ export default function AdminDashboardPage() {
                   </tbody>
                 </table>
               </div>
+            </section>
+
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Calendario anual por DJ</h2>
+                  <p>Seleccioná un DJ para visualizar sus eventos del año</p>
+                </div>
+                <div className={styles.djSelector}>
+                  <label htmlFor="dj-calendar-select">DJ</label>
+                  <select
+                    id="dj-calendar-select"
+                    value={selectedDjId || ''}
+                    onChange={(e) => setSelectedDjId(parseInt(e.target.value, 10))}
+                  >
+                    {data.djs.map((dj) => (
+                      <option key={dj.id} value={dj.id}>
+                        {dj.nombre} {dj.salon_nombre ? `(${dj.salon_nombre})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {selectedDjId ? (
+                (() => {
+                  const selectedDj = data.djs.find((dj) => dj.id === selectedDjId);
+                  if (!selectedDj) {
+                    return (
+                      <div className={styles.emptyState}>
+                        No se encontró información del DJ seleccionado.
+                      </div>
+                    );
+                  }
+
+                  if (!selectedDj.salon_id) {
+                    return (
+                      <div className={styles.emptyState}>
+                        Este DJ no tiene un salón asignado, no es posible mostrar su calendario.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Calendar
+                      salonId={selectedDj.salon_id}
+                      filterDjId={selectedDj.id}
+                      readOnly
+                    />
+                  );
+                })()
+              ) : (
+                <div className={styles.emptyState}>No hay DJs disponibles.</div>
+              )}
             </section>
           </>
         )

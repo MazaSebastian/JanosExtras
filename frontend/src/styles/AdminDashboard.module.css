@@ -271,3 +271,31 @@
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
 }
 
+.djSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.djSelector label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.djSelector select {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  min-width: 190px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  font-size: 0.95rem;
+}
+
