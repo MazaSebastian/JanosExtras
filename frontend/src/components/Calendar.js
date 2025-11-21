@@ -230,15 +230,29 @@ export default function Calendar({
                   dayStyle.borderStyle = 'solid';
                 }
                 
+                const dayClasses = [styles.day];
+                if (!isCurrentMonth) dayClasses.push(styles.otherMonth);
+                if (hasEventOnDate) dayClasses.push(styles.hasEvent);
+                if (isBlocked) dayClasses.push(styles.blocked);
+
                 return (
                   <div
                     key={`${monthIndex}-${dayIndex}`}
-                    className={`${styles.day} ${
-                      !isCurrentMonth ? styles.otherMonth : ''
-                    } ${hasEventOnDate ? styles.hasEvent : ''} ${isBlocked ? styles.blocked : ''}`}
+                    className={dayClasses.join(' ')}
                     onClick={() => handleDateClick(date, month.monthDate)}
                     style={dayStyle}
-                    title={isBlocked ? (isMyEvent ? `Evento marcado por ti (${event?.dj_nombre || ''})` : `Fecha ocupada por ${event?.dj_nombre || 'otro DJ'}`) : format(date, 'dd/MM/yyyy')}
+                    data-dj-name={
+                      hasEventOnDate && event?.dj_nombre
+                        ? event.dj_nombre
+                        : undefined
+                    }
+                    title={
+                      isBlocked
+                        ? isMyEvent
+                          ? `Evento marcado por ti (${event?.dj_nombre || ''})`
+                          : `Fecha ocupada por ${event?.dj_nombre || 'otro DJ'}`
+                        : format(date, 'dd/MM/yyyy')
+                    }
                   >
                     <span className={styles.dayNumber}>
                       {format(date, 'd')}
