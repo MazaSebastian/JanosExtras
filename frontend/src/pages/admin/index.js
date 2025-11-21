@@ -167,10 +167,6 @@ export default function AdminDashboardPage() {
                   {formatNumber(data.summary.total_djs)}
                 </p>
               </div>
-              <div className={styles.card}>
-                <h3>Promedio eventos por DJ</h3>
-                <p>{data.summary.promedio_eventos_por_dj}</p>
-              </div>
             </section>
 
             <section className={styles.section}>
