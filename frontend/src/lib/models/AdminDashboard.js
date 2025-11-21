@@ -51,6 +51,7 @@ export class AdminDashboard {
         d.nombre,
         d.rol,
         d.salon_id,
+        d.color_hex,
         s.nombre AS salon_nombre,
         COALESCE(COUNT(e.id), 0) AS total_eventos,
         COALESCE(MAX(e.fecha_evento), NULL) AS ultimo_evento

@@ -271,6 +271,29 @@
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
 }
 
+.salonCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.colorInput {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .salonCell {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
 .djSelector {
   display: flex;
   flex-direction: column;

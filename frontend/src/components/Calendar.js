@@ -195,8 +195,10 @@ export default function Calendar({
                 // Obtener el color del salón del DJ que marcó el evento
                 let eventColor = null;
                 if (hasEventOnDate && event) {
+                  if (event.dj_color_hex) {
+                    eventColor = event.dj_color_hex;
+                  } else if (event.dj_salon_id) {
                   // Prioridad: dj_salon_id > salon_id > dj_id (fallback)
-                  if (event.dj_salon_id) {
                     eventColor = getSalonColor(event.dj_salon_id);
                   } else if (event.salon_id) {
                     // Fallback: usar el salón del evento

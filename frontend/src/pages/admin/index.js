@@ -25,6 +25,8 @@ export default function AdminDashboardPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedDjId, setSelectedDjId] = useState(null);
+  const [colorStatus, setColorStatus] = useState({});
+  const [colorError, setColorError] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -48,6 +50,7 @@ export default function AdminDashboardPage() {
     try {
       setLoading(true);
       setError('');
+      setColorError('');
       const response = await adminAPI.getDashboard(selectedYear, selectedMonth);
       setData(response.data);
       if (!selectedDjId && response.data.djs.length > 0) {
@@ -58,6 +61,27 @@ export default function AdminDashboardPage() {
       setError(err.response?.data?.error || 'Error al cargar el dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleColorChange = async (djId, color) => {
+    try {
+      setColorStatus((prev) => ({ ...prev, [djId]: true }));
+      setColorError('');
+      await adminAPI.updateDjColor(djId, color);
+      setData((prev) => ({
+        ...prev,
+        djs: prev?.djs?.map((dj) =>
+          dj.id === djId ? { ...dj, color_hex: color } : dj
+        ) || [],
+      }));
+    } catch (err) {
+      setColorError(
+        err.response?.data?.error ||
+          'No se pudo actualizar el color. Intenta nuevamente.'
+      );
+    } finally {
+      setColorStatus((prev) => ({ ...prev, [djId]: false }));
     }
   };
 
@@ -171,6 +195,10 @@ export default function AdminDashboardPage() {
               </div>
             </section>
 
+            {colorError && (
+              <div className={styles.error}>{colorError}</div>
+            )}
+
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -191,14 +219,15 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-            {data.djs.map((dj) => {
-                      const color = getSalonColor(dj.salon_id || dj.id);
+                    {data.djs.map((dj) => {
+                      const resolvedColor =
+                        dj.color_hex || getSalonColor(dj.salon_id || dj.id);
                       return (
                         <tr key={dj.id}>
                           <td data-label="DJ" className={styles.djNameCell}>
                             <span
                               className={styles.djColorDot}
-                              style={{ backgroundColor: color }}
+                              style={{ backgroundColor: resolvedColor }}
                               title={`Salón: ${dj.salon_nombre || 'Sin salón'}`}
                             />
                             {dj.nombre}
@@ -214,7 +243,17 @@ export default function AdminDashboardPage() {
                             {dj.rol}
                           </span>
                         </td>
-                        <td data-label="Salón">{dj.salon_nombre || 'Sin salón'}</td>
+                        <td data-label="Salón" className={styles.salonCell}>
+                          {dj.salon_nombre || 'Sin salón'}
+                          <input
+                            type="color"
+                            value={dj.color_hex || resolvedColor}
+                            onChange={(e) => handleColorChange(dj.id, e.target.value)}
+                            disabled={colorStatus[dj.id]}
+                            className={styles.colorInput}
+                            title="Cambiar color del DJ"
+                          />
+                        </td>
                         <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
                         <td
                           data-label="Extras"

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS djs (
     nombre VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     rol VARCHAR(20) NOT NULL DEFAULT 'dj',
+    color_hex VARCHAR(7),
     salon_id INTEGER REFERENCES salones(id) ON DELETE SET NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -67,4 +68,5 @@ ON CONFLICT (nombre) DO NOTHING;
 
 -- Para bases ya creadas, ejecutar también:
 -- ALTER TABLE djs ADD COLUMN IF NOT EXISTS rol VARCHAR(20) NOT NULL DEFAULT 'dj';
+-- ALTER TABLE djs ADD COLUMN IF NOT EXISTS color_hex VARCHAR(7);
 

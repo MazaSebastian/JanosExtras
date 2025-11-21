@@ -35,7 +35,8 @@ export class Event {
         e.*,
         d.nombre as dj_nombre,
         d.id as dj_id,
-        d.salon_id as dj_salon_id
+        d.salon_id as dj_salon_id,
+        d.color_hex as dj_color_hex
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
       WHERE e.salon_id = $1 
@@ -51,7 +52,8 @@ export class Event {
     const query = `
       SELECT 
         e.*,
-        s.nombre as salon_nombre
+        s.nombre as salon_nombre,
+        s.id as salon_id
       FROM eventos e
       INNER JOIN salones s ON e.salon_id = s.id
       WHERE e.dj_id = $1 

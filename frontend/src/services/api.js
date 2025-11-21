@@ -69,6 +69,8 @@ export const eventosAPI = {
 export const adminAPI = {
   getDashboard: (year, month) =>
     api.get('/admin/dashboard', { params: { year, month } }),
+  updateDjColor: (djId, color_hex) =>
+    api.patch(`/admin/djs/${djId}/color`, { color_hex }),
 };
 
 export default api;
