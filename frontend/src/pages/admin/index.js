@@ -157,10 +157,6 @@ export default function AdminDashboardPage() {
                 <p>{formatNumber(data.summary.total_eventos_mes)}</p>
               </div>
               <div className={styles.card}>
-                <h3>Eventos extras</h3>
-                <p>{formatNumber(data.summary.total_eventos_extras)}</p>
-              </div>
-              <div className={styles.card}>
                 <h3>DJs con actividad</h3>
                 <p>
                   {formatNumber(data.summary.djs_con_eventos)} /{' '}
