@@ -187,8 +187,8 @@ export default function AdminDashboardPage() {
                   <tbody>
                     {data.djs.map((dj) => (
                       <tr key={dj.id}>
-                        <td>{dj.nombre}</td>
-                        <td>
+                        <td data-label="DJ">{dj.nombre}</td>
+                        <td data-label="Rol">
                           <span
                             className={
                               dj.rol === 'admin'
@@ -199,12 +199,15 @@ export default function AdminDashboardPage() {
                             {dj.rol}
                           </span>
                         </td>
-                        <td>{dj.salon_nombre || 'Sin salón'}</td>
-                        <td>{formatNumber(dj.total_eventos)}</td>
-                        <td className={dj.eventos_extras > 0 ? styles.highlight : ''}>
+                        <td data-label="Salón">{dj.salon_nombre || 'Sin salón'}</td>
+                        <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
+                        <td
+                          data-label="Extras"
+                          className={dj.eventos_extras > 0 ? styles.highlight : ''}
+                        >
                           {formatNumber(dj.eventos_extras)}
                         </td>
-                        <td>{formatDate(dj.ultimo_evento)}</td>
+                        <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -231,9 +234,9 @@ export default function AdminDashboardPage() {
                   <tbody>
                     {data.salones.map((salon) => (
                       <tr key={salon.id}>
-                        <td>{salon.nombre}</td>
-                        <td>{formatNumber(salon.total_eventos)}</td>
-                        <td>{formatNumber(salon.djs_activos)}</td>
+                        <td data-label="Salón">{salon.nombre}</td>
+                        <td data-label="Eventos del mes">{formatNumber(salon.total_eventos)}</td>
+                        <td data-label="DJs activos">{formatNumber(salon.djs_activos)}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  background: linear-gradient(135deg, #5f6ef8, #9f8ffc);
 }
 
 .card {
@@ -138,5 +139,45 @@
 
 .switchButton:hover {
   color: #764ba2;
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 28px 22px;
+    border-radius: 20px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+
+  .form {
+    gap: 16px;
+  }
+
+  .inputGroup label {
+    font-size: 13px;
+  }
+
+  .inputGroup input,
+  .inputGroup select,
+  .select {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .submitButton {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .switch {
+    font-size: 13px;
+  }
 }
 

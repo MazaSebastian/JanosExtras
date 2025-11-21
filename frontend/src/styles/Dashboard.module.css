@@ -53,6 +53,7 @@
   display: flex;
   gap: 20px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .filterGroup {
@@ -182,5 +183,54 @@
   text-align: center;
   padding: 40px;
   color: #666;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+
+  .extrasRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .cardValue {
+    font-size: 30px;
+  }
+
+  .extrasSection {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard {
+    padding: 18px;
+  }
+
+  .headerRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .salonInfo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .salonLabel {
+    font-size: 11px;
+  }
+
+  .title {
+    font-size: 21px;
+  }
 }
 

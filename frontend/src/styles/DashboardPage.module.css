@@ -16,6 +16,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .logo {
@@ -90,6 +91,40 @@
 
   .main {
     padding: 0 15px;
+  }
+
+  .userInfo {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .calendarSection,
+  .content > * {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .logo {
+    font-size: 24px;
+  }
+
+  .headerContent {
+    padding: 18px 16px;
+  }
+
+  .main {
+    padding: 0 12px;
+  }
+
+  .calendarSection {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .logoutButton {
+    width: 100%;
+    text-align: center;
   }
 }
 

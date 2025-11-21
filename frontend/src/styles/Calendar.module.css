@@ -184,5 +184,19 @@
   .monthTitle {
     font-size: 16px;
   }
+
+  .calendar {
+    padding: 16px;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .day {
+    min-height: 32px;
+    padding: 4px;
+  }
 }
 

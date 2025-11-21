@@ -91,3 +91,24 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 520px) {
+  .modal {
+    width: calc(100% - 32px);
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .confirmButton,
+  .cancelButton {
+    width: 100%;
+  }
+}
+
