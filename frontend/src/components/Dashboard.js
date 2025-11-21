@@ -10,6 +10,10 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [exporting, setExporting] = useState(false);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailEvents, setDetailEvents] = useState([]);
+  const [detailError, setDetailError] = useState('');
 
   useEffect(() => {
     loadSummary();
@@ -85,6 +89,29 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
     }
   };
 
+  const toggleDetail = async () => {
+    const nextVisible = !detailVisible;
+    setDetailVisible(nextVisible);
+
+    if (nextVisible && detailEvents.length === 0) {
+      try {
+        setDetailLoading(true);
+        setDetailError('');
+        const response = await eventosAPI.getMyEventsByMonth(
+          selectedYear,
+          selectedMonth
+        );
+        setDetailEvents(response.data || []);
+      } catch (err) {
+        console.error('Error al obtener detalle de eventos:', err);
+        setDetailError('No se pudieron cargar los eventos.');
+        setDetailVisible(false);
+      } finally {
+        setDetailLoading(false);
+      }
+    }
+  };
+
   const loadSummary = async () => {
     try {
       setLoading(true);
@@ -118,6 +145,9 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
         sueldo_adicional: sueldoAdicional,
         cotizacion_extra: cotizacionExtra
       });
+      setDetailVisible(false);
+      setDetailEvents([]);
+      setDetailError('');
     } catch (err) {
       console.error('Error al cargar resumen:', err);
       setSummary(null);
@@ -203,10 +233,16 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       ) : (
         <div className={styles.summaryContainer}>
           <div className={styles.summaryCards}>
-            <div className={styles.card}>
+            <div
+              className={`${styles.card} ${styles.clickableCard}`}
+              onClick={toggleDetail}
+            >
               <div className={styles.cardTitle}>Total de Eventos</div>
               <div className={styles.cardValue}>
                 {summary?.total_eventos || 0}
+              </div>
+              <div className={styles.cardHint}>
+                {detailVisible ? 'Ocultar detalle' : 'Ver detalle'}
               </div>
             </div>
 
@@ -253,6 +289,49 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
               </div>
             )}
           </div>
+
+        {detailVisible && (
+          <div className={styles.detailSection}>
+            <div className={styles.detailHeader}>
+              <h3>Detalle de eventos ({summary?.total_eventos || 0})</h3>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={toggleDetail}
+              >
+                Cerrar
+              </button>
+            </div>
+            {detailError && (
+              <div className={styles.error}>{detailError}</div>
+            )}
+            {detailLoading ? (
+              <div className={styles.loading}>Cargando eventos...</div>
+            ) : detailEvents.length === 0 ? (
+              <div className={styles.detailEmpty}>
+                No tienes eventos registrados en este mes.
+              </div>
+            ) : (
+              <div className={styles.detailList}>
+                {detailEvents.map((event) => (
+                  <div key={event.id} className={styles.detailItem}>
+                    <div>
+                      <strong>
+                        {event.fecha_evento
+                          ? format(new Date(event.fecha_evento), 'dd/MM/yyyy')
+                          : '--/--'}
+                      </strong>
+                      <span>{event.salon_nombre || 'Sin salón'}</span>
+                    </div>
+                    <span className={styles.detailStatus}>
+                      {event.confirmado ? 'Confirmado' : 'Pendiente'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         </div>
       )}
     </div>
