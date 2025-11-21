@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { adminAPI } from '@/services/api';
 import { getAuth, clearAuth } from '@/utils/auth';
+import { getSalonColor } from '@/utils/colors';
 import styles from '@/styles/AdminDashboard.module.css';
 
 const months = [
@@ -185,9 +186,18 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.djs.map((dj) => (
-                      <tr key={dj.id}>
-                        <td data-label="DJ">{dj.nombre}</td>
+                    {data.djs.map((dj) => {
+                      const color = getSalonColor(dj.salon_id || dj.id);
+                      return (
+                        <tr key={dj.id}>
+                          <td data-label="DJ" className={styles.djNameCell}>
+                            <span
+                              className={styles.djColorDot}
+                              style={{ backgroundColor: color }}
+                              title={`Salón: ${dj.salon_nombre || 'Sin salón'}`}
+                            />
+                            {dj.nombre}
+                          </td>
                         <td data-label="Rol">
                           <span
                             className={
@@ -207,9 +217,10 @@ export default function AdminDashboardPage() {
                         >
                           {formatNumber(dj.eventos_extras)}
                         </td>
-                        <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
-                      </tr>
-                    ))}
+                          <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
