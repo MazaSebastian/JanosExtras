@@ -25,8 +25,14 @@ export default function AdminDashboardPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedDjId, setSelectedDjId] = useState(null);
-  const [colorStatus, setColorStatus] = useState({});
-  const [colorError, setColorError] = useState('');
+  const [editingDj, setEditingDj] = useState(null);
+  const [editForm, setEditForm] = useState({
+    nombre: '',
+    salon_id: '',
+    color_hex: '#ffffff',
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -50,7 +56,7 @@ export default function AdminDashboardPage() {
     try {
       setLoading(true);
       setError('');
-      setColorError('');
+      setEditError('');
       const response = await adminAPI.getDashboard(selectedYear, selectedMonth);
       setData(response.data);
       if (!selectedDjId && response.data.djs.length > 0) {
@@ -64,24 +70,71 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleColorChange = async (djId, color) => {
+  const openEditModal = (dj) => {
+    const fallbackColor = dj.color_hex || getSalonColor(dj.salon_id || dj.id);
+    setEditingDj(dj);
+    setEditError('');
+    setEditForm({
+      nombre: dj.nombre || '',
+      salon_id: dj.salon_id ? String(dj.salon_id) : '',
+      color_hex: fallbackColor,
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditingDj(null);
+    setEditForm({
+      nombre: '',
+      salon_id: '',
+      color_hex: '#ffffff',
+    });
+    setSavingEdit(false);
+    setEditError('');
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingDj) return;
     try {
-      setColorStatus((prev) => ({ ...prev, [djId]: true }));
-      setColorError('');
-      await adminAPI.updateDjColor(djId, color);
+      setSavingEdit(true);
+      setEditError('');
+      const payload = {
+        nombre: editForm.nombre,
+        salon_id: editForm.salon_id ? parseInt(editForm.salon_id, 10) : null,
+        color_hex: editForm.color_hex,
+      };
+      await adminAPI.updateDj(editingDj.id, payload);
+
+      const getSalonName = (id) =>
+        data?.salones?.find((salon) => salon.id === id)?.nombre || null;
+
       setData((prev) => ({
         ...prev,
-        djs: prev?.djs?.map((dj) =>
-          dj.id === djId ? { ...dj, color_hex: color } : dj
-        ) || [],
+        djs:
+          prev?.djs?.map((dj) =>
+            dj.id === editingDj.id
+              ? {
+                  ...dj,
+                  nombre: editForm.nombre,
+                  salon_id: payload.salon_id,
+                  salon_nombre: payload.salon_id
+                    ? getSalonName(payload.salon_id)
+                    : null,
+                  color_hex: editForm.color_hex,
+                }
+              : dj
+          ) || [],
       }));
+      closeEditModal();
     } catch (err) {
-      setColorError(
-        err.response?.data?.error ||
-          'No se pudo actualizar el color. Intenta nuevamente.'
+      setEditError(
+        err.response?.data?.error || 'No se pudo actualizar el DJ.'
       );
     } finally {
-      setColorStatus((prev) => ({ ...prev, [djId]: false }));
+      setSavingEdit(false);
     }
   };
 
@@ -195,10 +248,6 @@ export default function AdminDashboardPage() {
               </div>
             </section>
 
-            {colorError && (
-              <div className={styles.error}>{colorError}</div>
-            )}
-
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -228,9 +277,17 @@ export default function AdminDashboardPage() {
                             <span
                               className={styles.djColorDot}
                               style={{ backgroundColor: resolvedColor }}
-                              title={`Salón: ${dj.salon_nombre || 'Sin salón'}`}
+                              title={`Color de ${dj.nombre}`}
                             />
-                            {dj.nombre}
+                            <span>{dj.nombre}</span>
+                            <button
+                              type="button"
+                              className={styles.editButton}
+                              onClick={() => openEditModal(dj)}
+                              title={`Editar ${dj.nombre}`}
+                            >
+                              ✏️
+                            </button>
                           </td>
                         <td data-label="Rol">
                           <span
@@ -243,16 +300,8 @@ export default function AdminDashboardPage() {
                             {dj.rol}
                           </span>
                         </td>
-                        <td data-label="Salón" className={styles.salonCell}>
+                        <td data-label="Salón">
                           {dj.salon_nombre || 'Sin salón'}
-                          <input
-                            type="color"
-                            value={dj.color_hex || resolvedColor}
-                            onChange={(e) => handleColorChange(dj.id, e.target.value)}
-                            disabled={colorStatus[dj.id]}
-                            className={styles.colorInput}
-                            title="Cambiar color del DJ"
-                          />
                         </td>
                         <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
                         <td
@@ -352,6 +401,89 @@ export default function AdminDashboardPage() {
                 <div className={styles.emptyState}>No hay DJs disponibles.</div>
               )}
             </section>
+
+            {editingDj && (
+              <div className={styles.modalOverlay} onClick={closeEditModal}>
+                <div
+                  className={styles.modalContent}
+                  onClick={(e) => e.stopPropagation()}
+                  role="dialog"
+                  aria-modal="true"
+                >
+                  <h3 className={styles.modalTitle}>Editar DJ</h3>
+                  <p className={styles.modalSubtitle}>
+                    {editingDj.nombre} — {editingDj.salon_nombre || 'Sin salón'}
+                  </p>
+
+                  {editError && <div className={styles.error}>{editError}</div>}
+
+                  <div className={styles.modalForm}>
+                    <label className={styles.modalLabel}>
+                      Nombre
+                      <input
+                        type="text"
+                        value={editForm.nombre}
+                        onChange={(e) =>
+                          handleEditChange('nombre', e.target.value)
+                        }
+                        className={styles.modalInput}
+                      />
+                    </label>
+
+                    <label className={styles.modalLabel}>
+                      Salón
+                      <select
+                        value={editForm.salon_id}
+                        onChange={(e) =>
+                          handleEditChange('salon_id', e.target.value)
+                        }
+                        className={styles.modalSelect}
+                      >
+                        <option value="">Sin salón asignado</option>
+                        {data.salones.map((salon) => (
+                          <option key={salon.id} value={salon.id}>
+                            {salon.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className={styles.modalLabel}>
+                      Color identificatorio
+                      <div className={styles.colorField}>
+                        <input
+                          type="color"
+                          value={editForm.color_hex}
+                          onChange={(e) =>
+                            handleEditChange('color_hex', e.target.value)
+                          }
+                        />
+                        <span>{editForm.color_hex}</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div className={styles.modalActions}>
+                    <button
+                      type="button"
+                      className={styles.secondaryButton}
+                      onClick={closeEditModal}
+                      disabled={savingEdit}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.primaryButton}
+                      onClick={handleSaveEdit}
+                      disabled={savingEdit || !editForm.nombre.trim()}
+                    >
+                      {savingEdit ? 'Guardando...' : 'Guardar cambios'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )
       )}
