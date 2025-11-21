@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
 import styles from '@/styles/Dashboard.module.css';
@@ -8,6 +9,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     loadSummary();
@@ -19,6 +21,69 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       onRefresh(loadSummary);
     }
   }, [onRefresh]);
+
+  const downloadCSV = (rows, filename) => {
+    const csvContent = rows
+      .map((row) =>
+        row
+          .map((value) => {
+            if (value === null || value === undefined) return '';
+            const stringValue = value.toString();
+            if (/[",;\n]/.test(stringValue)) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          })
+          .join(';')
+      )
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportEvents = async () => {
+    try {
+      setExporting(true);
+      const response = await eventosAPI.getMyEventsByMonth(
+        selectedYear,
+        selectedMonth
+      );
+      const events = response.data || [];
+      const header = ['Fecha', 'Salón', 'Confirmado'];
+      const rows = events.map((event) => [
+        event.fecha_evento
+          ? format(new Date(event.fecha_evento), 'yyyy-MM-dd')
+          : '',
+        event.salon_nombre || '—',
+        event.confirmado ? 'Sí' : 'No',
+      ]);
+
+      rows.push([]);
+      rows.push(['Total eventos', summary?.total_eventos ?? events.length]);
+      rows.push([
+        'Eventos extras',
+        summary?.eventos_extras ??
+          Math.max(0, (summary?.total_eventos ?? events.length) - 8),
+      ]);
+
+      downloadCSV(
+        [header, ...rows],
+        `eventos_${selectedYear}-${String(selectedMonth).padStart(2, '0')}.csv`
+      );
+    } catch (err) {
+      console.error('Error al exportar eventos:', err);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const loadSummary = async () => {
     try {
@@ -73,6 +138,14 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
     <div className={styles.dashboard}>
       <div className={styles.headerRow}>
         <h2 className={styles.title}>Resumen Mensual</h2>
+        <button
+          type="button"
+          className={styles.exportButton}
+          onClick={handleExportEvents}
+          disabled={exporting}
+        >
+          {exporting ? 'Generando...' : 'Exportar CSV'}
+        </button>
 
         <div className={styles.salonInfo}>
           <span className={styles.salonLabel}>Salón actual:</span>
