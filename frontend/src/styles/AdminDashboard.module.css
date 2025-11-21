@@ -35,7 +35,8 @@
 .secondaryButton,
 .logoutButton,
 .refreshButton,
-.primaryButton {
+.primaryButton,
+.exportButton {
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.25rem;
@@ -63,6 +64,19 @@
 .primaryButton {
   background: #fff;
   color: #5f6ef8;
+}
+
+.exportButton {
+  background: rgba(255, 255, 255, 0.9);
+  color: #5f6ef8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.exportButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .secondaryButton:disabled,

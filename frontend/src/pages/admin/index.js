@@ -147,6 +147,70 @@ export default function AdminDashboardPage() {
     router.push('/dashboard');
   };
 
+  const downloadCSV = (rows, filename) => {
+    const csvContent = rows
+      .map((row) =>
+        row
+          .map((value) => {
+            if (value === null || value === undefined) return '';
+            const stringValue = value.toString();
+            if (/[",;\n]/.test(stringValue)) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          })
+          .join(';')
+      )
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportDJs = () => {
+    if (!data?.djs?.length) return;
+    const header = [
+      'DJ',
+      'Rol',
+      'Salón',
+      'Eventos',
+      'Extras',
+      'Último Evento',
+      'Color',
+    ];
+    const rows = data.djs.map((dj) => [
+      dj.nombre,
+      dj.rol,
+      dj.salon_nombre || 'Sin salón',
+      dj.total_eventos,
+      dj.eventos_extras,
+      dj.ultimo_evento ? formatDate(dj.ultimo_evento) : '—',
+      dj.color_hex || getSalonColor(dj.salon_id || dj.id),
+    ]);
+    downloadCSV([header, ...rows], `reporte_djs_${selectedYear}-${selectedMonth}.csv`);
+  };
+
+  const handleExportSalones = () => {
+    if (!data?.salones?.length) return;
+    const header = ['Salón', 'Eventos del mes', 'DJs activos'];
+    const rows = data.salones.map((salon) => [
+      salon.nombre,
+      salon.total_eventos,
+      salon.djs_activos,
+    ]);
+    downloadCSV(
+      [header, ...rows],
+      `reporte_salones_${selectedYear}-${selectedMonth}.csv`
+    );
+  };
+
   const formatNumber = (value) => {
     return (value ?? 0).toLocaleString('es-AR');
   };
@@ -254,6 +318,14 @@ export default function AdminDashboardPage() {
                   <h2>DJs</h2>
                   <p>Actividad mensual por DJ</p>
                 </div>
+                <button
+                  type="button"
+                  className={styles.exportButton}
+                  onClick={handleExportDJs}
+                  disabled={!data?.djs?.length}
+                >
+                  Exportar CSV
+                </button>
               </div>
               <div className={styles.tableWrapper}>
                 <table className={styles.table}>
@@ -325,6 +397,14 @@ export default function AdminDashboardPage() {
                   <h2>Salones</h2>
                   <p>Distribución de eventos por salón</p>
                 </div>
+                <button
+                  type="button"
+                  className={styles.exportButton}
+                  onClick={handleExportSalones}
+                  disabled={!data?.salones?.length}
+                >
+                  Exportar CSV
+                </button>
               </div>
               <div className={styles.tableWrapper}>
                 <table className={styles.table}>
