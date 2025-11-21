@@ -65,4 +65,25 @@ GitHub: https://github.com/MazaSebastian/JanosExtras.git
 - **Producción**: Se recomienda migrar a PostgreSQL, MongoDB u otra base de datos real
 - **Persistencia en Vercel**: Los archivos en `/tmp` se limpian entre invocaciones. Para producción real, usar base de datos externa.
 - **Panel admin**: ver [ADMIN_DASHBOARD.md](./ADMIN_DASHBOARD.md) para crear usuarios gerente y habilitar el panel.
+- **Migraciones**: las migraciones versionadas viven en `database/migrations/` y se ejecutan con `npm run db:migrate`. Asegúrate de tener `DATABASE_URL` configurado (por ejemplo en un `.env` en la raíz).
+
+### Migraciones
+
+1. Crea un archivo `.env` en la raíz con tu cadena de conexión:
+   ```
+   DATABASE_URL=postgresql://usuario:password@host:5432/base?sslmode=require
+   ```
+2. Aplicar migraciones pendientes:
+   ```bash
+   npm run db:migrate
+   ```
+3. Crear una nueva migración (el nombre va después de `--`):
+   ```bash
+   npm run db:new -- agregar-tabla-x
+   ```
+   Esto genera un archivo en `database/migrations/` para que agregues los cambios en `exports.up/exports.down`.
+4. Si necesitas revertir la última migración:
+   ```bash
+   npm run db:rollback
+   ```
 

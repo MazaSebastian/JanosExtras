@@ -5,10 +5,17 @@
   "scripts": {
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "db:migrate": "node-pg-migrate -r dotenv/config -m database/migrations -d \"$DATABASE_URL\" up",
+    "db:rollback": "node-pg-migrate -r dotenv/config -m database/migrations -d \"$DATABASE_URL\" down 1",
+    "db:new": "node-pg-migrate -m database/migrations create"
   },
   "keywords": ["djs", "eventos", "calendario"],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "node-pg-migrate": "^6.2.2"
+  }
 }
 
