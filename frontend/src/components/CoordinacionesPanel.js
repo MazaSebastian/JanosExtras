@@ -385,7 +385,7 @@ export default function CoordinacionesPanel() {
                       >
                         <option value="pendiente">Pendiente</option>
                         <option value="en_proceso">En Proceso</option>
-                        <option value="completada">Completada</option>
+                        <option value="completado">Completada</option>
                         <option value="cancelada">Cancelada</option>
                       </select>
                     </div>
@@ -488,8 +488,8 @@ export default function CoordinacionesPanel() {
         </button>
         <button
           type="button"
-          className={filterEstado === 'completada' ? styles.filterActive : styles.filterButton}
-          onClick={() => setFilterEstado('completada')}
+          className={filterEstado === 'completado' ? styles.filterActive : styles.filterButton}
+          onClick={() => setFilterEstado('completado')}
         >
           Completadas
         </button>

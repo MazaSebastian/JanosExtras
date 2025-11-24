@@ -219,7 +219,7 @@ export class Coordinacion {
   }
 
   static async getEstados() {
-    return ['pendiente', 'en_proceso', 'completada', 'cancelada'];
+    return ['pendiente', 'en_proceso', 'completado', 'cancelada'];
   }
 
   static async getPrioridades() {
