@@ -509,7 +509,20 @@ SISTEMA EXTRAS JANOS/
 
 ## 📊 Estado Actual
 
-### ✅ Funcionalidades Completadas
+### ⚠️ IMPORTANTE - Estado de Deployment
+
+**Último deploy en producción:** Pendiente de deployment  
+**Fecha/Hora actual:** 24 de Noviembre de 2025, 18:15  
+**Último commit:** d210fee - "Feat: Agregar páginas Home para DJs y Administradores con resúmenes"  
+**Funcionalidades pendientes de deploy:**
+- ❌ **Home para DJs y Administradores** - Implementado pero NO en producción
+- ❌ **Ordenamiento de coordinaciones por fecha próxima** - Implementado pero NO en producción
+- ❌ **Botón "Ver Coordinación" con modal de resumen** - Implementado pero NO en producción
+- ❌ **Guardado del flujo de coordinación al completarlo** - Implementado pero NO en producción
+
+**Nota:** Estas funcionalidades están en el código fuente pero requieren un nuevo deployment a Vercel para estar disponibles en producción (janosdjs.com).
+
+### ✅ Funcionalidades Completadas y en Producción
 - [x] Sistema de eventos y extras
 - [x] Cálculo automático de sueldo adicional
 - [x] Fichadas con geolocalización
@@ -517,20 +530,18 @@ SISTEMA EXTRAS JANOS/
 - [x] Software y Shows
 - [x] Adicionales Técnica con procesamiento de PDFs
 - [x] Panel administrativo completo
-- [x] Home para DJs y Administradores
 - [x] Exportación de reportes CSV
 - [x] Validación geolocalizada
 - [x] Sistema de backups automatizado
 - [x] Integración con Sentry (logging)
 - [x] Responsive design
-- [x] Ordenamiento de coordinaciones por fecha próxima
 
-### 🔄 Mejoras Recientes
-- Páginas Home implementadas
-- Botón "Ver Coordinación" con modal de resumen
-- Guardado del flujo de coordinación al completarlo
-- Normalización de estados de coordinación
-- Optimización de carga de modales
+### 🔄 Mejoras Recientes (Pendientes de Deploy)
+- Páginas Home implementadas (NO en producción)
+- Botón "Ver Coordinación" con modal de resumen (NO en producción)
+- Guardado del flujo de coordinación al completarlo (NO en producción)
+- Normalización de estados de coordinación (NO en producción)
+- Optimización de carga de modales (NO en producción)
 
 ### ⚠️ Pendientes
 - [ ] Flujo de coordinación "Religioso"
@@ -619,6 +630,7 @@ SENTRY_DSN=tu_dsn (opcional)
 
 ---
 
-**Última actualización:** 24 de Noviembre de 2025  
-**Versión del documento:** 1.0
+**Última actualización:** 24 de Noviembre de 2025, 18:15  
+**Versión del documento:** 1.1  
+**Estado de Deployment:** Pendiente - Home y mejoras recientes requieren nuevo deploy
 
