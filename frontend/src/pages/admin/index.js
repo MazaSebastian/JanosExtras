@@ -54,6 +54,11 @@ export default function AdminDashboardPage() {
     endDate: '',
   });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [homeData, setHomeData] = useState({
+    coordinaciones: [],
+    recentFichadas: [],
+    loading: false,
+  });
 
   const menuItems = [
     { id: 'home', label: 'Home', icon: '🏠' },
@@ -82,6 +87,12 @@ export default function AdminDashboardPage() {
     if (!user) return;
     loadDashboardData();
   }, [user, selectedYear, selectedMonth]);
+
+  useEffect(() => {
+    if (activeMenu === 'home' && user) {
+      loadHomeData();
+    }
+  }, [activeMenu, user]);
 
   const loadDashboardData = async () => {
     try {
