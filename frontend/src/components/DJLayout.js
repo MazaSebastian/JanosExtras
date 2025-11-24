@@ -14,6 +14,7 @@ export default function DJLayout({ user, children }) {
   };
 
   const menuItems = [
+    { path: '/dashboard/home', label: 'Home', icon: '🏠' },
     { path: '/dashboard', label: 'Eventos y Extras', icon: '📊' },
     { path: '/dashboard/fichadas', label: 'Fichadas', icon: '⏱️' },
     { path: '/dashboard/software', label: 'Software', icon: '💻' },

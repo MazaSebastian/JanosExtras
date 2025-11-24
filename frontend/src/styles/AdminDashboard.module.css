@@ -829,3 +829,205 @@
   font-size: 0.9rem;
 }
 
+/* Home Section Styles */
+.homeSection {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.homeHeader {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.homeHeader h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.homeHeader p {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 1rem;
+}
+
+.homeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.homeCard {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.homeCard:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.homeCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.homeCardIcon {
+  font-size: 1.5rem;
+}
+
+.homeCardHeader h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.homeCardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.homeStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.homeStatLabel {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.homeStatValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.homeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.homeListItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.homeListItem:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.homeListItemIcon {
+  font-size: 1.25rem;
+}
+
+.homeListItemContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.homeListItemTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.homeListItemSubtitle {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.homeEmptyMessage {
+  text-align: center;
+  opacity: 0.6;
+  font-style: italic;
+  padding: 1rem;
+}
+
+.homeCardAction {
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.homeCardAction:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.homeTopDJs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.homeTopDJItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.homeTopDJColor {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.homeTopDJName {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.homeTopDJEvents {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .homeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .homeSection {
+    padding: 1.5rem;
+  }
+}
+

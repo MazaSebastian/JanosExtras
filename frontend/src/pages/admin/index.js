@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { adminAPI, salonesAPI } from '@/services/api';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { adminAPI, salonesAPI, coordinacionesAPI, fichadasAPI } from '@/services/api';
 import { getAuth, clearAuth } from '@/utils/auth';
 import { getSalonColor } from '@/utils/colors';
 import Calendar from '@/components/Calendar';
@@ -38,7 +40,7 @@ export default function AdminDashboardPage() {
   });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
-  const [activeMenu, setActiveMenu] = useState('overview');
+  const [activeMenu, setActiveMenu] = useState('home');
   const [editingSalon, setEditingSalon] = useState(null);
   const [viewingDjEvents, setViewingDjEvents] = useState(null);
   const [djEvents, setDjEvents] = useState([]);
@@ -54,6 +56,7 @@ export default function AdminDashboardPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuItems = [
+    { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'overview', label: 'Resumen general', icon: '📊' },
     { id: 'djs', label: 'DJs', icon: '🎧' },
     { id: 'salones', label: 'Salones', icon: '🏢' },
@@ -95,6 +98,38 @@ export default function AdminDashboardPage() {
       setError(err.response?.data?.error || 'Error al cargar el dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadHomeData = async () => {
+    try {
+      setHomeData(prev => ({ ...prev, loading: true }));
+      const currentDate = new Date();
+
+      // Cargar coordinaciones próximas
+      const coordinacionesRes = await coordinacionesAPI.getAll({ activo: true });
+      const allCoordinaciones = coordinacionesRes.data || [];
+      const upcoming = allCoordinaciones
+        .filter(c => {
+          if (!c.fecha_evento) return false;
+          const eventDate = new Date(c.fecha_evento);
+          return eventDate >= currentDate;
+        })
+        .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento))
+        .slice(0, 5);
+
+      // Cargar fichadas recientes
+      const fichadasRes = await adminAPI.getFichadas({ limit: 10 });
+      const recentFichadas = (fichadasRes.data || []).slice(0, 5);
+
+      setHomeData({
+        coordinaciones: upcoming,
+        recentFichadas,
+        loading: false,
+      });
+    } catch (err) {
+      console.error('Error al cargar datos del home:', err);
+      setHomeData(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -429,6 +464,166 @@ export default function AdminDashboardPage() {
       ) : (
         data && (
           <>
+            {activeMenu === 'home' && (
+              <section id="home" className={styles.homeSection}>
+                <div className={styles.homeHeader}>
+                  <h2>Bienvenido, {user.nombre}</h2>
+                  <p>Resumen general del sistema</p>
+                </div>
+                <div className={styles.homeGrid}>
+                  {/* Resumen General */}
+                  <div className={styles.homeCard}>
+                    <div className={styles.homeCardHeader}>
+                      <span className={styles.homeCardIcon}>📊</span>
+                      <h3>Resumen General</h3>
+                    </div>
+                    <div className={styles.homeCardContent}>
+                      <div className={styles.homeStat}>
+                        <span className={styles.homeStatLabel}>Total DJs</span>
+                        <span className={styles.homeStatValue}>{formatNumber(data.summary.total_djs)}</span>
+                      </div>
+                      <div className={styles.homeStat}>
+                        <span className={styles.homeStatLabel}>Eventos del Mes</span>
+                        <span className={styles.homeStatValue}>{formatNumber(data.summary.total_eventos_mes)}</span>
+                      </div>
+                      <div className={styles.homeStat}>
+                        <span className={styles.homeStatLabel}>Salones Activos</span>
+                        <span className={styles.homeStatValue}>
+                          {formatNumber(data.summary.salones_con_eventos)} / {formatNumber(data.summary.total_salones)}
+                        </span>
+                      </div>
+                      <button
+                        className={styles.homeCardAction}
+                        onClick={() => setActiveMenu('overview')}
+                      >
+                        Ver Detalles →
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Coordinaciones Próximas */}
+                  <div className={styles.homeCard}>
+                    <div className={styles.homeCardHeader}>
+                      <span className={styles.homeCardIcon}>📋</span>
+                      <h3>Coordinaciones Próximas</h3>
+                    </div>
+                    <div className={styles.homeCardContent}>
+                      {homeData.loading ? (
+                        <p>Cargando...</p>
+                      ) : homeData.coordinaciones.length === 0 ? (
+                        <p className={styles.homeEmptyMessage}>No hay coordinaciones próximas</p>
+                      ) : (
+                        <div className={styles.homeList}>
+                          {homeData.coordinaciones.map((coord) => (
+                            <div key={coord.id} className={styles.homeListItem}>
+                              <div className={styles.homeListItemContent}>
+                                <span className={styles.homeListItemTitle}>
+                                  {coord.nombre_cliente || coord.titulo}
+                                </span>
+                                <span className={styles.homeListItemSubtitle}>
+                                  {coord.fecha_evento && format(new Date(coord.fecha_evento), 'dd/MM/yyyy', { locale: es })}
+                                  {coord.tipo_evento && ` • ${coord.tipo_evento}`}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        className={styles.homeCardAction}
+                        onClick={() => {
+                          // Redirigir a coordinaciones (si existe esa sección) o mostrar mensaje
+                          alert('Funcionalidad de coordinaciones en desarrollo');
+                        }}
+                      >
+                        Ver Todas →
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Fichadas Recientes */}
+                  <div className={styles.homeCard}>
+                    <div className={styles.homeCardHeader}>
+                      <span className={styles.homeCardIcon}>⏰</span>
+                      <h3>Fichadas Recientes</h3>
+                    </div>
+                    <div className={styles.homeCardContent}>
+                      {homeData.loading ? (
+                        <p>Cargando...</p>
+                      ) : homeData.recentFichadas.length === 0 ? (
+                        <p className={styles.homeEmptyMessage}>No hay fichadas recientes</p>
+                      ) : (
+                        <div className={styles.homeList}>
+                          {homeData.recentFichadas.map((fichada) => (
+                            <div key={fichada.id} className={styles.homeListItem}>
+                              <span className={styles.homeListItemIcon}>
+                                {fichada.tipo === 'ingreso' ? '⬇️' : '⬆️'}
+                              </span>
+                              <div className={styles.homeListItemContent}>
+                                <span className={styles.homeListItemTitle}>
+                                  {fichada.dj_nombre || 'DJ'}
+                                </span>
+                                <span className={styles.homeListItemSubtitle}>
+                                  {fichada.tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} •{' '}
+                                  {format(new Date(fichada.registrado_en), 'dd/MM/yyyy HH:mm', { locale: es })}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        className={styles.homeCardAction}
+                        onClick={() => setActiveMenu('fichadas')}
+                      >
+                        Ver Todas →
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* DJs Activos */}
+                  <div className={styles.homeCard}>
+                    <div className={styles.homeCardHeader}>
+                      <span className={styles.homeCardIcon}>🎧</span>
+                      <h3>DJs con Actividad</h3>
+                    </div>
+                    <div className={styles.homeCardContent}>
+                      <div className={styles.homeStat}>
+                        <span className={styles.homeStatLabel}>DJs Activos</span>
+                        <span className={styles.homeStatValue}>
+                          {formatNumber(data.summary.djs_con_eventos)} / {formatNumber(data.summary.total_djs)}
+                        </span>
+                      </div>
+                      <div className={styles.homeStat}>
+                        <span className={styles.homeStatLabel}>Top DJs del Mes</span>
+                        <div className={styles.homeTopDJs}>
+                          {data.djs
+                            .filter(dj => dj.rol !== 'admin')
+                            .sort((a, b) => (b.total_eventos || 0) - (a.total_eventos || 0))
+                            .slice(0, 3)
+                            .map((dj) => (
+                              <div key={dj.id} className={styles.homeTopDJItem}>
+                                <span
+                                  className={styles.homeTopDJColor}
+                                  style={{ backgroundColor: dj.color_hex || getSalonColor(dj.salon_id || dj.id) }}
+                                />
+                                <span className={styles.homeTopDJName}>{dj.nombre}</span>
+                                <span className={styles.homeTopDJEvents}>{dj.total_eventos || 0} eventos</span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                      <button
+                        className={styles.homeCardAction}
+                        onClick={() => setActiveMenu('djs')}
+                      >
+                        Ver Todos →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
             {activeMenu === 'overview' && (
               <section id="overview" className={styles.summaryGrid}>
                 <div className={styles.card}>
