@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { coordinacionesAPI, salonesAPI, authAPI } from '@/services/api';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/CoordinacionesPanel.module.css';
+import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
@@ -33,6 +34,9 @@ export default function CoordinacionesPanel() {
   const [filterPrioridad, setFilterPrioridad] = useState('');
   const [playMenuOpen, setPlayMenuOpen] = useState(null);
   const [loadingSalones, setLoadingSalones] = useState(false);
+  const [viewingResumen, setViewingResumen] = useState(null);
+  const [resumenData, setResumenData] = useState(null);
+  const [loadingResumen, setLoadingResumen] = useState(false);
 
   // Cargar coordinaciones al montar y cuando cambian los filtros
   useEffect(() => {
@@ -216,6 +220,39 @@ export default function CoordinacionesPanel() {
 
   const togglePlayMenu = (id) => {
     setPlayMenuOpen(playMenuOpen === id ? null : id);
+  };
+
+  const handleVerResumen = async (coordinacion) => {
+    try {
+      setLoadingResumen(true);
+      setViewingResumen(coordinacion.id);
+      
+      // Cargar el flujo de coordinación si existe
+      let flujo = null;
+      try {
+        const flujoResponse = await coordinacionesAPI.getFlujo(coordinacion.id);
+        flujo = flujoResponse.data || flujoResponse;
+      } catch (err) {
+        // Si no existe flujo, no es un error, simplemente no hay datos del flujo
+        console.log('No se encontró flujo de coordinación para esta coordinación');
+      }
+      
+      setResumenData({
+        coordinacion,
+        flujo,
+      });
+    } catch (err) {
+      console.error('Error al cargar resumen:', err);
+      setError('Error al cargar el resumen de la coordinación.');
+      setViewingResumen(null);
+    } finally {
+      setLoadingResumen(false);
+    }
+  };
+
+  const closeResumenModal = () => {
+    setViewingResumen(null);
+    setResumenData(null);
   };
 
   // Cerrar menú al hacer clic fuera
@@ -590,6 +627,14 @@ export default function CoordinacionesPanel() {
                   </div>
                   <button
                     type="button"
+                    className={styles.viewButton}
+                    onClick={() => handleVerResumen(item)}
+                    title="Ver Coordinación"
+                  >
+                    👁️
+                  </button>
+                  <button
+                    type="button"
                     className={styles.editButton}
                     onClick={() => handleEdit(item)}
                   >
@@ -638,6 +683,188 @@ export default function CoordinacionesPanel() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal de Resumen de Coordinación */}
+      {viewingResumen && (
+        <div className={styles.modalOverlay} onClick={closeResumenModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Resumen de Coordinación</h2>
+              <button
+                type="button"
+                className={styles.modalCloseButton}
+                onClick={closeResumenModal}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              {loadingResumen ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p>Cargando resumen...</p>
+                </div>
+              ) : resumenData ? (
+                <div className={styles.resumenContainer}>
+                  <div className={styles.resumenSeccion}>
+                    <h3 className={styles.resumenSeccionTitulo}>Información General</h3>
+                    <div className={styles.resumenCampo}>
+                      <span className={styles.resumenLabel}>Cliente:</span>
+                      <span className={styles.resumenValor}>
+                        {resumenData.coordinacion?.nombre_cliente || 'N/A'}
+                      </span>
+                    </div>
+                    <div className={styles.resumenCampo}>
+                      <span className={styles.resumenLabel}>Tipo de Evento:</span>
+                      <span className={styles.resumenValor}>
+                        {resumenData.coordinacion?.tipo_evento || 'N/A'}
+                      </span>
+                    </div>
+                    {resumenData.coordinacion?.codigo_evento && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>Código de Evento:</span>
+                        <span className={styles.resumenValor}>
+                          {resumenData.coordinacion.codigo_evento}
+                        </span>
+                      </div>
+                    )}
+                    {resumenData.coordinacion?.fecha_evento && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>Fecha del Evento:</span>
+                        <span className={styles.resumenValor}>
+                          {format(
+                            new Date(resumenData.coordinacion.fecha_evento),
+                            'dd/MM/yyyy',
+                            { locale: es }
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    {resumenData.coordinacion?.salon_nombre && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>Salón:</span>
+                        <span className={styles.resumenValor}>
+                          {resumenData.coordinacion.salon_nombre}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {resumenData.flujo && resumenData.flujo.respuestas ? (
+                    (() => {
+                      const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
+                      const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+                      const respuestas = resumenData.flujo.respuestas;
+
+                      return pasos.map((paso) => {
+                        const tieneRespuestas = paso.preguntas.some((p) => {
+                          const esCondicional = p.condicional && p.condicional.pregunta;
+                          const debeMostrar =
+                            !esCondicional ||
+                            respuestas[p.condicional.pregunta] === p.condicional.valor;
+                          if (!debeMostrar) return false;
+                          const valor = respuestas[p.id];
+                          return (
+                            valor !== undefined &&
+                            valor !== null &&
+                            valor !== '' &&
+                            (p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0))
+                          );
+                        });
+
+                        if (!tieneRespuestas) return null;
+
+                        return (
+                          <div key={paso.id} className={styles.resumenSeccion}>
+                            <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
+                            {paso.preguntas.map((pregunta) => {
+                              const esCondicional =
+                                pregunta.condicional && pregunta.condicional.pregunta;
+                              const debeMostrar =
+                                !esCondicional ||
+                                respuestas[pregunta.condicional.pregunta] ===
+                                  pregunta.condicional.valor;
+
+                              if (!debeMostrar) return null;
+
+                              const valor = respuestas[pregunta.id];
+
+                              if (
+                                pregunta.tipo === 'velas' &&
+                                Array.isArray(valor) &&
+                                valor.length > 0
+                              ) {
+                                return (
+                                  <div key={pregunta.id} className={styles.resumenCampo}>
+                                    <span className={styles.resumenLabel}>
+                                      {pregunta.label}:
+                                    </span>
+                                    <div className={styles.resumenVelas}>
+                                      {valor.map((vela) => (
+                                        <div key={vela.id} className={styles.resumenVelaItem}>
+                                          <strong>{vela.nombre}</strong> - {vela.familiar}
+                                          <div className={styles.resumenVelaCancion}>
+                                            🎵 {vela.cancion}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              if (valor !== undefined && valor !== null && valor !== '') {
+                                return (
+                                  <div key={pregunta.id} className={styles.resumenCampo}>
+                                    <span className={styles.resumenLabel}>
+                                      {pregunta.label}:
+                                    </span>
+                                    <span className={styles.resumenValor}>
+                                      {String(valor)
+                                        .split('\n')
+                                        .map((line, i) => (
+                                          <span key={i}>
+                                            {line}
+                                            <br />
+                                          </span>
+                                        ))}
+                                    </span>
+                                  </div>
+                                );
+                              }
+
+                              return null;
+                            })}
+                          </div>
+                        );
+                      });
+                    })()
+                  ) : (
+                    <div className={styles.resumenSeccion}>
+                      <p style={{ color: '#666', fontStyle: 'italic' }}>
+                        Esta coordinación aún no tiene un flujo completado. Inicia la coordinación
+                        para comenzar a recopilar información.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p>No se pudo cargar el resumen.</p>
+                </div>
+              )}
+            </div>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.buttonSecondary}
+                onClick={closeResumenModal}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>

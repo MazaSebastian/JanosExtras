@@ -119,6 +119,7 @@ export const showsAPI = {
 export const coordinacionesAPI = {
   getAll: (params = {}) => api.get('/coordinaciones', { params }),
   getById: (id) => api.get(`/coordinaciones/${id}`),
+  getFlujo: (id) => api.get(`/coordinaciones/${id}/flujo`),
   create: (data) => api.post('/coordinaciones', data),
   update: (id, data) => api.patch(`/coordinaciones/${id}`, data),
   delete: (id) => api.delete(`/coordinaciones/${id}`),

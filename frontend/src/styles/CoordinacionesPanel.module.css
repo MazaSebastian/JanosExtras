@@ -395,6 +395,7 @@
   background: #f5f5f5 !important;
 }
 
+.viewButton,
 .editButton,
 .deleteButton {
   padding: 0.4rem;
@@ -404,6 +405,14 @@
   transition: all 0.2s ease;
   border: none;
   background: transparent;
+}
+
+.viewButton {
+  color: #4caf50;
+}
+
+.viewButton:hover {
+  background: #e8f5e9;
 }
 
 .editButton {
@@ -509,6 +518,194 @@
   }
   to {
     transform: translateY(0);
+  }
+}
+
+/* Modal de Resumen */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.modalCloseButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.modalCloseButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalActions {
+  padding: 1rem 1.5rem;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Estilos del Resumen (reutilizados de CoordinacionFlujo) */
+.resumenContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.resumenSeccion {
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid #667eea;
+}
+
+.resumenSeccionTitulo {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.resumenCampo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.resumenCampo:last-child {
+  margin-bottom: 0;
+}
+
+.resumenLabel {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.resumenValor {
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.resumenVelas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.resumenVelaItem {
+  padding: 1rem;
+  background: white;
+  border-left: 3px solid #667eea;
+  border-radius: 8px;
+}
+
+.resumenVelaCancion {
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.buttonSecondary {
+  padding: 0.75rem 1.5rem;
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buttonSecondary:hover {
+  background: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .modalOverlay {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .modalContent {
+    border-radius: 24px 24px 0 0;
+    max-width: 100%;
+    max-height: 90vh;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .modalHeader {
+    border-radius: 24px 24px 0 0;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .modalActions button {
+    width: 100%;
   }
 }
 

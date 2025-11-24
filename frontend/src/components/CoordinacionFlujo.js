@@ -6,7 +6,7 @@ import { coordinacionesAPI } from '@/services/api';
 import styles from '@/styles/CoordinacionFlujo.module.css';
 
 // Definición de pasos por tipo de evento
-const FLUJOS_POR_TIPO = {
+export const FLUJOS_POR_TIPO = {
   XV: [
     {
       id: 1,
