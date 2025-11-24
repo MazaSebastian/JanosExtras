@@ -278,39 +278,48 @@
 }
 
 /* Variantes de color para diferentes contextos */
+.primary .spinnerRing:nth-child(1),
 .spinnerContainer.primary .spinnerRing:nth-child(1) {
   border-top-color: #667eea;
 }
 
+.primary .spinnerRing:nth-child(2),
 .spinnerContainer.primary .spinnerRing:nth-child(2) {
   border-top-color: #764ba2;
 }
 
+.primary .spinnerRing:nth-child(3),
 .spinnerContainer.primary .spinnerRing:nth-child(3) {
   border-top-color: #f093fb;
 }
 
+.success .spinnerRing:nth-child(1),
 .spinnerContainer.success .spinnerRing:nth-child(1) {
   border-top-color: #43e97b;
 }
 
+.success .spinnerRing:nth-child(2),
 .spinnerContainer.success .spinnerRing:nth-child(2) {
   border-top-color: #38d9a9;
 }
 
+.success .spinnerRing:nth-child(3),
 .spinnerContainer.success .spinnerRing:nth-child(3) {
   border-top-color: #20bf6b;
 }
 
+.gradient .spinnerRing:nth-child(1),
 .spinnerContainer.gradient .spinnerRing:nth-child(1) {
   border-top-color: #667eea;
   border-image: linear-gradient(45deg, #667eea, #764ba2) 1;
 }
 
+.gradient .spinnerRing:nth-child(2),
 .spinnerContainer.gradient .spinnerRing:nth-child(2) {
   border-top-color: #764ba2;
 }
 
+.gradient .spinnerRing:nth-child(3),
 .spinnerContainer.gradient .spinnerRing:nth-child(3) {
   border-top-color: #f093fb;
 }
