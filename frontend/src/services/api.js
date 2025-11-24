@@ -115,6 +115,15 @@ export const showsAPI = {
   delete: (id) => api.delete(`/shows/${id}`),
 };
 
+// Contenido API
+export const contenidoAPI = {
+  getAll: (params = {}) => api.get('/contenido', { params }),
+  getById: (id) => api.get(`/contenido/${id}`),
+  create: (data) => api.post('/contenido', data),
+  update: (id, data) => api.patch(`/contenido/${id}`, data),
+  delete: (id) => api.delete(`/contenido/${id}`),
+};
+
 // Coordinaciones API
 export const coordinacionesAPI = {
   getAll: (params = {}) => api.get('/coordinaciones', { params }),

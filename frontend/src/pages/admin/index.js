@@ -8,6 +8,7 @@ import { getSalonColor } from '@/utils/colors';
 import Calendar from '@/components/Calendar';
 import SalonCoordinatesEditor from '@/components/SalonCoordinatesEditor';
 import AdicionalesTecnicaAdmin from '@/components/AdicionalesTecnicaAdmin';
+import ContenidoPanel from '@/components/ContenidoPanel';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/AdminDashboard.module.css';
 
@@ -65,6 +66,7 @@ export default function AdminDashboardPage() {
     { id: 'overview', label: 'Resumen general', icon: '📊' },
     { id: 'salones', label: 'Salones', icon: '🏢' },
     { id: 'fichadas', label: 'Fichadas', icon: '⏰' },
+    { id: 'contenido', label: 'Contenido', icon: '📦' },
     { id: 'adicionales', label: 'Adicionales Técnica', icon: '⚡' },
     { id: 'calendar', label: 'Calendario', icon: '📅' },
   ];
@@ -1048,6 +1050,12 @@ export default function AdminDashboardPage() {
                     </table>
                   </div>
                 )}
+              </section>
+            )}
+
+            {activeMenu === 'contenido' && (
+              <section id="contenido" className={styles.section}>
+                <ContenidoPanel />
               </section>
             )}
 
