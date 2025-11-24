@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
-import Loading, { LoadingButton, SkeletonCard } from '@/components/Loading';
+import Loading, { LoadingButton, SkeletonCard, Skeleton } from '@/components/Loading';
 import styles from '@/styles/Dashboard.module.css';
 
 export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonLoading }) {
