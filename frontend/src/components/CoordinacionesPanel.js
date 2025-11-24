@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI, salonesAPI, authAPI } from '@/services/api';
+import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/CoordinacionesPanel.module.css';
 
 export default function CoordinacionesPanel() {
