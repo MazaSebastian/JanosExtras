@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { authAPI, salonesAPI } from '@/services/api';
 import { setAuth } from '@/utils/auth';
+import { LoadingButton } from '@/components/Loading';
 import styles from '@/styles/Login.module.css';
 
 export default function Login() {
