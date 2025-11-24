@@ -63,7 +63,6 @@ export default function AdminDashboardPage() {
   const menuItems = [
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'overview', label: 'Resumen general', icon: '📊' },
-    { id: 'djs', label: 'DJs', icon: '🎧' },
     { id: 'salones', label: 'Salones', icon: '🏢' },
     { id: 'fichadas', label: 'Fichadas', icon: '⏰' },
     { id: 'adicionales', label: 'Adicionales Técnica', icon: '⚡' },
@@ -222,12 +221,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleMenuClick = (sectionId) => {
-    // Redirigir "djs" a "overview" ya que la tabla está ahí
-    if (sectionId === 'djs') {
-      setActiveMenu('overview');
-    } else {
-      setActiveMenu(sectionId);
-    }
+    setActiveMenu(sectionId);
     setMenuOpen(false); // Cerrar menú al hacer clic en un item
   };
 
@@ -752,21 +746,6 @@ export default function AdminDashboardPage() {
                       </tbody>
                     </table>
                   </div>
-                </div>
-              </section>
-            )}
-
-            {activeMenu === 'djs' && (
-              <section id="djs" className={styles.section}>
-                <div className={styles.emptyState}>
-                  <p>La tabla de DJs ahora está disponible en "Resumen General".</p>
-                  <button
-                    type="button"
-                    className={styles.primaryButton}
-                    onClick={() => setActiveMenu('overview')}
-                  >
-                    Ir a Resumen General
-                  </button>
                 </div>
               </section>
             )}
