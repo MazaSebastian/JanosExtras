@@ -16,7 +16,7 @@ export default function Loading({
 
   return (
     <div className={containerClass}>
-      <div className={`${styles.spinnerContainer} ${styles[variant]}`}>
+      <div className={`${styles.spinnerContainer} ${variant ? styles[variant] : ''}`}>
         <div className={`${styles.spinner} ${sizeClass}`}>
           <div className={styles.spinnerRing}></div>
           <div className={styles.spinnerRing}></div>
