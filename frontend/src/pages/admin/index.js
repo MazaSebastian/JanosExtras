@@ -222,7 +222,12 @@ export default function AdminDashboardPage() {
   };
 
   const handleMenuClick = (sectionId) => {
-    setActiveMenu(sectionId);
+    // Redirigir "djs" a "overview" ya que la tabla está ahí
+    if (sectionId === 'djs') {
+      setActiveMenu('overview');
+    } else {
+      setActiveMenu(sectionId);
+    }
     setMenuOpen(false); // Cerrar menú al hacer clic en un item
   };
 
@@ -636,117 +641,132 @@ export default function AdminDashboardPage() {
               </section>
             )}
             {activeMenu === 'overview' && (
-              <section id="overview" className={styles.summaryGrid}>
-                <div className={styles.card}>
-                  <h3>Total DJs</h3>
-                  <p>{formatNumber(data.summary.total_djs)}</p>
+              <section id="overview">
+                <div className={styles.summaryGrid}>
+                  <div className={styles.card}>
+                    <h3>Total DJs</h3>
+                    <p>{formatNumber(data.summary.total_djs)}</p>
+                  </div>
+                  <div className={styles.card}>
+                    <h3>Salones activos</h3>
+                    <p>
+                      {formatNumber(data.summary.salones_con_eventos)} /{' '}
+                      {formatNumber(data.summary.total_salones)}
+                    </p>
+                  </div>
+                  <div className={styles.card}>
+                    <h3>Eventos del mes</h3>
+                    <p>{formatNumber(data.summary.total_eventos_mes)}</p>
+                  </div>
+                  <div className={styles.card}>
+                    <h3>DJs con actividad</h3>
+                    <p>
+                      {formatNumber(data.summary.djs_con_eventos)} /{' '}
+                      {formatNumber(data.summary.total_djs)}
+                    </p>
+                  </div>
                 </div>
-                <div className={styles.card}>
-                  <h3>Salones activos</h3>
-                  <p>
-                    {formatNumber(data.summary.salones_con_eventos)} /{' '}
-                    {formatNumber(data.summary.total_salones)}
-                  </p>
-                </div>
-                <div className={styles.card}>
-                  <h3>Eventos del mes</h3>
-                  <p>{formatNumber(data.summary.total_eventos_mes)}</p>
-                </div>
-                <div className={styles.card}>
-                  <h3>DJs con actividad</h3>
-                  <p>
-                    {formatNumber(data.summary.djs_con_eventos)} /{' '}
-                    {formatNumber(data.summary.total_djs)}
-                  </p>
+                
+                <div className={styles.section} style={{ marginTop: '2rem' }}>
+                  <div className={styles.sectionHeader}>
+                    <div>
+                      <h2>DJs</h2>
+                      <p>Actividad mensual por DJ</p>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.exportButton}
+                      onClick={handleExportDJs}
+                      disabled={!data?.djs?.length}
+                    >
+                      Exportar CSV
+                    </button>
+                  </div>
+                  <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>DJ</th>
+                          <th>Rol</th>
+                          <th>Salón</th>
+                          <th>Eventos</th>
+                          <th>Extras</th>
+                          <th>Último evento</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.djs
+                          .filter((dj) => dj.rol !== 'admin')
+                          .map((dj) => {
+                          const resolvedColor =
+                            dj.color_hex || getSalonColor(dj.salon_id || dj.id);
+                          return (
+                            <tr key={dj.id}>
+                              <td data-label="DJ" className={styles.djNameCell}>
+                                <span
+                                  className={styles.djColorDot}
+                                  style={{ backgroundColor: resolvedColor }}
+                                  title={`Color de ${dj.nombre}`}
+                                />
+                                <span 
+                                  className={styles.djNameClickable}
+                                  onClick={() => handleViewDjEvents(dj)}
+                                  title="Ver eventos de este DJ"
+                                >
+                                  {dj.nombre}
+                                </span>
+                                <button
+                                  type="button"
+                                  className={styles.editButton}
+                                  onClick={() => openEditModal(dj)}
+                                  title={`Editar ${dj.nombre}`}
+                                >
+                                  ✏️
+                                </button>
+                              </td>
+                            <td data-label="Rol">
+                              <span
+                                className={
+                                  dj.rol === 'admin'
+                                    ? styles.badgeAdmin
+                                    : styles.badgeDj
+                                }
+                              >
+                                {dj.rol}
+                              </span>
+                            </td>
+                            <td data-label="Salón">
+                              {dj.salon_nombre || 'Sin salón'}
+                            </td>
+                            <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
+                            <td
+                              data-label="Extras"
+                              className={dj.eventos_extras > 0 ? styles.highlight : ''}
+                            >
+                              {formatNumber(dj.eventos_extras)}
+                            </td>
+                              <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </section>
             )}
 
             {activeMenu === 'djs' && (
               <section id="djs" className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <div>
-                    <h2>DJs</h2>
-                    <p>Actividad mensual por DJ</p>
-                  </div>
+                <div className={styles.emptyState}>
+                  <p>La tabla de DJs ahora está disponible en "Resumen General".</p>
                   <button
                     type="button"
-                    className={styles.exportButton}
-                    onClick={handleExportDJs}
-                    disabled={!data?.djs?.length}
+                    className={styles.primaryButton}
+                    onClick={() => setActiveMenu('overview')}
                   >
-                    Exportar CSV
+                    Ir a Resumen General
                   </button>
-                </div>
-                <div className={styles.tableWrapper}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>DJ</th>
-                        <th>Rol</th>
-                        <th>Salón</th>
-                        <th>Eventos</th>
-                        <th>Extras</th>
-                        <th>Último evento</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.djs
-                        .filter((dj) => dj.rol !== 'admin')
-                        .map((dj) => {
-                        const resolvedColor =
-                          dj.color_hex || getSalonColor(dj.salon_id || dj.id);
-                        return (
-                          <tr key={dj.id}>
-                            <td data-label="DJ" className={styles.djNameCell}>
-                              <span
-                                className={styles.djColorDot}
-                                style={{ backgroundColor: resolvedColor }}
-                                title={`Color de ${dj.nombre}`}
-                              />
-                              <span 
-                                className={styles.djNameClickable}
-                                onClick={() => handleViewDjEvents(dj)}
-                                title="Ver eventos de este DJ"
-                              >
-                                {dj.nombre}
-                              </span>
-                              <button
-                                type="button"
-                                className={styles.editButton}
-                                onClick={() => openEditModal(dj)}
-                                title={`Editar ${dj.nombre}`}
-                              >
-                                ✏️
-                              </button>
-                            </td>
-                          <td data-label="Rol">
-                            <span
-                              className={
-                                dj.rol === 'admin'
-                                  ? styles.badgeAdmin
-                                  : styles.badgeDj
-                              }
-                            >
-                              {dj.rol}
-                            </span>
-                          </td>
-                          <td data-label="Salón">
-                            {dj.salon_nombre || 'Sin salón'}
-                          </td>
-                          <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
-                          <td
-                            data-label="Extras"
-                            className={dj.eventos_extras > 0 ? styles.highlight : ''}
-                          >
-                            {formatNumber(dj.eventos_extras)}
-                          </td>
-                            <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
                 </div>
               </section>
             )}
