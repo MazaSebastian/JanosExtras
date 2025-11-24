@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getAuth, clearAuth } from '@/utils/auth';
+import { getAuth } from '@/utils/auth';
 import { salonesAPI } from '@/services/api';
+import Loading from '@/components/Loading';
 import SalonSelector from '@/components/SalonSelector';
 import Calendar from '@/components/Calendar';
 import EventMarker from '@/components/EventMarker';
 import EventDeleteModal from '@/components/EventDeleteModal';
 import Dashboard from '@/components/Dashboard';
+import DJLayout from '@/components/DJLayout';
 import styles from '@/styles/DashboardPage.module.css';
 
 export default function DashboardPage() {
@@ -94,62 +96,42 @@ export default function DashboardPage() {
     triggerRefreshSequence();
   };
 
-  const handleLogout = () => {
-    clearAuth();
-    router.push('/login');
-  };
-
   if (!user) {
-    return <div>Cargando...</div>;
+    return <Loading message="Cargando..." fullScreen />;
   }
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.logo}>Sistema DJs</h1>
-          <div className={styles.userInfo}>
-            <span className={styles.userName}>Hola, {user.nombre}</span>
-            <button onClick={handleLogout} className={styles.logoutButton}>
-              Cerrar Sesión
-            </button>
-          </div>
-        </div>
-      </header>
+    <DJLayout user={user}>
+      <div className={styles.container}>
+        <Dashboard 
+          key={dashboardRefreshKey} 
+          refreshTrigger={dashboardRefreshKey}
+          onRefresh={setDashboardRefreshFn}
+          salonInfo={userSalonInfo}
+          salonLoading={loadingSalonInfo}
+        />
 
-      <main className={styles.main}>
-        <div className={styles.content}>
-          <Dashboard 
-            key={dashboardRefreshKey} 
-            refreshTrigger={dashboardRefreshKey}
-            onRefresh={setDashboardRefreshFn}
-            salonInfo={userSalonInfo}
-            salonLoading={loadingSalonInfo}
+        <div className={styles.calendarSection}>
+          <SalonSelector
+            selectedSalon={selectedSalon}
+            onSalonChange={setSelectedSalon}
           />
 
-          <div className={styles.calendarSection}>
-            <SalonSelector
-              selectedSalon={selectedSalon}
-              onSalonChange={setSelectedSalon}
+          {selectedSalon ? (
+            <Calendar
+              key={refreshKey}
+              salonId={selectedSalon}
+              onDateClick={handleDateClick}
+              currentUserId={user?.id}
+              onExistingEventClick={handleExistingEventClick}
             />
-
-            {selectedSalon ? (
-              <Calendar
-                key={refreshKey}
-                salonId={selectedSalon}
-                onDateClick={handleDateClick}
-                currentUserSalonId={user?.salon_id}
-                currentUserId={user?.id}
-                onExistingEventClick={handleExistingEventClick}
-              />
-            ) : (
-              <div className={styles.placeholder}>
-                Selecciona un salón para ver el calendario
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className={styles.placeholder}>
+              Selecciona un salón para ver el calendario
+            </div>
+          )}
         </div>
-      </main>
+      </div>
 
       {showEventMarker && selectedDate && (
         <EventMarker
@@ -170,7 +152,7 @@ export default function DashboardPage() {
           onClose={() => setEventToDelete(null)}
         />
       )}
-    </div>
+    </DJLayout>
   );
 }
 

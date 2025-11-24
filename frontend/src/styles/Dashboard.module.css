@@ -115,7 +115,101 @@
   outline: none;
 }
 
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rangeFilters {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f9f9ff;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #e0e3ff;
+}
+
+.rangeInputs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rangeInputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  flex: 1;
+}
+
+.rangeInputs input[type="date"] {
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 2px solid #dfe3ff;
+  font-size: 14px;
+}
+
+.rangeActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rangeButton {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: #4b56d2;
+  color: white;
+  transition: opacity 0.2s ease;
+}
+
+.rangeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clearRangeButton {
+  background: #ffffff;
+  color: #4b56d2;
+  border: 1px solid #4b56d2;
+}
+
+.rangeInfo {
+  font-size: 13px;
+  color: #4b56d2;
+  font-weight: 600;
+}
+
+.rangeError {
+  font-size: 13px;
+  color: #b42318;
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .summaryContainer {
+  animation: fadeIn 0.4s ease-out;
   display: flex;
   flex-direction: column;
   gap: 24px;

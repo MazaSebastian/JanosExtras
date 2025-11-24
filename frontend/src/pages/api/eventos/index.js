@@ -38,8 +38,11 @@ export default async function handler(req, res) {
       const event = await Event.create({ dj_id, salon_id, fecha_evento: fecha });
       res.status(201).json(event);
     } catch (error) {
-      if (error.message === 'Ya has registrado un evento para esta fecha y salón' || 
-          error.message === 'Esta fecha ya está ocupada por otro DJ') {
+      const knownConflicts = [
+        'Ya has registrado un evento para esta fecha y salón',
+        'Este salón ya tiene 3 DJs asignados en esa fecha',
+      ];
+      if (knownConflicts.includes(error.message)) {
         return res.status(409).json({ error: error.message });
       }
       Sentry.captureException(error);

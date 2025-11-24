@@ -114,12 +114,97 @@
   cursor: not-allowed !important;
   position: relative;
   pointer-events: auto;
+  opacity: 0.9;
 }
 
 .day.blocked:hover {
   transform: none !important;
   /* Mantener los estilos del color del evento en hover */
   filter: brightness(0.95);
+}
+
+.day.myEvent {
+  border-color: #4caf50 !important;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
+}
+
+.day.full:not(.myEvent) {
+  border-color: #ff7043;
+  background: rgba(255, 112, 67, 0.08);
+}
+
+.day.holiday {
+  background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+  border-color: #ff9800;
+  border-width: 2px;
+  font-weight: 700;
+  position: relative;
+}
+
+.day.holiday .dayNumber {
+  color: #e65100;
+}
+
+.day.holiday:hover {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  border-color: #f57c00;
+  transform: scale(1.05);
+}
+
+.day.holiday[data-feriado-name]:hover::after {
+  content: attr(data-feriado-name);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 33, 33, 0.95);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: tooltipFadeIn 0.1s ease-out;
+}
+
+.day.holiday[data-feriado-name]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(33, 33, 33, 0.95);
+  z-index: 1001;
+  pointer-events: none;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.day.holiday.otherMonth {
+  opacity: 0.4;
+}
+
+.holidayBadge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.9;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
 
 /* Asegurar que los estilos inline tengan prioridad sobre hover */
@@ -166,11 +251,24 @@
   line-height: 1;
 }
 
-.eventIndicator {
-  position: absolute;
-  bottom: 1px;
-  font-size: 8px;
-  line-height: 1;
+.eventBadges {
+  display: flex;
+  gap: 2px;
+  margin-top: auto;
+  width: 100%;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.eventBadge {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.slotCounter {
+  display: none;
 }
 
 .blockedIcon {
@@ -187,6 +285,41 @@
   padding: 20px;
   color: #666;
   font-size: 14px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.loadingMessage {
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 500;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Responsive: En pantallas más pequeñas, mostrar 2 columnas */

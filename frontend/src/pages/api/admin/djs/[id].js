@@ -35,7 +35,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
 
-    const { nombre, salon_id, color_hex } = parsed.data;
+    const targetDj = await DJ.findById(parseInt(id, 10));
+    if (!targetDj) {
+      return res.status(404).json({ error: 'DJ no encontrado' });
+    }
+
+    const isTargetAdmin = targetDj.rol === 'admin';
+
+    const { nombre, color_hex } = parsed.data;
+    let { salon_id } = parsed.data;
+
+    if (isTargetAdmin) {
+      salon_id = null;
+    }
 
     const updatedDJ = await DJ.updateAdminFields({
       id: parseInt(id, 10),
@@ -44,8 +56,8 @@ export default async function handler(req, res) {
       color_hex,
     });
 
-    if (!updatedDJ) {
-      return res.status(404).json({ error: 'DJ no encontrado' });
+    if (isTargetAdmin) {
+      updatedDJ.salon_id = null;
     }
 
     res.json({ message: 'DJ actualizado', dj: updatedDJ });

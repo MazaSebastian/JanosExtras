@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI } from '@/services/api';
+import { LoadingButton } from '@/components/Loading';
 import styles from '@/styles/EventMarker.module.css';
 
 export default function EventDeleteModal({ event, onEventDeleted, onClose }) {
@@ -50,13 +51,13 @@ export default function EventDeleteModal({ event, onEventDeleted, onClose }) {
         {error && <div className={styles.error}>{error}</div>}
 
         <div className={styles.actions}>
-          <button
+          <LoadingButton
             onClick={handleDelete}
             className={styles.confirmButton}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Eliminando...' : 'Eliminar fecha'}
-          </button>
+            Eliminar fecha
+          </LoadingButton>
           <button
             onClick={onClose}
             className={styles.cancelButton}

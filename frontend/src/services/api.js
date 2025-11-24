@@ -12,12 +12,16 @@ const api = axios.create({
   },
 });
 
-// Interceptor para agregar token a las peticiones
+// Interceptor para agregar token a las peticiones y manejar FormData
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Si los datos son FormData, remover Content-Type para que axios lo establezca automáticamente
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     return config;
   },
@@ -51,7 +55,13 @@ export const salonesAPI = {
   getAll: () => api.get('/salones'),
   getById: (id) => api.get(`/salones/${id}`),
   create: (data) => api.post('/salones', data),
+  updateCoordinates: (id, data) => api.patch(`/salones/${id}`, data),
 };
+
+const requestMyEvents = (params) =>
+  api.get('/eventos/mis-eventos', { params });
+const requestSummary = (params) =>
+  api.get('/eventos/resumen-mensual', { params });
 
 // Eventos API
 export const eventosAPI = {
@@ -60,10 +70,13 @@ export const eventosAPI = {
     api.get(`/eventos/salon/${salonId}`, {
       params: { year, ...(month ? { month } : {}) },
     }),
-  getMyEventsByMonth: (year, month) =>
-    api.get('/eventos/mis-eventos', { params: { year, month } }),
-  getMonthlySummary: (year, month) =>
-    api.get('/eventos/resumen-mensual', { params: { year, month } }),
+  getMyEvents: (params = {}) => requestMyEvents(params),
+  getMyEventsByMonth: (year, month) => requestMyEvents({ year, month }),
+  getMyEventsByRange: (startDate, endDate) =>
+    requestMyEvents({ startDate, endDate }),
+  getMonthlySummary: (year, month) => requestSummary({ year, month }),
+  getSummaryByRange: (startDate, endDate) =>
+    requestSummary({ startDate, endDate }),
   delete: (id) => api.delete(`/eventos/${id}`),
 };
 
@@ -73,6 +86,58 @@ export const adminAPI = {
     api.get('/admin/dashboard', { params: { year, month } }),
   updateDj: (djId, data) =>
     api.patch(`/admin/djs/${djId}`, data),
+  getDjEvents: (djId) =>
+    api.get(`/admin/djs/${djId}/eventos`),
+  getFichadas: (params = {}) =>
+    api.get('/admin/fichadas', { params }),
+};
+
+export const fichadasAPI = {
+  list: (params = {}) => api.get('/fichadas', { params }),
+  create: (data) => api.post('/fichadas', data),
+};
+
+// Software API
+export const softwareAPI = {
+  getAll: (params = {}) => api.get('/software', { params }),
+  getById: (id) => api.get(`/software/${id}`),
+  create: (data) => api.post('/software', data),
+  update: (id, data) => api.patch(`/software/${id}`, data),
+  delete: (id) => api.delete(`/software/${id}`),
+};
+
+// Shows API
+export const showsAPI = {
+  getAll: (params = {}) => api.get('/shows', { params }),
+  getById: (id) => api.get(`/shows/${id}`),
+  create: (data) => api.post('/shows', data),
+  update: (id, data) => api.patch(`/shows/${id}`, data),
+  delete: (id) => api.delete(`/shows/${id}`),
+};
+
+// Coordinaciones API
+export const coordinacionesAPI = {
+  getAll: (params = {}) => api.get('/coordinaciones', { params }),
+  getById: (id) => api.get(`/coordinaciones/${id}`),
+  create: (data) => api.post('/coordinaciones', data),
+  update: (id, data) => api.patch(`/coordinaciones/${id}`, data),
+  delete: (id) => api.delete(`/coordinaciones/${id}`),
+};
+
+// Adicionales Técnica API
+export const adicionalesTecnicaAPI = {
+  getAll: (params = {}) => api.get('/adicionales-tecnica', { params }),
+  getBySalonAndDate: (salon_id, fecha_evento) => 
+    api.get('/adicionales-tecnica', { params: { salon_id, fecha_evento } }),
+  uploadPDF: (formData) => {
+    // Para FormData, axios establecerá automáticamente el Content-Type con el boundary correcto
+    return api.post('/adicionales-tecnica/upload-pdf', formData, {
+      timeout: 60000, // 60 segundos timeout para archivos grandes
+    });
+  },
+  create: (data) => api.post('/adicionales-tecnica', data),
+  update: (id, data) => api.patch(`/adicionales-tecnica/${id}`, data),
+  delete: (id) => api.delete(`/adicionales-tecnica/${id}`),
 };
 
 export default api;

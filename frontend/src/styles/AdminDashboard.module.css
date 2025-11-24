@@ -1,8 +1,85 @@
-.container {
+.layout {
   min-height: 100vh;
+  display: flex;
   background: linear-gradient(135deg, #5f6ef8, #9f8ffc);
-  padding: 2rem;
   color: #fff;
+}
+
+.sidebar {
+  width: 260px;
+  padding: 2rem 1.5rem;
+  background: rgba(21, 26, 79, 0.35);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brandIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.brandSubtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.menuItem {
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menuItemActive {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 20px rgba(12, 17, 67, 0.25);
+}
+
+.menuIcon {
+  font-size: 1.2rem;
+}
+
+.container {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
 }
 
 .header {
@@ -152,6 +229,54 @@
   margin-bottom: 1rem;
 }
 
+.filtersContainer {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  align-items: flex-end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+  flex: 1;
+}
+
+.filterGroup label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.filterGroup select,
+.filterGroup input {
+  padding: 0.65rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.filterGroup select:focus,
+.filterGroup input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.filterGroup select option {
+  background: #4b56d2;
+  color: #fff;
+}
+
 .tableWrapper {
   overflow-x: auto;
 }
@@ -196,6 +321,24 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+.badgeIngreso {
+  background: rgba(76, 175, 80, 0.3);
+  color: #81c784;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badgeEgreso {
+  background: rgba(255, 152, 0, 0.3);
+  color: #ffb74d;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 .highlight {
   color: #ffeb3b;
   font-weight: 600;
@@ -215,7 +358,93 @@
   color: #ffe2e2;
 }
 
+.hamburgerButton {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: rgba(21, 26, 79, 0.9);
+  backdrop-filter: blur(12px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.hamburgerButton:active {
+  transform: scale(0.95);
+}
+
+.hamburgerIcon {
+  display: block;
+  line-height: 1;
+}
+
+.overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .hamburgerButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .layout {
+    position: relative;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: none;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+  }
+
+  .container {
+    padding-top: 4.5rem; /* Espacio para el botón hamburguesa */
+  }
+
+  .menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .menuItem {
+    flex: 1 1 45%;
+  }
+
   .container {
     padding: 1.5rem;
   }
@@ -291,6 +520,19 @@
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
 }
 
+.djNameClickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.djNameClickable:hover {
+  color: #ffd700;
+  text-decoration-color: #ffd700;
+}
+
 .editButton {
   background: transparent;
   border: none;
@@ -324,6 +566,50 @@
   width: 100%;
   max-width: 480px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.eventsModalContent {
+  max-width: 800px;
+  max-height: 85vh;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 .modalTitle {
@@ -350,6 +636,12 @@
   font-weight: 600;
   color: #555;
   gap: 0.4rem;
+}
+
+.fieldHint {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 0.25rem;
 }
 
 .modalInput,
@@ -385,6 +677,28 @@
   margin-top: 1.5rem;
 }
 
+@media (max-width: 768px) {
+  /* Modal desplegable desde abajo en móviles */
+  .modalOverlay {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .modalContent {
+    border-radius: 24px 24px 0 0;
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    padding: 1.5rem;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .eventsModalContent {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 520px) {
   .modalContent {
     padding: 1.5rem;
@@ -396,6 +710,15 @@
 
   .modalActions button {
     width: 100%;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 
@@ -419,11 +742,90 @@
   min-width: 190px;
 }
 
+.calendarFilters {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.dateRangeFilter {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.dateRangeFilter label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.dateRangeFilter input[type="date"] {
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  min-width: 180px;
+}
+
+.clearRangeButton {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clearRangeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .emptyState {
   text-align: center;
   padding: 1rem;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.15);
   font-size: 0.95rem;
+}
+
+.eventsList {
+  margin-top: 0;
+}
+
+.eventsSummary {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(75, 86, 210, 0.1);
+  border-radius: 8px;
+  color: #4b56d2;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.eventsTableWrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.coordinatesOk {
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.coordinatesMissing {
+  color: #ff9800;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 

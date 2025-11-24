@@ -46,6 +46,23 @@ export class AdminDashboard {
 
   static async getDJStats(year, month) {
     const query = `
+      WITH eventos_totales AS (
+        SELECT 
+          dj_id,
+          COUNT(*) AS total_eventos,
+          MAX(fecha_evento) AS ultimo_evento
+        FROM eventos
+        GROUP BY dj_id
+      ),
+      eventos_mes AS (
+        SELECT 
+          dj_id,
+          COUNT(*) AS total_eventos_mes
+        FROM eventos
+        WHERE EXTRACT(YEAR FROM fecha_evento) = $1
+          AND EXTRACT(MONTH FROM fecha_evento) = $2
+        GROUP BY dj_id
+      )
       SELECT 
         d.id,
         d.nombre,
@@ -53,15 +70,13 @@ export class AdminDashboard {
         d.salon_id,
         d.color_hex,
         s.nombre AS salon_nombre,
-        COALESCE(COUNT(e.id), 0) AS total_eventos,
-        COALESCE(MAX(e.fecha_evento), NULL) AS ultimo_evento
+        COALESCE(et.total_eventos, 0) AS total_eventos,
+        COALESCE(em.total_eventos_mes, 0) AS total_eventos_mes,
+        et.ultimo_evento
       FROM djs d
       LEFT JOIN salones s ON s.id = d.salon_id
-      LEFT JOIN eventos e 
-        ON e.dj_id = d.id 
-        AND EXTRACT(YEAR FROM e.fecha_evento) = $1
-        AND EXTRACT(MONTH FROM e.fecha_evento) = $2
-      GROUP BY d.id, d.nombre, d.rol, d.salon_id, s.nombre
+      LEFT JOIN eventos_totales et ON et.dj_id = d.id
+      LEFT JOIN eventos_mes em ON em.dj_id = d.id
       ORDER BY total_eventos DESC, d.nombre ASC
     `;
 
@@ -69,10 +84,12 @@ export class AdminDashboard {
 
     return result.rows.map((dj) => {
       const totalEventos = parseInt(dj.total_eventos, 10) || 0;
+      const eventosMes = parseInt(dj.total_eventos_mes, 10) || 0;
       return {
         ...dj,
         total_eventos: totalEventos,
-        eventos_extras: Math.max(0, totalEventos - 8),
+        eventos_mes: eventosMes,
+        eventos_extras: Math.max(0, eventosMes - 8),
         ultimo_evento: dj.ultimo_evento
       };
     });
@@ -83,6 +100,9 @@ export class AdminDashboard {
       SELECT 
         s.id,
         s.nombre,
+        s.direccion,
+        s.latitud,
+        s.longitud,
         COALESCE(COUNT(e.id), 0) AS total_eventos,
         COALESCE(COUNT(DISTINCT e.dj_id), 0) AS djs_activos
       FROM salones s
@@ -90,7 +110,7 @@ export class AdminDashboard {
         ON e.salon_id = s.id
         AND EXTRACT(YEAR FROM e.fecha_evento) = $1
         AND EXTRACT(MONTH FROM e.fecha_evento) = $2
-      GROUP BY s.id, s.nombre
+      GROUP BY s.id, s.nombre, s.direccion, s.latitud, s.longitud
       ORDER BY total_eventos DESC, s.nombre ASC
     `;
 

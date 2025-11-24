@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
+import Loading, { LoadingButton, SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/Dashboard.module.css';
 
 export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonLoading }) {
@@ -14,10 +15,16 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailEvents, setDetailEvents] = useState([]);
   const [detailError, setDetailError] = useState('');
+  const [rangeStartInput, setRangeStartInput] = useState('');
+  const [rangeEndInput, setRangeEndInput] = useState('');
+  const [activeRange, setActiveRange] = useState(null);
+  const [rangeError, setRangeError] = useState('');
+  const isRangeActive =
+    Boolean(activeRange?.startDate) && Boolean(activeRange?.endDate);
 
   useEffect(() => {
     loadSummary();
-  }, [selectedYear, selectedMonth, refreshTrigger]);
+  }, [selectedYear, selectedMonth, refreshTrigger, activeRange]);
 
   // Exponer función de recarga manual
   useEffect(() => {
@@ -53,14 +60,62 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
     URL.revokeObjectURL(url);
   };
 
+  const handleApplyRange = () => {
+    if (!rangeStartInput || !rangeEndInput) {
+      setRangeError('Debes completar ambas fechas.');
+      return;
+    }
+
+    const start = new Date(rangeStartInput);
+    const end = new Date(rangeEndInput);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      setRangeError('Las fechas ingresadas no son válidas.');
+      return;
+    }
+
+    if (start > end) {
+      setRangeError('La fecha inicial no puede ser mayor a la final.');
+      return;
+    }
+
+    setRangeError('');
+    setActiveRange({ startDate: rangeStartInput, endDate: rangeEndInput });
+  };
+
+  const handleClearRange = () => {
+    setRangeStartInput('');
+    setRangeEndInput('');
+    setActiveRange(null);
+    setRangeError('');
+  };
+
+  const fetchEventsForCurrentFilter = async () => {
+    if (isRangeActive) {
+      const response = await eventosAPI.getMyEventsByRange(
+        activeRange.startDate,
+        activeRange.endDate
+      );
+      return response.data || [];
+    }
+    const response = await eventosAPI.getMyEventsByMonth(
+      selectedYear,
+      selectedMonth
+    );
+    return response.data || [];
+  };
+
+  const rangeLabel = () => {
+    if (!isRangeActive) return '';
+    const startLabel = format(new Date(activeRange.startDate), 'dd/MM/yyyy');
+    const endLabel = format(new Date(activeRange.endDate), 'dd/MM/yyyy');
+    return `Filtrando del ${startLabel} al ${endLabel}`;
+  };
+
   const handleExportEvents = async () => {
     try {
       setExporting(true);
-      const response = await eventosAPI.getMyEventsByMonth(
-        selectedYear,
-        selectedMonth
-      );
-      const events = response.data || [];
+      const events = await fetchEventsForCurrentFilter();
       const header = ['Fecha', 'Salón', 'Confirmado'];
       const rows = events.map((event) => [
         event.fecha_evento
@@ -71,16 +126,18 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       ]);
 
       rows.push([]);
-      rows.push(['Total eventos', summary?.total_eventos ?? events.length]);
+      rows.push(['Total eventos', summary?.eventos_mes ?? events.length]);
       rows.push([
         'Eventos extras',
         summary?.eventos_extras ??
-          Math.max(0, (summary?.total_eventos ?? events.length) - 8),
+          Math.max(0, (summary?.eventos_mes ?? events.length) - 8),
       ]);
 
       downloadCSV(
         [header, ...rows],
-        `eventos_${selectedYear}-${String(selectedMonth).padStart(2, '0')}.csv`
+        isRangeActive
+          ? `eventos_${activeRange.startDate}_a_${activeRange.endDate}.csv`
+          : `eventos_${selectedYear}-${String(selectedMonth).padStart(2, '0')}.csv`
       );
     } catch (err) {
       console.error('Error al exportar eventos:', err);
@@ -97,11 +154,8 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       try {
         setDetailLoading(true);
         setDetailError('');
-        const response = await eventosAPI.getMyEventsByMonth(
-          selectedYear,
-          selectedMonth
-        );
-        setDetailEvents(response.data || []);
+        const events = await fetchEventsForCurrentFilter();
+        setDetailEvents(events);
       } catch (err) {
         console.error('Error al obtener detalle de eventos:', err);
         setDetailError('No se pudieron cargar los eventos.');
@@ -115,13 +169,19 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
   const loadSummary = async () => {
     try {
       setLoading(true);
-      const response = await eventosAPI.getMonthlySummary(selectedYear, selectedMonth);
-      const data = response.data;
+      const response = isRangeActive
+        ? await eventosAPI.getSummaryByRange(
+            activeRange.startDate,
+            activeRange.endDate
+          )
+        : await eventosAPI.getMonthlySummary(selectedYear, selectedMonth);
+      const data = response.data || {};
       
-      // Asegurar que los valores numéricos estén correctos
-      const totalEventos = parseInt(data.total_eventos) || 0;
-      // Calcular eventos extras: a partir del evento 9 (después de los 8 del sueldo base)
-      const eventosExtras = totalEventos > 8 ? totalEventos - 8 : 0;
+      const totalEventosHistoricos = parseInt(data.total_eventos, 10) || 0;
+      const eventosDelPeriodo =
+        parseInt(data.eventos_mes ?? data.total_eventos, 10) || 0;
+      const eventosExtras =
+        data.eventos_extras ?? Math.max(0, eventosDelPeriodo - 8);
       const cotizacionExtra = data.cotizacion_extra || 47000;
       const sueldoAdicional = eventosExtras * cotizacionExtra;
       
@@ -140,7 +200,9 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       
       setSummary({
         ...data,
-        total_eventos: totalEventos,
+        total_eventos: isRangeActive ? eventosDelPeriodo : totalEventosHistoricos,
+        total_eventos_historicos: totalEventosHistoricos,
+        eventos_mes: eventosDelPeriodo,
         eventos_extras: eventosExtras,
         sueldo_adicional: sueldoAdicional,
         cotizacion_extra: cotizacionExtra
@@ -180,7 +242,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
         <div className={styles.salonInfo}>
           <span className={styles.salonLabel}>Salón actual:</span>
           {salonLoading ? (
-            <span className={styles.salonName}>cargando...</span>
+            <Skeleton width="120px" height="20px" />
           ) : salonInfo ? (
             <>
               <span className={styles.salonName}>{salonInfo.nombre}</span>
@@ -203,6 +265,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
             className={styles.select}
+            disabled={isRangeActive}
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -218,6 +281,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
             className={styles.select}
+            disabled={isRangeActive}
           >
             {months.map((month, index) => (
               <option key={index} value={index + 1}>
@@ -226,10 +290,59 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
             ))}
           </select>
         </div>
+
+        <div className={styles.rangeFilters}>
+          <div className={styles.rangeInputs}>
+            <label>
+              Desde
+              <input
+                type="date"
+                value={rangeStartInput}
+                onChange={(e) => setRangeStartInput(e.target.value)}
+              />
+            </label>
+            <label>
+              Hasta
+              <input
+                type="date"
+                value={rangeEndInput}
+                onChange={(e) => setRangeEndInput(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className={styles.rangeActions}>
+            <button
+              type="button"
+              className={styles.rangeButton}
+              onClick={handleApplyRange}
+              disabled={!rangeStartInput || !rangeEndInput}
+            >
+              Aplicar rango
+            </button>
+            <button
+              type="button"
+              className={`${styles.rangeButton} ${styles.clearRangeButton}`}
+              onClick={handleClearRange}
+              disabled={
+                !isRangeActive && !rangeStartInput && !rangeEndInput
+              }
+            >
+              Limpiar
+            </button>
+          </div>
+          {rangeError && <p className={styles.rangeError}>{rangeError}</p>}
+          {isRangeActive && (
+            <p className={styles.rangeInfo}>
+              {rangeLabel()} — los filtros de año/mes quedan deshabilitados.
+            </p>
+          )}
+        </div>
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Cargando resumen...</div>
+        <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
+          <SkeletonCard count={4} columns={4} />
+        </div>
       ) : (
         <div className={styles.summaryContainer}>
           <div className={styles.summaryCards}>
@@ -242,16 +355,14 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
                 {summary?.total_eventos || 0}
               </div>
               <div className={styles.cardHint}>
+                {isRangeActive
+                  ? 'Eventos en el rango seleccionado'
+                  : 'Eventos históricos totales'}
+                <br />
                 {detailVisible ? 'Ocultar detalle' : 'Ver detalle'}
               </div>
             </div>
 
-            <div className={styles.card}>
-              <div className={styles.cardTitle}>Salones Diferentes</div>
-              <div className={styles.cardValue}>
-                {summary?.total_salones || 0}
-              </div>
-            </div>
           </div>
 
           <div className={styles.extrasSection}>
@@ -268,22 +379,35 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Total de eventos extras realizados:</span>
                 <span className={styles.extrasValue}>
-                  {summary?.eventos_extras !== undefined ? summary.eventos_extras : (summary?.total_eventos > 8 ? summary.total_eventos - 8 : 0)}
+                  {summary?.eventos_extras !== undefined
+                    ? summary.eventos_extras
+                    : summary?.eventos_mes
+                    ? Math.max(0, summary.eventos_mes - 8)
+                    : 0}
                 </span>
               </div>
 
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Sueldo Adicional:</span>
                 <span className={styles.extrasValueHighlight}>
-                  ${(summary?.sueldo_adicional !== undefined ? summary.sueldo_adicional : ((summary?.eventos_extras !== undefined ? summary.eventos_extras : (summary?.total_eventos > 8 ? summary.total_eventos - 8 : 0)) * (summary?.cotizacion_extra || 47000))).toLocaleString('es-AR')}
+                  {(
+                    summary?.sueldo_adicional !== undefined
+                      ? summary.sueldo_adicional
+                      : ((summary?.eventos_extras !== undefined
+                          ? summary.eventos_extras
+                          : summary?.eventos_mes
+                          ? Math.max(0, summary.eventos_mes - 8)
+                          : 0) *
+                        (summary?.cotizacion_extra || 47000))
+                  ).toLocaleString('es-AR')}
                 </span>
               </div>
             </div>
 
-            {summary?.total_eventos > 0 && (
+            {summary?.eventos_mes > 0 && (
               <div className={styles.extrasNote}>
                 <small>
-                  * Los primeros 8 eventos corresponden al sueldo base. 
+                  * Los primeros 8 eventos del período corresponden al sueldo base. 
                   Los eventos extras se cuentan a partir del evento número 9.
                 </small>
               </div>
@@ -293,7 +417,10 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
         {detailVisible && (
           <div className={styles.detailSection}>
             <div className={styles.detailHeader}>
-              <h3>Detalle de eventos ({summary?.total_eventos || 0})</h3>
+              <h3>
+                Detalle de eventos del período (
+                {summary?.eventos_mes || summary?.total_eventos || 0})
+              </h3>
               <button
                 type="button"
                 className={styles.secondaryButton}
@@ -306,7 +433,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
               <div className={styles.error}>{detailError}</div>
             )}
             {detailLoading ? (
-              <div className={styles.loading}>Cargando eventos...</div>
+              <Loading message="Cargando eventos..." size="small" />
             ) : detailEvents.length === 0 ? (
               <div className={styles.detailEmpty}>
                 No tienes eventos registrados en este mes.

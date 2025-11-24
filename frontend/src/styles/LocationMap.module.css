@@ -1,0 +1,71 @@
+.mapContainer {
+  position: relative;
+  width: 100%;
+  margin: 1.5rem 0;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.distanceBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.distanceIcon {
+  font-size: 1.2rem;
+}
+
+.distanceText {
+  color: #333;
+}
+
+.distanceText strong {
+  color: #667eea;
+  font-weight: 700;
+}
+
+.mapPlaceholder {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 12px;
+  color: #666;
+  padding: 2rem;
+  text-align: center;
+}
+
+.mapPlaceholderSubtext {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .distanceBadge {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .mapContainer {
+    margin: 1rem 0;
+  }
+}
+

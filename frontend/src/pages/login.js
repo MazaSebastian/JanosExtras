@@ -174,13 +174,14 @@ export default function Login() {
             </div>
           )}
 
-          <button
+          <LoadingButton
             type="submit"
             className={styles.submitButton}
             disabled={loading || (isRegister && !formData.salon_id)}
+            loading={loading}
           >
-            {loading ? 'Procesando...' : isRegister ? 'Registrarse' : 'Iniciar Sesión'}
-          </button>
+            {isRegister ? 'Registrarse' : 'Iniciar Sesión'}
+          </LoadingButton>
         </form>
 
         <p className={styles.switch}>

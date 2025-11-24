@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { salonesAPI } from '@/services/api';
+import Loading from '@/components/Loading';
 import styles from '@/styles/SalonSelector.module.css';
 
 export default function SalonSelector({ selectedSalon, onSalonChange }) {
@@ -30,7 +31,11 @@ export default function SalonSelector({ selectedSalon, onSalonChange }) {
   };
 
   if (loading) {
-    return <div className={styles.container}>Cargando salones...</div>;
+    return (
+      <div className={styles.container}>
+        <Loading message="Cargando salones..." size="small" inline />
+      </div>
+    );
   }
 
   if (error) {

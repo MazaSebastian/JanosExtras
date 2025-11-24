@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS salones (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
     direccion TEXT,
+    latitud DECIMAL(10, 8),
+    longitud DECIMAL(11, 8),
     activo BOOLEAN DEFAULT true,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -29,8 +31,8 @@ CREATE TABLE IF NOT EXISTS eventos (
     fecha_evento DATE NOT NULL,
     confirmado BOOLEAN DEFAULT true,
     fecha_marcado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- Evitar que dos DJs marquen la misma fecha en el mismo salón
-    UNIQUE(salon_id, fecha_evento)
+    -- Evitar que un DJ marque dos veces el mismo salón en la misma fecha
+    UNIQUE(dj_id, salon_id, fecha_evento)
 );
 
 -- Paso 4: Crear índices para mejorar rendimiento
@@ -38,6 +40,17 @@ CREATE INDEX IF NOT EXISTS idx_eventos_dj_id ON eventos(dj_id);
 CREATE INDEX IF NOT EXISTS idx_eventos_salon_id ON eventos(salon_id);
 CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos(fecha_evento);
 CREATE INDEX IF NOT EXISTS idx_eventos_dj_fecha ON eventos(dj_id, fecha_evento);
+
+CREATE TABLE IF NOT EXISTS fichadas (
+    id SERIAL PRIMARY KEY,
+    dj_id INTEGER NOT NULL REFERENCES djs(id) ON DELETE CASCADE,
+    tipo VARCHAR(20) NOT NULL,
+    comentario TEXT,
+    registrado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fichadas_tipo_check CHECK (tipo IN ('ingreso', 'egreso'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_fichadas_dj_fecha ON fichadas(dj_id, registrado_en);
 
 -- Paso 5: Insertar salones (ejecutar DESPUÉS de crear la tabla)
 INSERT INTO salones (nombre, direccion) VALUES

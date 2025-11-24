@@ -1,28 +1,37 @@
-import { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfYear, endOfYear, addYears, subYears } from 'date-fns';
+import { useState, useEffect, useMemo } from 'react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
+import { getFeriadosMap, esFeriado } from '@/utils/feriados';
 import styles from '@/styles/Calendar.module.css';
+
+const MAX_DJS_PER_DAY = 3;
 
 export default function Calendar({
   salonId,
   onDateClick,
-  currentUserSalonId,
   currentUserId,
   onExistingEventClick,
   filterDjId,
-  readOnly = false
+  readOnly = false,
+  startDateFilter,
+  endDateFilter
 }) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [events, setEvents] = useState([]);
+  const [rawEvents, setRawEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // Mapa de feriados para el año actual y años adyacentes (para meses que muestran días de otros años)
+  const feriadosMap = useMemo(() => {
+    return getFeriadosMap(currentYear - 1, currentYear + 1);
+  }, [currentYear]);
 
   useEffect(() => {
     if (salonId) {
       loadEvents();
     } else {
-      setEvents([]);
+      setRawEvents([]);
     }
   }, [salonId, currentYear]);
 
@@ -33,15 +42,74 @@ export default function Calendar({
       setLoading(true);
       const response = await eventosAPI.getBySalon(salonId, currentYear);
       const eventsData = response.data || [];
-      const filteredEvents = filterDjId
-        ? eventsData.filter((event) => event.dj_id === filterDjId)
-        : eventsData;
-      setEvents(filteredEvents);
+      setRawEvents(eventsData);
     } catch (err) {
       console.error('Error al cargar eventos:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const events = useMemo(() => {
+    if (!rawEvents.length) return [];
+
+    const start = startDateFilter ? new Date(startDateFilter) : null;
+    const end = endDateFilter ? new Date(endDateFilter) : null;
+    let rangeStart = start;
+    let rangeEnd = end;
+
+    if (rangeStart && rangeEnd && rangeStart > rangeEnd) {
+      const temp = rangeStart;
+      rangeStart = rangeEnd;
+      rangeEnd = temp;
+    }
+
+    return rawEvents.filter((event) => {
+      if (filterDjId && event.dj_id !== filterDjId) return false;
+      if (!rangeStart && !rangeEnd) return true;
+      if (!event.fecha_evento) return false;
+      const eventDate = new Date(event.fecha_evento);
+      if (Number.isNaN(eventDate.getTime())) return false;
+      if (rangeStart && eventDate < rangeStart) return false;
+      if (rangeEnd && eventDate > rangeEnd) return false;
+      return true;
+    });
+  }, [rawEvents, filterDjId, startDateFilter, endDateFilter]);
+
+  const eventsByDate = useMemo(() => {
+    const map = new Map();
+    events.forEach((event) => {
+      if (!event.fecha_evento) return;
+      const key = event.fecha_evento.split('T')[0];
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key).push(event);
+    });
+    return map;
+  }, [events]);
+
+  const getEventsForDate = (date) => {
+    if (!date) return [];
+    const dateKey = format(date, 'yyyy-MM-dd');
+    return eventsByDate.get(dateKey) || [];
+  };
+
+  const getEventColor = (event) => {
+    if (event.dj_color_hex) {
+      return event.dj_color_hex;
+    }
+    if (event.dj_salon_id) {
+      return getSalonColor(event.dj_salon_id);
+    }
+    if (event.salon_id) {
+      return getSalonColor(event.salon_id);
+    }
+    if (event.dj_id) {
+      return getSalonColor(event.dj_id);
+    }
+    return '#667eea';
   };
 
   // Generar todos los meses del año
@@ -79,37 +147,6 @@ export default function Calendar({
     });
   }
 
-  // Función mejorada para comparar fechas sin problemas de zona horaria
-  const isSameDate = (date1, date2) => {
-    if (!date1 || !date2) return false;
-    const d1 = new Date(date1);
-    const d2 = new Date(date2);
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-  };
-
-  const hasEvent = (date) => {
-    if (!date || events.length === 0) return false;
-    return events.some((event) => {
-      if (!event.fecha_evento) return false;
-      // Normalizar la fecha del evento a formato YYYY-MM-DD
-      const eventDateStr = event.fecha_evento.split('T')[0];
-      const dateStr = format(date, 'yyyy-MM-dd');
-      return eventDateStr === dateStr;
-    });
-  };
-
-  const getEventForDate = (date) => {
-    if (!date || events.length === 0) return null;
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return events.find((event) => {
-      if (!event.fecha_evento) return false;
-      const eventDateStr = event.fecha_evento.split('T')[0];
-      return eventDateStr === dateStr;
-    });
-  };
-
   const handleDateClick = (date, monthDate) => {
     // Solo permitir clics en fechas del mes actual (no en días de otros meses)
     if (!isSameMonth(date, monthDate)) {
@@ -120,21 +157,22 @@ export default function Calendar({
       return;
     }
 
-    // Verificar si la fecha ya tiene un evento (bloqueada)
-    const event = getEventForDate(date);
-    const hasEventOnDate = !!event;
-    if (hasEventOnDate) {
-      if (
-        event?.dj_id === currentUserId &&
-        typeof onExistingEventClick === 'function'
-      ) {
-        onExistingEventClick(event);
+    const eventsForDate = getEventsForDate(date);
+    const myEvent = eventsForDate.find((event) => event.dj_id === currentUserId);
+    const isFull = eventsForDate.length >= MAX_DJS_PER_DAY;
+
+    if (myEvent) {
+      if (typeof onExistingEventClick === 'function') {
+        onExistingEventClick(myEvent);
       }
       return;
     }
+
+    if (isFull) {
+      return;
+    }
     
-    // Solo permitir clic si no está bloqueada
-    if (onDateClick && !hasEventOnDate) {
+    if (onDateClick) {
       onDateClick(date);
     }
   };
@@ -163,7 +201,11 @@ export default function Calendar({
         </button>
       </div>
 
-      {loading && <div className={styles.loading}>Cargando eventos del año...</div>}
+      {loading && (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingMessage}>Cargando eventos del año...</div>
+        </div>
+      )}
 
       <div className={styles.yearGrid}>
         {months.map((month, monthIndex) => (
@@ -181,81 +223,79 @@ export default function Calendar({
             <div className={styles.days}>
               {month.days.map((date, dayIndex) => {
                 const isCurrentMonth = isSameMonth(date, month.monthDate);
-                const hasEventOnDate = hasEvent(date);
-                const event = getEventForDate(date);
+                const eventsForDate = getEventsForDate(date);
+                const hasEventOnDate = eventsForDate.length > 0;
+                const myEvent = eventsForDate.find(
+                  (event) => event.dj_id === currentUserId
+                );
+                const isFull = eventsForDate.length >= MAX_DJS_PER_DAY;
+                const isBlocked = isFull && !myEvent;
+                const tooltipNames = eventsForDate
+                  .map((event) => event.dj_nombre || 'DJ sin nombre')
+                  .join(', ');
                 
-                // Obtener el color del salón del DJ que marcó el evento
-                let eventColor = null;
-                if (hasEventOnDate && event) {
-                  if (event.dj_color_hex) {
-                    eventColor = event.dj_color_hex;
-                  } else if (event.dj_salon_id) {
-                  // Prioridad: dj_salon_id > salon_id > dj_id (fallback)
-                    eventColor = getSalonColor(event.dj_salon_id);
-                  } else if (event.salon_id) {
-                    // Fallback: usar el salón del evento
-                    eventColor = getSalonColor(event.salon_id);
-                  } else if (event.dj_id) {
-                    // Último fallback: usar el ID del DJ (aunque debería usar salón)
-                    eventColor = getSalonColor(event.dj_id);
-                  }
-                  
-                  // Si aún no hay color, usar un color por defecto
-                  if (!eventColor) {
-                    eventColor = '#667eea'; // Color por defecto
-                  }
-                }
-
-                // Determinar si esta fecha está bloqueada
-                const isBlocked = hasEventOnDate;
-                const isMyEvent =
-                  hasEventOnDate &&
-                  event?.dj_id === currentUserId &&
-                  event?.dj_salon_id === currentUserSalonId;
-                
-                // Estilos dinámicos para fechas con eventos
-                const dayStyle = {};
-                if (hasEventOnDate && eventColor) {
-                  dayStyle.backgroundColor = `${eventColor}25`;
-                  dayStyle.borderColor = eventColor;
-                  dayStyle.borderWidth = '2px';
-                  dayStyle.borderStyle = 'solid';
-                }
+                // Verificar si es feriado
+                const dateKey = format(date, 'yyyy-MM-dd');
+                const feriadoInfo = feriadosMap.get(dateKey);
+                const isHoliday = Boolean(feriadoInfo);
                 
                 const dayClasses = [styles.day];
                 if (!isCurrentMonth) dayClasses.push(styles.otherMonth);
+                if (isHoliday) dayClasses.push(styles.holiday);
                 if (hasEventOnDate) dayClasses.push(styles.hasEvent);
                 if (isBlocked) dayClasses.push(styles.blocked);
+                if (myEvent) dayClasses.push(styles.myEvent);
+                if (isFull && !myEvent) dayClasses.push(styles.full);
+
+                // Construir el tooltip
+                let tooltipText = '';
+                if (isHoliday && feriadoInfo) {
+                  tooltipText = feriadoInfo.name;
+                  if (hasEventOnDate) {
+                    tooltipText += ` | ${tooltipNames}`;
+                    if (isFull && !myEvent) {
+                      tooltipText += ' — Cupo completo';
+                    }
+                  }
+                } else if (hasEventOnDate) {
+                  tooltipText = tooltipNames;
+                  if (isFull && !myEvent) {
+                    tooltipText += ' — Cupo completo';
+                  }
+                } else {
+                  tooltipText = format(date, 'dd/MM/yyyy');
+                }
 
                 return (
                   <div
                     key={`${monthIndex}-${dayIndex}`}
                     className={dayClasses.join(' ')}
                     onClick={() => handleDateClick(date, month.monthDate)}
-                    style={dayStyle}
                     data-dj-name={
-                      hasEventOnDate && event?.dj_nombre
-                        ? event.dj_nombre
+                      hasEventOnDate
+                        ? tooltipNames
                         : undefined
                     }
-                    title={
-                      isBlocked
-                        ? isMyEvent
-                          ? `Evento marcado por ti (${event?.dj_nombre || ''})`
-                          : `Fecha ocupada por ${event?.dj_nombre || 'otro DJ'}`
-                        : format(date, 'dd/MM/yyyy')
+                    data-feriado-name={
+                      isHoliday && feriadoInfo
+                        ? feriadoInfo.name
+                        : undefined
                     }
+                    title={tooltipText}
                   >
                     <span className={styles.dayNumber}>
                       {format(date, 'd')}
                     </span>
-                    {hasEventOnDate && eventColor && (
-                      <div 
-                        className={styles.eventIndicator} 
-                        title={`${event?.dj_nombre || 'Evento'}`}
-                        style={{ color: eventColor }}
-                      >
-                        ●
+                    {hasEventOnDate && (
+                      <div className={styles.eventBadges}>
+                        {eventsForDate.slice(0, MAX_DJS_PER_DAY).map((event) => (
+                          <span
+                            key={event.id}
+                            className={styles.eventBadge}
+                            style={{ backgroundColor: getEventColor(event) }}
+                            title={event.dj_nombre || 'Evento'}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
@@ -268,4 +308,5 @@ export default function Calendar({
     </div>
   );
 }
+
 

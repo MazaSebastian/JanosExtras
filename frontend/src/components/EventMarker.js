@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI } from '@/services/api';
+import { LoadingButton } from '@/components/Loading';
 import styles from '@/styles/EventMarker.module.css';
 
 export default function EventMarker({ date, salonId, onEventCreated, onClose }) {
@@ -33,7 +34,12 @@ export default function EventMarker({ date, salonId, onEventCreated, onClose }) 
       setError(errorMessage);
       
       // Si la fecha ya está ocupada, cerrar el modal después de mostrar el error
-      if (errorMessage.includes('ocupada') || errorMessage.includes('Ya existe')) {
+      if (
+        errorMessage.includes('ocupada') ||
+        errorMessage.includes('Ya existe') ||
+        errorMessage.includes('3 DJs') ||
+        errorMessage.includes('registrado')
+      ) {
         setTimeout(() => {
           onClose();
         }, 2000);
@@ -56,13 +62,13 @@ export default function EventMarker({ date, salonId, onEventCreated, onClose }) 
         {error && <div className={styles.error}>{error}</div>}
 
         <div className={styles.actions}>
-          <button
+          <LoadingButton
             onClick={handleMarkEvent}
             className={styles.confirmButton}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Marcando...' : 'Confirmar Evento'}
-          </button>
+            Confirmar Evento
+          </LoadingButton>
           <button
             onClick={onClose}
             className={styles.cancelButton}
