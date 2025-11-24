@@ -275,6 +275,27 @@
   margin-top: auto;
 }
 
+.downloadButton {
+  background: linear-gradient(135deg, #43e97b 0%, #38d9a9 100%);
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.downloadButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 233, 123, 0.4);
+}
+
 .editButton,
 .deleteButton {
   padding: 0.5rem 1rem;

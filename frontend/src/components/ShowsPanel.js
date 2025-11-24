@@ -17,7 +17,6 @@ export default function ShowsPanel() {
     categoria: '',
   });
   const [filterCategoria, setFilterCategoria] = useState('');
-  const [playingId, setPlayingId] = useState(null);
 
   const loadShows = async () => {
     try {
@@ -65,7 +64,7 @@ export default function ShowsPanel() {
     setFormData({
       nombre: item.nombre,
       descripcion: item.descripcion || '',
-      url_audio: item.url_audio,
+      url_audio: item.url_audio || '',
       duracion: item.duracion ? String(item.duracion) : '',
       categoria: item.categoria || '',
     });
@@ -85,12 +84,6 @@ export default function ShowsPanel() {
     }
   };
 
-  const formatDuration = (seconds) => {
-    if (!seconds) return '';
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const categorias = useMemo(() => {
     if (!Array.isArray(shows)) return [];
@@ -139,23 +132,13 @@ export default function ShowsPanel() {
                 />
               </div>
               <div className={styles.formGroup}>
-                <label>URL del Audio *</label>
+                <label>URL de Descarga *</label>
                 <input
                   type="url"
                   value={formData.url_audio}
                   onChange={(e) => setFormData({ ...formData, url_audio: e.target.value })}
                   required
                   placeholder="https://..."
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Duración (segundos)</label>
-                <input
-                  type="number"
-                  value={formData.duracion}
-                  onChange={(e) => setFormData({ ...formData, duracion: e.target.value })}
-                  min="0"
-                  placeholder="Ej: 180"
                 />
               </div>
               <div className={styles.formGroup}>
@@ -235,20 +218,15 @@ export default function ShowsPanel() {
                 {item.categoria && <span className={styles.badge}>{item.categoria}</span>}
               </div>
               {item.descripcion && <p className={styles.description}>{item.descripcion}</p>}
-              {item.duracion && (
-                <p className={styles.duration}>⏱️ {formatDuration(item.duracion)}</p>
-              )}
-              <div className={styles.audioPlayer}>
-                <audio
-                  controls
-                  src={item.url_audio}
-                  onPlay={() => setPlayingId(item.id)}
-                  onPause={() => setPlayingId(null)}
-                >
-                  Tu navegador no soporta audio HTML5.
-                </audio>
-              </div>
               <div className={styles.cardActions}>
+                <a
+                  href={item.url_audio}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.downloadButton}
+                >
+                  📥 Descargar
+                </a>
                 <button
                   type="button"
                   className={styles.editButton}
