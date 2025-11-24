@@ -59,7 +59,14 @@ export class Coordinacion {
       LEFT JOIN salones s ON c.salon_id = s.id
       LEFT JOIN djs creador ON c.creado_por = creador.id
       ${whereClause}
-      ORDER BY c.fecha_evento DESC NULLS LAST, c.fecha_creacion DESC
+      ORDER BY 
+        CASE 
+          WHEN c.fecha_evento IS NULL THEN 2
+          WHEN c.fecha_evento >= CURRENT_DATE THEN 0
+          ELSE 1
+        END,
+        c.fecha_evento ASC NULLS LAST,
+        c.fecha_creacion DESC
     `;
 
     const result = await pool.query(query, values);
