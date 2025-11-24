@@ -123,6 +123,9 @@ export const coordinacionesAPI = {
   create: (data) => api.post('/coordinaciones', data),
   update: (id, data) => api.patch(`/coordinaciones/${id}`, data),
   delete: (id) => api.delete(`/coordinaciones/${id}`),
+  // Flujo API
+  saveFlujo: (id, data) => api.post(`/coordinaciones/${id}/flujo`, data),
+  completeFlujo: (id, data) => api.post(`/coordinaciones/${id}/flujo/complete`, data),
 };
 
 // Adicionales Técnica API

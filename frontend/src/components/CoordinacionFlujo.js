@@ -491,16 +491,18 @@ export default function CoordinacionFlujo({ coordinacionId }) {
 
     try {
       setGuardando(true);
-      // TODO: Implementar finalización del flujo
-      // await coordinacionesFlujoAPI.complete(coordinacionId, respuestas);
       
-      // Actualizar estado de la coordinación
-      await coordinacionesAPI.update(coordinacionId, { estado: 'completado' });
+      // Guardar el flujo como completado
+      await coordinacionesAPI.completeFlujo(coordinacionId, {
+        respuestas,
+        tipo_evento: coordinacion?.tipo_evento,
+      });
       
       // Redirigir a la lista de coordinaciones
       router.push('/dashboard/coordinaciones');
     } catch (err) {
-      setError('Error al completar el flujo.');
+      console.error('Error al completar el flujo:', err);
+      setError(err.response?.data?.error || 'Error al completar el flujo.');
       setGuardando(false);
     }
   };
