@@ -369,21 +369,21 @@ export default async function handler(req, res) {
 }
 
 async function handleUpload(req, res) {
+  try {
+    console.log('Autenticando usuario...');
+    const auth = authenticateToken(req);
+    if (auth.error) {
+      console.log('Error de autenticación:', auth.error);
+      return res.status(auth.status).json({ error: auth.error });
+    }
 
-  console.log('Autenticando usuario...');
-  const auth = authenticateToken(req);
-  if (auth.error) {
-    console.log('Error de autenticación:', auth.error);
-    return res.status(auth.status).json({ error: auth.error });
-  }
+    console.log('Usuario autenticado:', auth.user?.nombre, 'Rol:', auth.user?.rol);
 
-  console.log('Usuario autenticado:', auth.user?.nombre, 'Rol:', auth.user?.rol);
-
-  // Solo administradores pueden subir PDFs
-  if (auth.user.rol !== 'admin') {
-    console.log('Usuario no es administrador');
-    return res.status(403).json({ error: 'Solo administradores pueden subir PDFs' });
-  }
+    // Solo administradores pueden subir PDFs
+    if (auth.user.rol !== 'admin') {
+      console.log('Usuario no es administrador');
+      return res.status(403).json({ error: 'Solo administradores pueden subir PDFs' });
+    }
 
     console.log('📤 Iniciando parsing del formulario...');
     console.log('Content-Type recibido:', req.headers['content-type']);
