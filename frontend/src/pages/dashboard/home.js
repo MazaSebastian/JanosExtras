@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAuth } from '@/utils/auth';
-import { eventosAPI, fichadasAPI, coordinacionesAPI, adicionalesTecnicaAPI } from '@/services/api';
+import { eventosAPI, fichadasAPI, coordinacionesAPI } from '@/services/api';
 import DJLayout from '@/components/DJLayout';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/Home.module.css';
@@ -15,7 +15,6 @@ export default function DJHomePage() {
   const [summary, setSummary] = useState(null);
   const [recentFichadas, setRecentFichadas] = useState([]);
   const [upcomingCoordinaciones, setUpcomingCoordinaciones] = useState([]);
-  const [recentAdicionales, setRecentAdicionales] = useState([]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -59,10 +58,6 @@ export default function DJHomePage() {
         .slice(0, 5);
       setUpcomingCoordinaciones(upcoming);
 
-      // Cargar adicionales técnica recientes (últimos 5)
-      const adicionalesRes = await adicionalesTecnicaAPI.getAll({ limit: 5 });
-      const adicionalesData = adicionalesRes.data?.data || adicionalesRes.data || [];
-      setRecentAdicionales(adicionalesData.slice(0, 5));
     } catch (err) {
       console.error('Error al cargar datos del home:', err);
     } finally {

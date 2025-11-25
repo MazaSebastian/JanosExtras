@@ -137,21 +137,6 @@ export const coordinacionesAPI = {
   completeFlujo: (id, data) => api.post(`/coordinaciones/${id}/flujo/complete`, data),
 };
 
-// Adicionales Técnica API
-export const adicionalesTecnicaAPI = {
-  getAll: (params = {}) => api.get('/adicionales-tecnica', { params }),
-  getBySalonAndDate: (salon_id, fecha_evento) => 
-    api.get('/adicionales-tecnica', { params: { salon_id, fecha_evento } }),
-  uploadPDF: (formData) => {
-    // Para FormData, axios establecerá automáticamente el Content-Type con el boundary correcto
-    return api.post('/adicionales-tecnica/upload-pdf', formData, {
-      timeout: 60000, // 60 segundos timeout para archivos grandes
-    });
-  },
-  create: (data) => api.post('/adicionales-tecnica', data),
-  update: (id, data) => api.patch(`/adicionales-tecnica/${id}`, data),
-  delete: (id) => api.delete(`/adicionales-tecnica/${id}`),
-};
 
 export default api;
 
