@@ -24,11 +24,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'PATCH') {
     try {
-      // Solo admins pueden actualizar contenido
-      if (auth.user.rol !== 'admin') {
-        return res.status(403).json({ error: 'Solo los administradores pueden actualizar contenido' });
-      }
-
+      // Todos los usuarios autenticados pueden actualizar contenido
       const { nombre, descripcion, url_descarga, categoria, tipo, activo } = req.body;
 
       const contenido = await Contenido.update(id, {
@@ -53,11 +49,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'DELETE') {
     try {
-      // Solo admins pueden eliminar contenido
-      if (auth.user.rol !== 'admin') {
-        return res.status(403).json({ error: 'Solo los administradores pueden eliminar contenido' });
-      }
-
+      // Todos los usuarios autenticados pueden eliminar contenido
       const contenido = await Contenido.delete(id);
       if (!contenido) {
         return res.status(404).json({ error: 'Contenido no encontrado' });

@@ -24,11 +24,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      // Solo admins pueden crear contenido
-      if (auth.user.rol !== 'admin') {
-        return res.status(403).json({ error: 'Solo los administradores pueden crear contenido' });
-      }
-
+      // Todos los usuarios autenticados pueden crear contenido
       const { nombre, descripcion, url_descarga, categoria, tipo } = req.body;
 
       if (!nombre || !url_descarga) {

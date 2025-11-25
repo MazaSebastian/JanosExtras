@@ -24,6 +24,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'PATCH') {
     try {
+      // Solo admins pueden actualizar shows (área artística)
+      if (auth.user.rol !== 'admin') {
+        return res.status(403).json({ error: 'Solo los administradores pueden actualizar shows' });
+      }
+
       const { nombre, descripcion, url_audio, duracion, categoria, activo } = req.body;
       const show = await Show.update(parseInt(id, 10), {
         nombre,
@@ -47,6 +52,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'DELETE') {
     try {
+      // Solo admins pueden eliminar shows (área artística)
+      if (auth.user.rol !== 'admin') {
+        return res.status(403).json({ error: 'Solo los administradores pueden eliminar shows' });
+      }
+
       const show = await Show.delete(parseInt(id, 10));
       if (!show) {
         return res.status(404).json({ error: 'Show no encontrado' });

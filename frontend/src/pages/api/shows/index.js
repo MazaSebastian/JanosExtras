@@ -23,6 +23,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
+      // Solo admins pueden crear shows (área artística)
+      if (auth.user.rol !== 'admin') {
+        return res.status(403).json({ error: 'Solo los administradores pueden crear shows' });
+      }
+
       const { nombre, descripcion, url_audio, duracion, categoria } = req.body;
 
       if (!nombre || !url_audio) {

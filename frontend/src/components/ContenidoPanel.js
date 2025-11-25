@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { contenidoAPI } from '@/services/api';
-import { getAuth } from '@/utils/auth';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/ContenidoPanel.module.css';
 
@@ -12,7 +11,6 @@ const TIPOS_CONTENIDO = [
 ];
 
 export default function ContenidoPanel() {
-  const [user] = useState(() => getAuth()?.user);
   const [contenido, setContenido] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -104,8 +102,6 @@ export default function ContenidoPanel() {
     return [...new Set(contenido.map(c => c.tipo).filter(Boolean))];
   }, [contenido]);
 
-  const isAdmin = user?.rol === 'admin';
-
   return (
     <section className={styles.panel}>
       <header className={styles.header}>
@@ -113,19 +109,17 @@ export default function ContenidoPanel() {
           <p className={styles.subtitle}>Recursos para DJs</p>
           <h3 className={styles.title}>Contenido</h3>
         </div>
-        {isAdmin && (
-          <button
-            type="button"
-            className={styles.addButton}
-            onClick={() => {
-              setShowForm(true);
-              setEditingId(null);
-              setFormData({ nombre: '', descripcion: '', url_descarga: '', categoria: '', tipo: '' });
-            }}
-          >
-            + Agregar Contenido
-          </button>
-        )}
+        <button
+          type="button"
+          className={styles.addButton}
+          onClick={() => {
+            setShowForm(true);
+            setEditingId(null);
+            setFormData({ nombre: '', descripcion: '', url_descarga: '', categoria: '', tipo: '' });
+          }}
+        >
+          + Agregar Contenido
+        </button>
       </header>
 
       {error && (
@@ -135,7 +129,7 @@ export default function ContenidoPanel() {
         </div>
       )}
 
-      {showForm && isAdmin && (
+      {showForm && (
         <div className={styles.formModal}>
           <div className={styles.formContent}>
             <h4>{editingId ? 'Editar Contenido' : 'Nuevo Contenido'}</h4>
@@ -260,7 +254,7 @@ export default function ContenidoPanel() {
         </div>
       ) : !Array.isArray(contenido) || contenido.length === 0 ? (
         <div className={styles.empty}>
-          <p>No hay contenido disponible. {isAdmin && '¡Sé el primero en agregar uno!'}</p>
+          <p>No hay contenido disponible. ¡Sé el primero en agregar uno!</p>
         </div>
       ) : (
         <div className={styles.grid}>
@@ -285,24 +279,20 @@ export default function ContenidoPanel() {
                   >
                     📥 Descargar
                   </a>
-                  {isAdmin && (
-                    <>
-                      <button
-                        type="button"
-                        className={styles.editButton}
-                        onClick={() => handleEdit(item)}
-                      >
-                        ✏️ Editar
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.deleteButton}
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        🗑️ Eliminar
-                      </button>
-                    </>
-                  )}
+                  <button
+                    type="button"
+                    className={styles.editButton}
+                    onClick={() => handleEdit(item)}
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={() => handleDelete(item.id)}
+                  >
+                    🗑️ Eliminar
+                  </button>
                 </div>
               </div>
             );

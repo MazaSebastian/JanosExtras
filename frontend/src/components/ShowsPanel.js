@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { showsAPI } from '@/services/api';
+import { getAuth } from '@/utils/auth';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/ShowsPanel.module.css';
 
 export default function ShowsPanel() {
+  const [user] = useState(() => getAuth()?.user);
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -90,6 +92,8 @@ export default function ShowsPanel() {
     return [...new Set(shows.map(s => s.categoria).filter(Boolean))];
   }, [shows]);
 
+  const isAdmin = user?.rol === 'admin';
+
   return (
     <section className={styles.panel}>
       <header className={styles.header}>
@@ -97,17 +101,19 @@ export default function ShowsPanel() {
           <p className={styles.subtitle}>Recursos para Shows</p>
           <h3 className={styles.title}>Pistas de Audio</h3>
         </div>
-        <button
-          type="button"
-          className={styles.addButton}
-          onClick={() => {
-            setShowForm(true);
-            setEditingId(null);
-            setFormData({ nombre: '', descripcion: '', url_audio: '', duracion: '', categoria: '' });
-          }}
-        >
-          + Agregar Pista
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            className={styles.addButton}
+            onClick={() => {
+              setShowForm(true);
+              setEditingId(null);
+              setFormData({ nombre: '', descripcion: '', url_audio: '', duracion: '', categoria: '' });
+            }}
+          >
+            + Agregar Pista
+          </button>
+        )}
       </header>
 
       {error && (
@@ -117,7 +123,7 @@ export default function ShowsPanel() {
         </div>
       )}
 
-      {showForm && (
+      {showForm && isAdmin && (
         <div className={styles.formModal}>
           <div className={styles.formContent}>
             <h4>{editingId ? 'Editar Pista' : 'Nueva Pista'}</h4>
@@ -207,7 +213,7 @@ export default function ShowsPanel() {
         </div>
       ) : !Array.isArray(shows) || shows.length === 0 ? (
         <div className={styles.empty}>
-          <p>No hay pistas disponibles. ¡Sé el primero en agregar una!</p>
+          <p>No hay pistas disponibles. {isAdmin && '¡Sé el primero en agregar una!'}</p>
         </div>
       ) : (
         <div className={styles.grid}>
@@ -219,28 +225,32 @@ export default function ShowsPanel() {
               </div>
               {item.descripcion && <p className={styles.description}>{item.descripcion}</p>}
               <div className={styles.cardActions}>
-                <a
-                  href={item.url_audio}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.downloadButton}
-                >
-                  📥 Descargar
-                </a>
-                <button
-                  type="button"
-                  className={styles.editButton}
-                  onClick={() => handleEdit(item)}
-                >
-                  ✏️ Editar
-                </button>
-                <button
-                  type="button"
-                  className={styles.deleteButton}
-                  onClick={() => handleDelete(item.id)}
-                >
-                  🗑️ Eliminar
-                </button>
+                  <a
+                    href={item.url_audio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.downloadButton}
+                  >
+                    📥 Descargar
+                  </a>
+                {isAdmin && (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.editButton}
+                      onClick={() => handleEdit(item)}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.deleteButton}
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      🗑️ Eliminar
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}
