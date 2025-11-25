@@ -335,36 +335,55 @@ async function parsePDFText(text, salonesConocidos = []) {
   return resultados;
 }
 
+// Wrapper para manejar errores de manera más robusta
 export default async function handler(req, res) {
   console.log('=== Handler upload-pdf llamado ===');
   console.log('Método:', req.method);
   console.log('URL:', req.url);
   console.log('Headers Content-Type:', req.headers['content-type']);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
   
+  // Verificar método antes de cualquier otra cosa
   if (req.method !== 'POST') {
     console.log('❌ Método no permitido:', req.method);
     return res.status(405).json({ 
       error: 'Método no permitido',
       metodo: req.method,
-      permitido: 'POST'
+      permitido: 'POST',
+      url: req.url
     });
   }
-
+  
+  // Envolver todo en try-catch para capturar errores inesperados
   try {
-    console.log('Autenticando usuario...');
-    const auth = authenticateToken(req);
-    if (auth.error) {
-      console.log('Error de autenticación:', auth.error);
-      return res.status(auth.status).json({ error: auth.error });
-    }
+    await handleUpload(req, res);
+  } catch (error) {
+    console.error('❌ Error inesperado en handler:', error);
+    console.error('Stack:', error.stack);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      detalles: error.message,
+      tipo: error.name
+    });
+  }
+}
 
-    console.log('Usuario autenticado:', auth.user?.nombre, 'Rol:', auth.user?.rol);
+async function handleUpload(req, res) {
 
-    // Solo administradores pueden subir PDFs
-    if (auth.user.rol !== 'admin') {
-      console.log('Usuario no es administrador');
-      return res.status(403).json({ error: 'Solo administradores pueden subir PDFs' });
-    }
+  console.log('Autenticando usuario...');
+  const auth = authenticateToken(req);
+  if (auth.error) {
+    console.log('Error de autenticación:', auth.error);
+    return res.status(auth.status).json({ error: auth.error });
+  }
+
+  console.log('Usuario autenticado:', auth.user?.nombre, 'Rol:', auth.user?.rol);
+
+  // Solo administradores pueden subir PDFs
+  if (auth.user.rol !== 'admin') {
+    console.log('Usuario no es administrador');
+    return res.status(403).json({ error: 'Solo administradores pueden subir PDFs' });
+  }
 
     console.log('📤 Iniciando parsing del formulario...');
     console.log('Content-Type recibido:', req.headers['content-type']);
