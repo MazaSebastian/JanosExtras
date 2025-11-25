@@ -185,56 +185,6 @@ export default function DJHomePage() {
               </div>
             </div>
 
-            {/* Adicionales de Técnica */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardIcon}>⚡</span>
-                <h2 className={styles.cardTitle}>Adicionales de Técnica</h2>
-              </div>
-              <div className={styles.cardContent}>
-                {recentAdicionales.length === 0 ? (
-                  <p className={styles.emptyMessage}>No hay adicionales de técnica registrados</p>
-                ) : (
-                  <div className={styles.list}>
-                    {recentAdicionales.map((adicional) => (
-                      <div key={adicional.id} className={styles.listItem}>
-                        <div className={styles.listItemContent}>
-                          <span className={styles.listItemTitle}>
-                            {adicional.salon_nombre || 'Salón'}
-                          </span>
-                          <span className={styles.listItemSubtitle}>
-                            {adicional.fecha_evento && format(new Date(adicional.fecha_evento), 'dd/MM/yyyy', { locale: es })}
-                            {adicional.adicionales && (
-                              <span>
-                                {' • '}
-                                {Object.entries(adicional.adicionales)
-                                  .filter(([_, value]) => value)
-                                  .map(([key]) => {
-                                    const labels = {
-                                      chispas: 'Chispas',
-                                      humo: 'Humo',
-                                      lasers: 'Láseres',
-                                      otros: 'Otros'
-                                    };
-                                    return labels[key] || key;
-                                  })
-                                  .join(', ')}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button
-                  className={styles.cardAction}
-                  onClick={() => router.push('/dashboard/adicionales-tecnica')}
-                >
-                  Ver Todas →
-                </button>
-              </div>
-            </div>
           </div>
         )}
       </div>
