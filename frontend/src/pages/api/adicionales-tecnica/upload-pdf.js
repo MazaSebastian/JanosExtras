@@ -15,19 +15,37 @@ export const config = {
 
 // Función para parsear el texto del PDF y extraer información
 async function parsePDFText(text, salonesConocidos = []) {
-  // Normalizar el texto: reemplazar múltiples espacios/tabs por un solo espacio
-  // Esto ayuda con PDFs generados desde Excel que tienen formato tabular
-  const normalizedText = text
-    .replace(/\t+/g, ' ')  // Reemplazar tabs por espacios
-    .replace(/ +/g, ' ')   // Reemplazar múltiples espacios por uno solo
-    .replace(/\r\n/g, '\n') // Normalizar saltos de línea
+  // Para PDFs de Excel, preservar tabs y múltiples espacios para detectar columnas
+  // Primero normalizar saltos de línea
+  let normalizedText = text
+    .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n');
   
-  const lines = normalizedText.split('\n').map(line => line.trim()).filter(line => line);
+  // Detectar si es formato tabular (tiene muchos tabs o espacios múltiples)
+  const hasTabs = text.includes('\t');
+  const hasMultipleSpaces = /\s{3,}/.test(text);
+  const isTabular = hasTabs || hasMultipleSpaces;
+  
+  console.log('Formato detectado:', isTabular ? 'Tabular (Excel)' : 'Texto normal');
+  console.log('Tiene tabs:', hasTabs, 'Tiene espacios múltiples:', hasMultipleSpaces);
+  
+  // Si es tabular, procesar de manera diferente
+  if (isTabular) {
+    // Para formato tabular, dividir por tabs o múltiples espacios
+    const columnSeparator = hasTabs ? '\t' : /\s{2,}/;
+    normalizedText = normalizedText.replace(/\t+/g, '\t'); // Normalizar tabs múltiples
+  } else {
+    // Para texto normal, normalizar espacios
+    normalizedText = normalizedText
+      .replace(/\t+/g, ' ')
+      .replace(/ +/g, ' ');
+  }
+  
+  const lines = normalizedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const resultados = [];
   
   console.log('Total de líneas a procesar:', lines.length);
-  console.log('Primeras 10 líneas:', lines.slice(0, 10));
+  console.log('Primeras 15 líneas:', lines.slice(0, 15));
   console.log('Salones conocidos para matching:', salonesConocidos.length);
   
   // Mapeo de complementos a categorías
@@ -64,8 +82,15 @@ async function parsePDFText(text, salonesConocidos = []) {
     'oct': '10', 'octubre': '10'
   };
   
-  // Detectar fechas en formato "DD-nov" o "DD-nov SALON"
-  const fechaRegex = /(\d{1,2})[- ](nov|noviembre|dic|diciembre|ene|enero|feb|febrero|mar|marzo|abr|abril|may|mayo|jun|junio|jul|julio|ago|agosto|sep|septiembre|oct|octubre)/i;
+  // Detectar fechas en múltiples formatos:
+  // - "DD-nov", "DD/nov", "DD nov"
+  // - "DD-nov-YYYY", "DD/nov/YYYY"
+  // - "noviembre DD", "DD de noviembre"
+  const fechaRegexes = [
+    /(\d{1,2})[-/ ](nov|noviembre|dic|diciembre|ene|enero|feb|febrero|mar|marzo|abr|abril|may|mayo|jun|junio|jul|julio|ago|agosto|sep|septiembre|oct|octubre)(?:[-/ ](\d{2,4}))?/i,
+    /(nov|noviembre|dic|diciembre|ene|enero|feb|febrero|mar|marzo|abr|abril|may|mayo|jun|junio|jul|julio|ago|agosto|sep|septiembre|oct|octubre)[-/ ](\d{1,2})(?:[-/ ](\d{2,4}))?/i,
+    /(\d{1,2})[-/ ]de[-/ ](nov|noviembre|dic|diciembre|ene|enero|feb|febrero|mar|marzo|abr|abril|may|mayo|jun|junio|jul|julio|ago|agosto|sep|septiembre|oct|octubre)/i,
+  ];
   
   // Estructura para almacenar datos por salón y fecha
   const datosPorSalon = {};
@@ -74,50 +99,88 @@ async function parsePDFText(text, salonesConocidos = []) {
     const line = lines[i];
     const lineLower = line.toLowerCase();
     
-    // Buscar fecha (formato: "19-nov" o "19-nov SALON")
-    const fechaMatch = line.match(fechaRegex);
+    // Buscar fecha en diferentes formatos
+    let fechaMatch = null;
+    for (const regex of fechaRegexes) {
+      fechaMatch = line.match(regex);
+      if (fechaMatch) break;
+    }
+    
     if (fechaMatch) {
-      const dia = fechaMatch[1].padStart(2, '0');
-      const mesAbrev = fechaMatch[2].toLowerCase();
+      let dia, mesAbrev, year;
+      
+      // Formato: DD-mes o mes-DD
+      if (fechaMatch[1] && mesMap[fechaMatch[1].toLowerCase()]) {
+        // Formato: mes-DD
+        mesAbrev = fechaMatch[1].toLowerCase();
+        dia = fechaMatch[2];
+        year = fechaMatch[3] || currentYear;
+      } else {
+        // Formato: DD-mes
+        dia = fechaMatch[1];
+        mesAbrev = fechaMatch[2].toLowerCase();
+        year = fechaMatch[3] || currentYear;
+      }
+      
+      // Normalizar año (si es 2 dígitos, asumir 20XX)
+      if (year && year.length === 2) {
+        year = '20' + year;
+      } else if (!year) {
+        year = currentYear;
+      }
+      
       const mes = mesMap[mesAbrev] || '11';
-      currentFecha = `${currentYear}-${mes}-${dia}`;
+      currentFecha = `${year}-${mes}-${dia.padStart(2, '0')}`;
+      console.log(`Fecha detectada: ${currentFecha} (de línea: "${line}")`);
       continue;
     }
     
     // Si no hay fecha actual, continuar
     if (!currentFecha) continue;
     
+    // Si es formato tabular, dividir la línea en columnas
+    const columns = isTabular 
+      ? line.split(hasTabs ? '\t' : /\s{2,}/).map(col => col.trim()).filter(col => col)
+      : [line];
+    
     // Buscar salón en la línea
-    // Para PDFs de Excel, el salón puede estar al inicio de la línea o después de espacios
+    // Para PDFs de Excel, el salón puede estar en cualquier columna
     let salonEncontrado = null;
     let mejorCoincidencia = null;
     let mejorScore = 0;
     
-    for (const salon of salonesConocidos) {
-      // Normalizar nombres para comparación
-      const salonNormalizado = salon.toLowerCase().trim();
-      const lineNormalizado = lineLower.trim();
+    // Buscar salón en todas las columnas
+    for (const column of columns) {
+      const columnLower = column.toLowerCase().trim();
       
-      // Buscar coincidencia exacta (mayor prioridad)
-      const salonRegex = new RegExp(`(^|\\s)${salon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`, 'i');
-      if (salonRegex.test(line)) {
-        salonEncontrado = salon;
-        break; // Coincidencia exacta, usar esta
-      }
-      
-      // Buscar coincidencia parcial para mejorar la precisión
-      if (lineNormalizado.includes(salonNormalizado) || salonNormalizado.includes(lineNormalizado)) {
-        const score = Math.min(salonNormalizado.length, lineNormalizado.length) / Math.max(salonNormalizado.length, lineNormalizado.length);
-        if (score > mejorScore && score > 0.7) { // Al menos 70% de coincidencia
-          mejorScore = score;
-          mejorCoincidencia = salon;
+      for (const salon of salonesConocidos) {
+        const salonNormalizado = salon.toLowerCase().trim();
+        
+        // Buscar coincidencia exacta (mayor prioridad)
+        const salonRegex = new RegExp(`^${salon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$|^${salon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s|\\s${salon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$|\\s${salon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s`, 'i');
+        if (salonRegex.test(column)) {
+          salonEncontrado = salon;
+          console.log(`Salón encontrado (exacto): ${salon} en línea: "${line}"`);
+          break;
+        }
+        
+        // Buscar coincidencia parcial
+        if (columnLower.includes(salonNormalizado) || salonNormalizado.includes(columnLower)) {
+          const score = Math.min(salonNormalizado.length, columnLower.length) / Math.max(salonNormalizado.length, columnLower.length);
+          if (score > mejorScore && score > 0.6) { // Al menos 60% de coincidencia
+            mejorScore = score;
+            mejorCoincidencia = salon;
+          }
         }
       }
+      
+      if (salonEncontrado) break;
     }
     
     // Si no hay coincidencia exacta pero hay una buena parcial, usarla
     if (!salonEncontrado && mejorCoincidencia) {
       salonEncontrado = mejorCoincidencia;
+      console.log(`Salón encontrado (parcial, score: ${mejorScore.toFixed(2)}): ${mejorCoincidencia} en línea: "${line}"`);
     }
     
     if (!salonEncontrado) continue;
@@ -133,32 +196,60 @@ async function parsePDFText(text, salonesConocidos = []) {
     }
     
     // Extraer complementos de la línea
-    // Los complementos pueden estar separados por espacios, tabs, o en diferentes posiciones
-    // Buscar palabras clave de complementos
+    // Para formato tabular, los complementos pueden estar en columnas separadas
     const complementosEncontrados = [];
     
-    // Buscar cada tipo de complemento
-    for (const [categoria, keywords] of Object.entries(complementosMap)) {
-      for (const keyword of keywords) {
-        const keywordRegex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-        if (keywordRegex.test(lineLower)) {
-          // Extraer el complemento completo (puede tener texto adicional)
-          const match = line.match(new RegExp(`([^\\s]*${keyword}[^\\s]*(?:\\s+[^\\s]+)*)`, 'i'));
-          if (match && !complementosEncontrados.includes(match[1])) {
-            complementosEncontrados.push(match[1]);
+    // Si es tabular, buscar en todas las columnas (excepto la del salón)
+    const columnasParaComplementos = isTabular 
+      ? columns.filter(col => {
+          const colLower = col.toLowerCase();
+          // Excluir columnas que son fechas o salones
+          return !fechaRegexes.some(regex => regex.test(col)) && 
+                 !salonesConocidos.some(s => colLower.includes(s.toLowerCase()));
+        })
+      : [line];
+    
+    // Buscar cada tipo de complemento en todas las columnas relevantes
+    for (const columna of columnasParaComplementos) {
+      const columnaLower = columna.toLowerCase();
+      
+      for (const [categoria, keywords] of Object.entries(complementosMap)) {
+        for (const keyword of keywords) {
+          const keywordRegex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+          if (keywordRegex.test(columnaLower)) {
+            // Si la columna completa contiene la keyword, agregarla
+            if (!complementosEncontrados.includes(columna.trim())) {
+              complementosEncontrados.push(columna.trim());
+            }
           }
+        }
+      }
+      
+      // Si la columna no es vacía y no es fecha/salón, puede ser un complemento
+      if (columna.trim().length > 2 && 
+          !fechaRegexes.some(regex => regex.test(columna)) &&
+          !salonesConocidos.some(s => columnaLower.includes(s.toLowerCase()))) {
+        // Verificar si contiene palabras clave de complementos
+        const tieneKeyword = Object.values(complementosMap).flat().some(keyword => 
+          columnaLower.includes(keyword.toLowerCase())
+        );
+        
+        if (!tieneKeyword && !complementosEncontrados.includes(columna.trim())) {
+          // Puede ser un complemento "otro"
+          complementosEncontrados.push(columna.trim());
         }
       }
     }
     
-    // Si no encontramos complementos conocidos, buscar en toda la línea
-    // Para PDFs de Excel, los complementos pueden estar en la misma línea separados por espacios
-    if (complementosEncontrados.length === 0) {
+    // Si no encontramos complementos en formato tabular, buscar en toda la línea
+    if (complementosEncontrados.length === 0 && !isTabular) {
       // Remover el nombre del salón y la fecha de la línea
       let complementoLine = line;
       
       // Remover fecha si está presente
-      complementoLine = complementoLine.replace(fechaRegex, '').trim();
+      for (const regex of fechaRegexes) {
+        complementoLine = complementoLine.replace(regex, '').trim();
+      }
       
       // Remover el nombre del salón
       for (const salon of salonesConocidos) {
@@ -166,7 +257,7 @@ async function parsePDFText(text, salonesConocidos = []) {
       }
       
       // Remover palabras comunes que no son complementos
-      complementoLine = complementoLine.replace(/\b(salon|salón|complemento|complementos)\b/gi, '').trim();
+      complementoLine = complementoLine.replace(/\b(salon|salón|complemento|complementos|fecha|date)\b/gi, '').trim();
       
       // Dividir por espacios y buscar palabras que parezcan complementos
       const palabras = complementoLine.split(/\s+/).filter(p => p.length > 2);
@@ -246,10 +337,13 @@ async function parsePDFText(text, salonesConocidos = []) {
 }
 
 export default async function handler(req, res) {
-  console.log('Handler llamado. Método:', req.method, 'URL:', req.url);
+  console.log('=== Handler upload-pdf llamado ===');
+  console.log('Método:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers Content-Type:', req.headers['content-type']);
   
   if (req.method !== 'POST') {
-    console.log('Método no permitido:', req.method);
+    console.log('❌ Método no permitido:', req.method);
     return res.status(405).json({ 
       error: 'Método no permitido',
       metodo: req.method,
@@ -273,7 +367,17 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Solo administradores pueden subir PDFs' });
     }
 
-    console.log('Iniciando parsing del formulario...');
+    console.log('📤 Iniciando parsing del formulario...');
+    console.log('Content-Type recibido:', req.headers['content-type']);
+
+    // Verificar que el Content-Type sea multipart
+    if (!req.headers['content-type'] || !req.headers['content-type'].includes('multipart')) {
+      console.error('❌ Content-Type no es multipart:', req.headers['content-type']);
+      return res.status(400).json({ 
+        error: 'El request debe ser multipart/form-data',
+        contentType: req.headers['content-type']
+      });
+    }
 
     // Parsear el formulario multipart usando formidable
     // En Next.js/Vercel, necesitamos usar el stream de la request directamente
@@ -288,10 +392,24 @@ export default async function handler(req, res) {
     const [fields, files] = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) {
-          console.error('Error al parsear formulario:', err);
+          console.error('❌ Error al parsear formulario:', err);
+          console.error('Stack:', err.stack);
           reject(err);
         } else {
-          console.log('Formulario parseado. Fields:', Object.keys(fields), 'Files:', Object.keys(files));
+          console.log('✅ Formulario parseado exitosamente');
+          console.log('Fields encontrados:', Object.keys(fields));
+          console.log('Files encontrados:', Object.keys(files));
+          if (files && Object.keys(files).length > 0) {
+            Object.keys(files).forEach(key => {
+              const file = Array.isArray(files[key]) ? files[key][0] : files[key];
+              console.log(`  - ${key}:`, {
+                name: file.originalFilename || file.name,
+                size: file.size,
+                type: file.mimetype,
+                path: file.filepath || file.path
+              });
+            });
+          }
           resolve([fields, files]);
         }
       });
@@ -314,17 +432,34 @@ export default async function handler(req, res) {
       }
     }
     
-    console.log('Archivo encontrado:', file ? (file.originalFilename || file.name || 'sin nombre') : 'No encontrado');
+    console.log('📄 Archivo encontrado:', file ? {
+      nombre: file.originalFilename || file.name || 'sin nombre',
+      tipo: file.mimetype || 'no especificado',
+      tamaño: file.size,
+      path: file.filepath || file.path
+    } : '❌ No encontrado');
 
     if (!file) {
-      return res.status(400).json({ error: 'No se proporcionó ningún archivo PDF' });
+      console.error('❌ No se encontró ningún archivo en el request');
+      console.log('Archivos disponibles:', Object.keys(files || {}));
+      return res.status(400).json({ 
+        error: 'No se proporcionó ningún archivo PDF',
+        camposDisponibles: Object.keys(files || {})
+      });
     }
 
     // Obtener la ruta del archivo
     const filepath = file.filepath || file.path;
     if (!filepath) {
-      return res.status(400).json({ error: 'No se pudo obtener la ruta del archivo' });
+      console.error('❌ No se pudo obtener la ruta del archivo');
+      console.log('Estructura del archivo:', JSON.stringify(file, null, 2));
+      return res.status(400).json({ 
+        error: 'No se pudo obtener la ruta del archivo',
+        detalles: 'El archivo no tiene filepath ni path'
+      });
     }
+    
+    console.log('✅ Ruta del archivo obtenida:', filepath);
 
     // Leer y parsear el PDF
     let pdfBuffer;
