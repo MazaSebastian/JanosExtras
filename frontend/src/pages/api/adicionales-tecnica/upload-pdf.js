@@ -475,11 +475,16 @@ export default async function handler(req, res) {
       console.log('Primeros 500 caracteres del texto:', textoPDF.substring(0, 500));
       
       if (!textoPDF || textoPDF.trim().length === 0) {
+        console.error('❌ PDF sin texto extraíble');
         return res.status(400).json({ 
           error: 'El PDF no contiene texto extraíble. Puede ser un PDF escaneado o con formato especial. Por favor, verifica que el PDF contenga texto seleccionable.',
-          sugerencia: 'Si el PDF es una imagen escaneada, necesitarás convertirlo a texto primero usando OCR.'
+          sugerencia: 'Si el PDF es una imagen escaneada, necesitarás convertirlo a texto primero usando OCR. Si es un PDF generado desde Excel, asegúrate de que el archivo original tenga texto seleccionable.'
         });
       }
+      
+      console.log('✅ PDF parseado exitosamente');
+      console.log('Longitud del texto extraído:', textoPDF.length);
+      console.log('Primeros 1000 caracteres:', textoPDF.substring(0, 1000));
     } catch (parseError) {
       console.error('Error al parsear el PDF:', parseError);
       return res.status(400).json({ 
@@ -503,13 +508,18 @@ export default async function handler(req, res) {
       
       if (resultados.length === 0) {
         // Mostrar una muestra del texto para debugging
-        const muestraTexto = textoPDF.substring(0, 1000);
-        console.log('No se encontraron resultados. Muestra del texto:', muestraTexto);
+        const muestraTexto = textoPDF.substring(0, 2000);
+        const lineasTexto = textoPDF.split('\n');
+        console.error('❌ No se encontraron resultados en el PDF');
+        console.log('Muestra del texto extraído (primeros 2000 caracteres):', muestraTexto);
+        console.log('Total de líneas en el texto:', lineasTexto.length);
+        console.log('Salones conocidos:', salonesNombres);
         
         return res.status(400).json({ 
           error: 'No se pudo extraer información del PDF. El formato del documento puede ser diferente al esperado.',
           textoExtraido: muestraTexto,
-          sugerencia: 'Verifica que el PDF contenga fechas en formato "DD-nov" y nombres de salones reconocidos.'
+          sugerencia: 'Verifica que el PDF contenga:\n- Fechas en formato "DD-nov", "DD/nov", "noviembre DD", etc.\n- Nombres de salones que coincidan con los salones en la base de datos\n- Información de adicionales técnicos (chispas, humo, lasers, etc.)',
+          salonesDisponibles: salonesNombres.slice(0, 10) // Mostrar primeros 10 salones como referencia
         });
       }
     } catch (parseError) {
