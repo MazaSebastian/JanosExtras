@@ -5,11 +5,10 @@ import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 
-// Deshabilitar el bodyParser por defecto de Next.js
+// Deshabilitar el bodyParser por defecto de Next.js para manejar multipart/form-data
 export const config = {
   api: {
     bodyParser: false,
-    externalResolver: true,
   },
 };
 
@@ -385,11 +384,19 @@ export default async function handler(req, res) {
       uploadDir: '/tmp',
       keepExtensions: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB
-      multiples: true,
+      multiples: false, // Cambiar a false para evitar problemas con arrays
     });
 
     // Parsear la request
+    // En Vercel/Next.js, necesitamos asegurarnos de que req no esté ya consumido
     const [fields, files] = await new Promise((resolve, reject) => {
+      // Verificar que req sea un stream válido
+      if (!req || typeof req.on !== 'function') {
+        console.error('❌ Request no es un stream válido');
+        reject(new Error('Request inválido'));
+        return;
+      }
+
       form.parse(req, (err, fields, files) => {
         if (err) {
           console.error('❌ Error al parsear formulario:', err);
