@@ -14,7 +14,7 @@ export const config = {
 };
 
 // Función para parsear el texto del PDF y extraer información
-function parsePDFText(text) {
+async function parsePDFText(text, salonesConocidos = []) {
   // Normalizar el texto: reemplazar múltiples espacios/tabs por un solo espacio
   // Esto ayuda con PDFs generados desde Excel que tienen formato tabular
   const normalizedText = text
@@ -28,25 +28,7 @@ function parsePDFText(text) {
   
   console.log('Total de líneas a procesar:', lines.length);
   console.log('Primeras 10 líneas:', lines.slice(0, 10));
-  
-  // Lista completa de salones conocidos (basada en el documento)
-  const salonesConocidos = [
-    'Acceso Oeste', 'Avellaneda 1', 'Avellaneda 2', 'Avellaneda 3', 'Avellaneda 4',
-    'Bella Vista 2', 'Benavidez 2', 'Berisso',
-    'CABA Boutique', 'Caballito 1', 'Caballito 2', 'Champagnat Boutique',
-    'Costanera 1', 'Costanera 2',
-    'Dardo Rocha', 'Darwin 1', 'Darwin 2', 'Del Viso', 'DOT',
-    'Escobar',
-    'Hudson 2', 'Hurlingham',
-    'Ituzaingo',
-    'La Plata', 'Lahusen',
-    'Moreno',
-    'Nuñez',
-    'Olivos',
-    'Palacio Sans Souci', 'Palermo Hollywood', 'Palermo Soho', 'Pilar', 'Pilar boutique', 'Playa Grande', 'Puerto Madero', 'Puerto Madero Boutique',
-    'San Isidro', 'San Justo', 'San Miguel', 'San Telmo', 'San Telmo 2', 'San Telmo Boutique',
-    'Vicente López', 'Vicente Lopez'
-  ];
+  console.log('Salones conocidos para matching:', salonesConocidos.length);
   
   // Mapeo de complementos a categorías
   const complementosMap = {
@@ -108,14 +90,34 @@ function parsePDFText(text) {
     // Buscar salón en la línea
     // Para PDFs de Excel, el salón puede estar al inicio de la línea o después de espacios
     let salonEncontrado = null;
+    let mejorCoincidencia = null;
+    let mejorScore = 0;
+    
     for (const salon of salonesConocidos) {
-      // Buscar coincidencia exacta o parcial (case insensitive)
-      // Permitir que el salón esté al inicio o después de espacios/tabs
+      // Normalizar nombres para comparación
+      const salonNormalizado = salon.toLowerCase().trim();
+      const lineNormalizado = lineLower.trim();
+      
+      // Buscar coincidencia exacta (mayor prioridad)
       const salonRegex = new RegExp(`(^|\\s)${salon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`, 'i');
       if (salonRegex.test(line)) {
         salonEncontrado = salon;
-        break;
+        break; // Coincidencia exacta, usar esta
       }
+      
+      // Buscar coincidencia parcial para mejorar la precisión
+      if (lineNormalizado.includes(salonNormalizado) || salonNormalizado.includes(lineNormalizado)) {
+        const score = Math.min(salonNormalizado.length, lineNormalizado.length) / Math.max(salonNormalizado.length, lineNormalizado.length);
+        if (score > mejorScore && score > 0.7) { // Al menos 70% de coincidencia
+          mejorScore = score;
+          mejorCoincidencia = salon;
+        }
+      }
+    }
+    
+    // Si no hay coincidencia exacta pero hay una buena parcial, usarla
+    if (!salonEncontrado && mejorCoincidencia) {
+      salonEncontrado = mejorCoincidencia;
     }
     
     if (!salonEncontrado) continue;
@@ -318,6 +320,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No se proporcionó ningún archivo PDF' });
     }
 
+    // Obtener la ruta del archivo
+    const filepath = file.filepath || file.path;
+    if (!filepath) {
+      return res.status(400).json({ error: 'No se pudo obtener la ruta del archivo' });
+    }
+
     // Leer y parsear el PDF
     let pdfBuffer;
     let pdfData;
@@ -345,10 +353,17 @@ export default async function handler(req, res) {
       });
     }
     
+    // Obtener lista de salones para el parser
+    const { Salon } = await import('@/lib/models/Salon');
+    const salones = await Salon.findAll();
+    const salonesNombres = salones.map(s => s.nombre);
+    
+    console.log('Salones cargados de la BD:', salonesNombres.length);
+    
     // Parsear el texto para extraer información
     let resultados;
     try {
-      resultados = parsePDFText(textoPDF);
+      resultados = await parsePDFText(textoPDF, salonesNombres);
       console.log('Resultados del parser:', resultados.length, 'registros encontrados');
       
       if (resultados.length === 0) {
@@ -371,13 +386,54 @@ export default async function handler(req, res) {
       });
     }
 
-    // Obtener lista de salones para mapear nombres a IDs
-    const { Salon } = await import('@/lib/models/Salon');
-    const salones = await Salon.findAll();
+    // Los salones ya están cargados arriba, reutilizamos la variable
+    
+    // Crear mapa de salones con normalización mejorada
     const salonMap = {};
+    const salonVariations = {}; // Mapeo de variaciones comunes
+    
     salones.forEach(s => {
-      salonMap[s.nombre.toLowerCase()] = s.id;
+      const nombreLower = s.nombre.toLowerCase().trim();
+      salonMap[nombreLower] = s.id;
+      
+      // Agregar variaciones comunes
+      const variations = [
+        nombreLower,
+        nombreLower.replace(/\s+/g, ' '), // Normalizar espacios
+        nombreLower.replace(/boutique/gi, 'boutique'), // Normalizar boutique
+        nombreLower.replace(/\./g, ''), // Sin puntos
+      ];
+      
+      variations.forEach(v => {
+        if (v && v !== nombreLower) {
+          salonVariations[v] = s.id;
+        }
+      });
     });
+    
+    // Función para encontrar salón con normalización mejorada
+    const findSalonId = (nombreSalon) => {
+      const nombreNormalizado = nombreSalon.toLowerCase().trim();
+      
+      // Buscar coincidencia exacta
+      if (salonMap[nombreNormalizado]) {
+        return salonMap[nombreNormalizado];
+      }
+      
+      // Buscar en variaciones
+      if (salonVariations[nombreNormalizado]) {
+        return salonVariations[nombreNormalizado];
+      }
+      
+      // Buscar coincidencia parcial (para casos como "Dot" vs "DOT")
+      for (const [nombre, id] of Object.entries(salonMap)) {
+        if (nombre.includes(nombreNormalizado) || nombreNormalizado.includes(nombre)) {
+          return id;
+        }
+      }
+      
+      return null;
+    };
 
     // Guardar cada resultado en la base de datos
     const guardados = [];
@@ -385,9 +441,9 @@ export default async function handler(req, res) {
 
     for (const resultado of resultados) {
       try {
-        const salonId = salonMap[resultado.salon.toLowerCase()];
+        const salonId = findSalonId(resultado.salon);
         if (!salonId) {
-          errores.push(`Salón "${resultado.salon}" no encontrado en la base de datos`);
+          errores.push(`Salón "${resultado.salon}" no encontrado en la base de datos. Salones disponibles: ${salones.map(s => s.nombre).join(', ')}`);
           continue;
         }
 
@@ -405,8 +461,24 @@ export default async function handler(req, res) {
           adicionales: resultado.adicionales,
         });
       } catch (error) {
-        errores.push(`Error al guardar ${resultado.salon} - ${resultado.fecha}: ${error.message}`);
+        console.error(`Error al guardar adicional para ${resultado.salon} - ${resultado.fecha}:`, error);
+        const errorMsg = error.message || 'Error desconocido';
+        // Si es un error de constraint único, es porque ya existe
+        if (error.message && error.message.includes('unique') || error.message.includes('duplicate')) {
+          errores.push(`Ya existe un registro para ${resultado.salon} - ${resultado.fecha}. Se actualizará el existente.`);
+        } else {
+          errores.push(`Error al guardar ${resultado.salon} - ${resultado.fecha}: ${errorMsg}`);
+        }
       }
+    }
+    
+    // Si hay errores pero también guardados, mostrar ambos
+    if (errores.length > 0 && guardados.length === 0) {
+      return res.status(400).json({
+        error: 'No se pudo guardar ningún registro. Verifica los errores.',
+        errores: errores,
+        sugerencia: 'Verifica que los nombres de los salones en el PDF coincidan con los salones en la base de datos.'
+      });
     }
 
     // Limpiar archivo temporal
@@ -424,6 +496,9 @@ export default async function handler(req, res) {
       total: resultados.length,
       datos: guardados,
       errores: errores.length > 0 ? errores : undefined,
+      mensaje: guardados.length > 0 
+        ? `Se procesaron ${guardados.length} de ${resultados.length} registros exitosamente.`
+        : 'No se guardaron registros.'
     });
   } catch (error) {
     console.error('Error al procesar PDF:', error);

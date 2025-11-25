@@ -128,8 +128,12 @@ export default function AdicionalesTecnicaAdmin() {
           <div className={styles.success}>
             <h3>✅ PDF procesado exitosamente</h3>
             <p>
-              Se guardaron <strong>{uploadSuccess.guardados}</strong> de{' '}
-              <strong>{uploadSuccess.total}</strong> registros encontrados
+              {uploadSuccess.mensaje || (
+                <>
+                  Se guardaron <strong>{uploadSuccess.guardados}</strong> de{' '}
+                  <strong>{uploadSuccess.total}</strong> registros encontrados
+                </>
+              )}
             </p>
             {uploadSuccess.errores && uploadSuccess.errores.length > 0 && (
               <div className={styles.errores}>

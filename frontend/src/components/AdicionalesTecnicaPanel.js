@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { adicionalesTecnicaAPI, salonesAPI } from '@/services/api';
+import { getAuth } from '@/utils/auth';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Loading, { SkeletonCard } from '@/components/Loading';
@@ -10,12 +11,24 @@ export default function AdicionalesTecnicaPanel() {
   const [salones, setSalones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
   const [filters, setFilters] = useState({
     salon_id: '',
     fecha_evento: '',
     startDate: '',
     endDate: '',
   });
+
+  useEffect(() => {
+    const auth = getAuth();
+    if (auth?.user) {
+      setUser(auth.user);
+      // Si el DJ tiene un salón asignado, filtrar automáticamente por ese salón
+      if (auth.user.salon_id && auth.user.rol === 'dj') {
+        setFilters(prev => ({ ...prev, salon_id: String(auth.user.salon_id) }));
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadSalones();
@@ -109,6 +122,8 @@ export default function AdicionalesTecnicaPanel() {
           <select
             value={filters.salon_id}
             onChange={(e) => handleFilterChange('salon_id', e.target.value)}
+            disabled={user?.rol === 'dj' && user?.salon_id}
+            title={user?.rol === 'dj' && user?.salon_id ? 'Filtrado automáticamente por tu salón asignado' : ''}
           >
             <option value="">Todos los salones</option>
             {Array.isArray(salones) && salones.map((salon) => (
@@ -117,6 +132,11 @@ export default function AdicionalesTecnicaPanel() {
               </option>
             ))}
           </select>
+          {user?.rol === 'dj' && user?.salon_id && (
+            <small className={styles.filterHint}>
+              Mostrando adicionales de tu salón asignado
+            </small>
+          )}
         </div>
 
         <div className={styles.filterGroup}>
@@ -156,10 +176,17 @@ export default function AdicionalesTecnicaPanel() {
       ) : adicionalesFiltrados.length === 0 ? (
         <div className={styles.empty}>
           <p>
-            {Object.values(filters).some((f) => f)
+            {user?.rol === 'dj' && user?.salon_id
+              ? `No hay adicionales técnicos registrados para tu salón${filters.startDate || filters.endDate ? ' en el rango de fechas seleccionado' : ''}.`
+              : Object.values(filters).some((f) => f)
               ? 'No se encontraron adicionales con los filtros seleccionados.'
               : 'No hay adicionales técnicos disponibles.'}
           </p>
+          {user?.rol === 'dj' && user?.salon_id && (
+            <p className={styles.emptyHint}>
+              Los adicionales técnicos se cargan desde el panel de administración mediante archivos PDF.
+            </p>
+          )}
         </div>
       ) : (
         <div className={styles.grid}>
@@ -175,12 +202,22 @@ export default function AdicionalesTecnicaPanel() {
                 </div>
                 {adicionalesList.length > 0 ? (
                   <div className={styles.adicionalesList}>
-                    {adicionalesList.map((adicional, index) => (
-                      <div key={index} className={styles.adicionalItem}>
-                        <span className={styles.adicionalName}>{adicional.nombre}:</span>
-                        <span className={styles.adicionalValue}>{adicional.valor}</span>
-                      </div>
-                    ))}
+                    {adicionalesList.map((adicional, index) => {
+                      // Determinar icono según el tipo de adicional
+                      let icono = '⚡';
+                      if (adicional.nombre.toLowerCase() === 'chispas') icono = '✨';
+                      else if (adicional.nombre.toLowerCase() === 'humo') icono = '💨';
+                      else if (adicional.nombre.toLowerCase() === 'lasers' || adicional.nombre.toLowerCase() === 'láseres') icono = '🔴';
+                      else if (adicional.nombre.toLowerCase() === 'otros') icono = '📌';
+                      
+                      return (
+                        <div key={index} className={styles.adicionalItem}>
+                          <span className={styles.adicionalIcon}>{icono}</span>
+                          <span className={styles.adicionalName}>{adicional.nombre}:</span>
+                          <span className={styles.adicionalValue}>{adicional.valor}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className={styles.noAdicionales}>Sin adicionales registrados</p>
