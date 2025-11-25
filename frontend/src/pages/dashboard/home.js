@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAuth } from '@/utils/auth';
-import { eventosAPI, fichadasAPI, coordinacionesAPI, softwareAPI, showsAPI, adicionalesTecnicaAPI } from '@/services/api';
+import { eventosAPI, fichadasAPI, coordinacionesAPI, adicionalesTecnicaAPI } from '@/services/api';
 import DJLayout from '@/components/DJLayout';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/Home.module.css';
@@ -15,8 +15,7 @@ export default function DJHomePage() {
   const [summary, setSummary] = useState(null);
   const [recentFichadas, setRecentFichadas] = useState([]);
   const [upcomingCoordinaciones, setUpcomingCoordinaciones] = useState([]);
-  const [recentSoftware, setRecentSoftware] = useState([]);
-  const [recentShows, setRecentShows] = useState([]);
+  const [recentAdicionales, setRecentAdicionales] = useState([]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -60,13 +59,10 @@ export default function DJHomePage() {
         .slice(0, 5);
       setUpcomingCoordinaciones(upcoming);
 
-      // Cargar software reciente (últimos 3)
-      const softwareRes = await softwareAPI.getAll({ activo: true });
-      setRecentSoftware((softwareRes.data?.data || softwareRes.data || []).slice(0, 3));
-
-      // Cargar shows recientes (últimos 3)
-      const showsRes = await showsAPI.getAll({ activo: true });
-      setRecentShows((showsRes.data?.data || showsRes.data || []).slice(0, 3));
+      // Cargar adicionales técnica recientes (últimos 5)
+      const adicionalesRes = await adicionalesTecnicaAPI.getAll({ limit: 5 });
+      const adicionalesData = adicionalesRes.data?.data || adicionalesRes.data || [];
+      setRecentAdicionales(adicionalesData.slice(0, 5));
     } catch (err) {
       console.error('Error al cargar datos del home:', err);
     } finally {
@@ -194,55 +190,54 @@ export default function DJHomePage() {
               </div>
             </div>
 
-            {/* Software y Shows */}
+            {/* Adicionales de Técnica */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <span className={styles.cardIcon}>💻</span>
-                <h2 className={styles.cardTitle}>Recursos</h2>
+                <span className={styles.cardIcon}>⚡</span>
+                <h2 className={styles.cardTitle}>Adicionales de Técnica</h2>
               </div>
               <div className={styles.cardContent}>
-                <div className={styles.resourcesSection}>
-                  <h3 className={styles.resourcesTitle}>Software Reciente</h3>
-                  {recentSoftware.length === 0 ? (
-                    <p className={styles.emptyMessage}>No hay software disponible</p>
-                  ) : (
-                    <div className={styles.list}>
-                      {recentSoftware.map((item) => (
-                        <div key={item.id} className={styles.listItem}>
-                          <span className={styles.listItemTitle}>{item.nombre}</span>
+                {recentAdicionales.length === 0 ? (
+                  <p className={styles.emptyMessage}>No hay adicionales de técnica registrados</p>
+                ) : (
+                  <div className={styles.list}>
+                    {recentAdicionales.map((adicional) => (
+                      <div key={adicional.id} className={styles.listItem}>
+                        <div className={styles.listItemContent}>
+                          <span className={styles.listItemTitle}>
+                            {adicional.salon_nombre || 'Salón'}
+                          </span>
+                          <span className={styles.listItemSubtitle}>
+                            {adicional.fecha_evento && format(new Date(adicional.fecha_evento), 'dd/MM/yyyy', { locale: es })}
+                            {adicional.adicionales && (
+                              <span>
+                                {' • '}
+                                {Object.entries(adicional.adicionales)
+                                  .filter(([_, value]) => value)
+                                  .map(([key]) => {
+                                    const labels = {
+                                      chispas: 'Chispas',
+                                      humo: 'Humo',
+                                      lasers: 'Láseres',
+                                      otros: 'Otros'
+                                    };
+                                    return labels[key] || key;
+                                  })
+                                  .join(', ')}
+                              </span>
+                            )}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className={styles.resourcesSection}>
-                  <h3 className={styles.resourcesTitle}>Shows Recientes</h3>
-                  {recentShows.length === 0 ? (
-                    <p className={styles.emptyMessage}>No hay shows disponibles</p>
-                  ) : (
-                    <div className={styles.list}>
-                      {recentShows.map((item) => (
-                        <div key={item.id} className={styles.listItem}>
-                          <span className={styles.listItemTitle}>{item.nombre}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className={styles.cardActions}>
-                  <button
-                    className={styles.cardAction}
-                    onClick={() => router.push('/dashboard/software')}
-                  >
-                    Ver Software →
-                  </button>
-                  <button
-                    className={styles.cardAction}
-                    onClick={() => router.push('/dashboard/shows')}
-                  >
-                    Ver Shows →
-                  </button>
-                </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  className={styles.cardAction}
+                  onClick={() => router.push('/dashboard/adicionales-tecnica')}
+                >
+                  Ver Todas →
+                </button>
               </div>
             </div>
           </div>
