@@ -86,9 +86,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realiza_ingreso_salon', 
           label: '¿Realizas ingreso al salón?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_salon', 
@@ -422,9 +424,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realizan_ingreso_salon', 
           label: '¿Harán un ingreso especial al salón?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_salon', 
@@ -853,9 +857,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realiza_ingreso_salon', 
           label: '¿Realizas ingreso al salón?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_salon', 

@@ -109,10 +109,21 @@ export default function PreCoordinacionPage() {
     });
   };
 
-  const handleButtonToggle = (preguntaId, opcion, permiteOtro) => {
+  const handleButtonToggle = (preguntaId, opcion, permiteOtro, multiple = true) => {
     const valorActual = respuestasCliente[preguntaId] || [];
     const esArray = Array.isArray(valorActual);
     const valores = esArray ? valorActual : (valorActual ? [valorActual] : []);
+    
+    // Si no es múltiple, reemplazar directamente
+    if (!multiple) {
+      // Si ya está seleccionado, deseleccionar (permitir deselección)
+      const yaSeleccionado = valores.includes(opcion);
+      setRespuestasCliente({
+        ...respuestasCliente,
+        [preguntaId]: yaSeleccionado ? [] : [opcion],
+      });
+      return;
+    }
     
     // Si es "Otro", manejar de forma especial
     if (opcion.includes('Otro')) {
@@ -635,7 +646,7 @@ export default function PreCoordinacionPage() {
                           <div key={opcion} className={styles.buttonWrapper}>
                             <button
                               type="button"
-                              onClick={() => handleButtonToggle(pregunta.id, opcion, pregunta.permiteOtro)}
+                              onClick={() => handleButtonToggle(pregunta.id, opcion, pregunta.permiteOtro, pregunta.multiple !== false)}
                               className={`${styles.selectableButton} ${isSelected ? styles.selectableButtonActive : ''}`}
                             >
                               {opcion.replace(' (especificar)', '')}
