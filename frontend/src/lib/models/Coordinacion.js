@@ -38,6 +38,7 @@ export class Coordinacion {
         c.titulo,
         c.descripcion,
         c.nombre_cliente,
+        c.telefono,
         c.tipo_evento,
         c.codigo_evento,
         c.fecha_evento,
