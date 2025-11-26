@@ -9,6 +9,7 @@ import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
+  const [user, setUser] = useState(null);
   const [coordinaciones, setCoordinaciones] = useState([]);
   const [salones, setSalones] = useState([]);
   const [djs, setDjs] = useState([]);
@@ -36,6 +37,14 @@ export default function CoordinacionesPanel() {
   const [loadingSalones, setLoadingSalones] = useState(false);
   const [viewingResumen, setViewingResumen] = useState(null);
   const [resumenData, setResumenData] = useState(null);
+
+  // Cargar información del usuario
+  useEffect(() => {
+    const auth = getAuth();
+    if (auth?.user) {
+      setUser(auth.user);
+    }
+  }, []);
   const [loadingResumen, setLoadingResumen] = useState(false);
 
   // Cargar coordinaciones al montar y cuando cambian los filtros
@@ -111,8 +120,14 @@ export default function CoordinacionesPanel() {
         ...formData,
         titulo: formData.titulo || null, // Título opcional
         salon_id: formData.salon_id || null,
-        dj_responsable_id: formData.dj_responsable_id || null,
       };
+      
+      // Solo incluir dj_responsable_id si el usuario es admin
+      // Para DJs, el backend lo asignará automáticamente
+      if (user?.rol === 'admin' && formData.dj_responsable_id) {
+        data.dj_responsable_id = formData.dj_responsable_id || null;
+      }
+      
       if (editingId) {
         await coordinacionesAPI.update(editingId, data);
       } else {
@@ -439,15 +454,17 @@ export default function CoordinacionesPanel() {
                       </select>
                     </div>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>DJ Responsable</label>
-                    <input
-                      type="text"
-                      value={formData.dj_responsable_id}
-                      onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
-                      placeholder="ID del DJ (opcional)"
-                    />
-                  </div>
+                  {user?.rol === 'admin' && (
+                    <div className={styles.formGroup}>
+                      <label>DJ Responsable</label>
+                      <input
+                        type="text"
+                        value={formData.dj_responsable_id}
+                        onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
+                        placeholder="ID del DJ (opcional, se asignará automáticamente si se deja vacío)"
+                      />
+                    </div>
+                  )}
                   <div className={styles.formGroup}>
                     <label>Descripción</label>
                     <textarea

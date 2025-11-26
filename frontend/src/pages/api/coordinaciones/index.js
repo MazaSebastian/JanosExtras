@@ -10,10 +10,18 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const { activo, estado, dj_responsable_id, salon_id } = req.query;
+      
+      // Si es DJ (no admin), filtrar automáticamente por su ID
+      // Los admins pueden ver todas o filtrar manualmente
+      let djFilterId = dj_responsable_id ? parseInt(dj_responsable_id, 10) : null;
+      if (auth.user.rol !== 'admin' && !djFilterId) {
+        djFilterId = auth.user.id;
+      }
+      
       const coordinaciones = await Coordinacion.findAll({
         activo: activo === 'false' ? false : activo === 'true' ? true : null,
         estado: estado || null,
-        dj_responsable_id: dj_responsable_id ? parseInt(dj_responsable_id, 10) : null,
+        dj_responsable_id: djFilterId,
         salon_id: salon_id ? parseInt(salon_id, 10) : null,
       });
       return res.json(coordinaciones);
@@ -30,6 +38,16 @@ export default async function handler(req, res) {
       // Generar título automáticamente si no se proporciona
       const tituloFinal = titulo || (nombre_cliente ? `${nombre_cliente} - ${tipo_evento || 'Evento'}` : 'Nueva Coordinación');
 
+      // Asignar automáticamente el DJ responsable:
+      // - Si es admin, puede especificar otro DJ o usar el suyo
+      // - Si es DJ, siempre se asigna a sí mismo
+      let djResponsableId = dj_responsable_id ? parseInt(dj_responsable_id, 10) : null;
+      if (auth.user.rol !== 'admin') {
+        djResponsableId = auth.user.id; // DJs siempre crean coordinaciones para sí mismos
+      } else if (!djResponsableId) {
+        djResponsableId = auth.user.id; // Si admin no especifica, usar el suyo
+      }
+
       const coordinacion = await Coordinacion.create({
         titulo: tituloFinal,
         descripcion: descripcion || null,
@@ -39,7 +57,7 @@ export default async function handler(req, res) {
         fecha_evento: fecha_evento || null,
         hora_evento: hora_evento || null,
         salon_id: salon_id ? parseInt(salon_id, 10) : null,
-        dj_responsable_id: dj_responsable_id ? parseInt(dj_responsable_id, 10) : null,
+        dj_responsable_id: djResponsableId,
         estado: estado || 'pendiente',
         prioridad: prioridad || 'normal',
         notas: notas || null,
