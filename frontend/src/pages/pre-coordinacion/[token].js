@@ -135,6 +135,10 @@ export default function PreCoordinacionPage() {
 
     const faltantes = preguntasRequeridas.filter(p => {
       const valor = respuestasCliente[p.id];
+      // Para velas, verificar que sea un array y tenga al menos un elemento
+      if (p.tipo === 'velas') {
+        return !Array.isArray(valor) || valor.length === 0;
+      }
       return valor === undefined || valor === null || valor === '';
     });
 
