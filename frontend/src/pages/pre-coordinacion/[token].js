@@ -119,7 +119,7 @@ export default function PreCoordinacionPage() {
     });
   };
 
-  const handleButtonToggle = (preguntaId, opcion, permiteOtro, multiple = true) => {
+  const handleButtonToggle = async (preguntaId, opcion, permiteOtro, multiple = true) => {
     const valorActual = respuestasCliente[preguntaId] || [];
     const esArray = Array.isArray(valorActual);
     const valores = esArray ? valorActual : (valorActual ? [valorActual] : []);
@@ -128,10 +128,20 @@ export default function PreCoordinacionPage() {
     if (!multiple) {
       // Si ya está seleccionado, deseleccionar (permitir deselección)
       const yaSeleccionado = valores.includes(opcion);
+      const nuevoValor = yaSeleccionado ? [] : [opcion];
+      
       setRespuestasCliente({
         ...respuestasCliente,
-        [preguntaId]: yaSeleccionado ? [] : [opcion],
+        [preguntaId]: nuevoValor,
       });
+      
+      // Si es el último paso y la respuesta es "No", finalizar automáticamente
+      if (pasoActual === totalPasos && preguntaId === 'realiza_ingreso_carioca' && opcion === 'No' && !yaSeleccionado) {
+        // Guardar progreso y mostrar resumen
+        await guardarProgreso();
+        setMostrarConfirmacion(false);
+        setMostrarResumen(true);
+      }
       return;
     }
     

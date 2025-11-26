@@ -911,92 +911,25 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 6,
-      titulo: '🎶 Música para Bailar',
-      descripcion: 'Las tandas de baile son los momentos donde todos bailan',
+      titulo: '🎊 Ingreso a Carioca',
+      descripcion: 'El momento de la fiesta',
       preguntas: [
         { 
-          id: 'tanda_1', 
-          label: 'Tanda 1 - ¿Qué música te gustaría?', 
+          id: 'realiza_ingreso_carioca', 
+          label: '¿Realizas ingreso a carioca?', 
           tipo: 'buttons', 
+          opciones: ['Sí', 'No'], 
           requerido: true,
-          opciones: [
-            'Cumbia',
-            'Reggaeton',
-            'Pop de los 2000s',
-            'Pop actual',
-            'Rock nacional',
-            'Música latina',
-            'Bachata',
-            'Salsa',
-            'Cuarteto',
-            'Electrónica',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
+          multiple: false,
+          permiteOtro: false
         },
         { 
-          id: 'tanda_2', 
-          label: 'Tanda 2 - ¿Qué música te gustaría?', 
-          tipo: 'buttons', 
-          requerido: true,
-          opciones: [
-            'Cumbia',
-            'Reggaeton',
-            'Pop de los 2000s',
-            'Pop actual',
-            'Rock nacional',
-            'Música latina',
-            'Bachata',
-            'Salsa',
-            'Cuarteto',
-            'Electrónica',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-        { 
-          id: 'tanda_3', 
-          label: 'Tanda 3 - ¿Qué música te gustaría?', 
-          tipo: 'buttons', 
-          requerido: true,
-          opciones: [
-            'Cumbia',
-            'Reggaeton',
-            'Pop de los 2000s',
-            'Pop actual',
-            'Rock nacional',
-            'Música latina',
-            'Bachata',
-            'Salsa',
-            'Cuarteto',
-            'Electrónica',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-        { 
-          id: 'tanda_4', 
-          label: 'Tanda 4 - ¿Qué música te gustaría?', 
-          tipo: 'buttons', 
-          requerido: true,
-          opciones: [
-            'Cumbia',
-            'Reggaeton',
-            'Pop de los 2000s',
-            'Pop actual',
-            'Rock nacional',
-            'Música latina',
-            'Bachata',
-            'Salsa',
-            'Cuarteto',
-            'Electrónica',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
+          id: 'cancion_ingreso_carioca', 
+          label: 'Canción para ingreso al carioca:', 
+          tipo: 'textarea', 
+          requerido: false,
+          condicional: { pregunta: 'realiza_ingreso_carioca', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
         },
       ],
     },
