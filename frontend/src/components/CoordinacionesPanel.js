@@ -742,16 +742,16 @@ export default function CoordinacionesPanel() {
                       </div>
                     )}
                   </div>
-                  {item.telefono && (
-                    <button
-                      type="button"
-                      className={styles.whatsappButton}
-                      onClick={() => handleWhatsApp(item)}
-                      title={`Enviar WhatsApp a ${item.telefono}`}
-                    >
-                      💬
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className={styles.whatsappButton}
+                    onClick={() => handleWhatsApp(item)}
+                    title={item.telefono ? `Enviar WhatsApp a ${item.telefono}` : 'Agregar teléfono para enviar WhatsApp'}
+                    disabled={!item.telefono}
+                    style={!item.telefono ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                  >
+                    💬
+                  </button>
                   <button
                     type="button"
                     className={styles.viewButton}
