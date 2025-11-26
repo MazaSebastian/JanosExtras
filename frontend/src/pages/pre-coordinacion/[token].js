@@ -425,8 +425,21 @@ export default function PreCoordinacionPage() {
                   <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
                   {paso.preguntas.map((pregunta) => {
                     const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-                    const debeMostrar = !esCondicional || 
-                      (respuestasCliente[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                    let debeMostrar = true;
+                    
+                    if (esCondicional) {
+                      const valorCondicional = respuestasCliente[pregunta.condicional.pregunta];
+                      const valorEsperado = pregunta.condicional.valor;
+                      
+                      // Manejar tanto valores string como arrays (para botones)
+                      if (Array.isArray(valorCondicional)) {
+                        debeMostrar = valorCondicional.includes(valorEsperado);
+                      } else if (typeof valorCondicional === 'string') {
+                        debeMostrar = valorCondicional === valorEsperado;
+                      } else {
+                        debeMostrar = false;
+                      }
+                    }
                     
                     if (!debeMostrar) return null;
 
@@ -572,8 +585,21 @@ export default function PreCoordinacionPage() {
           {paso.preguntas.map((pregunta) => {
             // Verificar si la pregunta condicional se cumple
             const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-            const debeMostrar = !esCondicional || 
-              (respuestasCliente[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+            let debeMostrar = true;
+            
+            if (esCondicional) {
+              const valorCondicional = respuestasCliente[pregunta.condicional.pregunta];
+              const valorEsperado = pregunta.condicional.valor;
+              
+              // Manejar tanto valores string como arrays (para botones)
+              if (Array.isArray(valorCondicional)) {
+                debeMostrar = valorCondicional.includes(valorEsperado);
+              } else if (typeof valorCondicional === 'string') {
+                debeMostrar = valorCondicional === valorEsperado;
+              } else {
+                debeMostrar = false;
+              }
+            }
             
             if (!debeMostrar) return null;
 
