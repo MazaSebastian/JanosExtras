@@ -386,19 +386,18 @@ export default function PreCoordinacionPage() {
       
       await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
       
-      // Actualizar estado local con formato convertido para el resumen
+      // Ocultar resumen de confirmación inmediatamente
+      setMostrarConfirmacion(false);
+      
+      // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
       
-      // Marcar como enviada y mostrar mensaje de cierre
-      // Primero ocultar confirmación, luego marcar como enviada
-      setMostrarConfirmacion(false);
+      // Marcar como enviada para mostrar mensaje de cierre
+      setPreCoordinacionEnviada(true);
       setGuardando(false);
-      // Usar setTimeout para asegurar que el estado se actualice correctamente
-      setTimeout(() => {
-        setPreCoordinacionEnviada(true);
-        // Scroll al inicio para mostrar el mensaje de cierre
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 100);
+      
+      // Scroll al inicio para mostrar el mensaje de cierre
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error('Error al finalizar:', err);
       setError(err.response?.data?.error || 'Error al guardar las respuestas. Por favor, intenta nuevamente.');
