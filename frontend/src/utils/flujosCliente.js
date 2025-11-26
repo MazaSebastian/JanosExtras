@@ -875,6 +875,20 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 4,
+      titulo: '🥂 Brindis',
+      descripcion: 'El momento del brindis',
+      preguntas: [
+        { 
+          id: 'cancion_brindis', 
+          label: '¿Qué canción te gustaría para el brindis?', 
+          tipo: 'textarea', 
+          requerido: true,
+          placeholder: 'Nombre de la canción y artista'
+        },
+      ],
+    },
+    {
+      id: 5,
       titulo: '🎭 Coreografías',
       descripcion: '¿Tienes alguna presentación especial?',
       preguntas: [
@@ -892,20 +906,6 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           requerido: false, 
           condicional: { pregunta: 'realiza_coreografia', valor: 'Sí' },
           placeholder: 'Describe qué harás y si necesitas alguna canción específica'
-        },
-      ],
-    },
-    {
-      id: 5,
-      titulo: '🥂 Brindis',
-      descripcion: 'El momento del brindis',
-      preguntas: [
-        { 
-          id: 'cancion_brindis', 
-          label: '¿Qué canción te gustaría para el brindis?', 
-          tipo: 'textarea', 
-          requerido: true,
-          placeholder: 'Nombre de la canción y artista'
         },
       ],
     },
