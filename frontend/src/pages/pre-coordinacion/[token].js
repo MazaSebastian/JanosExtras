@@ -457,7 +457,8 @@ export default function PreCoordinacionPage() {
   }
 
   // Mostrar resumen para confirmar antes de enviar
-  if (mostrarConfirmacion) {
+  // Solo mostrar si no está enviada (para evitar mostrar ambos)
+  if (mostrarConfirmacion && !preCoordinacionEnviada) {
     return (
       <div className={styles.container}>
         <div className={styles.resumenContainer}>
