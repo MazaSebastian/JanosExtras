@@ -109,7 +109,7 @@ export default function Calendar({
     if (event.dj_id) {
       return getSalonColor(event.dj_id);
     }
-    return '#667eea';
+    return '#772c87';
   };
 
   // Generar todos los meses del año

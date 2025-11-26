@@ -555,16 +555,16 @@ export default function CoordinacionFlujo({ coordinacionId }) {
         <title>Resumen de Coordinación - ${coordinacion?.nombre_cliente || coordinacion?.titulo}</title>
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { color: #333; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
-          h2 { color: #667eea; margin-top: 30px; }
+          h1 { color: #333; border-bottom: 3px solid #772c87; padding-bottom: 10px; }
+          h2 { color: #772c87; margin-top: 30px; }
           .seccion { margin-bottom: 25px; }
           .campo { margin-bottom: 15px; }
           .campo-label { font-weight: bold; color: #666; }
           .campo-valor { margin-top: 5px; padding: 10px; background: #f5f5f5; border-radius: 5px; }
-          .vela-item { margin: 10px 0; padding: 10px; border-left: 3px solid #667eea; background: #f9f9f9; }
+          .vela-item { margin: 10px 0; padding: 10px; border-left: 3px solid #772c87; background: #f9f9f9; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
           th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-          th { background: #667eea; color: white; }
+          th { background: #772c87; color: white; }
         </style>
       </head>
       <body>
