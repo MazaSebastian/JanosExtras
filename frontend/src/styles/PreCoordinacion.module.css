@@ -189,6 +189,78 @@
   font-style: italic;
 }
 
+/* Estilos para botones seleccionables */
+.buttonsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.buttonsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.selectableButton {
+  padding: 0.875rem 1.25rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectableButton:hover {
+  border-color: #772c87;
+  background: #f9f9f9;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(119, 44, 135, 0.2);
+}
+
+.selectableButtonActive {
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: white;
+  border-color: #772c87;
+  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.3);
+}
+
+.selectableButtonActive:hover {
+  background: linear-gradient(135deg, #5a1f6b 0%, #772c87 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(119, 44, 135, 0.4);
+}
+
+.buttonWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.otroInput {
+  padding: 0.75rem;
+  border: 2px solid #772c87;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  margin-top: 0.5rem;
+}
+
+.otroInput:focus {
+  outline: none;
+  border-color: #5a1f6b;
+  box-shadow: 0 0 0 3px rgba(119, 44, 135, 0.1);
+}
+
 .navegacion {
   display: flex;
   justify-content: space-between;

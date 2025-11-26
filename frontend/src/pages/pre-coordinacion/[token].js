@@ -85,6 +85,81 @@ export default function PreCoordinacionPage() {
     });
   };
 
+  const handleButtonToggle = (preguntaId, opcion, permiteOtro) => {
+    const valorActual = respuestasCliente[preguntaId] || [];
+    const esArray = Array.isArray(valorActual);
+    const valores = esArray ? valorActual : (valorActual ? [valorActual] : []);
+    
+    // Si es "Otro", manejar de forma especial
+    if (opcion.includes('Otro')) {
+      const tieneOtro = valores.some(v => typeof v === 'object' && v.tipo === 'otro');
+      if (tieneOtro) {
+        // Remover "Otro"
+        setRespuestasCliente({
+          ...respuestasCliente,
+          [preguntaId]: valores.filter(v => !(typeof v === 'object' && v.tipo === 'otro')),
+        });
+      } else {
+        // Agregar "Otro" con campo de texto
+        setRespuestasCliente({
+          ...respuestasCliente,
+          [preguntaId]: [...valores, { tipo: 'otro', valor: '' }],
+        });
+      }
+    } else {
+      // Toggle normal
+      const index = valores.findIndex(v => v === opcion || (typeof v === 'string' && v === opcion));
+      if (index >= 0) {
+        // Remover
+        setRespuestasCliente({
+          ...respuestasCliente,
+          [preguntaId]: valores.filter((_, i) => i !== index),
+        });
+      } else {
+        // Agregar
+        setRespuestasCliente({
+          ...respuestasCliente,
+          [preguntaId]: [...valores, opcion],
+        });
+      }
+    }
+  };
+
+  const handleOtroInputChange = (preguntaId, valor) => {
+    const valorActual = respuestasCliente[preguntaId] || [];
+    const valores = Array.isArray(valorActual) ? valorActual : (valorActual ? [valorActual] : []);
+    const otroIndex = valores.findIndex(v => typeof v === 'object' && v.tipo === 'otro');
+    
+    if (otroIndex >= 0) {
+      valores[otroIndex] = { tipo: 'otro', valor };
+    } else {
+      valores.push({ tipo: 'otro', valor });
+    }
+    
+    setRespuestasCliente({
+      ...respuestasCliente,
+      [preguntaId]: valores,
+    });
+  };
+
+  const isButtonSelected = (preguntaId, opcion) => {
+    const valorActual = respuestasCliente[preguntaId] || [];
+    const valores = Array.isArray(valorActual) ? valorActual : (valorActual ? [valorActual] : []);
+    
+    if (opcion.includes('Otro')) {
+      return valores.some(v => typeof v === 'object' && v.tipo === 'otro');
+    }
+    
+    return valores.includes(opcion);
+  };
+
+  const getOtroValue = (preguntaId) => {
+    const valorActual = respuestasCliente[preguntaId] || [];
+    const valores = Array.isArray(valorActual) ? valorActual : (valorActual ? [valorActual] : []);
+    const otro = valores.find(v => typeof v === 'object' && v.tipo === 'otro');
+    return otro ? otro.valor : '';
+  };
+
   const handleAgregarVela = () => {
     setVelaForm({ nombre: '', familiar: '', cancion: '' });
     setShowVelaModal(true);
@@ -138,6 +213,19 @@ export default function PreCoordinacionPage() {
       // Para velas, verificar que sea un array y tenga al menos un elemento
       if (p.tipo === 'velas') {
         return !Array.isArray(valor) || valor.length === 0;
+      }
+      // Para botones, verificar que tenga al menos una opción seleccionada
+      if (p.tipo === 'buttons') {
+        if (Array.isArray(valor)) {
+          // Si tiene "Otro", verificar que tenga valor
+          const tieneOtro = valor.some(v => typeof v === 'object' && v.tipo === 'otro');
+          if (tieneOtro) {
+            const otro = valor.find(v => typeof v === 'object' && v.tipo === 'otro');
+            return !otro || !otro.valor || otro.valor.trim() === '';
+          }
+          return valor.length === 0;
+        }
+        return !valor || valor === '';
       }
       return valor === undefined || valor === null || valor === '';
     });
@@ -466,6 +554,42 @@ export default function PreCoordinacionPage() {
                       <small className={styles.ayuda}>{pregunta.ayuda}</small>
                     )}
                   </>
+                )}
+
+                {pregunta.tipo === 'buttons' && (
+                  <div className={styles.buttonsContainer}>
+                    {pregunta.ayuda && (
+                      <small className={styles.ayuda}>{pregunta.ayuda}</small>
+                    )}
+                    <div className={styles.buttonsGrid}>
+                      {pregunta.opciones.map((opcion) => {
+                        const isSelected = isButtonSelected(pregunta.id, opcion);
+                        const isOtro = opcion.includes('Otro');
+                        
+                        return (
+                          <div key={opcion} className={styles.buttonWrapper}>
+                            <button
+                              type="button"
+                              onClick={() => handleButtonToggle(pregunta.id, opcion, pregunta.permiteOtro)}
+                              className={`${styles.selectableButton} ${isSelected ? styles.selectableButtonActive : ''}`}
+                            >
+                              {opcion.replace(' (especificar)', '')}
+                            </button>
+                            {isOtro && isSelected && pregunta.permiteOtro && (
+                              <input
+                                type="text"
+                                value={getOtroValue(pregunta.id)}
+                                onChange={(e) => handleOtroInputChange(pregunta.id, e.target.value)}
+                                className={styles.otroInput}
+                                placeholder="Especifica aquí..."
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
                 {pregunta.tipo === 'velas' && (

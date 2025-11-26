@@ -25,17 +25,44 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       preguntas: [
         { 
           id: 'musica_recepcion', 
-          label: '¿Qué tipo de música te gustaría durante la recepción? (puedes mencionar géneros, épocas, o el ambiente que buscas)', 
-          tipo: 'textarea', 
+          label: '¿Qué tipo de música te gustaría durante la recepción?', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música suave de los 80s, pop actual, reggaeton, etc.'
+          opciones: [
+            'Música suave / Instrumental',
+            'Pop de los 80s y 90s',
+            'Pop actual',
+            'Reggaeton',
+            'Cumbia',
+            'Rock',
+            'Música latina',
+            'Jazz',
+            'Música clásica',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'artistas_favoritos', 
           label: '¿Tienes artistas o canciones favoritas que no pueden faltar? (opcional)', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: false,
-          placeholder: 'Menciona artistas, canciones o géneros que amas'
+          opciones: [
+            'Shakira',
+            'Maluma',
+            'Bad Bunny',
+            'J Balvin',
+            'Daddy Yankee',
+            'Ricky Martin',
+            'Luis Fonsi',
+            'Enrique Iglesias',
+            'Marc Anthony',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
       ],
     },
@@ -177,31 +204,87 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       preguntas: [
         { 
           id: 'tanda_1', 
-          label: 'Tanda 1 - ¿Qué música te gustaría? (géneros, épocas, artistas)', 
-          tipo: 'textarea', 
+          label: 'Tanda 1 - ¿Qué música te gustaría?', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Cumbia, reggaeton, pop de los 2000s'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_2', 
           label: 'Tanda 2 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Rock nacional, música latina, etc.'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_3', 
           label: 'Tanda 3 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música actual, hits del momento'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_4', 
           label: 'Tanda 4 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música para cerrar la noche'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
       ],
     },
@@ -229,16 +312,43 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'musica_recepcion', 
           label: '¿Qué tipo de música te gustaría durante la recepción?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música suave, jazz, clásica, etc.'
+          opciones: [
+            'Música suave / Instrumental',
+            'Pop de los 80s y 90s',
+            'Pop actual',
+            'Reggaeton',
+            'Cumbia',
+            'Rock',
+            'Música latina',
+            'Jazz',
+            'Música clásica',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'artistas_favoritos', 
           label: '¿Tienes artistas o canciones favoritas? (opcional)', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: false,
-          placeholder: 'Menciona artistas o canciones especiales'
+          opciones: [
+            'Shakira',
+            'Maluma',
+            'Bad Bunny',
+            'J Balvin',
+            'Daddy Yankee',
+            'Ricky Martin',
+            'Luis Fonsi',
+            'Enrique Iglesias',
+            'Marc Anthony',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
       ],
     },
@@ -419,30 +529,86 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'tanda_1', 
           label: 'Tanda 1 - ¿Qué música les gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Cumbia, reggaeton, pop de los 2000s'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_2', 
           label: 'Tanda 2 - ¿Qué música les gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Rock nacional, música latina'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_3', 
           label: 'Tanda 3 - ¿Qué música les gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música actual, hits del momento'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_4', 
           label: 'Tanda 4 - ¿Qué música les gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música para cerrar la noche'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
       ],
     },
@@ -542,34 +708,90 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'tanda_1', 
           label: 'Tanda 1 - ¿Qué música les gustaría? (opcional)', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: false, 
           condicional: { pregunta: 'hay_tandas_baile', valor: 'Sí' },
-          placeholder: 'Ejemplo: Música variada, hits actuales, etc.'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_2', 
           label: 'Tanda 2 - ¿Qué música les gustaría? (opcional)', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: false, 
           condicional: { pregunta: 'hay_tandas_baile', valor: 'Sí' },
-          placeholder: 'Ejemplo: Rock, pop, música latina'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_3', 
           label: 'Tanda 3 - ¿Qué música les gustaría? (opcional)', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: false, 
           condicional: { pregunta: 'hay_tandas_baile', valor: 'Sí' },
-          placeholder: 'Ejemplo: Música para cerrar'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_4', 
           label: 'Tanda 4 - ¿Qué música les gustaría? (opcional)', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: false, 
           condicional: { pregunta: 'hay_tandas_baile', valor: 'Sí' },
-          placeholder: 'Ejemplo: Música para cerrar la noche'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
       ],
     },
@@ -597,9 +819,23 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'musica_recepcion', 
           label: '¿Qué tipo de música te gustaría durante la recepción?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música suave, pop actual, reggaeton, etc.'
+          opciones: [
+            'Música suave / Instrumental',
+            'Pop de los 80s y 90s',
+            'Pop actual',
+            'Reggaeton',
+            'Cumbia',
+            'Rock',
+            'Música latina',
+            'Jazz',
+            'Música clásica',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'artistas_favoritos', 
@@ -668,30 +904,86 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'tanda_1', 
           label: 'Tanda 1 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Cumbia, reggaeton, pop de los 2000s'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_2', 
           label: 'Tanda 2 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Rock nacional, música latina'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_3', 
           label: 'Tanda 3 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música actual, hits del momento'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
         { 
           id: 'tanda_4', 
           label: 'Tanda 4 - ¿Qué música te gustaría?', 
-          tipo: 'textarea', 
+          tipo: 'buttons', 
           requerido: true,
-          placeholder: 'Ejemplo: Música para cerrar la noche'
+          opciones: [
+            'Cumbia',
+            'Reggaeton',
+            'Pop de los 2000s',
+            'Pop actual',
+            'Rock nacional',
+            'Música latina',
+            'Bachata',
+            'Salsa',
+            'Cuarteto',
+            'Electrónica',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
         },
       ],
     },
