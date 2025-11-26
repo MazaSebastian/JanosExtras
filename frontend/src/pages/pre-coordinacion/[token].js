@@ -17,7 +17,6 @@ export default function PreCoordinacionPage() {
   const [respuestasCliente, setRespuestasCliente] = useState({});
   const [pasoActual, setPasoActual] = useState(1);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
-  const [mostrarResumen, setMostrarResumen] = useState(false);
   const [preCoordinacionEnviada, setPreCoordinacionEnviada] = useState(false);
   const [showVelaModal, setShowVelaModal] = useState(false);
   const [velaForm, setVelaForm] = useState({ nombre: '', familiar: '', cancion: '' });
