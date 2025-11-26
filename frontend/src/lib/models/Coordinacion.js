@@ -164,6 +164,11 @@ export class Coordinacion {
       values.push(nombre_cliente);
       paramIndex++;
     }
+    if (telefono !== undefined) {
+      updates.push(`telefono = $${paramIndex}`);
+      values.push(telefono);
+      paramIndex++;
+    }
     if (tipo_evento !== undefined) {
       updates.push(`tipo_evento = $${paramIndex}`);
       values.push(tipo_evento);

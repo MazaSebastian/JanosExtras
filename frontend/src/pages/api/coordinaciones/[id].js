@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'No tienes permiso para editar esta coordinación' });
       }
       
-      const { titulo, descripcion, nombre_cliente, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo } = req.body;
+      const { titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo } = req.body;
       
       // Si es DJ (no admin), no puede cambiar el dj_responsable_id
       let djResponsableIdUpdate = dj_responsable_id ? parseInt(dj_responsable_id, 10) : undefined;
@@ -54,6 +54,7 @@ export default async function handler(req, res) {
         titulo,
         descripcion,
         nombre_cliente,
+        telefono,
         tipo_evento,
         codigo_evento,
         fecha_evento,
