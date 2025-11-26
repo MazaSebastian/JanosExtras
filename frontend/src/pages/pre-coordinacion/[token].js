@@ -166,10 +166,9 @@ export default function PreCoordinacionPage() {
           
           await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
           
-          // Actualizar estado local y mostrar resumen
+          // Actualizar estado local y mostrar resumen para confirmar
           setRespuestasCliente(respuestasActualizadas);
-          setMostrarConfirmacion(false);
-          setMostrarResumen(true);
+          setMostrarConfirmacion(true);
         }, 100);
       }
       return;
