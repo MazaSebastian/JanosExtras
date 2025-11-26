@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { adminAPI, salonesAPI, coordinacionesAPI, fichadasAPI } from '@/services/api';
+import { adminAPI, salonesAPI, fichadasAPI } from '@/services/api';
 import { getAuth, clearAuth } from '@/utils/auth';
 import { getSalonColor } from '@/utils/colors';
 import Calendar from '@/components/Calendar';
@@ -116,24 +116,12 @@ export default function AdminDashboardPage() {
       setHomeData(prev => ({ ...prev, loading: true }));
       const currentDate = new Date();
 
-      // Cargar coordinaciones próximas
-      const coordinacionesRes = await coordinacionesAPI.getAll({ activo: true });
-      const allCoordinaciones = coordinacionesRes.data || [];
-      const upcoming = allCoordinaciones
-        .filter(c => {
-          if (!c.fecha_evento) return false;
-          const eventDate = new Date(c.fecha_evento);
-          return eventDate >= currentDate;
-        })
-        .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento))
-        .slice(0, 5);
-
       // Cargar fichadas recientes
       const fichadasRes = await adminAPI.getFichadas({ limit: 10 });
       const recentFichadas = (fichadasRes.data || []).slice(0, 5);
 
       setHomeData({
-        coordinaciones: upcoming,
+        coordinaciones: [],
         recentFichadas,
         loading: false,
       });
@@ -507,46 +495,6 @@ export default function AdminDashboardPage() {
                         onClick={() => setActiveMenu('overview')}
                       >
                         Ver Detalles →
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Coordinaciones Próximas */}
-                  <div className={styles.homeCard}>
-                    <div className={styles.homeCardHeader}>
-                      <span className={styles.homeCardIcon}>📋</span>
-                      <h3>Coordinaciones Próximas</h3>
-                    </div>
-                    <div className={styles.homeCardContent}>
-                      {homeData.loading ? (
-                        <p>Cargando...</p>
-                      ) : homeData.coordinaciones.length === 0 ? (
-                        <p className={styles.homeEmptyMessage}>No hay coordinaciones próximas</p>
-                      ) : (
-                        <div className={styles.homeList}>
-                          {homeData.coordinaciones.map((coord) => (
-                            <div key={coord.id} className={styles.homeListItem}>
-                              <div className={styles.homeListItemContent}>
-                                <span className={styles.homeListItemTitle}>
-                                  {coord.nombre_cliente || coord.titulo}
-                                </span>
-                                <span className={styles.homeListItemSubtitle}>
-                                  {coord.fecha_evento && format(new Date(coord.fecha_evento), 'dd/MM/yyyy', { locale: es })}
-                                  {coord.tipo_evento && ` • ${coord.tipo_evento}`}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <button
-                        className={styles.homeCardAction}
-                        onClick={() => {
-                          // Redirigir a coordinaciones (si existe esa sección) o mostrar mensaje
-                          alert('Funcionalidad de coordinaciones en desarrollo');
-                        }}
-                      >
-                        Ver Todas →
                       </button>
                     </div>
                   </div>
