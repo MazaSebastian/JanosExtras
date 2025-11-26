@@ -126,9 +126,16 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: #772c87;
-  margin: 0 0 2rem 0;
-  padding-bottom: 1rem;
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
   border-bottom: 2px solid #e0e0e0;
+}
+
+.pasoDescripcion {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+  font-style: italic;
 }
 
 .preguntas {
@@ -172,6 +179,14 @@
 .textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+.ayuda {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
 }
 
 .navegacion {
@@ -395,6 +410,150 @@
   margin: 0;
 }
 
+/* Estilos para velas */
+.velasContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.agregarVelaButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.agregarVelaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
+}
+
+.velasList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.velaItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 3px solid #772c87;
+}
+
+.velaInfo {
+  flex: 1;
+}
+
+.velaInfo strong {
+  color: #333;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.velaCancion {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.eliminarVelaButton {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.eliminarVelaButton:hover {
+  background: #d32f2f;
+  transform: scale(1.05);
+}
+
+/* Estilos para modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.modalCloseButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modalCloseButton:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 2px solid #e0e0e0;
+}
+
 @media (max-width: 768px) {
   .resumenContainer {
     padding: 1.5rem;
@@ -406,6 +565,11 @@
 
   .resumenInfoGeneral {
     grid-template-columns: 1fr;
+  }
+
+  .modalContent {
+    max-width: 100%;
+    margin: 1rem;
   }
 }
 

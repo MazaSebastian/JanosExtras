@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { preCoordinacionAPI } from '@/services/api';
-import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
+import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 import Loading from '@/components/Loading';
 import styles from '@/styles/PreCoordinacion.module.css';
 
@@ -18,6 +18,8 @@ export default function PreCoordinacionPage() {
   const [pasoActual, setPasoActual] = useState(1);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [mostrarResumen, setMostrarResumen] = useState(false);
+  const [showVelaModal, setShowVelaModal] = useState(false);
+  const [velaForm, setVelaForm] = useState({ nombre: '', familiar: '', cancion: '' });
 
   useEffect(() => {
     if (token) {
@@ -40,7 +42,7 @@ export default function PreCoordinacionPage() {
       if (respuestas && Object.keys(respuestas).length > 0) {
         // Determinar desde qué paso continuar
         const tipoEvento = data.coordinacion.tipo_evento?.trim();
-        const pasos = FLUJOS_POR_TIPO[tipoEvento] || [];
+        const pasos = CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [];
         let primerPasoIncompleto = 1;
         for (let i = 0; i < pasos.length; i++) {
           const paso = pasos[i];
@@ -72,7 +74,7 @@ export default function PreCoordinacionPage() {
     return coordinacion.tipo_evento.trim();
   }, [coordinacion?.tipo_evento]);
 
-  const pasos = tipoEventoNormalizado ? FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
+  const pasos = tipoEventoNormalizado ? CLIENTE_FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
   const paso = pasos.find(p => p.id === pasoActual);
   const totalPasos = pasos.length;
 
@@ -80,6 +82,43 @@ export default function PreCoordinacionPage() {
     setRespuestasCliente({
       ...respuestasCliente,
       [preguntaId]: value,
+    });
+  };
+
+  const handleAgregarVela = () => {
+    setVelaForm({ nombre: '', familiar: '', cancion: '' });
+    setShowVelaModal(true);
+  };
+
+  const handleGuardarVela = () => {
+    if (!velaForm.nombre || !velaForm.familiar || !velaForm.cancion) {
+      setError('Por favor, completa todos los campos de la vela.');
+      return;
+    }
+
+    const velasActuales = respuestasCliente.velas || [];
+    const nuevaVela = {
+      id: Date.now(),
+      nombre: velaForm.nombre,
+      familiar: velaForm.familiar,
+      cancion: velaForm.cancion,
+    };
+
+    setRespuestasCliente({
+      ...respuestasCliente,
+      velas: [...velasActuales, nuevaVela],
+    });
+
+    setShowVelaModal(false);
+    setVelaForm({ nombre: '', familiar: '', cancion: '' });
+    setError('');
+  };
+
+  const handleEliminarVela = (id) => {
+    const velasActuales = respuestasCliente.velas || [];
+    setRespuestasCliente({
+      ...respuestasCliente,
+      velas: velasActuales.filter(v => v.id !== id),
     });
   };
 
@@ -357,6 +396,9 @@ export default function PreCoordinacionPage() {
 
       <div className={styles.pasoContainer}>
         <h2 className={styles.pasoTitulo}>{paso.titulo}</h2>
+        {paso.descripcion && (
+          <p className={styles.pasoDescripcion}>{paso.descripcion}</p>
+        )}
         
         <div className={styles.preguntas}>
           {paso.preguntas.map((pregunta) => {
@@ -391,31 +433,149 @@ export default function PreCoordinacionPage() {
                 )}
 
                 {pregunta.tipo === 'textarea' && (
-                  <textarea
-                    value={respuestasCliente[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    className={styles.textarea}
-                    rows={4}
-                    placeholder="Escribe aquí..."
-                    required={pregunta.requerido}
-                  />
+                  <>
+                    <textarea
+                      value={respuestasCliente[pregunta.id] || ''}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      className={styles.textarea}
+                      rows={4}
+                      placeholder={pregunta.placeholder || "Escribe aquí..."}
+                      required={pregunta.requerido}
+                    />
+                    {pregunta.ayuda && (
+                      <small className={styles.ayuda}>{pregunta.ayuda}</small>
+                    )}
+                  </>
                 )}
 
                 {pregunta.tipo === 'text' && (
-                  <input
-                    type="text"
-                    value={respuestasCliente[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    className={styles.input}
-                    placeholder="Escribe aquí..."
-                    required={pregunta.requerido}
-                  />
+                  <>
+                    <input
+                      type="text"
+                      value={respuestasCliente[pregunta.id] || ''}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      className={styles.input}
+                      placeholder={pregunta.placeholder || "Escribe aquí..."}
+                      required={pregunta.requerido}
+                    />
+                    {pregunta.ayuda && (
+                      <small className={styles.ayuda}>{pregunta.ayuda}</small>
+                    )}
+                  </>
+                )}
+
+                {pregunta.tipo === 'velas' && (
+                  <div className={styles.velasContainer}>
+                    {pregunta.ayuda && (
+                      <small className={styles.ayuda}>{pregunta.ayuda}</small>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleAgregarVela}
+                      className={styles.agregarVelaButton}
+                    >
+                      + Agregar Vela
+                    </button>
+                    {respuestasCliente.velas && respuestasCliente.velas.length > 0 && (
+                      <div className={styles.velasList}>
+                        {respuestasCliente.velas.map((vela) => (
+                          <div key={vela.id} className={styles.velaItem}>
+                            <div className={styles.velaInfo}>
+                              <strong>{vela.nombre}</strong> - {vela.familiar}
+                              <div className={styles.velaCancion}>🎵 {vela.cancion}</div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleEliminarVela(vela.id)}
+                              className={styles.eliminarVelaButton}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             );
           })}
         </div>
       </div>
+
+      {showVelaModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowVelaModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Agregar Vela</h3>
+              <button
+                className={styles.modalCloseButton}
+                onClick={() => {
+                  setShowVelaModal(false);
+                  setVelaForm({ nombre: '', familiar: '', cancion: '' });
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.pregunta}>
+                <label className={styles.preguntaLabel}>
+                  Nombre de la persona a quien está dedicada la vela *
+                </label>
+                <input
+                  type="text"
+                  value={velaForm.nombre}
+                  onChange={(e) => setVelaForm({ ...velaForm, nombre: e.target.value })}
+                  className={styles.input}
+                  placeholder="Ejemplo: Abuela María"
+                />
+              </div>
+              <div className={styles.pregunta}>
+                <label className={styles.preguntaLabel}>
+                  Relación familiar *
+                </label>
+                <input
+                  type="text"
+                  value={velaForm.familiar}
+                  onChange={(e) => setVelaForm({ ...velaForm, familiar: e.target.value })}
+                  className={styles.input}
+                  placeholder="Ejemplo: Abuela"
+                />
+              </div>
+              <div className={styles.pregunta}>
+                <label className={styles.preguntaLabel}>
+                  Canción para esta vela *
+                </label>
+                <textarea
+                  value={velaForm.cancion}
+                  onChange={(e) => setVelaForm({ ...velaForm, cancion: e.target.value })}
+                  className={styles.textarea}
+                  rows={3}
+                  placeholder="Nombre de la canción y artista"
+                />
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                onClick={() => {
+                  setShowVelaModal(false);
+                  setVelaForm({ nombre: '', familiar: '', cancion: '' });
+                }}
+                className={styles.botonAnterior}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarVela}
+                className={styles.botonSiguiente}
+              >
+                Guardar Vela
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.navegacion}>
         <button
