@@ -392,7 +392,6 @@ export default function PreCoordinacionPage() {
       // Marcar como enviada y mostrar mensaje de cierre
       setPreCoordinacionEnviada(true);
       setMostrarConfirmacion(false);
-      setMostrarResumen(false);
       setGuardando(false);
     } catch (err) {
       console.error('Error al finalizar:', err);
