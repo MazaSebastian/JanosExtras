@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: linear-gradient(135deg, #5f6ef8, #9f8ffc);
+  background: linear-gradient(135deg, #772c87, #9a4da8);
 }
 
 .card {
@@ -51,7 +51,7 @@
 }
 
 .inputGroup input:focus {
-  border-color: #667eea;
+  border-color: #772c87;
 }
 
 .inputGroup select {
@@ -65,7 +65,7 @@
 }
 
 .inputGroup select:focus {
-  border-color: #667eea;
+  border-color: #772c87;
   outline: none;
 }
 
@@ -88,7 +88,7 @@
 }
 
 .select:focus {
-  border-color: #667eea;
+  border-color: #772c87;
   outline: none;
 }
 
@@ -102,7 +102,7 @@
 }
 
 .submitButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   padding: 14px;
   border-radius: 8px;

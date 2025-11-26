@@ -13,7 +13,7 @@
   font-weight: 700;
   color: #333;
   margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -91,7 +91,7 @@
 .statValue {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #667eea;
+  color: #772c87;
 }
 
 .list {
@@ -146,7 +146,7 @@
 .cardAction {
   margin-top: auto;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   border: none;
   border-radius: 8px;

@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@
   color: #333;
   margin: 0 0 1.5rem 0;
   text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -44,7 +44,7 @@
 }
 
 .infoItem strong {
-  color: #667eea;
+  color: #772c87;
   display: block;
   margin-bottom: 0.25rem;
 }
@@ -125,7 +125,7 @@
 .pasoTitulo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: #772c87;
   margin: 0 0 2rem 0;
   padding-bottom: 1rem;
   border-bottom: 2px solid #e0e0e0;
@@ -166,7 +166,7 @@
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #772c87;
 }
 
 .textarea {
@@ -212,7 +212,7 @@
 
 .botonSiguiente,
 .botonFinalizar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   flex: 1;
 }
@@ -220,7 +220,7 @@
 .botonSiguiente:hover,
 .botonFinalizar:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
 }
 
 .botonVolver {
@@ -332,7 +332,7 @@
 }
 
 .resumenInfoItem strong {
-  color: #667eea;
+  color: #772c87;
   display: block;
   margin-bottom: 0.25rem;
 }
@@ -348,7 +348,7 @@
 .resumenSeccionTitulo {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #667eea;
+  color: #772c87;
   margin: 0 0 1rem 0;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e0e0e0;

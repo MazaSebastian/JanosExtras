@@ -44,7 +44,7 @@
 .backButton {
   background: transparent;
   border: none;
-  color: #667eea;
+  color: #772c87;
   cursor: pointer;
   font-size: 0.9rem;
   margin-bottom: 1rem;
@@ -120,7 +120,7 @@
 
 .progressStep.active .stepNumber {
   background: #667eea;
-  border-color: #667eea;
+  border-color: #772c87;
   color: white;
   transform: scale(1.1);
 }
@@ -202,7 +202,7 @@
 .pregunta textarea:focus,
 .pregunta select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #772c87;
 }
 
 .pregunta textarea {
@@ -224,7 +224,7 @@
   border: 3px solid #667eea;
   border-radius: 12px;
   background: white;
-  color: #667eea;
+  color: #772c87;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
@@ -239,9 +239,9 @@
 }
 
 .tematicaButtonActive {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
-  border-color: #667eea;
+  border-color: #772c87;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
@@ -270,7 +270,7 @@
 }
 
 .buttonPrimary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   margin-left: auto;
 }
@@ -287,7 +287,7 @@
 
 .buttonSecondary {
   background: white;
-  color: #667eea;
+  color: #772c87;
   border: 2px solid #667eea;
 }
 
@@ -372,7 +372,7 @@
 .resumenSeccionTitulo {
   margin: 0 0 1rem 0;
   font-size: 1.3rem;
-  color: #667eea;
+  color: #772c87;
   font-weight: 600;
 }
 
@@ -471,7 +471,7 @@
 
 .agregarVelaButton {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -506,7 +506,7 @@
 }
 
 .velaItem:hover {
-  border-color: #667eea;
+  border-color: #772c87;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
@@ -632,7 +632,7 @@
 
 .modalBody .formGroup input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #772c87;
 }
 
 .modalActions {

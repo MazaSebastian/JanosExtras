@@ -34,14 +34,14 @@
   font-size: 2rem;
   font-weight: 700;
   color: #333;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .addButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -135,7 +135,7 @@
 .formGroup textarea:focus,
 .formGroup select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #772c87;
 }
 
 .formActions {
@@ -197,14 +197,14 @@
 }
 
 .filterActive {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   border-color: transparent;
 }
 
 .filterButton:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: #772c87;
+  color: #772c87;
 }
 
 .priorityFilter {
@@ -220,7 +220,7 @@
 
 .priorityFilter:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #772c87;
 }
 
 .list {
@@ -304,7 +304,7 @@
 }
 
 .typeBadge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   padding: 0.4rem 1rem;
   border-radius: 8px;
@@ -426,7 +426,7 @@
 }
 
 .editButton {
-  color: #667eea;
+  color: #772c87;
 }
 
 .editButton:hover {
@@ -565,7 +565,7 @@
   align-items: center;
   padding: 1.5rem;
   border-bottom: 2px solid #f0f0f0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
 }
 
@@ -627,7 +627,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #667eea;
+  color: #772c87;
 }
 
 .resumenCampo {
