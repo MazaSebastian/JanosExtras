@@ -85,6 +85,7 @@ export class Coordinacion {
         c.titulo,
         c.descripcion,
         c.nombre_cliente,
+        c.telefono,
         c.tipo_evento,
         c.codigo_evento,
         c.fecha_evento,
@@ -141,7 +142,7 @@ export class Coordinacion {
     return result.rows[0];
   }
 
-  static async update(id, { titulo, descripcion, nombre_cliente, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado }) {
+  static async update(id, { titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado }) {
     const updates = [];
     const values = [];
     let paramIndex = 1;

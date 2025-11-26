@@ -21,6 +21,7 @@ export default function CoordinacionesPanel() {
   const [formData, setFormData] = useState({
     titulo: '',
     nombre_cliente: '',
+    telefono: '',
     tipo_evento: '',
     codigo_evento: '',
     fecha_evento: '',
@@ -163,6 +164,7 @@ export default function CoordinacionesPanel() {
     setFormData({
       titulo: item.titulo,
       nombre_cliente: item.nombre_cliente || '',
+      telefono: item.telefono || '',
       tipo_evento: item.tipo_evento || '',
       codigo_evento: item.codigo_evento || '',
       fecha_evento: item.fecha_evento ? format(new Date(item.fecha_evento), 'yyyy-MM-dd') : '',
@@ -525,6 +527,7 @@ export default function CoordinacionesPanel() {
                     setFormData({
                       titulo: '',
                       nombre_cliente: '',
+                      telefono: '',
                       tipo_evento: '',
                       codigo_evento: '',
                       fecha_evento: '',
@@ -709,6 +712,12 @@ export default function CoordinacionesPanel() {
                   <div className={styles.detail}>
                     <span className={styles.detailLabel}>🔢 Código:</span>
                     <span><strong>{item.codigo_evento}</strong></span>
+                  </div>
+                )}
+                {item.telefono && (
+                  <div className={styles.detail}>
+                    <span className={styles.detailLabel}>📞 Teléfono:</span>
+                    <span>{item.telefono}</span>
                   </div>
                 )}
                 {item.hora_evento && (
