@@ -390,9 +390,15 @@ export default function PreCoordinacionPage() {
       setRespuestasCliente(respuestasParaGuardar);
       
       // Marcar como enviada y mostrar mensaje de cierre
-      setPreCoordinacionEnviada(true);
+      // Primero ocultar confirmación, luego marcar como enviada
       setMostrarConfirmacion(false);
       setGuardando(false);
+      // Usar setTimeout para asegurar que el estado se actualice correctamente
+      setTimeout(() => {
+        setPreCoordinacionEnviada(true);
+        // Scroll al inicio para mostrar el mensaje de cierre
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
     } catch (err) {
       console.error('Error al finalizar:', err);
       setError(err.response?.data?.error || 'Error al guardar las respuestas. Por favor, intenta nuevamente.');
