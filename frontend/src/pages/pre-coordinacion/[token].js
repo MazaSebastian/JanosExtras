@@ -432,7 +432,29 @@ export default function PreCoordinacionPage() {
 
 
   // Mostrar resumen para confirmar antes de enviar
-  if (mostrarConfirmacion && !preCoordinacionEnviada) {
+  // Primero verificar si ya se envió (mensaje de cierre tiene prioridad)
+  if (preCoordinacionEnviada) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.mensajeCierreContainer}>
+          <div className={styles.mensajeCierreIcono}>✅</div>
+          <h1 className={styles.mensajeCierreTitulo}>¡Pre-Coordinación Finalizada!</h1>
+          <p className={styles.mensajeCierreTexto}>
+            Hemos recibido tu información y la hemos enviado a nuestro DJ.
+          </p>
+          <p className={styles.mensajeCierreTexto}>
+            Te contactaremos próximamente para coordinar los detalles finales de tu evento.
+          </p>
+          <div className={styles.mensajeCierreDetalle}>
+            <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar resumen para confirmar antes de enviar
+  if (mostrarConfirmacion) {
     return (
       <div className={styles.container}>
         <div className={styles.resumenContainer}>
@@ -598,26 +620,6 @@ export default function PreCoordinacionPage() {
     );
   }
 
-  // Mostrar mensaje de cierre después de enviar
-  if (preCoordinacionEnviada) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.mensajeCierreContainer}>
-          <div className={styles.mensajeCierreIcono}>✅</div>
-          <h1 className={styles.mensajeCierreTitulo}>¡Pre-Coordinación Finalizada!</h1>
-          <p className={styles.mensajeCierreTexto}>
-            Hemos recibido tu información y la hemos enviado a nuestro DJ.
-          </p>
-          <p className={styles.mensajeCierreTexto}>
-            Te contactaremos próximamente para coordinar los detalles finales de tu evento.
-          </p>
-          <div className={styles.mensajeCierreDetalle}>
-            <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.container}>
