@@ -400,6 +400,10 @@ export default function CoordinacionesPanel() {
             }
             setFormData({
               titulo: '',
+              nombre_cliente: '',
+              telefono: '',
+              tipo_evento: '',
+              codigo_evento: '',
               descripcion: '',
               fecha_evento: '',
               hora_evento: '',
@@ -435,6 +439,15 @@ export default function CoordinacionesPanel() {
                   onChange={(e) => setFormData({ ...formData, nombre_cliente: e.target.value })}
                   required
                   placeholder="Ingrese el nombre del cliente"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Teléfono</label>
+                <input
+                  type="tel"
+                  value={formData.telefono}
+                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  placeholder="Ingrese el teléfono del cliente"
                 />
               </div>
               <div className={styles.formGroup}>
