@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI } from '@/services/api';
+import Loading from '@/components/Loading';
 import styles from '@/styles/CoordinacionFlujo.module.css';
 
 // Definición de pasos por tipo de evento
