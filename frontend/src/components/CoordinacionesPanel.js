@@ -496,30 +496,6 @@ export default function CoordinacionesPanel() {
                   </div>
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
-                      <label>Hora</label>
-                      <input
-                        type="time"
-                        value={formData.hora_evento}
-                        onChange={(e) => setFormData({ ...formData, hora_evento: e.target.value })}
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Salón</label>
-                      <select
-                        value={formData.salon_id}
-                        onChange={(e) => setFormData({ ...formData, salon_id: e.target.value })}
-                      >
-                        <option value="">Seleccionar salón</option>
-                        {salones.map((salon) => (
-                          <option key={salon.id} value={salon.id}>
-                            {salon.nombre}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
                       <label>Estado</label>
                       <select
                         value={formData.estado}
@@ -529,18 +505,6 @@ export default function CoordinacionesPanel() {
                         <option value="en_proceso">En Proceso</option>
                         <option value="completado">Completada</option>
                         <option value="cancelada">Cancelada</option>
-                      </select>
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Prioridad</label>
-                      <select
-                        value={formData.prioridad}
-                        onChange={(e) => setFormData({ ...formData, prioridad: e.target.value })}
-                      >
-                        <option value="baja">Baja</option>
-                        <option value="normal">Normal</option>
-                        <option value="alta">Alta</option>
-                        <option value="urgente">Urgente</option>
                       </select>
                     </div>
                   </div>
@@ -555,14 +519,6 @@ export default function CoordinacionesPanel() {
                       />
                     </div>
                   )}
-                  <div className={styles.formGroup}>
-                    <label>Descripción</label>
-                    <textarea
-                      value={formData.descripcion}
-                      onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                      rows="4"
-                    />
-                  </div>
                   <div className={styles.formGroup}>
                     <label>Notas</label>
                     <textarea
