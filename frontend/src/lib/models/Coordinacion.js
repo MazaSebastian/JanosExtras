@@ -50,6 +50,11 @@ export class Coordinacion {
         c.activo,
         c.fecha_creacion,
         c.fecha_actualizacion,
+        c.pre_coordinacion_token,
+        c.pre_coordinacion_url,
+        c.pre_coordinacion_fecha_creacion,
+        c.pre_coordinacion_completado_por_cliente,
+        c.pre_coordinacion_fecha_completado,
         d.nombre AS dj_responsable_nombre,
         d.color_hex AS dj_responsable_color,
         s.nombre AS salon_nombre,
@@ -93,6 +98,11 @@ export class Coordinacion {
         c.creado_por,
         c.fecha_creacion,
         c.fecha_actualizacion,
+        c.pre_coordinacion_token,
+        c.pre_coordinacion_url,
+        c.pre_coordinacion_fecha_creacion,
+        c.pre_coordinacion_completado_por_cliente,
+        c.pre_coordinacion_fecha_completado,
         d.nombre AS dj_responsable_nombre,
         d.color_hex AS dj_responsable_color,
         s.nombre AS salon_nombre,
@@ -131,7 +141,7 @@ export class Coordinacion {
     return result.rows[0];
   }
 
-  static async update(id, { titulo, descripcion, nombre_cliente, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo }) {
+  static async update(id, { titulo, descripcion, nombre_cliente, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado }) {
     const updates = [];
     const values = [];
     let paramIndex = 1;
@@ -202,6 +212,36 @@ export class Coordinacion {
       paramIndex++;
     }
 
+    if (pre_coordinacion_token !== undefined) {
+      updates.push(`pre_coordinacion_token = $${paramIndex}`);
+      values.push(pre_coordinacion_token);
+      paramIndex++;
+    }
+
+    if (pre_coordinacion_url !== undefined) {
+      updates.push(`pre_coordinacion_url = $${paramIndex}`);
+      values.push(pre_coordinacion_url);
+      paramIndex++;
+    }
+
+    if (pre_coordinacion_fecha_creacion !== undefined) {
+      updates.push(`pre_coordinacion_fecha_creacion = $${paramIndex}`);
+      values.push(pre_coordinacion_fecha_creacion);
+      paramIndex++;
+    }
+
+    if (pre_coordinacion_completado_por_cliente !== undefined) {
+      updates.push(`pre_coordinacion_completado_por_cliente = $${paramIndex}`);
+      values.push(pre_coordinacion_completado_por_cliente);
+      paramIndex++;
+    }
+
+    if (pre_coordinacion_fecha_completado !== undefined) {
+      updates.push(`pre_coordinacion_fecha_completado = $${paramIndex}`);
+      values.push(pre_coordinacion_fecha_completado);
+      paramIndex++;
+    }
+
     if (updates.length === 0) {
       return await this.findById(id);
     }
@@ -213,7 +253,7 @@ export class Coordinacion {
       UPDATE coordinaciones
       SET ${updates.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, titulo, descripcion, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion
+      RETURNING id, titulo, descripcion, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado
     `;
     const result = await pool.query(query, values);
     return result.rows[0] || null;

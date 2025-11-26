@@ -1,0 +1,271 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.titulo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.infoGeneral {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9ff;
+  border-radius: 8px;
+}
+
+.infoItem {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.infoItem strong {
+  color: #667eea;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.progressBar {
+  width: 100%;
+  max-width: 800px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: white;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #333;
+  font-weight: 600;
+  font-size: 0.9rem;
+  z-index: 1;
+}
+
+.errorContainer,
+.confirmacionContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.confirmacionContainer h1 {
+  color: #4caf50;
+  margin-bottom: 1rem;
+}
+
+.error {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #856404;
+  font-weight: 500;
+}
+
+.pasoContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.pasoTitulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  margin: 0 0 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.preguntas {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pregunta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.preguntaLabel {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.required {
+  color: #f44336;
+}
+
+.input,
+.textarea {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.navegacion {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.botonAnterior,
+.botonSiguiente,
+.botonFinalizar,
+.botonVolver {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.botonAnterior {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.botonAnterior:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.botonAnterior:not(:disabled):hover {
+  background: #e0e0e0;
+}
+
+.botonSiguiente,
+.botonFinalizar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex: 1;
+}
+
+.botonSiguiente:hover,
+.botonFinalizar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.botonVolver {
+  background: #f5f5f5;
+  color: #333;
+  margin-top: 1rem;
+}
+
+.botonVolver:hover {
+  background: #e0e0e0;
+}
+
+.footer {
+  text-align: center;
+  color: white;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  max-width: 800px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+
+  .header,
+  .pasoContainer {
+    padding: 1.5rem;
+  }
+
+  .titulo {
+    font-size: 1.5rem;
+  }
+
+  .infoGeneral {
+    grid-template-columns: 1fr;
+  }
+
+  .navegacion {
+    flex-direction: column;
+  }
+
+  .botonAnterior,
+  .botonSiguiente {
+    width: 100%;
+  }
+}
+

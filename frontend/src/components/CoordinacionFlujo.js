@@ -350,8 +350,33 @@ export default function CoordinacionFlujo({ coordinacionId }) {
       
       setCoordinacion(data);
       
-      // Cargar flujo existente si existe
-      // TODO: Implementar carga de flujo guardado
+      // Cargar flujo existente si existe (puede contener respuestas del cliente)
+      try {
+        const flujoResponse = await coordinacionesAPI.getFlujo(coordinacionId);
+        const flujoData = flujoResponse?.data || flujoResponse;
+        
+        if (flujoData && flujoData.respuestas) {
+          const respuestasExistentes = typeof flujoData.respuestas === 'string' 
+            ? JSON.parse(flujoData.respuestas) 
+            : flujoData.respuestas;
+          
+          // Pre-llenar respuestas (pueden venir del cliente o ser parciales del DJ)
+          setRespuestas(respuestasExistentes);
+          
+          // Si hay respuestas, continuar desde donde se quedó
+          if (flujoData.paso_actual && flujoData.paso_actual < 999) {
+            setPasoActual(flujoData.paso_actual);
+          }
+          
+          // Si fue completado por el cliente, mostrar mensaje informativo
+          if (flujoData.estado === 'completado_por_cliente' || data.pre_coordinacion_completado_por_cliente) {
+            console.log('✅ Esta coordinación ya fue completada por el cliente. Puedes revisar y editar las respuestas.');
+          }
+        }
+      } catch (err) {
+        // No es un error crítico si no hay flujo aún
+        console.log('No hay flujo guardado aún para esta coordinación');
+      }
       
       setLoading(false);
     } catch (err) {
@@ -669,6 +694,24 @@ export default function CoordinacionFlujo({ coordinacionId }) {
         </button>
         <h1>Coordinación: {coordinacion.nombre_cliente || coordinacion.titulo}</h1>
         <p className={styles.subtitle}>Tipo: {coordinacion.tipo_evento}</p>
+        {coordinacion.pre_coordinacion_completado_por_cliente && (
+          <div style={{
+            marginTop: '1rem',
+            padding: '1rem',
+            background: '#e8f5e9',
+            border: '2px solid #4caf50',
+            borderRadius: '8px',
+            color: '#2e7d32'
+          }}>
+            <strong>✅ Pre-Coordinación completada por el cliente</strong>
+            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
+              El cliente ya completó el cuestionario. Las respuestas están pre-llenadas. Puedes revisarlas y editarlas si es necesario.
+              {coordinacion.pre_coordinacion_fecha_completado && (
+                <span> (Completado el {format(new Date(coordinacion.pre_coordinacion_fecha_completado), 'dd/MM/yyyy', { locale: es })})</span>
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className={styles.progressBar}>

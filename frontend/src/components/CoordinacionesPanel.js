@@ -221,17 +221,41 @@ export default function CoordinacionesPanel() {
     }
   };
 
-  const handleEnviarPreCoordinacion = async (id) => {
+  const handleGenerarPreCoordinacion = async (id) => {
     try {
-      // Aquí se puede implementar la lógica para enviar pre-coordinación
-      // Por ahora, solo mostramos un mensaje
+      setGenerandoPreCoordinacion(true);
+      setError('');
       setPlayMenuOpen(null);
-      alert('Función "Enviar Pre-Coordinación" en desarrollo. Se enviará un email/notificación con los detalles de la coordinación.');
-      // TODO: Implementar envío de pre-coordinación
+
+      const response = await coordinacionesAPI.generarPreCoordinacion(id);
+      
+      if (response.data.success) {
+        setPreCoordinacionUrl(response.data.url);
+        setShowPreCoordinacionModal(true);
+        
+        // Recargar coordinaciones para actualizar el estado
+        loadCoordinaciones();
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al enviar la pre-coordinación.');
-      setPlayMenuOpen(null);
+      setError(err.response?.data?.error || 'Error al generar la pre-coordinación.');
+    } finally {
+      setGenerandoPreCoordinacion(false);
     }
+  };
+
+  const copiarUrl = () => {
+    navigator.clipboard.writeText(preCoordinacionUrl).then(() => {
+      alert('¡URL copiada al portapapeles! Ahora puedes compartirla con tu cliente.');
+    }).catch(() => {
+      // Fallback para navegadores que no soportan clipboard API
+      const textarea = document.createElement('textarea');
+      textarea.value = preCoordinacionUrl;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      alert('¡URL copiada al portapapeles!');
+    });
   };
 
   const togglePlayMenu = (id) => {
@@ -636,9 +660,18 @@ export default function CoordinacionesPanel() {
                         <button
                           type="button"
                           className={styles.playMenuItem}
-                          onClick={() => handleEnviarPreCoordinacion(item.id)}
+                          onClick={() => {
+                            if (item.pre_coordinacion_url) {
+                              setPreCoordinacionUrl(item.pre_coordinacion_url);
+                              setShowPreCoordinacionModal(true);
+                            } else {
+                              handleGenerarPreCoordinacion(item.id);
+                            }
+                          }}
+                          disabled={generandoPreCoordinacion || !item.tipo_evento}
+                          title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
                         >
-                          Enviar Pre-Coordinación
+                          {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
                         </button>
                       </div>
                     )}
@@ -693,6 +726,18 @@ export default function CoordinacionesPanel() {
                     <span>{item.dj_responsable_nombre}</span>
                   </div>
                 )}
+                {item.pre_coordinacion_completado_por_cliente && (
+                  <div className={styles.detail}>
+                    <span className={styles.detailLabel}>✅ Pre-Coordinación:</span>
+                    <span style={{ color: '#4caf50', fontWeight: 600 }}>Completada por cliente</span>
+                  </div>
+                )}
+                {item.pre_coordinacion_url && !item.pre_coordinacion_completado_por_cliente && (
+                  <div className={styles.detail}>
+                    <span className={styles.detailLabel}>📋 Pre-Coordinación:</span>
+                    <span style={{ color: '#ff9800', fontWeight: 600 }}>Pendiente de completar</span>
+                  </div>
+                )}
               </div>
               {item.notas && (
                 <div className={styles.notas}>
@@ -701,6 +746,70 @@ export default function CoordinacionesPanel() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal de Pre-Coordinación */}
+      {showPreCoordinacionModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowPreCoordinacionModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Link de Pre-Coordinación</h2>
+              <button
+                type="button"
+                className={styles.modalCloseButton}
+                onClick={() => setShowPreCoordinacionModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <p style={{ marginBottom: '1rem', color: '#666' }}>
+                Comparte este link con tu cliente para que complete la información del evento antes de la reunión.
+              </p>
+              <div style={{ 
+                display: 'flex', 
+                gap: '0.5rem', 
+                marginBottom: '1rem',
+                padding: '1rem',
+                background: '#f5f5f5',
+                borderRadius: '8px',
+                wordBreak: 'break-all'
+              }}>
+                <input
+                  type="text"
+                  value={preCoordinacionUrl}
+                  readOnly
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '0.9rem'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={copiarUrl}
+                  className={styles.saveButton}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  📋 Copiar
+                </button>
+              </div>
+              {preCoordinacionUrl && (
+                <div style={{ 
+                  padding: '1rem', 
+                  background: '#e8f5e9', 
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  color: '#2e7d32'
+                }}>
+                  <strong>💡 Tip:</strong> Puedes copiar este link y enviarlo por WhatsApp, email o cualquier medio a tu cliente.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

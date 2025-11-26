@@ -135,6 +135,26 @@ export const coordinacionesAPI = {
   // Flujo API
   saveFlujo: (id, data) => api.post(`/coordinaciones/${id}/flujo`, data),
   completeFlujo: (id, data) => api.post(`/coordinaciones/${id}/flujo/complete`, data),
+  // Pre-Coordinación API
+  generarPreCoordinacion: (id) => api.post(`/coordinaciones/${id}/generar-pre-coordinacion`),
+};
+
+// Pre-Coordinación API (pública, sin autenticación)
+export const preCoordinacionAPI = {
+  getByToken: (token) => {
+    const publicApi = api.create({
+      baseURL: api.defaults.baseURL,
+      headers: {},
+    });
+    return publicApi.get(`/pre-coordinacion/${token}`);
+  },
+  guardarRespuestas: (token, respuestas) => {
+    const publicApi = api.create({
+      baseURL: api.defaults.baseURL,
+      headers: {},
+    });
+    return publicApi.post(`/pre-coordinacion/${token}`, { respuestas });
+  },
 };
 
 
