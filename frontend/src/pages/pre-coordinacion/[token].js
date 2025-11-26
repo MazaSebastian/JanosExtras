@@ -272,7 +272,30 @@ export default function PreCoordinacionPage() {
       setGuardando(true);
       setError('');
       
-      await preCoordinacionAPI.guardarRespuestas(token, respuestasCliente);
+      // Convertir respuestas de botones a formato compatible
+      const respuestasParaGuardar = { ...respuestasCliente };
+      Object.keys(respuestasParaGuardar).forEach(key => {
+        const valor = respuestasParaGuardar[key];
+        if (Array.isArray(valor)) {
+          // Convertir array de botones a string legible
+          const tieneObjetos = valor.some(v => typeof v === 'object');
+          if (tieneObjetos) {
+            respuestasParaGuardar[key] = valor.map(v => {
+              if (typeof v === 'object' && v.tipo === 'otro') {
+                return `Otro: ${v.valor}`;
+              }
+              return v;
+            }).join(', ');
+          } else {
+            respuestasParaGuardar[key] = valor.join(', ');
+          }
+        }
+      });
+      
+      await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+      
+      // Actualizar estado local con formato convertido para el resumen
+      setRespuestasCliente(respuestasParaGuardar);
       
       // Mostrar resumen en lugar de redirigir
       setMostrarConfirmacion(false);
@@ -388,6 +411,24 @@ export default function PreCoordinacionPage() {
                               </div>
                             ))}
                           </div>
+                        </div>
+                      );
+                    }
+
+                    // Manejar botones seleccionables
+                    if (pregunta.tipo === 'buttons' && Array.isArray(valor)) {
+                      const valoresTexto = valor.map(v => {
+                        if (typeof v === 'object' && v.tipo === 'otro') {
+                          return `Otro: ${v.valor}`;
+                        }
+                        return v;
+                      });
+                      return (
+                        <div key={pregunta.id} className={styles.resumenCampo}>
+                          <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                          <span className={styles.resumenValor}>
+                            {valoresTexto.join(', ')}
+                          </span>
                         </div>
                       );
                     }
