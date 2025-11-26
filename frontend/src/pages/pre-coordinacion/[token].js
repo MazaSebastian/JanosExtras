@@ -409,8 +409,21 @@ export default function PreCoordinacionPage() {
             {pasos.map((paso) => {
               const preguntasRespondidas = paso.preguntas.filter(p => {
                 const esCondicional = p.condicional && p.condicional.pregunta;
-                const debeMostrar = !esCondicional || 
-                  (respuestasCliente[p.condicional.pregunta] === p.condicional.valor);
+                let debeMostrar = true;
+                
+                if (esCondicional) {
+                  const valorCondicional = respuestasCliente[p.condicional.pregunta];
+                  const valorEsperado = p.condicional.valor;
+                  
+                  // Manejar tanto valores string como arrays (para botones)
+                  if (Array.isArray(valorCondicional)) {
+                    debeMostrar = valorCondicional.includes(valorEsperado);
+                  } else if (typeof valorCondicional === 'string') {
+                    debeMostrar = valorCondicional === valorEsperado;
+                  } else {
+                    debeMostrar = false;
+                  }
+                }
                 
                 if (!debeMostrar) return false;
                 
