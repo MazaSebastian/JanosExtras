@@ -38,29 +38,25 @@ export default async function handler(req, res) {
     const shortToken = (fullUUID.substring(0, 8) + timestamp.substring(timestamp.length - 4)).toLowerCase();
     
     // Generar URL comercial (siempre usar el dominio principal en producción)
+    // Prioridad: NEXT_PUBLIC_APP_URL (si contiene janosdjs.com) > janosdjs.com > VERCEL_URL (solo en desarrollo)
     let baseUrl = 'https://janosdjs.com';
     
-    // Solo usar VERCEL_URL o NEXT_PUBLIC_APP_URL si estamos en desarrollo o staging
-    // Verificar si VERCEL_URL contiene el dominio principal
-    const isProduction = process.env.NODE_ENV === 'production' && 
-                        !process.env.VERCEL_URL?.includes('localhost') &&
-                        !process.env.VERCEL_URL?.includes('vercel.app');
-    
-    if (!isProduction) {
-      // En desarrollo/staging, usar la URL disponible
-      if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.includes('janosdjs.com')) {
-        baseUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
-          ? process.env.NEXT_PUBLIC_APP_URL 
-          : `https://${process.env.NEXT_PUBLIC_APP_URL}`;
-      } else if (process.env.VERCEL_URL && process.env.VERCEL_URL.includes('janosdjs.com')) {
-        baseUrl = `https://${process.env.VERCEL_URL}`;
-      } else if (process.env.NEXT_PUBLIC_APP_URL) {
-        baseUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
-          ? process.env.NEXT_PUBLIC_APP_URL 
-          : `https://${process.env.NEXT_PUBLIC_APP_URL}`;
-      } else if (process.env.VERCEL_URL) {
+    // Si hay una variable de entorno con el dominio comercial, usarla
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
+        ? process.env.NEXT_PUBLIC_APP_URL 
+        : `https://${process.env.NEXT_PUBLIC_APP_URL}`;
+      
+      // Solo usar si contiene el dominio comercial
+      if (appUrl.includes('janosdjs.com')) {
+        baseUrl = appUrl;
+      }
+    } else if (process.env.VERCEL_URL) {
+      // Solo usar VERCEL_URL si contiene el dominio comercial, de lo contrario usar janosdjs.com
+      if (process.env.VERCEL_URL.includes('janosdjs.com')) {
         baseUrl = `https://${process.env.VERCEL_URL}`;
       }
+      // Si no contiene janosdjs.com, mantener el default (janosdjs.com)
     }
     
     // Usar ruta más corta: /pre/[token] en lugar de /pre-coordinacion/[token]
