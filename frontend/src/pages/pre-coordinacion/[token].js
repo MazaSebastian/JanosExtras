@@ -36,7 +36,31 @@ export default function PreCoordinacionPage() {
       
       setCoordinacion(data.coordinacion);
       const respuestas = data.respuestasCliente || {};
-      setRespuestasCliente(respuestas);
+      
+      // Convertir respuestas guardadas (strings) de vuelta a arrays para botones
+      const respuestasConvertidas = { ...respuestas };
+      const tipoEvento = data.coordinacion.tipo_evento?.trim();
+      const pasos = CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [];
+      
+      pasos.forEach(paso => {
+        paso.preguntas.forEach(pregunta => {
+          if (pregunta.tipo === 'buttons' && respuestasConvertidas[pregunta.id]) {
+            const valor = respuestasConvertidas[pregunta.id];
+            // Si es string, convertir a array
+            if (typeof valor === 'string') {
+              respuestasConvertidas[pregunta.id] = valor.split(', ').map(v => {
+                // Si contiene "Otro:", convertir a objeto
+                if (v.startsWith('Otro: ')) {
+                  return { tipo: 'otro', valor: v.replace('Otro: ', '') };
+                }
+                return v;
+              });
+            }
+          }
+        });
+      });
+      
+      setRespuestasCliente(respuestasConvertidas);
       
       // Si ya hay respuestas, comenzar desde el primer paso no completado
       if (respuestas && Object.keys(respuestas).length > 0) {
