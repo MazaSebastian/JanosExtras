@@ -18,6 +18,7 @@ export default function PreCoordinacionPage() {
   const [pasoActual, setPasoActual] = useState(1);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [mostrarResumen, setMostrarResumen] = useState(false);
+  const [preCoordinacionEnviada, setPreCoordinacionEnviada] = useState(false);
   const [showVelaModal, setShowVelaModal] = useState(false);
   const [velaForm, setVelaForm] = useState({ nombre: '', familiar: '', cancion: '' });
 
@@ -338,7 +339,7 @@ export default function PreCoordinacionPage() {
       // Scroll al inicio
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      // Último paso - mostrar confirmación
+      // Último paso - mostrar resumen para confirmar
       setMostrarConfirmacion(true);
     }
   };
@@ -390,9 +391,10 @@ export default function PreCoordinacionPage() {
       // Actualizar estado local con formato convertido para el resumen
       setRespuestasCliente(respuestasParaGuardar);
       
-      // Mostrar resumen en lugar de redirigir
+      // Marcar como enviada y mostrar mensaje de cierre
+      setPreCoordinacionEnviada(true);
       setMostrarConfirmacion(false);
-      setMostrarResumen(true);
+      setMostrarResumen(false);
       setGuardando(false);
     } catch (err) {
       console.error('Error al finalizar:', err);
@@ -581,25 +583,189 @@ export default function PreCoordinacionPage() {
     );
   }
 
-  if (mostrarConfirmacion) {
+  // Mostrar resumen para confirmar antes de enviar
+  if (mostrarConfirmacion && !preCoordinacionEnviada) {
     return (
       <div className={styles.container}>
-        <div className={styles.confirmacionContainer}>
-          <h1>✅ ¡Cuestionario completado!</h1>
-          <p>Por favor, revisa que toda la información sea correcta antes de enviar.</p>
-          <button
-            onClick={handleFinalizar}
-            disabled={guardando}
-            className={styles.botonFinalizar}
-          >
-            {guardando ? 'Enviando...' : 'Confirmar y Enviar'}
-          </button>
-          <button
-            onClick={() => setMostrarConfirmacion(false)}
-            className={styles.botonVolver}
-          >
-            Volver para revisar
-          </button>
+        <div className={styles.resumenContainer}>
+          <div className={styles.resumenHeader}>
+            <h1>✅ ¡Cuestionario Completado!</h1>
+            <p className={styles.mensajeConfirmacion}>
+              Por favor, revisa que toda la información sea correcta antes de enviar.
+            </p>
+          </div>
+          
+          <div className={styles.resumenContent}>
+            <h2 className={styles.resumenTitulo}>Resumen de tu Pre-Coordinación</h2>
+            
+            <div className={styles.resumenInfoGeneral}>
+              <div className={styles.resumenInfoItem}>
+                <strong>Cliente:</strong> {coordinacion.nombre_cliente || coordinacion.titulo}
+              </div>
+              <div className={styles.resumenInfoItem}>
+                <strong>Tipo de Evento:</strong> {coordinacion.tipo_evento}
+              </div>
+              {coordinacion.fecha_evento && (
+                <div className={styles.resumenInfoItem}>
+                  <strong>Fecha:</strong> {format(new Date(coordinacion.fecha_evento), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                </div>
+              )}
+              {coordinacion.salon_nombre && (
+                <div className={styles.resumenInfoItem}>
+                  <strong>Salón:</strong> {coordinacion.salon_nombre}
+                </div>
+              )}
+            </div>
+
+            {pasos.map((paso) => {
+              const preguntasRespondidas = paso.preguntas.filter(p => {
+                const esCondicional = p.condicional && p.condicional.pregunta;
+                let debeMostrar = true;
+                
+                if (esCondicional) {
+                  const valorCondicional = respuestasCliente[p.condicional.pregunta];
+                  const valorEsperado = p.condicional.valor;
+                  
+                  // Manejar tanto valores string como arrays (para botones)
+                  if (Array.isArray(valorCondicional)) {
+                    debeMostrar = valorCondicional.includes(valorEsperado);
+                  } else if (typeof valorCondicional === 'string') {
+                    debeMostrar = valorCondicional === valorEsperado;
+                  } else {
+                    debeMostrar = false;
+                  }
+                }
+                
+                if (!debeMostrar) return false;
+                
+                const valor = respuestasCliente[p.id];
+                if (p.tipo === 'velas') {
+                  return Array.isArray(valor) && valor.length > 0;
+                }
+                if (p.tipo === 'buttons') {
+                  return Array.isArray(valor) && valor.length > 0;
+                }
+                return valor !== undefined && valor !== null && valor !== '';
+              });
+
+              if (preguntasRespondidas.length === 0) return null;
+
+              return (
+                <div key={paso.id} className={styles.resumenSeccion}>
+                  <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
+                  {paso.preguntas.map((pregunta) => {
+                    const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                    let debeMostrar = true;
+                    
+                    if (esCondicional) {
+                      const valorCondicional = respuestasCliente[pregunta.condicional.pregunta];
+                      const valorEsperado = pregunta.condicional.valor;
+                      
+                      // Manejar tanto valores string como arrays (para botones)
+                      if (Array.isArray(valorCondicional)) {
+                        debeMostrar = valorCondicional.includes(valorEsperado);
+                      } else if (typeof valorCondicional === 'string') {
+                        debeMostrar = valorCondicional === valorEsperado;
+                      } else {
+                        debeMostrar = false;
+                      }
+                    }
+                    
+                    if (!debeMostrar) return null;
+
+                    const valor = respuestasCliente[pregunta.id];
+                    if (valor === undefined || valor === null || valor === '') return null;
+
+                    if (pregunta.tipo === 'velas' && Array.isArray(valor)) {
+                      return (
+                        <div key={pregunta.id} className={styles.resumenCampo}>
+                          <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                          <div className={styles.resumenValor}>
+                            {valor.map((vela, idx) => (
+                              <div key={idx} className={styles.velaItem}>
+                                <strong>{vela.nombre}</strong> - {vela.familiar}
+                                <br />
+                                🎵 {vela.cancion}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Manejar botones seleccionables
+                    if (pregunta.tipo === 'buttons' && Array.isArray(valor)) {
+                      const valoresTexto = valor.map(v => {
+                        if (typeof v === 'object' && v.tipo === 'otro') {
+                          return `Otro: ${v.valor}`;
+                        }
+                        return v;
+                      });
+                      return (
+                        <div key={pregunta.id} className={styles.resumenCampo}>
+                          <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                          <span className={styles.resumenValor}>
+                            {valoresTexto.join(', ')}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={pregunta.id} className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                        <span className={styles.resumenValor}>
+                          {String(valor).split('\n').map((line, i) => (
+                            <span key={i}>
+                              {line}
+                              {i < String(valor).split('\n').length - 1 && <br />}
+                            </span>
+                          ))}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className={styles.resumenAcciones}>
+            <button
+              onClick={handleFinalizar}
+              disabled={guardando}
+              className={styles.botonFinalizar}
+            >
+              {guardando ? 'Enviando...' : 'Confirmar y Enviar'}
+            </button>
+            <button
+              onClick={() => setMostrarConfirmacion(false)}
+              className={styles.botonVolver}
+            >
+              Volver para revisar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar mensaje de cierre después de enviar
+  if (preCoordinacionEnviada) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.mensajeCierreContainer}>
+          <div className={styles.mensajeCierreIcono}>✅</div>
+          <h1 className={styles.mensajeCierreTitulo}>¡Pre-Coordinación Finalizada!</h1>
+          <p className={styles.mensajeCierreTexto}>
+            Hemos recibido tu información y la hemos enviado a nuestro DJ.
+          </p>
+          <p className={styles.mensajeCierreTexto}>
+            Te contactaremos próximamente para coordinar los detalles finales de tu evento.
+          </p>
+          <div className={styles.mensajeCierreDetalle}>
+            <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
+          </div>
         </div>
       </div>
     );
