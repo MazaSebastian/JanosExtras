@@ -74,7 +74,15 @@ export default async function handler(req, res) {
       return res.json(coordinacion);
     } catch (error) {
       console.error('Error al actualizar coordinación:', error);
-      return res.status(500).json({ error: 'Error al actualizar coordinación' });
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        body: req.body
+      });
+      return res.status(500).json({ 
+        error: 'Error al actualizar coordinación',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 

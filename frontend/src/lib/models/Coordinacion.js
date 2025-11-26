@@ -257,14 +257,26 @@ export class Coordinacion {
     updates.push(`fecha_actualizacion = CURRENT_TIMESTAMP`);
     values.push(id);
 
+    if (updates.length === 0) {
+      return await this.findById(id);
+    }
+
     const query = `
       UPDATE coordinaciones
       SET ${updates.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, titulo, descripcion, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado
+      RETURNING id, titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado
     `;
-    const result = await pool.query(query, values);
-    return result.rows[0] || null;
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error('Error en query UPDATE coordinaciones:', error);
+      console.error('Query:', query);
+      console.error('Values:', values);
+      throw error;
+    }
   }
 
   static async delete(id) {
