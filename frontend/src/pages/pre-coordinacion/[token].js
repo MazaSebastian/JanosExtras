@@ -386,13 +386,11 @@ export default function PreCoordinacionPage() {
       
       await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
       
-      // Ocultar resumen de confirmación inmediatamente
-      setMostrarConfirmacion(false);
-      
       // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
       
-      // Marcar como enviada para mostrar mensaje de cierre
+      // Ocultar resumen y marcar como enviada para mostrar mensaje de cierre
+      setMostrarConfirmacion(false);
       setPreCoordinacionEnviada(true);
       setGuardando(false);
       
