@@ -84,10 +84,18 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           placeholder: 'Nombre de la canción y artista'
         },
         { 
+          id: 'realiza_ingreso_salon', 
+          label: '¿Realizas ingreso al salón?', 
+          tipo: 'select', 
+          opciones: ['Sí', 'No'], 
+          requerido: true 
+        },
+        { 
           id: 'cancion_ingreso_salon', 
-          label: '¿Qué canción te gustaría para tu ingreso al salón? (este es un momento muy importante)', 
+          label: 'Canción de ingreso:', 
           tipo: 'textarea', 
-          requerido: true,
+          requerido: false,
+          condicional: { pregunta: 'realiza_ingreso_salon', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
       ],
@@ -843,10 +851,18 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Tu momento especial',
       preguntas: [
         { 
+          id: 'realiza_ingreso_salon', 
+          label: '¿Realizas ingreso al salón?', 
+          tipo: 'select', 
+          opciones: ['Sí', 'No'], 
+          requerido: true 
+        },
+        { 
           id: 'cancion_ingreso_salon', 
-          label: '¿Qué canción te gustaría para tu ingreso al salón?', 
+          label: 'Canción de ingreso:', 
           tipo: 'textarea', 
-          requerido: true,
+          requerido: false,
+          condicional: { pregunta: 'realiza_ingreso_salon', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
       ],
