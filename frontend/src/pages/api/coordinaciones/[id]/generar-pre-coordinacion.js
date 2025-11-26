@@ -31,19 +31,43 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'La coordinación debe tener un tipo de evento para generar pre-coordinación' });
     }
 
-    // Generar token único
-    const token = randomUUID();
-
-    // Generar URL (usar la URL del frontend desde variables de entorno o construirla)
+    // Generar token único más corto y amigable (12 caracteres alfanuméricos)
+    // Combinar UUID sin guiones + timestamp para garantizar unicidad
+    const fullUUID = randomUUID().replace(/-/g, '');
+    const timestamp = Date.now().toString(36); // Base 36 para más corto
+    const shortToken = (fullUUID.substring(0, 8) + timestamp.substring(timestamp.length - 4)).toLowerCase();
+    
+    // Generar URL comercial (siempre usar el dominio principal en producción)
     let baseUrl = 'https://janosdjs.com';
-    if (process.env.NEXT_PUBLIC_APP_URL) {
-      baseUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
-        ? process.env.NEXT_PUBLIC_APP_URL 
-        : `https://${process.env.NEXT_PUBLIC_APP_URL}`;
-    } else if (process.env.VERCEL_URL) {
-      baseUrl = `https://${process.env.VERCEL_URL}`;
+    
+    // Solo usar VERCEL_URL o NEXT_PUBLIC_APP_URL si estamos en desarrollo o staging
+    // Verificar si VERCEL_URL contiene el dominio principal
+    const isProduction = process.env.NODE_ENV === 'production' && 
+                        !process.env.VERCEL_URL?.includes('localhost') &&
+                        !process.env.VERCEL_URL?.includes('vercel.app');
+    
+    if (!isProduction) {
+      // En desarrollo/staging, usar la URL disponible
+      if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.includes('janosdjs.com')) {
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
+          ? process.env.NEXT_PUBLIC_APP_URL 
+          : `https://${process.env.NEXT_PUBLIC_APP_URL}`;
+      } else if (process.env.VERCEL_URL && process.env.VERCEL_URL.includes('janosdjs.com')) {
+        baseUrl = `https://${process.env.VERCEL_URL}`;
+      } else if (process.env.NEXT_PUBLIC_APP_URL) {
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
+          ? process.env.NEXT_PUBLIC_APP_URL 
+          : `https://${process.env.NEXT_PUBLIC_APP_URL}`;
+      } else if (process.env.VERCEL_URL) {
+        baseUrl = `https://${process.env.VERCEL_URL}`;
+      }
     }
-    const preCoordinacionUrl = `${baseUrl}/pre-coordinacion/${token}`;
+    
+    // Usar ruta más corta: /pre/[token] en lugar de /pre-coordinacion/[token]
+    const preCoordinacionUrl = `${baseUrl}/pre/${shortToken}`;
+    
+    // Guardar el token corto en la base de datos (más amigable para URLs)
+    const token = shortToken;
 
     // Actualizar la coordinación con el token y URL
     const coordinacionActualizada = await Coordinacion.update(parseInt(id, 10), {
