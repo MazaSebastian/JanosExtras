@@ -137,10 +137,40 @@ export default function PreCoordinacionPage() {
       
       // Si es el último paso y la respuesta es "No", finalizar automáticamente
       if (pasoActual === totalPasos && preguntaId === 'realiza_ingreso_carioca' && opcion === 'No' && !yaSeleccionado) {
-        // Guardar progreso y mostrar resumen
-        await guardarProgreso();
-        setMostrarConfirmacion(false);
-        setMostrarResumen(true);
+        // Esperar un momento para que el estado se actualice
+        setTimeout(async () => {
+          // Guardar progreso con la respuesta actualizada
+          const respuestasActualizadas = {
+            ...respuestasCliente,
+            [preguntaId]: nuevoValor,
+          };
+          
+          // Convertir respuestas para guardar
+          const respuestasParaGuardar = { ...respuestasActualizadas };
+          Object.keys(respuestasParaGuardar).forEach(key => {
+            const valor = respuestasParaGuardar[key];
+            if (Array.isArray(valor)) {
+              const tieneObjetos = valor.some(v => typeof v === 'object');
+              if (tieneObjetos) {
+                respuestasParaGuardar[key] = valor.map(v => {
+                  if (typeof v === 'object' && v.tipo === 'otro') {
+                    return `Otro: ${v.valor}`;
+                  }
+                  return v;
+                }).join(', ');
+              } else {
+                respuestasParaGuardar[key] = valor.join(', ');
+              }
+            }
+          });
+          
+          await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+          
+          // Actualizar estado local y mostrar resumen
+          setRespuestasCliente(respuestasActualizadas);
+          setMostrarConfirmacion(false);
+          setMostrarResumen(true);
+        }, 100);
       }
       return;
     }
