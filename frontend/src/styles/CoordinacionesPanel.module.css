@@ -50,12 +50,12 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(119, 44, 135, 0.3);
 }
 
 .addButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
 }
 
 .error {
@@ -620,7 +620,7 @@
   background: #f9f9f9;
   border-radius: 12px;
   padding: 1.5rem;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #772c87;
 }
 
 .resumenSeccionTitulo {
@@ -667,7 +667,7 @@
 .resumenVelaItem {
   padding: 1rem;
   background: white;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #772c87;
   border-radius: 8px;
 }
 

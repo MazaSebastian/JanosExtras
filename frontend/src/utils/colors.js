@@ -2,7 +2,7 @@
 // Cada salón tiene un color asignado, y todos los DJs de ese salón comparten el mismo color
 
 const colorPalette = [
-  '#667eea', // Azul púrpura - Salón Principal
+  '#772c87', // Morado - Salón Principal
   '#f093fb', // Rosa - Salón VIP
   '#4facfe', // Azul claro - Salón Terraza
   '#43e97b', // Verde
