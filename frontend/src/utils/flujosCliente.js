@@ -11,10 +11,12 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'tema_fiesta', 
           label: '¿Qué estilo te gusta más para tu fiesta?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Princesa (clásico y elegante)', 'Moderna y Trendy (actual y divertida)', 'Descontracturado (relajado y casual)'], 
           requerido: true,
-          ayuda: 'Elige el estilo que mejor represente cómo te imaginas tu celebración'
+          ayuda: 'Elige el estilo que mejor represente cómo te imaginas tu celebración',
+          multiple: false,
+          permiteOtro: false
         },
       ],
     },
@@ -71,9 +73,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realiza_ingreso_recepcion', 
           label: '¿Harás un ingreso especial a la recepción?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_recepcion', 
@@ -110,9 +114,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'baila_vals', 
           label: '¿Vas a bailar el vals?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_vals', 
@@ -132,9 +138,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'ceremonia_velas', 
           label: '¿Harás ceremonia de velas?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'velas', 
@@ -154,9 +162,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realiza_coreografia', 
           label: '¿Harás alguna coreografía o presentación especial?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'descripcion_coreografia', 
@@ -190,9 +200,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realiza_ingreso_carioca', 
           label: '¿Harás un ingreso especial a la carioca (fiesta)?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_carioca', 
@@ -305,9 +317,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'estilo_casamiento', 
           label: '¿Qué estilo tiene tu casamiento?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Ceremonial (tradicional y formal)', 'Formal y Elegante (sofisticado)', 'Descontracturado (relajado y divertido)'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
       ],
     },
@@ -364,9 +378,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realizan_ingreso_recepcion', 
           label: '¿Harán un ingreso especial a la recepción?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_recepcion', 
@@ -386,9 +402,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realizan_ceremonia_salon', 
           label: '¿Realizarán la ceremonia en el salón?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'detalles_ceremonia', 
@@ -448,9 +466,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'bailan_vals', 
           label: '¿Van a bailar el vals?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_vals', 
@@ -470,9 +490,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realizan_coreografia', 
           label: '¿Harán alguna coreografía o presentación especial?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'detalles_coreografia', 
@@ -513,9 +535,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realizan_ingreso_carioca', 
           label: '¿Harán un ingreso especial a la carioca (fiesta)?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'cancion_ingreso_carioca', 
@@ -628,9 +652,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'tematica_evento', 
           label: '¿Qué tipo de evento es?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Presentación', 'Charla o Conferencia', 'Team Building / Trabajo en Equipo', 'Fiesta o Celebración'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
       ],
     },
@@ -656,9 +682,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'requieren_escenario', 
           label: '¿Necesitan escenario?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'medidas_aproximadas', 
@@ -671,9 +699,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'contratan_pantalla', 
           label: '¿Contratan pantalla para proyectar?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'material_proyectar', 
@@ -693,9 +723,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realizan_sorteos', 
           label: '¿Van a realizar sorteos o rifas?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
       ],
     },
@@ -707,9 +739,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'hay_tandas_baile', 
           label: '¿Va a haber tandas de baile?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'tanda_1', 
@@ -811,9 +845,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'tematica_evento', 
           label: '¿Qué estilo tiene tu cumpleaños?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Formal (elegante y sofisticado)', 'Descontracturado (relajado y divertido)', 'Temático (con una temática específica)'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
       ],
     },
@@ -895,9 +931,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'realiza_coreografia', 
           label: '¿Harás alguna coreografía o presentación especial?', 
-          tipo: 'select', 
+          tipo: 'buttons', 
           opciones: ['Sí', 'No'], 
-          requerido: true 
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         { 
           id: 'descripcion_coreografia', 
