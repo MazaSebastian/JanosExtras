@@ -72,7 +72,17 @@ export default function PreCoordinacionPage() {
           const paso = pasos[i];
           const todasRespondidas = paso.preguntas.every(p => {
             if (p.condicional) {
-              const condicionCumplida = respuestas[p.condicional.pregunta] === p.condicional.valor;
+              const valorCondicional = respuestas[p.condicional.pregunta];
+              const valorEsperado = p.condicional.valor;
+              let condicionCumplida = false;
+              
+              // Manejar tanto valores string como arrays (para botones)
+              if (Array.isArray(valorCondicional)) {
+                condicionCumplida = valorCondicional.includes(valorEsperado);
+              } else if (typeof valorCondicional === 'string') {
+                condicionCumplida = valorCondicional === valorEsperado;
+              }
+              
               if (!condicionCumplida) return true; // Si no cumple condición, no es requerida
             }
             if (!p.requerido) return true; // Si no es requerida, se considera respondida
@@ -237,8 +247,16 @@ export default function PreCoordinacionPage() {
     const preguntasRequeridas = paso.preguntas.filter(p => {
       if (!p.requerido) return false;
       if (p.condicional) {
-        const condicionCumplida = respuestasCliente[p.condicional.pregunta] === p.condicional.valor;
-        return condicionCumplida;
+        const valorCondicional = respuestasCliente[p.condicional.pregunta];
+        const valorEsperado = p.condicional.valor;
+        
+        // Manejar tanto valores string como arrays (para botones)
+        if (Array.isArray(valorCondicional)) {
+          return valorCondicional.includes(valorEsperado);
+        } else if (typeof valorCondicional === 'string') {
+          return valorCondicional === valorEsperado;
+        }
+        return false;
       }
       return true;
     });
