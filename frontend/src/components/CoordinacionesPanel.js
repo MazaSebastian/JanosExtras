@@ -881,6 +881,116 @@ export default function CoordinacionesPanel() {
                     )}
                   </div>
 
+                  {/* Sección de Pre-Coordinación Completada */}
+                  {resumenData.coordinacion?.pre_coordinacion_completado_por_cliente && (
+                    <div className={styles.resumenSeccion} style={{ 
+                      background: '#e8f5e9', 
+                      padding: '1rem', 
+                      borderRadius: '8px',
+                      marginBottom: '1.5rem',
+                      border: '2px solid #4caf50'
+                    }}>
+                      <h3 className={styles.resumenSeccionTitulo} style={{ color: '#2e7d32' }}>
+                        ✅ Pre-Coordinación Completada por el Cliente
+                      </h3>
+                      <p style={{ color: '#2e7d32', marginBottom: '1rem', fontSize: '0.95rem' }}>
+                        El cliente completó la pre-coordinación el{' '}
+                        {resumenData.coordinacion.pre_coordinacion_fecha_completado
+                          ? format(new Date(resumenData.coordinacion.pre_coordinacion_fecha_completado), "dd 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })
+                          : 'fecha no disponible'}
+                      </p>
+                      {resumenData.flujo && resumenData.flujo.respuestas && (
+                        <div style={{ marginTop: '1rem' }}>
+                          <h4 style={{ color: '#2e7d32', marginBottom: '0.75rem', fontSize: '1rem' }}>
+                            Respuestas del Cliente:
+                          </h4>
+                          {(() => {
+                            const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
+                            const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+                            const respuestas = resumenData.flujo.respuestas;
+                            
+                            return pasos.map((paso) => {
+                              const tieneRespuestas = paso.preguntas.some((p) => {
+                                const esCondicional = p.condicional && p.condicional.pregunta;
+                                const debeMostrar =
+                                  !esCondicional ||
+                                  (respuestas[p.condicional.pregunta] === p.condicional.valor);
+                                if (!debeMostrar) return false;
+                                const valor = respuestas[p.id];
+                                return valor !== undefined && valor !== null && valor !== '';
+                              });
+
+                              if (!tieneRespuestas) return null;
+
+                              return (
+                                <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
+                                  <h5 style={{ 
+                                    color: '#2e7d32', 
+                                    fontSize: '0.95rem', 
+                                    fontWeight: 600,
+                                    marginBottom: '0.5rem',
+                                    paddingBottom: '0.5rem',
+                                    borderBottom: '1px solid #c8e6c9'
+                                  }}>
+                                    {paso.titulo}
+                                  </h5>
+                                  {paso.preguntas.map((pregunta) => {
+                                    const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                                    const debeMostrar =
+                                      !esCondicional ||
+                                      (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                                    if (!debeMostrar) return null;
+
+                                    const valor = respuestas[pregunta.id];
+                                    if (valor === undefined || valor === null || valor === '') return null;
+
+                                    if (pregunta.tipo === 'velas' && Array.isArray(valor)) {
+                                      return (
+                                        <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
+                                          <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                                          <div className={styles.resumenValor}>
+                                            {valor.map((vela, idx) => (
+                                              <div key={idx} style={{ 
+                                                marginBottom: '0.5rem',
+                                                padding: '0.5rem',
+                                                background: '#f1f8f4',
+                                                borderRadius: '4px'
+                                              }}>
+                                                <strong>{vela.nombre}</strong> - {vela.familiar}
+                                                <br />
+                                                🎵 {vela.cancion}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+
+                                    return (
+                                      <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
+                                        <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                                        <span className={styles.resumenValor}>
+                                          {String(valor)
+                                            .split('\n')
+                                            .map((line, i) => (
+                                              <span key={i}>
+                                                {line}
+                                                {i < String(valor).split('\n').length - 1 && <br />}
+                                              </span>
+                                            ))}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            });
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {resumenData.flujo && resumenData.flujo.respuestas ? (
                     (() => {
                       const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();

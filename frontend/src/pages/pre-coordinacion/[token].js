@@ -17,6 +17,7 @@ export default function PreCoordinacionPage() {
   const [respuestasCliente, setRespuestasCliente] = useState({});
   const [pasoActual, setPasoActual] = useState(1);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+  const [mostrarResumen, setMostrarResumen] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -142,12 +143,10 @@ export default function PreCoordinacionPage() {
       
       await preCoordinacionAPI.guardarRespuestas(token, respuestasCliente);
       
-      // Mostrar mensaje de éxito
+      // Mostrar resumen en lugar de redirigir
       setMostrarConfirmacion(false);
-      alert('¡Gracias! Tus respuestas han sido guardadas correctamente. El DJ se pondrá en contacto contigo próximamente.');
-      
-      // Redirigir o mostrar mensaje final
-      router.push('/pre-coordinacion/gracias');
+      setMostrarResumen(true);
+      setGuardando(false);
     } catch (err) {
       console.error('Error al finalizar:', err);
       setError(err.response?.data?.error || 'Error al guardar las respuestas. Por favor, intenta nuevamente.');
@@ -180,6 +179,112 @@ export default function PreCoordinacionPage() {
         <div className={styles.errorContainer}>
           <h1>❌ Pre-coordinación no encontrada</h1>
           <p>El link proporcionado no es válido o ha expirado.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (mostrarResumen) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.resumenContainer}>
+          <div className={styles.resumenHeader}>
+            <h1>✅ Pre-Coordinación Finalizada</h1>
+            <p className={styles.mensajeExito}>
+              Hemos enviado tu información a nuestro DJ. Te contactaremos próximamente para coordinar los detalles finales.
+            </p>
+          </div>
+          
+          <div className={styles.resumenContent}>
+            <h2 className={styles.resumenTitulo}>Resumen de tu Pre-Coordinación</h2>
+            
+            <div className={styles.resumenInfoGeneral}>
+              <div className={styles.resumenInfoItem}>
+                <strong>Cliente:</strong> {coordinacion.nombre_cliente || coordinacion.titulo}
+              </div>
+              <div className={styles.resumenInfoItem}>
+                <strong>Tipo de Evento:</strong> {coordinacion.tipo_evento}
+              </div>
+              {coordinacion.fecha_evento && (
+                <div className={styles.resumenInfoItem}>
+                  <strong>Fecha:</strong> {format(new Date(coordinacion.fecha_evento), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                </div>
+              )}
+              {coordinacion.salon_nombre && (
+                <div className={styles.resumenInfoItem}>
+                  <strong>Salón:</strong> {coordinacion.salon_nombre}
+                </div>
+              )}
+            </div>
+
+            {pasos.map((paso) => {
+              const preguntasRespondidas = paso.preguntas.filter(p => {
+                const esCondicional = p.condicional && p.condicional.pregunta;
+                const debeMostrar = !esCondicional || 
+                  (respuestasCliente[p.condicional.pregunta] === p.condicional.valor);
+                
+                if (!debeMostrar) return false;
+                
+                const valor = respuestasCliente[p.id];
+                return valor !== undefined && valor !== null && valor !== '';
+              });
+
+              if (preguntasRespondidas.length === 0) return null;
+
+              return (
+                <div key={paso.id} className={styles.resumenSeccion}>
+                  <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
+                  {paso.preguntas.map((pregunta) => {
+                    const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                    const debeMostrar = !esCondicional || 
+                      (respuestasCliente[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                    
+                    if (!debeMostrar) return null;
+
+                    const valor = respuestasCliente[pregunta.id];
+                    if (valor === undefined || valor === null || valor === '') return null;
+
+                    if (pregunta.tipo === 'velas' && Array.isArray(valor)) {
+                      return (
+                        <div key={pregunta.id} className={styles.resumenCampo}>
+                          <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                          <div className={styles.resumenValor}>
+                            {valor.map((vela, idx) => (
+                              <div key={idx} className={styles.velaItem}>
+                                <strong>{vela.nombre}</strong> - {vela.familiar}
+                                <br />
+                                🎵 {vela.cancion}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={pregunta.id} className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                        <span className={styles.resumenValor}>
+                          {String(valor).split('\n').map((line, i) => (
+                            <span key={i}>
+                              {line}
+                              {i < String(valor).split('\n').length - 1 && <br />}
+                            </span>
+                          ))}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className={styles.resumenFooter}>
+            <p className={styles.resumenFooterTexto}>
+              Gracias por completar la pre-coordinación. Nuestro DJ revisará esta información y se pondrá en contacto contigo.
+            </p>
+          </div>
         </div>
       </div>
     );

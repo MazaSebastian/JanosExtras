@@ -269,3 +269,143 @@
   }
 }
 
+/* Estilos para el resumen de pre-coordinación */
+.resumenContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.resumenHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.resumenHeader h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4caf50;
+  margin: 0 0 1rem 0;
+}
+
+.mensajeExito {
+  font-size: 1.1rem;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.resumenContent {
+  margin-top: 2rem;
+}
+
+.resumenTitulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.resumenInfoGeneral {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9ff;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.resumenInfoItem {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.resumenInfoItem strong {
+  color: #667eea;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.resumenSeccion {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.resumenSeccionTitulo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #667eea;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.resumenCampo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.resumenLabel {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.resumenValor {
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.velaItem {
+  padding: 0.75rem;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e0e0e0;
+}
+
+.resumenFooter {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e0e0;
+  text-align: center;
+}
+
+.resumenFooterTexto {
+  color: #666;
+  font-size: 0.95rem;
+  font-style: italic;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .resumenContainer {
+    padding: 1.5rem;
+  }
+
+  .resumenHeader h1 {
+    font-size: 1.5rem;
+  }
+
+  .resumenInfoGeneral {
+    grid-template-columns: 1fr;
+  }
+}
+
