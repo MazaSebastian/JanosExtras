@@ -121,21 +121,39 @@ export default function CoordinacionesPanel() {
     e.preventDefault();
     try {
       setError('');
-      const data = {
-        ...formData,
-        titulo: formData.titulo || null, // Título opcional
-        salon_id: formData.salon_id || null,
-      };
-      
-      // Solo incluir dj_responsable_id si el usuario es admin
-      // Para DJs, el backend lo asignará automáticamente
-      if (user?.rol === 'admin' && formData.dj_responsable_id) {
-        data.dj_responsable_id = formData.dj_responsable_id || null;
-      }
       
       if (editingId) {
+        // Para edición: solo enviar los campos que están en el formulario
+        const data = {
+          titulo: formData.titulo || null,
+          nombre_cliente: formData.nombre_cliente || null,
+          telefono: formData.telefono || null,
+          tipo_evento: formData.tipo_evento || null,
+          codigo_evento: formData.codigo_evento || null,
+          fecha_evento: formData.fecha_evento || null,
+          estado: formData.estado || 'pendiente',
+          notas: formData.notas || null,
+        };
+        
+        // Solo incluir dj_responsable_id si el usuario es admin
+        if (user?.rol === 'admin' && formData.dj_responsable_id) {
+          data.dj_responsable_id = formData.dj_responsable_id || null;
+        }
+        
         await coordinacionesAPI.update(editingId, data);
       } else {
+        // Para creación: enviar todos los campos necesarios
+        const data = {
+          ...formData,
+          titulo: formData.titulo || null,
+          salon_id: formData.salon_id || null,
+        };
+        
+        // Solo incluir dj_responsable_id si el usuario es admin
+        if (user?.rol === 'admin' && formData.dj_responsable_id) {
+          data.dj_responsable_id = formData.dj_responsable_id || null;
+        }
+        
         await coordinacionesAPI.create(data);
       }
       setShowForm(false);
