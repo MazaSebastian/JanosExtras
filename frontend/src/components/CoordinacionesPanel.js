@@ -854,6 +854,14 @@ export default function CoordinacionesPanel() {
                         {resumenData.coordinacion?.nombre_cliente || 'N/A'}
                       </span>
                     </div>
+                    {resumenData.coordinacion?.telefono && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>Teléfono:</span>
+                        <span className={styles.resumenValor}>
+                          {resumenData.coordinacion.telefono}
+                        </span>
+                      </div>
+                    )}
                     <div className={styles.resumenCampo}>
                       <span className={styles.resumenLabel}>Tipo de Evento:</span>
                       <span className={styles.resumenValor}>
