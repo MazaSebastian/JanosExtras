@@ -397,7 +397,8 @@
 
 .viewButton,
 .editButton,
-.deleteButton {
+.deleteButton,
+.whatsappButton {
   padding: 0.4rem;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -405,6 +406,15 @@
   transition: all 0.2s ease;
   border: none;
   background: transparent;
+}
+
+.whatsappButton {
+  color: #25d366;
+}
+
+.whatsappButton:hover {
+  background: #e8f5e9;
+  transform: scale(1.1);
 }
 
 .viewButton {
