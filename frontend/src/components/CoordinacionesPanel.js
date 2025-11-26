@@ -38,6 +38,10 @@ export default function CoordinacionesPanel() {
   const [loadingSalones, setLoadingSalones] = useState(false);
   const [viewingResumen, setViewingResumen] = useState(null);
   const [resumenData, setResumenData] = useState(null);
+  const [loadingResumen, setLoadingResumen] = useState(false);
+  const [showPreCoordinacionModal, setShowPreCoordinacionModal] = useState(false);
+  const [preCoordinacionUrl, setPreCoordinacionUrl] = useState('');
+  const [generandoPreCoordinacion, setGenerandoPreCoordinacion] = useState(false);
 
   // Cargar información del usuario
   useEffect(() => {
@@ -46,7 +50,6 @@ export default function CoordinacionesPanel() {
       setUser(auth.user);
     }
   }, []);
-  const [loadingResumen, setLoadingResumen] = useState(false);
 
   // Cargar coordinaciones al montar y cuando cambian los filtros
   useEffect(() => {
