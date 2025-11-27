@@ -122,10 +122,26 @@ export default async function handler(req, res) {
         console.log('Respuestas combinadas después del merge:', respuestasCombinadas);
         console.log('Total de respuestas combinadas:', Object.keys(respuestasCombinadas).length);
 
+        // Log antes de actualizar
+        console.log('=== ANTES DE ACTUALIZAR FLUJO ===');
+        console.log('Respuestas que se van a guardar:', respuestasCombinadas);
+        console.log('Total de respuestas que se van a guardar:', Object.keys(respuestasCombinadas).length);
+        console.log('Keys que se van a guardar:', Object.keys(respuestasCombinadas));
+        
         // Actualizar el flujo
         flujo = await CoordinacionFlujo.update(coordinacion.id, {
           respuestas: respuestasCombinadas,
         });
+        
+        // Log después de actualizar
+        console.log('=== DESPUÉS DE ACTUALIZAR FLUJO ===');
+        console.log('Flujo actualizado:', flujo);
+        console.log('Respuestas en el flujo actualizado:', flujo?.respuestas);
+        console.log('Tipo de respuestas:', typeof flujo?.respuestas);
+        if (flujo?.respuestas) {
+          console.log('Keys en el flujo actualizado:', Object.keys(flujo.respuestas));
+          console.log('Total de respuestas en el flujo:', Object.keys(flujo.respuestas).length);
+        }
       } else {
         // Crear nuevo flujo
         console.log('Creando nuevo flujo con respuestas:', respuestas);
