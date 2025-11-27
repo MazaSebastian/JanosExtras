@@ -369,6 +369,12 @@ export default function PreCoordinacionPage() {
     let respuestasParaGuardar = {};
     
     try {
+      // Log antes de la conversión
+      console.log('=== FINALIZANDO PRE-COORDINACIÓN ===');
+      console.log('RespuestasCliente ANTES de conversión:', respuestasCliente);
+      console.log('Total de respuestas ANTES de conversión:', Object.keys(respuestasCliente).length);
+      console.log('Keys ANTES de conversión:', Object.keys(respuestasCliente));
+      
       // Convertir respuestas de botones a formato compatible
       respuestasParaGuardar = { ...respuestasCliente };
       Object.keys(respuestasParaGuardar).forEach(key => {
@@ -389,16 +395,20 @@ export default function PreCoordinacionPage() {
         }
       });
       
+      // Log después de la conversión
+      console.log('RespuestasParaGuardar DESPUÉS de conversión:', respuestasParaGuardar);
+      console.log('Total de respuestas DESPUÉS de conversión:', Object.keys(respuestasParaGuardar).length);
+      console.log('Keys DESPUÉS de conversión:', Object.keys(respuestasParaGuardar));
+      
       // Guardar respuestas en el servidor (no bloquear si falla)
       try {
-        console.log('Finalizando - respuestasParaGuardar:', respuestasParaGuardar);
-        console.log('Total de respuestas a guardar al finalizar:', Object.keys(respuestasParaGuardar).length);
-        console.log('Keys de respuestas:', Object.keys(respuestasParaGuardar));
+        console.log('Enviando respuestas al servidor...');
         const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
         console.log('Respuesta del servidor:', response);
         console.log('Respuestas guardadas exitosamente');
       } catch (apiError) {
         console.error('Error en la llamada API (continuando de todas formas):', apiError);
+        console.error('Detalles del error:', apiError.response?.data);
       }
       
       // Actualizar estado local con formato convertido
