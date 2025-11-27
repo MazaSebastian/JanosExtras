@@ -161,12 +161,12 @@
 
 .primaryButton {
   background: #fff;
-  color: #5f6ef8;
+  color: #772c87;
 }
 
 .exportButton {
   background: rgba(255, 255, 255, 0.9);
-  color: #5f6ef8;
+  color: #772c87;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -294,7 +294,7 @@
 }
 
 .filterGroup select option {
-  background: #4b56d2;
+  background: #772c87;
   color: #fff;
 }
 
@@ -636,7 +636,7 @@
 .modalTitle {
   margin: 0;
   font-size: 1.5rem;
-  color: #4b56d2;
+  color: #772c87;
 }
 
 .modalSubtitle {
@@ -825,9 +825,9 @@
 .eventsSummary {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: rgba(75, 86, 210, 0.1);
+  background: rgba(119, 44, 135, 0.1);
   border-radius: 8px;
-  color: #4b56d2;
+  color: #772c87;
   font-size: 1rem;
   text-align: center;
 }
