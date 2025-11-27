@@ -176,6 +176,33 @@ export class Event {
     return result.rows;
   }
 
+  static async findByDate(fecha) {
+    // Buscar todos los eventos de una fecha específica
+    // fecha debe ser un objeto Date o string ISO
+    const fechaDate = fecha instanceof Date ? fecha : new Date(fecha);
+    const fechaInicio = new Date(fechaDate);
+    fechaInicio.setHours(0, 0, 0, 0);
+    const fechaFin = new Date(fechaDate);
+    fechaFin.setHours(23, 59, 59, 999);
+
+    const query = `
+      SELECT 
+        e.*,
+        d.id as dj_id,
+        d.nombre as dj_nombre,
+        d.salon_id as dj_salon_id,
+        d.color_hex as dj_color_hex,
+        s.nombre as salon_nombre
+      FROM eventos e
+      INNER JOIN djs d ON e.dj_id = d.id
+      INNER JOIN salones s ON e.salon_id = s.id
+      WHERE DATE(e.fecha_evento) = DATE($1)
+      ORDER BY e.fecha_evento, d.nombre
+    `;
+    const result = await pool.query(query, [fechaDate]);
+    return result.rows;
+  }
+
   static async delete(event_id, dj_id) {
     const query = `
       DELETE FROM eventos 

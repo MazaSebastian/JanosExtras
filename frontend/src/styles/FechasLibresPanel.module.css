@@ -1,0 +1,278 @@
+.container {
+  padding: 1.5rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+}
+
+.header p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Búsqueda */
+.searchSection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.searchForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.dateInput,
+.selectInput {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.dateInput:focus,
+.selectInput:focus {
+  outline: none;
+  border-color: #772c87;
+  box-shadow: 0 0 0 2px rgba(119, 44, 135, 0.1);
+}
+
+.searchButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.searchButton:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
+}
+
+.searchButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Resumen */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(119, 44, 135, 0.2);
+}
+
+.summaryValue {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.summaryLabel {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Secciones */
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  color: #333;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #772c87;
+}
+
+/* Grid de DJs */
+.djsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.djCard {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid;
+  transition: all 0.2s;
+}
+
+.djCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.djLibre {
+  border-left-color: #4CAF50;
+}
+
+.djOcupado {
+  border-left-color: #F44336;
+}
+
+.djHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.djName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.djStatusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badgeLibre {
+  background: #4CAF50;
+  color: white;
+}
+
+.badgeOcupado {
+  background: #F44336;
+  color: white;
+}
+
+.djInfo {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.djLabel {
+  font-weight: 600;
+}
+
+/* Eventos */
+.eventosList {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.eventosTitle {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.eventoItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.eventoSalon {
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.eventoFecha {
+  color: #666;
+}
+
+.eventoConfirmado {
+  color: #4CAF50;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* Estados */
+.loading {
+  padding: 2rem;
+  text-align: center;
+}
+
+.error {
+  padding: 1rem;
+  background: #fee;
+  color: #c33;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.emptyMessage {
+  padding: 2rem;
+  text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+}
+
+.placeholder {
+  padding: 3rem;
+  text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .searchForm {
+    grid-template-columns: 1fr;
+  }
+
+  .djsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
