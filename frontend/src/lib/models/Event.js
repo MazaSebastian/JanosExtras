@@ -178,12 +178,26 @@ export class Event {
 
   static async findByDate(fecha) {
     // Buscar todos los eventos de una fecha específica
-    // fecha debe ser un objeto Date o string ISO
-    const fechaDate = fecha instanceof Date ? fecha : new Date(fecha);
-    const fechaInicio = new Date(fechaDate);
-    fechaInicio.setHours(0, 0, 0, 0);
-    const fechaFin = new Date(fechaDate);
-    fechaFin.setHours(23, 59, 59, 999);
+    // fecha puede ser un string "YYYY-MM-DD" o un objeto Date
+    let fechaParaQuery;
+    
+    if (typeof fecha === 'string') {
+      // Si es string, usarlo directamente (formato YYYY-MM-DD)
+      fechaParaQuery = fecha;
+    } else if (fecha instanceof Date) {
+      // Si es Date, convertir a string YYYY-MM-DD
+      const year = fecha.getFullYear();
+      const month = String(fecha.getMonth() + 1).padStart(2, '0');
+      const day = String(fecha.getDate()).padStart(2, '0');
+      fechaParaQuery = `${year}-${month}-${day}`;
+    } else {
+      // Intentar convertir a Date y luego a string
+      const fechaDate = new Date(fecha);
+      const year = fechaDate.getFullYear();
+      const month = String(fechaDate.getMonth() + 1).padStart(2, '0');
+      const day = String(fechaDate.getDate()).padStart(2, '0');
+      fechaParaQuery = `${year}-${month}-${day}`;
+    }
 
     const query = `
       SELECT 
@@ -196,10 +210,10 @@ export class Event {
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
       INNER JOIN salones s ON e.salon_id = s.id
-      WHERE DATE(e.fecha_evento) = DATE($1)
+      WHERE DATE(e.fecha_evento) = $1::date
       ORDER BY e.fecha_evento, d.nombre
     `;
-    const result = await pool.query(query, [fechaDate]);
+    const result = await pool.query(query, [fechaParaQuery]);
     return result.rows;
   }
 
