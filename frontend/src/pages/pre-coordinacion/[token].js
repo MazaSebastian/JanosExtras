@@ -453,9 +453,7 @@ export default function PreCoordinacionPage() {
     );
   }
 
-
-  // Mostrar resumen para confirmar antes de enviar
-  // Primero verificar si ya se envió (mensaje de cierre tiene prioridad)
+  // PRIORIDAD 1: Mostrar mensaje de cierre si ya se envió
   if (preCoordinacionEnviada) {
     return (
       <div className={styles.container}>
