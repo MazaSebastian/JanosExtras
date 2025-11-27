@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { coordinacionesAPI, salonesAPI, authAPI } from '@/services/api';
+import { coordinacionesAPI, salonesAPI, adminAPI } from '@/services/api';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/CoordinacionesAdminPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
@@ -114,8 +114,9 @@ export default function CoordinacionesAdminPanel() {
 
   const loadDjs = async () => {
     try {
-      const response = await authAPI.getUsers();
-      const djsData = (response.data || []).filter(u => u.rol === 'dj');
+      // Usar el endpoint de admin dashboard que devuelve los DJs
+      const response = await adminAPI.getDashboard(new Date().getFullYear(), new Date().getMonth() + 1);
+      const djsData = (response.data?.djs || []);
       setDjs(djsData);
     } catch (err) {
       console.error('Error al cargar DJs:', err);
