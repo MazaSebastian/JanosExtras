@@ -131,16 +131,18 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
+  color: #1a1a1a !important;
 }
 
 .checkInsTable table {
   width: 100%;
   border-collapse: collapse;
+  color: #1a1a1a !important;
 }
 
 .checkInsTable th {
   background: #772c87;
-  color: white;
+  color: white !important;
   padding: 1rem;
   text-align: left;
   font-weight: 600;
@@ -152,11 +154,15 @@
   border-bottom: 1px solid #e0e0e0;
   font-size: 0.9rem;
   color: #1a1a1a !important;
-  background-color: white;
+  background-color: white !important;
+}
+
+.checkInsTable td * {
+  color: #1a1a1a !important;
 }
 
 .checkInsTable tr:hover {
-  background: #f9f9f9;
+  background: #f9f9f9 !important;
 }
 
 .emptyState {
