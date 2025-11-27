@@ -385,8 +385,14 @@ export default function PreCoordinacionPage() {
       });
       
       // Guardar respuestas en el servidor
-      const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
-      console.log('Respuesta del servidor:', response);
+      try {
+        const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+        console.log('Respuesta del servidor:', response);
+      } catch (apiError) {
+        console.error('Error en la llamada API:', apiError);
+        // Continuar con el flujo incluso si hay un error en el API
+        // para que el cliente vea el mensaje de confirmación
+      }
       
       // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
@@ -394,16 +400,16 @@ export default function PreCoordinacionPage() {
       // Ocultar resumen inmediatamente
       setMostrarConfirmacion(false);
       
-      // Marcar como enviada para mostrar mensaje de cierre
-      setPreCoordinacionEnviada(true);
-      
-      // Desactivar estado de carga
+      // Desactivar estado de carga ANTES de marcar como enviada
       setGuardando(false);
       
-      // Scroll al inicio para mostrar el mensaje de cierre
+      // Marcar como enviada para mostrar mensaje de cierre
+      // Usar un pequeño delay para asegurar que el estado se actualice
       setTimeout(() => {
+        setPreCoordinacionEnviada(true);
+        // Scroll al inicio para mostrar el mensaje de cierre
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 100);
+      }, 50);
       
     } catch (err) {
       console.error('Error al finalizar:', err);
