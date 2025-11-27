@@ -1088,34 +1088,39 @@ export default function CoordinacionesPanel() {
                                     const valor = respuestas[pregunta.id];
                                     if (valor === undefined || valor === null || valor === '') return null;
 
+                                    // Manejar velas específicamente - verificar tanto por tipo como por id
+                                    if ((pregunta.tipo === 'velas' || pregunta.id === 'velas') && Array.isArray(valor)) {
+                                      // Asegurar que cada elemento del array sea un objeto válido
+                                      const velasValidas = valor.filter(v => v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion));
+                                      
+                                      if (velasValidas.length > 0) {
+                                        return (
+                                          <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
+                                            <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                                            <div className={styles.resumenValor}>
+                                              {velasValidas.map((vela, idx) => (
+                                                <div key={vela.id || idx} style={{ 
+                                                  marginBottom: '0.5rem',
+                                                  padding: '0.5rem',
+                                                  background: '#f1f8f4',
+                                                  borderRadius: '4px'
+                                                }}>
+                                                  <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
+                                                  <br />
+                                                  🎵 {vela.cancion || 'Sin canción'}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                    }
+
                                     // Manejar valores que pueden ser strings o arrays
                                     let valorParaMostrar = valor;
                                     if (typeof valor === 'string' && pregunta.tipo === 'buttons') {
                                       // Si es string y era un botón, puede estar separado por comas
                                       valorParaMostrar = valor;
-                                    }
-
-                                    // Manejar velas específicamente
-                                    if (pregunta.tipo === 'velas' && Array.isArray(valor)) {
-                                      return (
-                                        <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
-                                          <span className={styles.resumenLabel}>{pregunta.label}:</span>
-                                          <div className={styles.resumenValor}>
-                                            {valor.map((vela, idx) => (
-                                              <div key={idx} style={{ 
-                                                marginBottom: '0.5rem',
-                                                padding: '0.5rem',
-                                                background: '#f1f8f4',
-                                                borderRadius: '4px'
-                                              }}>
-                                                <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
-                                                <br />
-                                                🎵 {vela.cancion || 'Sin canción'}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      );
                                     }
 
                                     // Si el valor es un array pero no es velas, no renderizarlo como string
