@@ -397,19 +397,18 @@ export default function PreCoordinacionPage() {
       // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
       
-      // Ocultar resumen inmediatamente
+      // Ocultar resumen y desactivar carga
       setMostrarConfirmacion(false);
-      
-      // Desactivar estado de carga ANTES de marcar como enviada
       setGuardando(false);
       
       // Marcar como enviada para mostrar mensaje de cierre
-      // Usar un pequeño delay para asegurar que el estado se actualice
-      setTimeout(() => {
-        setPreCoordinacionEnviada(true);
-        // Scroll al inicio para mostrar el mensaje de cierre
+      // Forzar actualización del estado de manera síncrona
+      setPreCoordinacionEnviada(true);
+      
+      // Scroll al inicio después de un pequeño delay para asegurar el render
+      requestAnimationFrame(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 50);
+      });
       
     } catch (err) {
       console.error('Error al finalizar:', err);
