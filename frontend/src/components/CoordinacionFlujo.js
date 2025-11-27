@@ -356,9 +356,90 @@ export default function CoordinacionFlujo({ coordinacionId }) {
         const flujoData = flujoResponse?.data || flujoResponse;
         
         if (flujoData && flujoData.respuestas) {
-          const respuestasExistentes = typeof flujoData.respuestas === 'string' 
+          let respuestasExistentes = typeof flujoData.respuestas === 'string' 
             ? JSON.parse(flujoData.respuestas) 
             : flujoData.respuestas;
+          
+          // Si hay pre-coordinación completada por el cliente, mapear las respuestas al formato del DJ
+          if (data.pre_coordinacion_completado_por_cliente || flujoData.estado === 'completado_por_cliente') {
+            console.log('Mapeando respuestas del cliente al formato del DJ...');
+            console.log('Respuestas originales del cliente:', respuestasExistentes);
+            
+            // Mapear respuestas del cliente al formato del DJ
+            const respuestasMapeadas = { ...respuestasExistentes };
+            
+            // Mapear tematica_evento: convertir de "Formal (elegante y sofisticado)" a "Formal"
+            if (respuestasMapeadas.tematica_evento) {
+              const tematica = respuestasMapeadas.tematica_evento;
+              if (typeof tematica === 'string') {
+                // Si es un array convertido a string, tomar el primer elemento
+                if (tematica.startsWith('[') || tematica.includes(',')) {
+                  try {
+                    const parsed = JSON.parse(tematica);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                      respuestasMapeadas.tematica_evento = parsed[0].split('(')[0].trim();
+                    }
+                  } catch (e) {
+                    // Si no es JSON válido, extraer solo la primera parte antes del paréntesis
+                    respuestasMapeadas.tematica_evento = tematica.split('(')[0].trim();
+                  }
+                } else {
+                  // Extraer solo la primera parte antes del paréntesis
+                  respuestasMapeadas.tematica_evento = tematica.split('(')[0].trim();
+                }
+              } else if (Array.isArray(tematica) && tematica.length > 0) {
+                // Si es un array, tomar el primer elemento y extraer solo la primera parte
+                const primerValor = typeof tematica[0] === 'string' ? tematica[0] : String(tematica[0]);
+                respuestasMapeadas.tematica_evento = primerValor.split('(')[0].trim();
+              }
+            }
+            
+            // Mapear musica_recepcion: convertir de array/string de botones a texto descriptivo
+            if (respuestasMapeadas.musica_recepcion) {
+              const musica = respuestasMapeadas.musica_recepcion;
+              if (typeof musica === 'string') {
+                // Si ya es un string con comas, mantenerlo como está
+                respuestasMapeadas.musica_recepcion = musica;
+              } else if (Array.isArray(musica)) {
+                // Convertir array a string separado por comas
+                respuestasMapeadas.musica_recepcion = musica.join(', ');
+              }
+            }
+            
+            // Mapear realiza_ingreso_salon: convertir de array ["Sí"] a "Sí"
+            if (respuestasMapeadas.realiza_ingreso_salon) {
+              const ingreso = respuestasMapeadas.realiza_ingreso_salon;
+              if (Array.isArray(ingreso) && ingreso.length > 0) {
+                respuestasMapeadas.realiza_ingreso_salon = ingreso[0];
+              } else if (typeof ingreso === 'string' && (ingreso === 'Sí' || ingreso === 'No' || ingreso === 'S1' || ingreso === 'N1')) {
+                // Si es "S1" o "N1" (código interno), convertir a "Sí" o "No"
+                respuestasMapeadas.realiza_ingreso_salon = ingreso === 'S1' ? 'Sí' : (ingreso === 'N1' ? 'No' : ingreso);
+              }
+            }
+            
+            // Mapear realiza_coreografia: convertir de array ["Sí"] a "Sí"
+            if (respuestasMapeadas.realiza_coreografia) {
+              const coreografia = respuestasMapeadas.realiza_coreografia;
+              if (Array.isArray(coreografia) && coreografia.length > 0) {
+                respuestasMapeadas.realiza_coreografia = coreografia[0];
+              } else if (typeof coreografia === 'string' && (coreografia === 'S1' || coreografia === 'N1')) {
+                respuestasMapeadas.realiza_coreografia = coreografia === 'S1' ? 'Sí' : 'No';
+              }
+            }
+            
+            // Mapear realiza_ingreso_carioca: convertir de array ["Sí"] a "Sí"
+            if (respuestasMapeadas.realiza_ingreso_carioca) {
+              const carioca = respuestasMapeadas.realiza_ingreso_carioca;
+              if (Array.isArray(carioca) && carioca.length > 0) {
+                respuestasMapeadas.realiza_ingreso_carioca = carioca[0];
+              } else if (typeof carioca === 'string' && (carioca === 'S1' || carioca === 'N1')) {
+                respuestasMapeadas.realiza_ingreso_carioca = carioca === 'S1' ? 'Sí' : 'No';
+              }
+            }
+            
+            console.log('Respuestas mapeadas al formato del DJ:', respuestasMapeadas);
+            respuestasExistentes = respuestasMapeadas;
+          }
           
           // Pre-llenar respuestas (pueden venir del cliente o ser parciales del DJ)
           setRespuestas(respuestasExistentes);
