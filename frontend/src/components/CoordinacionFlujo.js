@@ -391,6 +391,8 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                 valorLimpio = primerValor.split('(')[0].trim();
               }
               
+              console.log('🔍 Mapeando tema_fiesta:', { original: tema, valorLimpio });
+              
               // Mapear valores específicos del cliente al formato del DJ
               const mapeoTemaFiesta = {
                 'Princesa': 'Princesa',
@@ -398,7 +400,9 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                 'Descontracturado': 'Descontracturado'
               };
               
-              respuestasMapeadas.tema_fiesta = mapeoTemaFiesta[valorLimpio] || valorLimpio;
+              const valorMapeado = mapeoTemaFiesta[valorLimpio] || valorLimpio;
+              console.log('✅ tema_fiesta mapeado:', { valorLimpio, valorMapeado });
+              respuestasMapeadas.tema_fiesta = valorMapeado;
             }
             
             // Mapear tematica_evento (Cumpleaños/Corporativo): convertir de "Formal (elegante y sofisticado)" a "Formal"
