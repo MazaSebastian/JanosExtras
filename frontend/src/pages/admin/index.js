@@ -388,10 +388,15 @@ export default function AdminDashboardPage() {
       </button>
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.brand}>
-          <div className={styles.brandIcon}>🎛️</div>
+          <div className={styles.brandLogoContainer}>
+            <img 
+              src="/logo-janos-blanco.png" 
+              alt="Logo Jano's" 
+              className={styles.brandLogo}
+            />
+          </div>
           <div>
-            <p className={styles.brandSubtitle}>Administración</p>
-            <h2 className={styles.brandTitle}>Sistema DJs</h2>
+            <p className={styles.brandSubtitle}>Sistema de Administracion de DJ's</p>
           </div>
         </div>
         <nav className={styles.menu}>
