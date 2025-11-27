@@ -157,7 +157,7 @@
   background-color: white !important;
 }
 
-.checkInsTable td *:not(.estadoBadge) {
+.checkInsTable td *:not(.estadoBadge):not(.viewButton) {
   color: #1a1a1a !important;
 }
 
@@ -184,7 +184,7 @@
 .viewButton {
   padding: 6px 12px;
   background: #772c87;
-  color: white;
+  color: white !important;
   border: none;
   border-radius: 4px;
   font-size: 0.85rem;
