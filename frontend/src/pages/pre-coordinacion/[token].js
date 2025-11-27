@@ -361,8 +361,11 @@ export default function PreCoordinacionPage() {
 
   const guardarProgreso = async () => {
     try {
-      console.log('Guardando progreso - respuestasCliente:', respuestasCliente);
+      console.log('=== GUARDANDO PROGRESO ===');
+      console.log('RespuestasCliente en guardarProgreso:', respuestasCliente);
       console.log('Total de respuestas a guardar:', Object.keys(respuestasCliente).length);
+      console.log('Keys a guardar:', Object.keys(respuestasCliente));
+      console.log('Valor completo:', JSON.stringify(respuestasCliente, null, 2));
       await preCoordinacionAPI.guardarRespuestas(token, respuestasCliente);
       console.log('Progreso guardado exitosamente');
     } catch (err) {
