@@ -107,12 +107,38 @@ export default async function handler(req, res) {
       
       if (flujo) {
         // Actualizar respuestas existentes (merge, no sobrescribir)
-        const respuestasExistentes = typeof flujo.respuestas === 'string' 
-          ? JSON.parse(flujo.respuestas) 
-          : flujo.respuestas || {};
+        let respuestasExistentes = {};
+        try {
+          if (flujo.respuestas) {
+            if (typeof flujo.respuestas === 'string') {
+              respuestasExistentes = JSON.parse(flujo.respuestas);
+            } else if (typeof flujo.respuestas === 'object') {
+              respuestasExistentes = flujo.respuestas;
+            }
+          }
+        } catch (parseError) {
+          console.error('Error al parsear respuestas existentes:', parseError);
+          console.error('Respuestas existentes (raw):', flujo.respuestas);
+          // Si falla el parseo, usar objeto vacío
+          respuestasExistentes = {};
+        }
+        
+        // Validar que respuestasExistentes es un objeto
+        if (typeof respuestasExistentes !== 'object' || respuestasExistentes === null) {
+          console.warn('Respuestas existentes no es un objeto válido, usando objeto vacío');
+          respuestasExistentes = {};
+        }
         
         console.log('Respuestas existentes antes del merge:', respuestasExistentes);
+        console.log('Tipo de respuestas existentes:', typeof respuestasExistentes);
         console.log('Nuevas respuestas recibidas:', respuestas);
+        console.log('Tipo de nuevas respuestas:', typeof respuestas);
+        
+        // Validar que respuestas es un objeto válido
+        if (typeof respuestas !== 'object' || respuestas === null) {
+          console.error('Error: Las nuevas respuestas no son un objeto válido');
+          return res.status(400).json({ error: 'Las respuestas deben ser un objeto válido' });
+        }
         
         const respuestasCombinadas = {
           ...respuestasExistentes,
@@ -121,6 +147,15 @@ export default async function handler(req, res) {
 
         console.log('Respuestas combinadas después del merge:', respuestasCombinadas);
         console.log('Total de respuestas combinadas:', Object.keys(respuestasCombinadas).length);
+        console.log('Tipo de respuestas combinadas:', typeof respuestasCombinadas);
+
+        // Validar que respuestasCombinadas es serializable
+        try {
+          JSON.stringify(respuestasCombinadas);
+        } catch (stringifyError) {
+          console.error('Error al validar serialización de respuestas combinadas:', stringifyError);
+          return res.status(400).json({ error: 'Las respuestas combinadas no son serializables' });
+        }
 
         // Log antes de actualizar
         console.log('=== ANTES DE ACTUALIZAR FLUJO ===');
@@ -129,9 +164,15 @@ export default async function handler(req, res) {
         console.log('Keys que se van a guardar:', Object.keys(respuestasCombinadas));
         
         // Actualizar el flujo
-        flujo = await CoordinacionFlujo.update(coordinacion.id, {
-          respuestas: respuestasCombinadas,
-        });
+        try {
+          flujo = await CoordinacionFlujo.update(coordinacion.id, {
+            respuestas: respuestasCombinadas,
+          });
+        } catch (updateError) {
+          console.error('Error al actualizar flujo:', updateError);
+          console.error('Stack trace:', updateError.stack);
+          throw updateError; // Re-lanzar para que sea capturado por el catch general
+        }
         
         // Log después de actualizar
         console.log('=== DESPUÉS DE ACTUALIZAR FLUJO ===');
