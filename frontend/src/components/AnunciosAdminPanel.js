@@ -249,7 +249,7 @@ export default function AnunciosAdminPanel() {
                   checked={formData.activo}
                   onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
                 />
-                <span>Anuncio activo</span>
+                <span>Visible para DJs (mostrar en sus dashboards)</span>
               </label>
             </div>
 
