@@ -507,8 +507,44 @@ export default function CoordinacionFlujo({ coordinacionId }) {
               }
             }
             
+            // Asegurar que velas sea siempre un array
+            if (respuestasMapeadas.velas) {
+              if (!Array.isArray(respuestasMapeadas.velas)) {
+                // Si velas no es un array, intentar parsearlo o inicializarlo como array vacío
+                if (typeof respuestasMapeadas.velas === 'string') {
+                  try {
+                    const parsed = JSON.parse(respuestasMapeadas.velas);
+                    respuestasMapeadas.velas = Array.isArray(parsed) ? parsed : [];
+                  } catch (e) {
+                    respuestasMapeadas.velas = [];
+                  }
+                } else {
+                  respuestasMapeadas.velas = [];
+                }
+              }
+            } else {
+              // Si no existe velas, inicializarlo como array vacío
+              respuestasMapeadas.velas = [];
+            }
+            
             console.log('Respuestas mapeadas al formato del DJ:', respuestasMapeadas);
             respuestasExistentes = respuestasMapeadas;
+          }
+          
+          // Asegurar que velas siempre sea un array antes de pre-llenar
+          if (respuestasExistentes.velas && !Array.isArray(respuestasExistentes.velas)) {
+            if (typeof respuestasExistentes.velas === 'string') {
+              try {
+                const parsed = JSON.parse(respuestasExistentes.velas);
+                respuestasExistentes.velas = Array.isArray(parsed) ? parsed : [];
+              } catch (e) {
+                respuestasExistentes.velas = [];
+              }
+            } else {
+              respuestasExistentes.velas = [];
+            }
+          } else if (!respuestasExistentes.velas) {
+            respuestasExistentes.velas = [];
           }
           
           // Pre-llenar respuestas (pueden venir del cliente o ser parciales del DJ)
@@ -1088,7 +1124,7 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                     >
                       + AGREGAR VELA
                     </button>
-                    {respuestas.velas && respuestas.velas.length > 0 && (
+                    {Array.isArray(respuestas.velas) && respuestas.velas.length > 0 && (
                       <div className={styles.velasList}>
                         {respuestas.velas.map((vela) => (
                           <div key={vela.id} className={styles.velaItem}>
