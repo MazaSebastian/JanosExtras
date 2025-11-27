@@ -22,9 +22,30 @@ export default async function handler(req, res) {
       if (flujo.respuestas && typeof flujo.respuestas === 'string') {
         try {
           flujo.respuestas = JSON.parse(flujo.respuestas);
+          console.log('✅ Respuestas parseadas desde string en GET /flujo');
+          console.log('Keys en respuestas:', Object.keys(flujo.respuestas));
+          console.log('Tiene velas:', !!flujo.respuestas.velas);
+          if (flujo.respuestas.velas) {
+            console.log('Tipo de velas:', typeof flujo.respuestas.velas);
+            console.log('Valor de velas:', flujo.respuestas.velas);
+            if (Array.isArray(flujo.respuestas.velas)) {
+              console.log('✅ velas es un array con', flujo.respuestas.velas.length, 'elementos');
+            }
+          }
         } catch (e) {
           console.error('Error al parsear respuestas:', e);
           flujo.respuestas = {};
+        }
+      } else if (flujo.respuestas && typeof flujo.respuestas === 'object') {
+        console.log('✅ Respuestas ya es un objeto en GET /flujo');
+        console.log('Keys en respuestas:', Object.keys(flujo.respuestas));
+        console.log('Tiene velas:', !!flujo.respuestas.velas);
+        if (flujo.respuestas.velas) {
+          console.log('Tipo de velas:', typeof flujo.respuestas.velas);
+          console.log('Valor de velas:', flujo.respuestas.velas);
+          if (Array.isArray(flujo.respuestas.velas)) {
+            console.log('✅ velas es un array con', flujo.respuestas.velas.length, 'elementos');
+          }
         }
       }
 
