@@ -296,9 +296,17 @@ export default function CoordinacionesPanel() {
       try {
         const flujoResponse = await coordinacionesAPI.getFlujo(coordinacion.id);
         flujo = flujoResponse.data || flujoResponse;
+        console.log('Flujo cargado desde API:', flujo);
+        console.log('Respuestas del flujo:', flujo?.respuestas);
+        console.log('Tipo de respuestas:', typeof flujo?.respuestas);
+        if (flujo?.respuestas) {
+          console.log('Keys de respuestas en el flujo:', Object.keys(flujo.respuestas));
+          console.log('Total de respuestas:', Object.keys(flujo.respuestas).length);
+        }
       } catch (err) {
         // Si no existe flujo, no es un error, simplemente no hay datos del flujo
         console.log('No se encontró flujo de coordinación para esta coordinación');
+        console.error('Error al cargar flujo:', err);
       }
       
       setResumenData({
