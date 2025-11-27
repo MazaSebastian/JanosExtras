@@ -159,16 +159,24 @@ export default function PreCoordinacionPage() {
           Object.keys(respuestasParaGuardar).forEach(key => {
             const valor = respuestasParaGuardar[key];
             if (Array.isArray(valor)) {
-              const tieneObjetos = valor.some(v => typeof v === 'object');
-              if (tieneObjetos) {
-                respuestasParaGuardar[key] = valor.map(v => {
-                  if (typeof v === 'object' && v.tipo === 'otro') {
-                    return `Otro: ${v.valor}`;
-                  }
-                  return v;
-                }).join(', ');
+              // IMPORTANTE: No convertir velas a string, mantener como array de objetos
+              if (key === 'velas') {
+                // Las velas deben mantenerse como array de objetos
+                respuestasParaGuardar[key] = valor;
+                console.log('✅ Manteniendo velas como array de objetos (auto-finalización):', valor);
               } else {
-                respuestasParaGuardar[key] = valor.join(', ');
+                // Convertir otros arrays (como botones) a string legible
+                const tieneObjetos = valor.some(v => typeof v === 'object' && v.tipo === 'otro');
+                if (tieneObjetos) {
+                  respuestasParaGuardar[key] = valor.map(v => {
+                    if (typeof v === 'object' && v.tipo === 'otro') {
+                      return `Otro: ${v.valor}`;
+                    }
+                    return v;
+                  }).join(', ');
+                } else {
+                  respuestasParaGuardar[key] = valor.join(', ');
+                }
               }
             }
           });
@@ -460,17 +468,24 @@ export default function PreCoordinacionPage() {
       Object.keys(respuestasParaGuardar).forEach(key => {
         const valor = respuestasParaGuardar[key];
         if (Array.isArray(valor)) {
-          // Convertir array de botones a string legible
-          const tieneObjetos = valor.some(v => typeof v === 'object');
-          if (tieneObjetos) {
-            respuestasParaGuardar[key] = valor.map(v => {
-              if (typeof v === 'object' && v.tipo === 'otro') {
-                return `Otro: ${v.valor}`;
-              }
-              return v;
-            }).join(', ');
+          // IMPORTANTE: No convertir velas a string, mantener como array de objetos
+          if (key === 'velas') {
+            // Las velas deben mantenerse como array de objetos
+            respuestasParaGuardar[key] = valor;
+            console.log('✅ Manteniendo velas como array de objetos:', valor);
           } else {
-            respuestasParaGuardar[key] = valor.join(', ');
+            // Convertir otros arrays (como botones) a string legible
+            const tieneObjetos = valor.some(v => typeof v === 'object' && v.tipo === 'otro');
+            if (tieneObjetos) {
+              respuestasParaGuardar[key] = valor.map(v => {
+                if (typeof v === 'object' && v.tipo === 'otro') {
+                  return `Otro: ${v.valor}`;
+                }
+                return v;
+              }).join(', ');
+            } else {
+              respuestasParaGuardar[key] = valor.join(', ');
+            }
           }
         }
       });
