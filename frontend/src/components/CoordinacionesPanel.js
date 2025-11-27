@@ -1108,10 +1108,12 @@ export default function CoordinacionesPanel() {
                                     if (!debeMostrar) return null;
 
                                     const valor = respuestas[pregunta.id];
-                                    if (valor === undefined || valor === null || valor === '') return null;
-
+                                    
                                     // Manejar velas específicamente - verificar tanto por tipo como por id
+                                    // IMPORTANTE: Verificar velas ANTES de la validación genérica
                                     if ((pregunta.tipo === 'velas' || pregunta.id === 'velas')) {
+                                      // Para velas, permitir arrays vacíos pero no valores null/undefined
+                                      if (valor === undefined || valor === null) return null;
                                       // Log para depuración
                                       console.log('🔍 Detectando velas:', {
                                         preguntaId: pregunta.id,
@@ -1162,8 +1164,18 @@ export default function CoordinacionesPanel() {
                                         }
                                       } else {
                                         console.warn('⚠️ Valor de velas no es un array:', valorVelas);
+                                        // Si no es un array válido, no renderizar nada
+                                        return null;
                                       }
                                     }
+                                    
+                                    // Si llegamos aquí y es tipo velas pero no se renderizó, no mostrar nada más
+                                    if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
+                                      return null;
+                                    }
+
+                                    // Validación genérica para otros tipos de preguntas
+                                    if (valor === undefined || valor === null || valor === '') return null;
 
                                     // Manejar valores que pueden ser strings o arrays
                                     let valorParaMostrar = valor;
@@ -1385,4 +1397,5 @@ export default function CoordinacionesPanel() {
     </section>
   );
 }
+
 
