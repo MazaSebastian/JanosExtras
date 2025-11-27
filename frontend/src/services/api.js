@@ -167,6 +167,16 @@ export const anunciosAPI = {
   delete: (id) => api.delete(`/anuncios/${id}`),
 };
 
+// Check-In Técnico API
+export const checkInTecnicoAPI = {
+  getAll: (params = {}) => api.get('/check-in-tecnico', { params }),
+  getById: (id) => api.get(`/check-in-tecnico/${id}`),
+  create: (data) => api.post('/check-in-tecnico', data),
+  update: (id, data) => api.patch(`/check-in-tecnico/${id}`, data),
+  delete: (id) => api.delete(`/check-in-tecnico/${id}`),
+  getResumen: (params = {}) => api.get('/check-in-tecnico/resumen', { params }),
+};
+
 
 export default api;
 

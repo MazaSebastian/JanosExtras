@@ -11,6 +11,7 @@ import ContenidoPanel from '@/components/ContenidoPanel';
 import CoordinacionesAdminPanel from '@/components/CoordinacionesAdminPanel';
 import AnunciosAdminPanel from '@/components/AnunciosAdminPanel';
 import FechasLibresPanel from '@/components/FechasLibresPanel';
+import CheckInTecnicoAdminPanel from '@/components/CheckInTecnicoAdminPanel';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/AdminDashboard.module.css';
 
@@ -69,6 +70,7 @@ export default function AdminDashboardPage() {
     { id: 'coordinaciones', label: 'Coordinaciones', icon: '📋' },
     { id: 'anuncios', label: 'Anuncios', icon: '📢' },
     { id: 'fechas-libres', label: 'Fechas Libres', icon: '📅' },
+    { id: 'check-in-tecnico', label: 'Check-In Técnico', icon: '🔧' },
     { id: 'salones', label: 'Salones', icon: '🏢' },
     { id: 'fichadas', label: 'Fichadas', icon: '⏰' },
     { id: 'contenido', label: 'Contenido', icon: '📦' },
@@ -1026,6 +1028,12 @@ export default function AdminDashboardPage() {
             {activeMenu === 'fechas-libres' && (
               <section id="fechas-libres" className={styles.section}>
                 <FechasLibresPanel />
+              </section>
+            )}
+
+            {activeMenu === 'check-in-tecnico' && (
+              <section id="check-in-tecnico" className={styles.section}>
+                <CheckInTecnicoAdminPanel />
               </section>
             )}
 
