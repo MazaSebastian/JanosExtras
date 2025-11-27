@@ -12,7 +12,8 @@ export default async function handler(req, res) {
     return res.status(auth.status).json({ error: auth.error });
   }
 
-  if (auth.user.rol !== 'admin') {
+  // Permitir acceso tanto a admins como a DJs
+  if (auth.user.rol !== 'admin' && auth.user.rol !== 'dj') {
     return res.status(403).json({ error: 'Acceso restringido' });
   }
 

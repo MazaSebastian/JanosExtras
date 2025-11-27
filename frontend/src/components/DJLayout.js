@@ -21,6 +21,7 @@ export default function DJLayout({ user, children }) {
     { path: '/dashboard/shows', label: 'Shows', icon: '🎤' },
     { path: '/dashboard/contenido', label: 'Contenido', icon: '📦' },
     { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋' },
+    { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅' },
   ];
 
   const handleMenuClick = (path) => {
