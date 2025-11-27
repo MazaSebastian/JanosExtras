@@ -63,6 +63,7 @@ export default function AdminDashboardPage() {
   const menuItems = [
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'overview', label: 'Resumen general', icon: '📊' },
+    { id: 'coordinaciones', label: 'Coordinaciones', icon: '📋' },
     { id: 'salones', label: 'Salones', icon: '🏢' },
     { id: 'fichadas', label: 'Fichadas', icon: '⏰' },
     { id: 'contenido', label: 'Contenido', icon: '📦' },
