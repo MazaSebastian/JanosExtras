@@ -81,6 +81,15 @@ export class Anuncio {
       creado_por,
     } = data;
 
+    // Convertir fechas a formato ISO para PostgreSQL
+    const fechaInicioDate = fecha_inicio 
+      ? (fecha_inicio instanceof Date ? fecha_inicio : new Date(fecha_inicio))
+      : new Date();
+    
+    const fechaFinDate = fecha_fin && fecha_fin !== ''
+      ? (fecha_fin instanceof Date ? fecha_fin : new Date(fecha_fin))
+      : null;
+
     const query = `
       INSERT INTO anuncios (
         titulo, mensaje, tipo, prioridad, activo,
@@ -96,8 +105,8 @@ export class Anuncio {
       tipo,
       prioridad,
       activo,
-      fecha_inicio || new Date(),
-      fecha_fin || null,
+      fechaInicioDate.toISOString(),
+      fechaFinDate ? fechaFinDate.toISOString() : null,
       creado_por,
     ];
 
@@ -120,46 +129,59 @@ export class Anuncio {
     const values = [];
     let paramIndex = 1;
 
-    if (titulo !== undefined) {
+    if (titulo !== undefined && titulo !== null) {
       updates.push(`titulo = $${paramIndex}`);
       values.push(titulo);
       paramIndex++;
     }
 
-    if (mensaje !== undefined) {
+    if (mensaje !== undefined && mensaje !== null) {
       updates.push(`mensaje = $${paramIndex}`);
       values.push(mensaje);
       paramIndex++;
     }
 
-    if (tipo !== undefined) {
+    if (tipo !== undefined && tipo !== null) {
       updates.push(`tipo = $${paramIndex}`);
       values.push(tipo);
       paramIndex++;
     }
 
-    if (prioridad !== undefined) {
+    if (prioridad !== undefined && prioridad !== null) {
       updates.push(`prioridad = $${paramIndex}`);
       values.push(prioridad);
       paramIndex++;
     }
 
-    if (activo !== undefined) {
+    if (activo !== undefined && activo !== null) {
       updates.push(`activo = $${paramIndex}`);
       values.push(activo);
       paramIndex++;
     }
 
-    if (fecha_inicio !== undefined) {
+    if (fecha_inicio !== undefined && fecha_inicio !== null && fecha_inicio !== '') {
+      // Convertir fecha de formato datetime-local a ISO string para PostgreSQL
+      const fechaInicioDate = fecha_inicio instanceof Date 
+        ? fecha_inicio 
+        : new Date(fecha_inicio);
       updates.push(`fecha_inicio = $${paramIndex}`);
-      values.push(fecha_inicio);
+      values.push(fechaInicioDate.toISOString());
       paramIndex++;
     }
 
     if (fecha_fin !== undefined) {
-      updates.push(`fecha_fin = $${paramIndex}`);
-      values.push(fecha_fin);
-      paramIndex++;
+      // Si fecha_fin es una cadena vacía, convertir a null
+      if (fecha_fin === null || fecha_fin === '') {
+        updates.push(`fecha_fin = NULL`);
+      } else {
+        // Convertir fecha de formato datetime-local a ISO string para PostgreSQL
+        const fechaFinDate = fecha_fin instanceof Date 
+          ? fecha_fin 
+          : new Date(fecha_fin);
+        updates.push(`fecha_fin = $${paramIndex}`);
+        values.push(fechaFinDate.toISOString());
+        paramIndex++;
+      }
     }
 
     if (updates.length === 0) {

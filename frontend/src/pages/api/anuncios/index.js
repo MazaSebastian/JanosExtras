@@ -43,14 +43,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Título y mensaje son requeridos' });
       }
 
+      // Convertir fecha_fin vacía a null
+      const fechaFinNormalizada = fecha_fin && fecha_fin !== '' ? fecha_fin : null;
+      const fechaInicioNormalizada = fecha_inicio || new Date();
+
       const nuevoAnuncio = await Anuncio.create({
         titulo,
         mensaje,
         tipo: tipo || 'info',
         prioridad: prioridad || 'normal',
         activo: activo !== undefined ? activo : true,
-        fecha_inicio: fecha_inicio || new Date(),
-        fecha_fin: fecha_fin || null,
+        fecha_inicio: fechaInicioNormalizada,
+        fecha_fin: fechaFinNormalizada,
         creado_por: auth.user.id,
       });
 
