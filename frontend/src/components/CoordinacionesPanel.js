@@ -1142,7 +1142,8 @@ export default function CoordinacionesPanel() {
                     </div>
                   )}
 
-                  {resumenData.flujo && resumenData.flujo.respuestas ? (
+                  {/* Solo mostrar el flujo del DJ si NO hay pre-coordinación completada por el cliente */}
+                  {resumenData.flujo && resumenData.flujo.respuestas && !resumenData.coordinacion?.pre_coordinacion_completado_por_cliente ? (
                     (() => {
                       const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                       const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
