@@ -16,7 +16,6 @@ export default function AnunciosAdminPanel() {
     mensaje: '',
     tipo: 'info',
     prioridad: 'normal',
-    activo: true,
     fecha_inicio: format(new Date(), 'yyyy-MM-dd\'T\'HH:mm'),
     fecha_fin: '',
   });
@@ -90,16 +89,6 @@ export default function AnunciosAdminPanel() {
     }
   };
 
-  const handleToggleActivo = async (anuncio) => {
-    try {
-      await anunciosAPI.update(anuncio.id, { activo: !anuncio.activo });
-      loadAnuncios();
-    } catch (err) {
-      console.error('Error al actualizar estado:', err);
-      alert('Error al actualizar el estado del anuncio');
-    }
-  };
-
   const resetForm = () => {
     setFormData({
       titulo: '',
@@ -129,19 +118,6 @@ export default function AnunciosAdminPanel() {
       baja: '#9E9E9E',
     };
     return colors[prioridad] || colors.normal;
-  };
-
-  // Función para determinar si el anuncio es visible para DJs
-  // (considera activo Y fechas válidas)
-  const isAnuncioVisibleParaDJs = (anuncio) => {
-    if (!anuncio.activo) return false;
-    const ahora = new Date();
-    const inicio = anuncio.fecha_inicio ? new Date(anuncio.fecha_inicio) : null;
-    const fin = anuncio.fecha_fin ? new Date(anuncio.fecha_fin) : null;
-    
-    if (inicio && inicio > ahora) return false;
-    if (fin && fin < ahora) return false;
-    return true;
   };
 
   return (
@@ -328,13 +304,6 @@ export default function AnunciosAdminPanel() {
                   className={styles.actionButton}
                 >
                   ✏️ Editar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleToggleActivo(anuncio)}
-                  className={styles.actionButton}
-                >
-                  {anuncio.activo ? '👁️‍🗨️ Desactivar' : '👁️ Activar'}
                 </button>
                 <button
                   type="button"
