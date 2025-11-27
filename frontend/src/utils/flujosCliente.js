@@ -260,22 +260,9 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { 
           id: 'artistas_favoritos', 
           label: '¿Tienes artistas o canciones favoritas? (opcional)', 
-          tipo: 'buttons', 
+          tipo: 'textarea', 
           requerido: false,
-          opciones: [
-            'Shakira',
-            'Maluma',
-            'Bad Bunny',
-            'J Balvin',
-            'Daddy Yankee',
-            'Ricky Martin',
-            'Luis Fonsi',
-            'Enrique Iglesias',
-            'Marc Anthony',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
+          placeholder: 'Menciona los artistas o canciones que no pueden faltar en tu evento'
         },
       ],
     },
