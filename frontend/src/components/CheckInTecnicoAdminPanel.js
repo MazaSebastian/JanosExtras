@@ -251,14 +251,14 @@ export default function CheckInTecnicoAdminPanel() {
             </div>
             <div className={styles.modalBody}>
               <div className={styles.detailRow}>
-                <strong>DJ:</strong> {selectedCheckIn.dj_nombre}
+                <strong>DJ:</strong> <span>{selectedCheckIn.dj_nombre}</span>
               </div>
               <div className={styles.detailRow}>
-                <strong>Salón:</strong> {selectedCheckIn.salon_nombre}
+                <strong>Salón:</strong> <span>{selectedCheckIn.salon_nombre}</span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Fecha:</strong>{' '}
-                {format(new Date(selectedCheckIn.fecha_check_in), 'dd/MM/yyyy HH:mm', { locale: es })}
+                <span>{format(new Date(selectedCheckIn.fecha_check_in), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Estado General:</strong>{' '}
@@ -272,7 +272,7 @@ export default function CheckInTecnicoAdminPanel() {
               {selectedCheckIn.observaciones && (
                 <div className={styles.detailRow}>
                   <strong>Observaciones Generales:</strong>
-                  <p>{selectedCheckIn.observaciones}</p>
+                  <p style={{ color: '#1a1a1a', marginTop: '0.5rem' }}>{selectedCheckIn.observaciones}</p>
                 </div>
               )}
               <div className={styles.equiposSection}>

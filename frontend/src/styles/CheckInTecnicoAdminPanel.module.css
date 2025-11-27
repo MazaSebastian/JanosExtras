@@ -214,6 +214,7 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  color: #333;
 }
 
 .modalHeader {
@@ -253,12 +254,15 @@
 
 .modalBody {
   padding: 1.5rem;
+  color: #333;
+  background: white;
 }
 
 .detailRow {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #f0f0f0;
+  color: #1a1a1a;
 }
 
 .detailRow:last-child {
@@ -266,24 +270,32 @@
 }
 
 .detailRow strong {
-  color: #333;
+  color: #1a1a1a;
   display: block;
   margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.detailRow > *:not(strong) {
+  color: #1a1a1a;
 }
 
 .detailRow p {
   margin: 0.5rem 0 0 0;
-  color: #666;
+  color: #1a1a1a;
+  line-height: 1.5;
 }
 
 .equiposSection {
   margin-top: 1.5rem;
+  color: #1a1a1a;
 }
 
 .equiposSection strong {
   display: block;
   margin-bottom: 1rem;
-  color: #333;
+  color: #1a1a1a;
+  font-weight: 600;
 }
 
 .equiposList {
@@ -297,6 +309,7 @@
   padding: 1rem;
   border-radius: 6px;
   border-left: 4px solid #772c87;
+  color: #1a1a1a;
 }
 
 .equipoHeader {
@@ -308,7 +321,7 @@
 
 .equipoNombre {
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
 }
 
 .equipoObservaciones {
@@ -316,10 +329,12 @@
   padding-top: 0.5rem;
   border-top: 1px solid #e0e0e0;
   font-size: 0.9rem;
-  color: #666;
+  color: #1a1a1a;
+  line-height: 1.5;
 }
 
 .equipoObservaciones strong {
-  color: #333;
+  color: #1a1a1a;
+  font-weight: 600;
 }
 
