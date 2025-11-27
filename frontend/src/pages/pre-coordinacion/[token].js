@@ -173,7 +173,8 @@ export default function PreCoordinacionPage() {
             }
           });
           
-          await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+          // Marcar como finalizado porque se está completando la pre-coordinación
+          await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar, true);
           
           // Actualizar estado local y mostrar resumen para confirmar
           setRespuestasCliente(respuestasActualizadas);
