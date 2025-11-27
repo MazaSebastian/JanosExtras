@@ -998,24 +998,40 @@ export default function CoordinacionesPanel() {
                             }
                             
                             // Asegurar que velas sea siempre un array válido
+                            console.log('🔍 Parseando respuestas del cliente:', {
+                              tieneVelas: !!respuestas.velas,
+                              tipoVelas: typeof respuestas.velas,
+                              valorVelas: respuestas.velas
+                            });
+                            
                             if (respuestas.velas) {
                               if (typeof respuestas.velas === 'string') {
                                 try {
                                   respuestas.velas = JSON.parse(respuestas.velas);
+                                  console.log('✅ Velas parseadas desde string:', respuestas.velas);
                                 } catch (e) {
                                   console.error('Error al parsear velas desde string:', e);
                                   respuestas.velas = [];
                                 }
                               }
                               if (!Array.isArray(respuestas.velas)) {
-                                console.warn('velas no es un array, convirtiendo a array vacío:', respuestas.velas);
+                                console.warn('⚠️ velas no es un array, convirtiendo a array vacío:', respuestas.velas);
                                 respuestas.velas = [];
+                              } else {
+                                console.log('✅ Velas es un array con', respuestas.velas.length, 'elementos');
+                                // Filtrar solo objetos válidos
+                                const antesFiltro = respuestas.velas.length;
+                                respuestas.velas = respuestas.velas.filter(v => {
+                                  const esValido = v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion);
+                                  if (!esValido) {
+                                    console.warn('⚠️ Vela inválida filtrada:', v);
+                                  }
+                                  return esValido;
+                                });
+                                console.log(`✅ Velas válidas: ${respuestas.velas.length} de ${antesFiltro}`);
                               }
-                              // Filtrar solo objetos válidos
-                              respuestas.velas = respuestas.velas.filter(v => 
-                                v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
-                              );
                             } else {
+                              console.warn('⚠️ No hay campo velas en respuestas');
                               respuestas.velas = [];
                             }
                             
@@ -1136,10 +1152,18 @@ export default function CoordinacionesPanel() {
                                       
                                       // Verificar que sea un array
                                       if (Array.isArray(valorVelas)) {
-                                        // Asegurar que cada elemento del array sea un objeto válido
-                                        const velasValidas = valorVelas.filter(v => v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion));
+                                        console.log('✅ valorVelas es un array con', valorVelas.length, 'elementos:', valorVelas);
                                         
-                                        console.log('✅ Velas válidas encontradas:', velasValidas.length);
+                                        // Asegurar que cada elemento del array sea un objeto válido
+                                        const velasValidas = valorVelas.filter(v => {
+                                          const esValido = v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion);
+                                          if (!esValido) {
+                                            console.warn('⚠️ Vela inválida en renderizado:', v);
+                                          }
+                                          return esValido;
+                                        });
+                                        
+                                        console.log('✅ Velas válidas encontradas para renderizar:', velasValidas.length, velasValidas);
                                         
                                         if (velasValidas.length > 0) {
                                           return (
