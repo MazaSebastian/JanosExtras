@@ -538,6 +538,28 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 5,
+      titulo: '🎵 Música del Evento',
+      descripcion: 'Selecciona el estilo musical para tu evento',
+      preguntas: [
+        { 
+          id: 'estilo_musical', 
+          label: '¿Qué estilo musical prefieres para el evento?', 
+          tipo: 'buttons', 
+          opciones: [
+            'Estilo Chill',
+            'Estilo Acústico',
+            'Estilo Corporativo',
+            'Estilo Funcional',
+            'Estilo Comercial'
+          ], 
+          requerido: true,
+          multiple: true,
+          permiteOtro: false
+        },
+      ],
+    },
+    {
+      id: 6,
       titulo: '🎶 Música para Bailar',
       descripcion: 'Si habrá momentos de baile',
       preguntas: [
