@@ -16,17 +16,37 @@ export default function AnunciosDisplay() {
   const loadAnuncios = async () => {
     try {
       setLoading(true);
-      const response = await anunciosAPI.getAll({ soloActivos: 'true' });
+      // Para DJs, solo obtener anuncios activos y visibles
+      const response = await anunciosAPI.getAll();
       const anunciosData = response.data || [];
       
       // Cargar anuncios descartados del localStorage
       const dismissed = JSON.parse(localStorage.getItem('dismissedAnuncios') || '[]');
       setDismissedAnuncios(dismissed);
       
-      // Filtrar anuncios descartados
-      const visibleAnuncios = anunciosData.filter(
-        a => !dismissed.includes(a.id)
-      );
+      // Filtrar anuncios descartados y asegurar que estén activos y visibles
+      const ahora = new Date();
+      const visibleAnuncios = anunciosData.filter(a => {
+        // No mostrar si fue descartado
+        if (dismissed.includes(a.id)) return false;
+        
+        // Debe estar activo
+        if (!a.activo) return false;
+        
+        // Verificar fecha de inicio
+        if (a.fecha_inicio) {
+          const fechaInicio = new Date(a.fecha_inicio);
+          if (fechaInicio > ahora) return false;
+        }
+        
+        // Verificar fecha de fin
+        if (a.fecha_fin) {
+          const fechaFin = new Date(a.fecha_fin);
+          if (fechaFin < ahora) return false;
+        }
+        
+        return true;
+      });
       
       setAnuncios(visibleAnuncios);
     } catch (err) {
