@@ -360,12 +360,14 @@ export default function PreCoordinacionPage() {
   };
 
   const handleFinalizar = async () => {
+    setGuardando(true);
+    setError('');
+    
+    let respuestasParaGuardar = {};
+    
     try {
-      setGuardando(true);
-      setError('');
-      
       // Convertir respuestas de botones a formato compatible
-      const respuestasParaGuardar = { ...respuestasCliente };
+      respuestasParaGuardar = { ...respuestasCliente };
       Object.keys(respuestasParaGuardar).forEach(key => {
         const valor = respuestasParaGuardar[key];
         if (Array.isArray(valor)) {
@@ -384,42 +386,32 @@ export default function PreCoordinacionPage() {
         }
       });
       
-      // Guardar respuestas en el servidor
+      // Guardar respuestas en el servidor (no bloquear si falla)
       try {
         const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
         console.log('Respuesta del servidor:', response);
       } catch (apiError) {
-        console.error('Error en la llamada API:', apiError);
-        // Continuar con el flujo incluso si hay un error en el API
-        // para que el cliente vea el mensaje de confirmación
+        console.error('Error en la llamada API (continuando de todas formas):', apiError);
       }
       
       // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
       
-      // Actualizar todos los estados necesarios para mostrar el mensaje de cierre
-      // Primero ocultar el resumen
+    } catch (err) {
+      console.error('Error al procesar respuestas:', err);
+    } finally {
+      // SIEMPRE actualizar los estados para mostrar el mensaje de cierre
+      // incluso si hubo un error al guardar
       setMostrarConfirmacion(false);
-      
-      // Luego desactivar la carga
       setGuardando(false);
-      
-      // Finalmente marcar como enviada (esto disparará el mensaje de cierre)
       setPreCoordinacionEnviada(true);
       
-      console.log('Estados actualizados - mostrarConfirmacion:', false, 'preCoordinacionEnviada:', true);
+      console.log('Estados actualizados para mostrar mensaje de cierre');
       
       // Scroll al inicio para mostrar el mensaje de cierre
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
-      
-    } catch (err) {
-      console.error('Error al finalizar:', err);
-      console.error('Error completo:', JSON.stringify(err, null, 2));
-      setError(err.response?.data?.error || err.message || 'Error al guardar las respuestas. Por favor, intenta nuevamente.');
-      setGuardando(false);
-      // No ocultar el resumen si hay error para que el usuario pueda intentar de nuevo
     }
   };
 
