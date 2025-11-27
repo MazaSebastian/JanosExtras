@@ -368,30 +368,96 @@ export default function CoordinacionFlujo({ coordinacionId }) {
             // Mapear respuestas del cliente al formato del DJ
             const respuestasMapeadas = { ...respuestasExistentes };
             
-            // Mapear tematica_evento: convertir de "Formal (elegante y sofisticado)" a "Formal"
+            // Mapear tema_fiesta (XV): convertir valores del cliente al formato del DJ
+            if (respuestasMapeadas.tema_fiesta) {
+              const tema = respuestasMapeadas.tema_fiesta;
+              let valorLimpio = '';
+              
+              if (typeof tema === 'string') {
+                if (tema.startsWith('[') || tema.includes(',')) {
+                  try {
+                    const parsed = JSON.parse(tema);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                      valorLimpio = parsed[0].split('(')[0].trim();
+                    }
+                  } catch (e) {
+                    valorLimpio = tema.split('(')[0].trim();
+                  }
+                } else {
+                  valorLimpio = tema.split('(')[0].trim();
+                }
+              } else if (Array.isArray(tema) && tema.length > 0) {
+                const primerValor = typeof tema[0] === 'string' ? tema[0] : String(tema[0]);
+                valorLimpio = primerValor.split('(')[0].trim();
+              }
+              
+              // Mapear valores específicos del cliente al formato del DJ
+              const mapeoTemaFiesta = {
+                'Princesa': 'Princesa',
+                'Moderna y Trendy': 'Moderna n Trendy',
+                'Descontracturado': 'Descontracturado'
+              };
+              
+              respuestasMapeadas.tema_fiesta = mapeoTemaFiesta[valorLimpio] || valorLimpio;
+            }
+            
+            // Mapear tematica_evento (Cumpleaños/Corporativo): convertir de "Formal (elegante y sofisticado)" a "Formal"
             if (respuestasMapeadas.tematica_evento) {
               const tematica = respuestasMapeadas.tematica_evento;
+              let valorLimpio = '';
+              
               if (typeof tematica === 'string') {
-                // Si es un array convertido a string, tomar el primer elemento
                 if (tematica.startsWith('[') || tematica.includes(',')) {
                   try {
                     const parsed = JSON.parse(tematica);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                      respuestasMapeadas.tematica_evento = parsed[0].split('(')[0].trim();
+                      valorLimpio = parsed[0].split('(')[0].trim();
                     }
                   } catch (e) {
-                    // Si no es JSON válido, extraer solo la primera parte antes del paréntesis
-                    respuestasMapeadas.tematica_evento = tematica.split('(')[0].trim();
+                    valorLimpio = tematica.split('(')[0].trim();
                   }
                 } else {
-                  // Extraer solo la primera parte antes del paréntesis
-                  respuestasMapeadas.tematica_evento = tematica.split('(')[0].trim();
+                  valorLimpio = tematica.split('(')[0].trim();
                 }
               } else if (Array.isArray(tematica) && tematica.length > 0) {
-                // Si es un array, tomar el primer elemento y extraer solo la primera parte
                 const primerValor = typeof tematica[0] === 'string' ? tematica[0] : String(tematica[0]);
-                respuestasMapeadas.tematica_evento = primerValor.split('(')[0].trim();
+                valorLimpio = primerValor.split('(')[0].trim();
               }
+              
+              respuestasMapeadas.tematica_evento = valorLimpio;
+            }
+            
+            // Mapear estilo_casamiento (Casamiento): convertir valores del cliente al formato del DJ
+            if (respuestasMapeadas.estilo_casamiento) {
+              const estilo = respuestasMapeadas.estilo_casamiento;
+              let valorLimpio = '';
+              
+              if (typeof estilo === 'string') {
+                if (estilo.startsWith('[') || estilo.includes(',')) {
+                  try {
+                    const parsed = JSON.parse(estilo);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                      valorLimpio = parsed[0].split('(')[0].trim();
+                    }
+                  } catch (e) {
+                    valorLimpio = estilo.split('(')[0].trim();
+                  }
+                } else {
+                  valorLimpio = estilo.split('(')[0].trim();
+                }
+              } else if (Array.isArray(estilo) && estilo.length > 0) {
+                const primerValor = typeof estilo[0] === 'string' ? estilo[0] : String(estilo[0]);
+                valorLimpio = primerValor.split('(')[0].trim();
+              }
+              
+              // Mapear valores específicos del cliente al formato del DJ
+              const mapeoEstiloCasamiento = {
+                'Ceremonial': 'Ceremonial',
+                'Formal y Elegante': 'Formal y Elegante',
+                'Descontracturado': 'Descontracturado'
+              };
+              
+              respuestasMapeadas.estilo_casamiento = mapeoEstiloCasamiento[valorLimpio] || valorLimpio;
             }
             
             // Mapear musica_recepcion: convertir de array/string de botones a texto descriptivo
