@@ -25,10 +25,11 @@ export default async function handler(req, res) {
 
   try {
     // Obtener todos los DJs
-    const todosLosDJs = await pool.query(
+    const todosLosDJsResult = await pool.query(
       'SELECT id, nombre, salon_id, color_hex FROM djs WHERE rol = $1 ORDER BY nombre',
       ['dj']
     );
+    const todosLosDJs = todosLosDJsResult.rows;
 
     // Obtener eventos de la fecha especificada
     const eventos = await Event.findByDate(fecha);
