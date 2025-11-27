@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { getAuth } from '@/utils/auth';
 import { eventosAPI, fichadasAPI, coordinacionesAPI } from '@/services/api';
 import DJLayout from '@/components/DJLayout';
+import AnunciosDisplay from '@/components/AnunciosDisplay';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/Home.module.css';
 
@@ -76,6 +77,8 @@ export default function DJHomePage() {
           <h1 className={styles.title}>Bienvenido, {user.nombre}</h1>
           <p className={styles.subtitle}>Resumen de tus actividades</p>
         </div>
+
+        <AnunciosDisplay />
 
         {loading ? (
           <SkeletonCard count={4} />

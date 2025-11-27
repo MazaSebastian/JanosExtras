@@ -9,6 +9,7 @@ import Calendar from '@/components/Calendar';
 import SalonCoordinatesEditor from '@/components/SalonCoordinatesEditor';
 import ContenidoPanel from '@/components/ContenidoPanel';
 import CoordinacionesAdminPanel from '@/components/CoordinacionesAdminPanel';
+import AnunciosAdminPanel from '@/components/AnunciosAdminPanel';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/AdminDashboard.module.css';
 
@@ -65,6 +66,7 @@ export default function AdminDashboardPage() {
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'overview', label: 'Resumen general', icon: '📊' },
     { id: 'coordinaciones', label: 'Coordinaciones', icon: '📋' },
+    { id: 'anuncios', label: 'Anuncios', icon: '📢' },
     { id: 'salones', label: 'Salones', icon: '🏢' },
     { id: 'fichadas', label: 'Fichadas', icon: '⏰' },
     { id: 'contenido', label: 'Contenido', icon: '📦' },

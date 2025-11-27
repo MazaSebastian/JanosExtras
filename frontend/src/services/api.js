@@ -157,6 +157,15 @@ export const preCoordinacionAPI = {
   },
 };
 
+// Anuncios API
+export const anunciosAPI = {
+  getAll: (params = {}) => api.get('/anuncios', { params }),
+  getById: (id) => api.get(`/anuncios/${id}`),
+  create: (data) => api.post('/anuncios', data),
+  update: (id, data) => api.patch(`/anuncios/${id}`, data),
+  delete: (id) => api.delete(`/anuncios/${id}`),
+};
+
 
 export default api;
 
