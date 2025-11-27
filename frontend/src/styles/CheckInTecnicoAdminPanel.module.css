@@ -151,6 +151,8 @@
   padding: 1rem;
   border-bottom: 1px solid #e0e0e0;
   font-size: 0.9rem;
+  color: #1a1a1a !important;
+  background-color: white;
 }
 
 .checkInsTable tr:hover {
