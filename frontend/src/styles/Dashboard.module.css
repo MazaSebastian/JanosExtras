@@ -77,7 +77,7 @@
 .salonName {
   font-size: 16px;
   font-weight: 700;
-  color: #4b56d2;
+  color: #772c87;
 }
 
 .salonBadge {
@@ -175,9 +175,15 @@
   border: none;
   font-weight: 600;
   cursor: pointer;
-  background: #4b56d2;
+  background: #772c87;
   color: white;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.viewDetailButton:hover:not(:disabled) {
+  background: #9a4da8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
 }
 
 .rangeButton:disabled {
@@ -187,13 +193,13 @@
 
 .clearRangeButton {
   background: #ffffff;
-  color: #4b56d2;
-  border: 1px solid #4b56d2;
+  color: #772c87;
+  border: 1px solid #772c87;
 }
 
 .rangeInfo {
   font-size: 13px;
-  color: #4b56d2;
+  color: #772c87;
   font-weight: 600;
 }
 
@@ -376,7 +382,7 @@
 .detailItem strong {
   display: block;
   font-size: 15px;
-  color: #4b56d2;
+  color: #772c87;
 }
 
 .detailItem span {
