@@ -23,7 +23,7 @@ export const ESTADOS = {
 };
 
 export class CheckInTecnico {
-  static async create({ dj_id, salon_id, evento_id, equipos, observaciones, estado_general }) {
+  static async create({ dj_id, salon_id, fecha, evento_id, equipos, observaciones, estado_general }) {
     // Validar que equipos sea un array
     if (!Array.isArray(equipos)) {
       throw new Error('equipos debe ser un array');
@@ -31,6 +31,15 @@ export class CheckInTecnico {
 
     // Asegurar que estado_general tenga un valor válido
     const estadoFinal = estado_general || ESTADOS.OK;
+
+    // Si se proporciona fecha, convertirla a timestamp con la hora actual
+    let fechaCheckIn;
+    if (fecha) {
+      const fechaDate = new Date(fecha);
+      fechaCheckIn = fechaDate.toISOString();
+    } else {
+      fechaCheckIn = new Date().toISOString();
+    }
 
     const query = `
       INSERT INTO check_in_tecnico (
@@ -46,7 +55,6 @@ export class CheckInTecnico {
       RETURNING *
     `;
 
-    const fechaCheckIn = new Date().toISOString();
     const result = await pool.query(query, [
       dj_id,
       salon_id,

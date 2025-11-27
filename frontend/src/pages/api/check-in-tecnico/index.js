@@ -32,10 +32,14 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { salon_id, evento_id, equipos, observaciones, estado_general } = req.body;
+      const { salon_id, fecha, evento_id, equipos, observaciones, estado_general } = req.body;
 
       if (!salon_id) {
         return res.status(400).json({ error: 'El salón es requerido' });
+      }
+
+      if (!fecha) {
+        return res.status(400).json({ error: 'La fecha es requerida' });
       }
 
       if (!equipos || !Array.isArray(equipos)) {
@@ -53,6 +57,7 @@ export default async function handler(req, res) {
       const nuevoCheckIn = await CheckInTecnico.create({
         dj_id: auth.user.id,
         salon_id,
+        fecha,
         evento_id: evento_id || null,
         equipos,
         observaciones: observaciones || null,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { checkInTecnicoAPI, salonesAPI, eventosAPI } from '@/services/api';
+import { checkInTecnicoAPI, salonesAPI } from '@/services/api';
 import { EQUIPOS_DEFAULT, ESTADOS } from '@/lib/models/CheckInTecnico.js';
 import { LoadingButton, SkeletonCard } from '@/components/Loading';
 import { format } from 'date-fns';
@@ -8,7 +8,6 @@ import styles from '@/styles/CheckInTecnicoPanel.module.css';
 
 export default function CheckInTecnicoPanel() {
   const [salones, setSalones] = useState([]);
-  const [eventos, setEventos] = useState([]);
   const [checkIns, setCheckIns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingSalones, setLoadingSalones] = useState(true);
@@ -16,7 +15,7 @@ export default function CheckInTecnicoPanel() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     salon_id: '',
-    evento_id: '',
+    fecha: format(new Date(), 'yyyy-MM-dd'),
     equipos: EQUIPOS_DEFAULT.map(nombre => ({ nombre, estado: ESTADOS.OK, observaciones: '' })),
     observaciones: '',
   });
@@ -26,15 +25,6 @@ export default function CheckInTecnicoPanel() {
     loadSalones();
     loadCheckIns();
   }, []);
-
-  // Cargar eventos cuando se selecciona un salón
-  useEffect(() => {
-    if (formData.salon_id) {
-      loadEventos();
-    } else {
-      setEventos([]);
-    }
-  }, [formData.salon_id]);
 
   const loadSalones = async () => {
     try {
@@ -49,33 +39,6 @@ export default function CheckInTecnicoPanel() {
     }
   };
 
-  const loadEventos = async () => {
-    try {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      
-      // Cargar eventos del mes actual y pasado
-      const response = await eventosAPI.getMyEventsByMonth(year, month);
-      const eventosData = response.data || [];
-      
-      // Filtrar eventos del salón seleccionado y de fechas recientes (últimos 30 días)
-      const fechaLimite = new Date();
-      fechaLimite.setDate(fechaLimite.getDate() - 30);
-      
-      const eventosFiltrados = eventosData.filter(evento => {
-        if (evento.salon_id !== parseInt(formData.salon_id)) return false;
-        const fechaEvento = new Date(evento.fecha_evento);
-        return fechaEvento >= fechaLimite;
-      });
-      
-      setEventos(eventosFiltrados);
-    } catch (err) {
-      console.error('Error al cargar eventos:', err);
-      // No mostrar error, simplemente no cargar eventos
-      setEventos([]);
-    }
-  };
 
   const loadCheckIns = async () => {
     try {
@@ -143,7 +106,7 @@ export default function CheckInTecnicoPanel() {
 
       const checkInData = {
         salon_id: parseInt(formData.salon_id),
-        evento_id: formData.evento_id ? parseInt(formData.evento_id) : null,
+        fecha: formData.fecha,
         equipos: formData.equipos,
         observaciones: formData.observaciones || null,
         estado_general: estadoGeneral,
@@ -154,7 +117,7 @@ export default function CheckInTecnicoPanel() {
       setShowForm(false);
       setFormData({
         salon_id: '',
-        evento_id: '',
+        fecha: format(new Date(), 'yyyy-MM-dd'),
         equipos: EQUIPOS_DEFAULT.map(nombre => ({ nombre, estado: ESTADOS.OK, observaciones: '' })),
         observaciones: '',
       });
@@ -236,7 +199,7 @@ export default function CheckInTecnicoPanel() {
             <select
               className={styles.select}
               value={formData.salon_id}
-              onChange={(e) => setFormData({ ...formData, salon_id: e.target.value, evento_id: '' })}
+              onChange={(e) => setFormData({ ...formData, salon_id: e.target.value })}
               required
               disabled={loadingSalones}
             >
@@ -249,23 +212,18 @@ export default function CheckInTecnicoPanel() {
             </select>
           </div>
 
-          {formData.salon_id && (
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Evento Asociado (Opcional)</label>
-              <select
-                className={styles.select}
-                value={formData.evento_id}
-                onChange={(e) => setFormData({ ...formData, evento_id: e.target.value })}
-              >
-                <option value="">-- Sin evento asociado --</option>
-                {eventos.map((evento) => (
-                  <option key={evento.id} value={evento.id}>
-                    {format(new Date(evento.fecha_evento), "dd/MM/yyyy", { locale: es })} - {evento.salon_nombre || 'Salón'}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Fecha <span className={styles.required}>*</span>
+            </label>
+            <input
+              type="date"
+              className={styles.select}
+              value={formData.fecha}
+              onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+              required
+            />
+          </div>
 
           <div className={styles.equiposSection}>
             <h3 className={styles.sectionTitle}>Estado de Equipos</h3>
