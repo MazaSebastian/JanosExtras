@@ -1023,6 +1023,12 @@ export default function AdminDashboardPage() {
               </section>
             )}
 
+            {activeMenu === 'fechas-libres' && (
+              <section id="fechas-libres" className={styles.section}>
+                <FechasLibresPanel />
+              </section>
+            )}
+
             {editingSalon && (
               <SalonCoordinatesEditor
                 salon={editingSalon}
