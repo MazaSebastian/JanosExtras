@@ -125,7 +125,7 @@ export default function CoordinacionesPanel() {
       
       if (editingId) {
         // Para edición: solo enviar los campos que están en el formulario
-        const data = {
+      const data = {
           titulo: formData.titulo || null,
           nombre_cliente: formData.nombre_cliente || null,
           telefono: formData.telefono || null,
@@ -534,17 +534,17 @@ export default function CoordinacionesPanel() {
                         <option value="cancelada">Cancelada</option>
                       </select>
                     </div>
-                  </div>
-                  {user?.rol === 'admin' && (
-                    <div className={styles.formGroup}>
-                      <label>DJ Responsable</label>
-                      <input
-                        type="text"
-                        value={formData.dj_responsable_id}
-                        onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
-                        placeholder="ID del DJ (opcional, se asignará automáticamente si se deja vacío)"
-                      />
                     </div>
+                  {user?.rol === 'admin' && (
+                  <div className={styles.formGroup}>
+                    <label>DJ Responsable</label>
+                    <input
+                      type="text"
+                      value={formData.dj_responsable_id}
+                      onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
+                        placeholder="ID del DJ (opcional, se asignará automáticamente si se deja vacío)"
+                    />
+                  </div>
                   )}
                   <div className={styles.formGroup}>
                     <label>Notas</label>
@@ -1193,17 +1193,22 @@ export default function CoordinacionesPanel() {
                                       {pregunta.label}:
                                     </span>
                                     <div className={styles.resumenVelas}>
-                                      {valor.map((vela) => (
-                                        <div key={vela.id} className={styles.resumenVelaItem}>
-                                          <strong>{vela.nombre}</strong> - {vela.familiar}
+                                      {valor.map((vela, idx) => (
+                                        <div key={vela.id || idx} className={styles.resumenVelaItem}>
+                                          <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
                                           <div className={styles.resumenVelaCancion}>
-                                            🎵 {vela.cancion}
+                                            🎵 {vela.cancion || 'Sin canción'}
                                           </div>
                                         </div>
                                       ))}
                                     </div>
                                   </div>
                                 );
+                              }
+
+                              // Si el valor es un array pero no es velas, no renderizarlo como string
+                              if (Array.isArray(valor)) {
+                                return null;
                               }
 
                               if (valor !== undefined && valor !== null && valor !== '') {
