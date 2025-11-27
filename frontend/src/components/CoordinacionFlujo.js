@@ -1111,18 +1111,30 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                 )}
                 {pregunta.tipo === 'select' && (pregunta.id === 'tema_fiesta' || pregunta.id === 'estilo_casamiento' || pregunta.id === 'tematica_evento') ? (
                   <div className={styles.tematicaButtons}>
-                    {pregunta.opciones.map((opcion) => (
-                      <button
-                        key={opcion}
-                        type="button"
-                        className={`${styles.tematicaButton} ${
-                          respuestas[pregunta.id] === opcion ? styles.tematicaButtonActive : ''
-                        }`}
-                        onClick={() => handleInputChange(pregunta.id, opcion)}
-                      >
-                        {opcion}
-                      </button>
-                    ))}
+                    {pregunta.opciones.map((opcion) => {
+                      const valorActual = respuestas[pregunta.id];
+                      const estaSeleccionado = valorActual === opcion;
+                      // Log para depuración solo la primera vez que se renderiza
+                      if (pregunta.id === 'tema_fiesta' && valorActual && pregunta.opciones.indexOf(opcion) === 0) {
+                        console.log(`🔍 Renderizando botones tema_fiesta:`, { 
+                          valorActual, 
+                          todasLasOpciones: pregunta.opciones,
+                          estaSeleccionadoParaEstaOpcion: estaSeleccionado
+                        });
+                      }
+                      return (
+                        <button
+                          key={opcion}
+                          type="button"
+                          className={`${styles.tematicaButton} ${
+                            estaSeleccionado ? styles.tematicaButtonActive : ''
+                          }`}
+                          onClick={() => handleInputChange(pregunta.id, opcion)}
+                        >
+                          {opcion}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : pregunta.tipo === 'select' ? (
                   <select
