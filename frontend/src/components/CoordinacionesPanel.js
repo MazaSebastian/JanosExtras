@@ -973,18 +973,34 @@ export default function CoordinacionesPanel() {
                             
                             // Parsear respuestas correctamente
                             let respuestas = resumenData.flujo.respuestas;
+                            
+                            // Si respuestas es null o undefined, intentar obtenerlas de otra forma
+                            if (!respuestas && resumenData.flujo) {
+                              respuestas = resumenData.flujo.respuestas || {};
+                            }
+                            
                             if (typeof respuestas === 'string') {
                               try {
                                 respuestas = JSON.parse(respuestas);
                               } catch (e) {
                                 console.error('Error al parsear respuestas:', e);
+                                console.error('String que falló:', respuestas);
                                 respuestas = {};
                               }
                             }
                             
+                            // Si respuestas sigue siendo null/undefined, usar objeto vacío
+                            if (!respuestas || typeof respuestas !== 'object') {
+                              console.warn('Respuestas no válidas, usando objeto vacío:', respuestas);
+                              respuestas = {};
+                            }
+                            
                             console.log('Tipo evento:', tipoEvento);
                             console.log('Pasos disponibles:', pasos.length);
-                            console.log('Respuestas:', respuestas);
+                            console.log('Respuestas RAW:', resumenData.flujo?.respuestas);
+                            console.log('Respuestas parseadas:', respuestas);
+                            console.log('Total de respuestas:', Object.keys(respuestas).length);
+                            console.log('Keys de respuestas:', Object.keys(respuestas));
                             
                             if (!respuestas || Object.keys(respuestas).length === 0) {
                               return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
