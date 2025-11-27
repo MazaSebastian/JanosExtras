@@ -16,35 +16,22 @@ export default function AnunciosDisplay() {
   const loadAnuncios = async () => {
     try {
       setLoading(true);
-      // Para DJs, solo obtener anuncios activos y visibles
-      const response = await anunciosAPI.getAll();
+      // Para DJs, obtener TODOS los anuncios (sin filtrar por activo ni fechas)
+      // Solo se ocultan si fueron descartados por el usuario o eliminados
+      const response = await anunciosAPI.getAll({ soloActivos: 'false' });
       const anunciosData = response.data || [];
       
       // Cargar anuncios descartados del localStorage
       const dismissed = JSON.parse(localStorage.getItem('dismissedAnuncios') || '[]');
       setDismissedAnuncios(dismissed);
       
-      // Filtrar anuncios descartados y asegurar que estén activos y visibles
-      const ahora = new Date();
+      // Solo filtrar anuncios descartados por el usuario
+      // Los anuncios siempre se muestran, independientemente de activo o fechas
       const visibleAnuncios = anunciosData.filter(a => {
-        // No mostrar si fue descartado
+        // No mostrar si fue descartado por el usuario
         if (dismissed.includes(a.id)) return false;
         
-        // Debe estar activo
-        if (!a.activo) return false;
-        
-        // Verificar fecha de inicio
-        if (a.fecha_inicio) {
-          const fechaInicio = new Date(a.fecha_inicio);
-          if (fechaInicio > ahora) return false;
-        }
-        
-        // Verificar fecha de fin
-        if (a.fecha_fin) {
-          const fechaFin = new Date(a.fecha_fin);
-          if (fechaFin < ahora) return false;
-        }
-        
+        // Mostrar todos los demás anuncios
         return true;
       });
       

@@ -17,9 +17,11 @@ export default async function handler(req, res) {
         activo: activo === 'false' ? false : activo === 'true' ? true : null,
         tipo: tipo || null,
         prioridad: prioridad || null,
+        // DJs ven TODOS los anuncios (sin filtrar por activo ni fechas)
+        // Solo se ocultan si fueron eliminados o descartados por el usuario
         soloActivos: auth.user.rol === 'admin' 
           ? soloActivos === 'false' ? false : true 
-          : true, // DJs siempre ven solo activos
+          : false, // DJs ven todos los anuncios
       };
 
       const anuncios = await Anuncio.findAll(filters);
