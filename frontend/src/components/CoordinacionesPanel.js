@@ -7,6 +7,7 @@ import { getAuth } from '@/utils/auth';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/CoordinacionesPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
+import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
@@ -967,21 +968,45 @@ export default function CoordinacionesPanel() {
                           </h4>
                           {(() => {
                             const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
-                            const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
-                            const respuestas = resumenData.flujo.respuestas;
+                            // Usar el flujo del cliente ya que las respuestas fueron guardadas con ese flujo
+                            const pasos = tipoEvento ? CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+                            const respuestas = typeof resumenData.flujo.respuestas === 'string' 
+                              ? JSON.parse(resumenData.flujo.respuestas)
+                              : resumenData.flujo.respuestas;
+                            
+                            if (!respuestas || Object.keys(respuestas).length === 0) {
+                              return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
+                            }
                             
                             return pasos.map((paso) => {
-                              const tieneRespuestas = paso.preguntas.some((p) => {
+                              // Verificar si este paso tiene respuestas
+                              const preguntasConRespuestas = paso.preguntas.filter((p) => {
                                 const esCondicional = p.condicional && p.condicional.pregunta;
-                                const debeMostrar =
-                                  !esCondicional ||
-                                  (respuestas[p.condicional.pregunta] === p.condicional.valor);
+                                let debeMostrar = true;
+                                
+                                if (esCondicional) {
+                                  const valorCondicional = respuestas[p.condicional.pregunta];
+                                  const valorEsperado = p.condicional.valor;
+                                  
+                                  // Manejar tanto valores string como arrays (para botones)
+                                  if (Array.isArray(valorCondicional)) {
+                                    debeMostrar = valorCondicional.includes(valorEsperado);
+                                  } else if (typeof valorCondicional === 'string') {
+                                    // Si es string, puede ser una lista separada por comas
+                                    debeMostrar = valorCondicional === valorEsperado || 
+                                                 valorCondicional.includes(valorEsperado);
+                                  } else {
+                                    debeMostrar = false;
+                                  }
+                                }
+                                
                                 if (!debeMostrar) return false;
+                                
                                 const valor = respuestas[p.id];
                                 return valor !== undefined && valor !== null && valor !== '';
                               });
 
-                              if (!tieneRespuestas) return null;
+                              if (preguntasConRespuestas.length === 0) return null;
 
                               return (
                                 <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
@@ -997,13 +1022,34 @@ export default function CoordinacionesPanel() {
                                   </h5>
                                   {paso.preguntas.map((pregunta) => {
                                     const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-                                    const debeMostrar =
-                                      !esCondicional ||
-                                      (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                                    let debeMostrar = true;
+                                    
+                                    if (esCondicional) {
+                                      const valorCondicional = respuestas[pregunta.condicional.pregunta];
+                                      const valorEsperado = pregunta.condicional.valor;
+                                      
+                                      // Manejar tanto valores string como arrays (para botones)
+                                      if (Array.isArray(valorCondicional)) {
+                                        debeMostrar = valorCondicional.includes(valorEsperado);
+                                      } else if (typeof valorCondicional === 'string') {
+                                        debeMostrar = valorCondicional === valorEsperado || 
+                                                     valorCondicional.includes(valorEsperado);
+                                      } else {
+                                        debeMostrar = false;
+                                      }
+                                    }
+                                    
                                     if (!debeMostrar) return null;
 
                                     const valor = respuestas[pregunta.id];
                                     if (valor === undefined || valor === null || valor === '') return null;
+
+                                    // Manejar valores que pueden ser strings o arrays
+                                    let valorParaMostrar = valor;
+                                    if (typeof valor === 'string' && pregunta.tipo === 'buttons') {
+                                      // Si es string y era un botón, puede estar separado por comas
+                                      valorParaMostrar = valor;
+                                    }
 
                                     if (pregunta.tipo === 'velas' && Array.isArray(valor)) {
                                       return (
@@ -1031,12 +1077,12 @@ export default function CoordinacionesPanel() {
                                       <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
                                         <span className={styles.resumenLabel}>{pregunta.label}:</span>
                                         <span className={styles.resumenValor}>
-                                          {String(valor)
+                                          {String(valorParaMostrar)
                                             .split('\n')
                                             .map((line, i) => (
                                               <span key={i}>
                                                 {line}
-                                                {i < String(valor).split('\n').length - 1 && <br />}
+                                                {i < String(valorParaMostrar).split('\n').length - 1 && <br />}
                                               </span>
                                             ))}
                                         </span>
@@ -1045,7 +1091,7 @@ export default function CoordinacionesPanel() {
                                   })}
                                 </div>
                               );
-                            });
+                            }).filter(Boolean); // Filtrar valores null
                           })()}
                         </div>
                       )}
