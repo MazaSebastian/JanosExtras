@@ -991,47 +991,46 @@ export default function CoordinacionesPanel() {
                             }
                             
                             return pasos.map((paso) => {
-                              // Verificar si este paso tiene respuestas
-                              const preguntasConRespuestas = paso.preguntas.filter((p) => {
+                              // Verificar si este paso tiene al menos una respuesta
+                              // Primero verificar directamente si hay respuestas para las preguntas del paso
+                              const tieneRespuestasDirectas = paso.preguntas.some((p) => {
+                                const valor = respuestas[p.id];
+                                return valor !== undefined && valor !== null && valor !== '';
+                              });
+                              
+                              // También verificar preguntas condicionales si se cumplen sus condiciones
+                              const tieneRespuestasCondicionales = paso.preguntas.some((p) => {
                                 const esCondicional = p.condicional && p.condicional.pregunta;
-                                let debeMostrar = true;
+                                if (!esCondicional) return false;
                                 
-                                if (esCondicional) {
-                                  const valorCondicional = respuestas[p.condicional.pregunta];
-                                  const valorEsperado = p.condicional.valor;
-                                  
-                                  // Manejar tanto valores string como arrays (para botones)
-                                  if (Array.isArray(valorCondicional)) {
-                                    debeMostrar = valorCondicional.includes(valorEsperado);
-                                  } else if (typeof valorCondicional === 'string') {
-                                    // Si es string, puede ser una lista separada por comas o el valor directo
-                                    debeMostrar = valorCondicional === valorEsperado || 
-                                                 valorCondicional.includes(valorEsperado) ||
-                                                 valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
-                                  } else {
-                                    debeMostrar = false;
-                                  }
+                                const valorCondicional = respuestas[p.condicional.pregunta];
+                                const valorEsperado = p.condicional.valor;
+                                
+                                // Verificar si se cumple la condición
+                                let seCumpleCondicion = false;
+                                if (Array.isArray(valorCondicional)) {
+                                  seCumpleCondicion = valorCondicional.includes(valorEsperado);
+                                } else if (typeof valorCondicional === 'string') {
+                                  seCumpleCondicion = valorCondicional === valorEsperado || 
+                                                     valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
                                 }
                                 
-                                if (!debeMostrar) return false;
-                                
-                                const valor = respuestas[p.id];
-                                const tieneValor = valor !== undefined && valor !== null && valor !== '';
-                                
-                                // Si la pregunta es condicional y no se cumple, no contar
-                                if (esCondicional && !debeMostrar) return false;
-                                
-                                return tieneValor;
-                              });
-
-                              // Si el paso tiene al menos una pregunta con respuesta, mostrarlo
-                              const pasoTieneRespuestas = preguntasConRespuestas.length > 0 || 
-                                paso.preguntas.some((p) => {
+                                // Si se cumple la condición, verificar si tiene respuesta
+                                if (seCumpleCondicion) {
                                   const valor = respuestas[p.id];
                                   return valor !== undefined && valor !== null && valor !== '';
-                                });
+                                }
+                                
+                                return false;
+                              });
                               
-                              console.log(`Paso ${paso.id} (${paso.titulo}): ${pasoTieneRespuestas ? 'Tiene respuestas' : 'Sin respuestas'}`);
+                              const pasoTieneRespuestas = tieneRespuestasDirectas || tieneRespuestasCondicionales;
+                              
+                              console.log(`Paso ${paso.id} (${paso.titulo}):`, {
+                                tieneRespuestasDirectas,
+                                tieneRespuestasCondicionales,
+                                pasoTieneRespuestas
+                              });
 
                               if (!pasoTieneRespuestas) return null;
 
