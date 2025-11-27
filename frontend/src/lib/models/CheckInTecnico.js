@@ -251,6 +251,7 @@ export class CheckInTecnico {
         c.salon_id,
         c.estado_general,
         c.fecha_check_in,
+        c.equipos,
         d.nombre as dj_nombre,
         s.nombre as salon_nombre,
         COUNT(*) OVER() as total
@@ -290,7 +291,19 @@ export class CheckInTecnico {
     query += ` ORDER BY c.fecha_check_in DESC`;
 
     const result = await pool.query(query, params);
-    return result.rows;
+    
+    // Parsear equipos JSONB para cada check-in
+    return result.rows.map((row) => {
+      if (row.equipos && typeof row.equipos === 'string') {
+        try {
+          row.equipos = JSON.parse(row.equipos);
+        } catch (e) {
+          console.error('Error al parsear equipos:', e);
+          row.equipos = [];
+        }
+      }
+      return row;
+    });
   }
 }
 

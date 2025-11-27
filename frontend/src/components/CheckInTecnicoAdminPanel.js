@@ -82,6 +82,17 @@ export default function CheckInTecnicoAdminPanel() {
     });
   };
 
+  const contarEquiposPorEstado = (equipos) => {
+    if (!equipos || !Array.isArray(equipos)) {
+      return { observacion: 0, reparar: 0 };
+    }
+    
+    const observacion = equipos.filter(e => e.estado === ESTADOS.OBSERVACION).length;
+    const reparar = equipos.filter(e => e.estado === ESTADOS.REPARAR).length;
+    
+    return { observacion, reparar };
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -213,12 +224,37 @@ export default function CheckInTecnicoAdminPanel() {
                       <td>{checkIn.dj_nombre}</td>
                       <td>{checkIn.salon_nombre}</td>
                       <td>
-                        <span
-                          className={styles.estadoBadge}
-                          style={{ backgroundColor: getEstadoColor(checkIn.estado_general) }}
-                        >
-                          {getEstadoLabel(checkIn.estado_general)}
-                        </span>
+                        {(() => {
+                          const conteos = contarEquiposPorEstado(checkIn.equipos);
+                          return (
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                              {conteos.observacion > 0 && (
+                                <span
+                                  className={styles.estadoBadge}
+                                  style={{ backgroundColor: getEstadoColor(ESTADOS.OBSERVACION) }}
+                                >
+                                  {conteos.observacion} {getEstadoLabel(ESTADOS.OBSERVACION)}
+                                </span>
+                              )}
+                              {conteos.reparar > 0 && (
+                                <span
+                                  className={styles.estadoBadge}
+                                  style={{ backgroundColor: getEstadoColor(ESTADOS.REPARAR) }}
+                                >
+                                  {conteos.reparar} {getEstadoLabel(ESTADOS.REPARAR)}
+                                </span>
+                              )}
+                              {conteos.observacion === 0 && conteos.reparar === 0 && (
+                                <span
+                                  className={styles.estadoBadge}
+                                  style={{ backgroundColor: getEstadoColor(checkIn.estado_general) }}
+                                >
+                                  {getEstadoLabel(checkIn.estado_general)}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td>
                         <button
