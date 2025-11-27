@@ -1089,30 +1089,57 @@ export default function CoordinacionesPanel() {
                                     if (valor === undefined || valor === null || valor === '') return null;
 
                                     // Manejar velas específicamente - verificar tanto por tipo como por id
-                                    if ((pregunta.tipo === 'velas' || pregunta.id === 'velas') && Array.isArray(valor)) {
-                                      // Asegurar que cada elemento del array sea un objeto válido
-                                      const velasValidas = valor.filter(v => v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion));
+                                    if ((pregunta.tipo === 'velas' || pregunta.id === 'velas')) {
+                                      // Log para depuración
+                                      console.log('🔍 Detectando velas:', {
+                                        preguntaId: pregunta.id,
+                                        preguntaTipo: pregunta.tipo,
+                                        valor,
+                                        esArray: Array.isArray(valor),
+                                        tipoValor: typeof valor
+                                      });
                                       
-                                      if (velasValidas.length > 0) {
-                                        return (
-                                          <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
-                                            <span className={styles.resumenLabel}>{pregunta.label}:</span>
-                                            <div className={styles.resumenValor}>
-                                              {velasValidas.map((vela, idx) => (
-                                                <div key={vela.id || idx} style={{ 
-                                                  marginBottom: '0.5rem',
-                                                  padding: '0.5rem',
-                                                  background: '#f1f8f4',
-                                                  borderRadius: '4px'
-                                                }}>
-                                                  <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
-                                                  <br />
-                                                  🎵 {vela.cancion || 'Sin canción'}
-                                                </div>
-                                              ))}
+                                      // Si el valor es un string, intentar parsearlo
+                                      let valorVelas = valor;
+                                      if (typeof valor === 'string') {
+                                        try {
+                                          valorVelas = JSON.parse(valor);
+                                        } catch (e) {
+                                          console.error('Error al parsear velas desde string:', e);
+                                          return null;
+                                        }
+                                      }
+                                      
+                                      // Verificar que sea un array
+                                      if (Array.isArray(valorVelas)) {
+                                        // Asegurar que cada elemento del array sea un objeto válido
+                                        const velasValidas = valorVelas.filter(v => v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion));
+                                        
+                                        console.log('✅ Velas válidas encontradas:', velasValidas.length);
+                                        
+                                        if (velasValidas.length > 0) {
+                                          return (
+                                            <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
+                                              <span className={styles.resumenLabel}>{pregunta.label}:</span>
+                                              <div className={styles.resumenValor}>
+                                                {velasValidas.map((vela, idx) => (
+                                                  <div key={vela.id || idx} style={{ 
+                                                    marginBottom: '0.5rem',
+                                                    padding: '0.5rem',
+                                                    background: '#f1f8f4',
+                                                    borderRadius: '4px'
+                                                  }}>
+                                                    <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
+                                                    <br />
+                                                    🎵 {vela.cancion || 'Sin canción'}
+                                                  </div>
+                                                ))}
+                                              </div>
                                             </div>
-                                          </div>
-                                        );
+                                          );
+                                        }
+                                      } else {
+                                        console.warn('⚠️ Valor de velas no es un array:', valorVelas);
                                       }
                                     }
 
