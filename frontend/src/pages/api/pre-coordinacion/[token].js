@@ -175,8 +175,18 @@ export default async function handler(req, res) {
         flujo,
       });
     } catch (error) {
-      console.error('Error al guardar respuestas de pre-coordinación:', error);
-      return res.status(500).json({ error: 'Error al guardar respuestas' });
+      console.error('=== ERROR AL GUARDAR RESPUESTAS ===');
+      console.error('Error completo:', error);
+      console.error('Stack trace:', error.stack);
+      console.error('Mensaje:', error.message);
+      console.error('Respuestas recibidas:', req.body?.respuestas);
+      
+      // Devolver más detalles del error para debugging
+      return res.status(500).json({ 
+        error: 'Error al guardar respuestas',
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   }
 

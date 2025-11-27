@@ -87,8 +87,20 @@ export class CoordinacionFlujo {
 
     if (respuestas !== undefined) {
       updates.push(`respuestas = $${paramIndex}`);
-      values.push(JSON.stringify(respuestas));
-      paramIndex++;
+      try {
+        // Asegurarse de que respuestas es un objeto válido antes de stringify
+        if (typeof respuestas !== 'object' || respuestas === null) {
+          console.error('Error: respuestas no es un objeto válido:', respuestas);
+          throw new Error('Las respuestas deben ser un objeto válido');
+        }
+        const respuestasString = JSON.stringify(respuestas);
+        values.push(respuestasString);
+        paramIndex++;
+      } catch (e) {
+        console.error('Error al serializar respuestas:', e);
+        console.error('Respuestas que causaron el error:', respuestas);
+        throw new Error(`Error al serializar respuestas: ${e.message}`);
+      }
     }
 
     if (estado !== undefined) {
