@@ -78,6 +78,10 @@ export default async function handler(req, res) {
       // Guardar respuestas del cliente
       const { respuestas } = req.body;
 
+      console.log('API recibió respuestas:', respuestas);
+      console.log('Total de respuestas recibidas:', respuestas ? Object.keys(respuestas).length : 0);
+      console.log('Keys de respuestas recibidas:', respuestas ? Object.keys(respuestas) : []);
+
       if (!respuestas || typeof respuestas !== 'object') {
         return res.status(400).json({ error: 'Las respuestas son requeridas' });
       }
@@ -107,10 +111,16 @@ export default async function handler(req, res) {
           ? JSON.parse(flujo.respuestas) 
           : flujo.respuestas || {};
         
+        console.log('Respuestas existentes antes del merge:', respuestasExistentes);
+        console.log('Nuevas respuestas recibidas:', respuestas);
+        
         const respuestasCombinadas = {
           ...respuestasExistentes,
-          ...respuestas,
+          ...respuestas, // Las nuevas respuestas sobrescriben las existentes
         };
+
+        console.log('Respuestas combinadas después del merge:', respuestasCombinadas);
+        console.log('Total de respuestas combinadas:', Object.keys(respuestasCombinadas).length);
 
         // Actualizar el flujo
         flujo = await CoordinacionFlujo.update(coordinacion.id, {
@@ -118,6 +128,7 @@ export default async function handler(req, res) {
         });
       } else {
         // Crear nuevo flujo
+        console.log('Creando nuevo flujo con respuestas:', respuestas);
         flujo = await CoordinacionFlujo.create({
           coordinacion_id: coordinacion.id,
           paso_actual: 999, // Indica que fue completado por el cliente
@@ -126,6 +137,8 @@ export default async function handler(req, res) {
           estado: 'completado_por_cliente',
         });
       }
+      
+      console.log('Flujo guardado, respuestas finales:', flujo.respuestas);
 
       // Marcar la coordinación como completada por el cliente
       await Coordinacion.update(coordinacion.id, {

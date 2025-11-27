@@ -352,7 +352,10 @@ export default function PreCoordinacionPage() {
 
   const guardarProgreso = async () => {
     try {
+      console.log('Guardando progreso - respuestasCliente:', respuestasCliente);
+      console.log('Total de respuestas a guardar:', Object.keys(respuestasCliente).length);
       await preCoordinacionAPI.guardarRespuestas(token, respuestasCliente);
+      console.log('Progreso guardado exitosamente');
     } catch (err) {
       console.error('Error al guardar progreso:', err);
       // No mostrar error al usuario para no interrumpir el flujo
@@ -388,8 +391,12 @@ export default function PreCoordinacionPage() {
       
       // Guardar respuestas en el servidor (no bloquear si falla)
       try {
+        console.log('Finalizando - respuestasParaGuardar:', respuestasParaGuardar);
+        console.log('Total de respuestas a guardar al finalizar:', Object.keys(respuestasParaGuardar).length);
+        console.log('Keys de respuestas:', Object.keys(respuestasParaGuardar));
         const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
         console.log('Respuesta del servidor:', response);
+        console.log('Respuestas guardadas exitosamente');
       } catch (apiError) {
         console.error('Error en la llamada API (continuando de todas formas):', apiError);
       }
