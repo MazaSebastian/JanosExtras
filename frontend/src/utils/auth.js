@@ -15,6 +15,9 @@ export const getAuth = () => {
 export const clearAuth = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  // Limpiar anuncios descartados al cerrar sesión
+  // Esto asegura que todos los anuncios vuelvan a aparecer en la próxima sesión
+  sessionStorage.removeItem('dismissedAnuncios');
 };
 
 export const isAuthenticated = () => {
