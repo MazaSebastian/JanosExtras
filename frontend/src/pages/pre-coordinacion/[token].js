@@ -37,6 +37,11 @@ export default function PreCoordinacionPage() {
       setCoordinacion(data.coordinacion);
       const respuestas = data.respuestasCliente || {};
       
+      console.log('=== CARGANDO PRE-COORDINACIÓN ===');
+      console.log('Respuestas recibidas del servidor:', respuestas);
+      console.log('Total de respuestas recibidas:', Object.keys(respuestas).length);
+      console.log('Keys recibidas:', Object.keys(respuestas));
+      
       // Convertir respuestas guardadas (strings) de vuelta a arrays para botones
       const respuestasConvertidas = { ...respuestas };
       const tipoEvento = data.coordinacion.tipo_evento?.trim();
@@ -59,6 +64,10 @@ export default function PreCoordinacionPage() {
           }
         });
       });
+      
+      console.log('Respuestas convertidas después de procesamiento:', respuestasConvertidas);
+      console.log('Total de respuestas convertidas:', Object.keys(respuestasConvertidas).length);
+      console.log('Keys convertidas:', Object.keys(respuestasConvertidas));
       
       setRespuestasCliente(respuestasConvertidas);
       
@@ -374,6 +383,57 @@ export default function PreCoordinacionPage() {
       console.log('RespuestasCliente ANTES de conversión:', respuestasCliente);
       console.log('Total de respuestas ANTES de conversión:', Object.keys(respuestasCliente).length);
       console.log('Keys ANTES de conversión:', Object.keys(respuestasCliente));
+      console.log('Valor completo de respuestasCliente:', JSON.stringify(respuestasCliente, null, 2));
+      
+      // Asegurarse de que tenemos todas las respuestas
+      // Si solo hay tematica_evento, puede ser que las respuestas no se hayan cargado correctamente
+      if (Object.keys(respuestasCliente).length === 0 || 
+          (Object.keys(respuestasCliente).length === 1 && Object.keys(respuestasCliente)[0] === 'tematica_evento')) {
+        console.warn('⚠️ ADVERTENCIA: Parece que solo hay una respuesta. Recargando desde el servidor...');
+        // Intentar recargar las respuestas del servidor
+        try {
+          const response = await preCoordinacionAPI.getByToken(token);
+          const data = response.data;
+          const respuestasServidor = data.respuestasCliente || {};
+          console.log('Respuestas recargadas del servidor:', respuestasServidor);
+          console.log('Total de respuestas del servidor:', Object.keys(respuestasServidor).length);
+          
+          // Si hay más respuestas en el servidor, usarlas
+          if (Object.keys(respuestasServidor).length > Object.keys(respuestasCliente).length) {
+            console.log('Usando respuestas del servidor en lugar del estado local');
+            // Convertir respuestas del servidor
+            const respuestasServidorConvertidas = { ...respuestasServidor };
+            const tipoEvento = data.coordinacion.tipo_evento?.trim();
+            const pasos = CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [];
+            
+            pasos.forEach(paso => {
+              paso.preguntas.forEach(pregunta => {
+                if (pregunta.tipo === 'buttons' && respuestasServidorConvertidas[pregunta.id]) {
+                  const valor = respuestasServidorConvertidas[pregunta.id];
+                  if (typeof valor === 'string') {
+                    respuestasServidorConvertidas[pregunta.id] = valor.split(', ').map(v => {
+                      if (v.startsWith('Otro: ')) {
+                        return { tipo: 'otro', valor: v.replace('Otro: ', '') };
+                      }
+                      return v;
+                    });
+                  }
+                }
+              });
+            });
+            
+            // Combinar respuestas del servidor con las locales (las locales tienen prioridad)
+            respuestasCliente = {
+              ...respuestasServidorConvertidas,
+              ...respuestasCliente,
+            };
+            console.log('Respuestas combinadas (servidor + local):', respuestasCliente);
+            console.log('Total de respuestas combinadas:', Object.keys(respuestasCliente).length);
+          }
+        } catch (reloadError) {
+          console.error('Error al recargar respuestas del servidor:', reloadError);
+        }
+      }
       
       // Convertir respuestas de botones a formato compatible
       respuestasParaGuardar = { ...respuestasCliente };
