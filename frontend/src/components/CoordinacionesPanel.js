@@ -990,49 +990,23 @@ export default function CoordinacionesPanel() {
                               return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
                             }
                             
-                            return pasos.map((paso) => {
-                              // Verificar si este paso tiene al menos una respuesta
-                              // Primero verificar directamente si hay respuestas para las preguntas del paso
-                              const tieneRespuestasDirectas = paso.preguntas.some((p) => {
+                            // Filtrar y mostrar solo los pasos que tienen respuestas
+                            const pasosConRespuestas = pasos.filter((paso) => {
+                              // Verificar si el paso tiene al menos una pregunta con respuesta
+                              return paso.preguntas.some((p) => {
                                 const valor = respuestas[p.id];
+                                // Si tiene valor, el paso se muestra (las condiciones se manejan en el render)
                                 return valor !== undefined && valor !== null && valor !== '';
                               });
-                              
-                              // También verificar preguntas condicionales si se cumplen sus condiciones
-                              const tieneRespuestasCondicionales = paso.preguntas.some((p) => {
-                                const esCondicional = p.condicional && p.condicional.pregunta;
-                                if (!esCondicional) return false;
-                                
-                                const valorCondicional = respuestas[p.condicional.pregunta];
-                                const valorEsperado = p.condicional.valor;
-                                
-                                // Verificar si se cumple la condición
-                                let seCumpleCondicion = false;
-                                if (Array.isArray(valorCondicional)) {
-                                  seCumpleCondicion = valorCondicional.includes(valorEsperado);
-                                } else if (typeof valorCondicional === 'string') {
-                                  seCumpleCondicion = valorCondicional === valorEsperado || 
-                                                     valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
-                                }
-                                
-                                // Si se cumple la condición, verificar si tiene respuesta
-                                if (seCumpleCondicion) {
-                                  const valor = respuestas[p.id];
-                                  return valor !== undefined && valor !== null && valor !== '';
-                                }
-                                
-                                return false;
-                              });
-                              
-                              const pasoTieneRespuestas = tieneRespuestasDirectas || tieneRespuestasCondicionales;
-                              
-                              console.log(`Paso ${paso.id} (${paso.titulo}):`, {
-                                tieneRespuestasDirectas,
-                                tieneRespuestasCondicionales,
-                                pasoTieneRespuestas
-                              });
-
-                              if (!pasoTieneRespuestas) return null;
+                            });
+                            
+                            console.log(`Total pasos: ${pasos.length}, Pasos con respuestas: ${pasosConRespuestas.length}`);
+                            
+                            if (pasosConRespuestas.length === 0) {
+                              return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
+                            }
+                            
+                            return pasosConRespuestas.map((paso) => {
 
                               return (
                                 <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
