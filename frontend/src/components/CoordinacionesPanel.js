@@ -1095,6 +1095,7 @@ export default function CoordinacionesPanel() {
                                       valorParaMostrar = valor;
                                     }
 
+                                    // Manejar velas específicamente
                                     if (pregunta.tipo === 'velas' && Array.isArray(valor)) {
                                       return (
                                         <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
@@ -1107,14 +1108,25 @@ export default function CoordinacionesPanel() {
                                                 background: '#f1f8f4',
                                                 borderRadius: '4px'
                                               }}>
-                                                <strong>{vela.nombre}</strong> - {vela.familiar}
+                                                <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
                                                 <br />
-                                                🎵 {vela.cancion}
+                                                🎵 {vela.cancion || 'Sin canción'}
                                               </div>
                                             ))}
                                           </div>
                                         </div>
                                       );
+                                    }
+
+                                    // Si el valor es un array pero no es velas, no renderizarlo como string
+                                    if (Array.isArray(valorParaMostrar)) {
+                                      // Si es un array de strings (como botones), unirlos con comas
+                                      if (valorParaMostrar.every(v => typeof v === 'string')) {
+                                        valorParaMostrar = valorParaMostrar.join(', ');
+                                      } else {
+                                        // Si es un array de objetos, no renderizarlo
+                                        return null;
+                                      }
                                     }
 
                                     return (
