@@ -133,7 +133,9 @@ export default function AnunciosAdminPanel() {
     return colors[prioridad] || colors.normal;
   };
 
-  const isAnuncioActivo = (anuncio) => {
+  // Función para determinar si el anuncio es visible para DJs
+  // (considera activo Y fechas válidas)
+  const isAnuncioVisibleParaDJs = (anuncio) => {
     if (!anuncio.activo) return false;
     const ahora = new Date();
     const inicio = anuncio.fecha_inicio ? new Date(anuncio.fecha_inicio) : null;
@@ -286,9 +288,7 @@ export default function AnunciosAdminPanel() {
           {anuncios.map((anuncio) => (
             <div
               key={anuncio.id}
-              className={`${styles.anuncioCard} ${
-                !isAnuncioActivo(anuncio) ? styles.anuncioInactivo : ''
-              }`}
+              className={styles.anuncioCard}
             >
               <div
                 className={styles.anuncioHeader}
@@ -311,10 +311,10 @@ export default function AnunciosAdminPanel() {
                     </span>
                     <span
                       className={`${styles.badge} ${
-                        isAnuncioActivo(anuncio) ? styles.badgeActive : styles.badgeInactive
+                        isAnuncioVisibleParaDJs(anuncio) ? styles.badgeActive : styles.badgeInactive
                       }`}
                     >
-                      {isAnuncioActivo(anuncio) ? 'Activo' : 'Inactivo'}
+                      {isAnuncioVisibleParaDJs(anuncio) ? 'Visible para DJs' : 'No visible para DJs'}
                     </span>
                   </div>
                 </div>
