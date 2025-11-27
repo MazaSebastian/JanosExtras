@@ -1213,7 +1213,39 @@ export default function CoordinacionesPanel() {
                     (() => {
                       const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                       const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
-                      const respuestas = resumenData.flujo.respuestas;
+                      let respuestas = resumenData.flujo.respuestas;
+                      
+                      // Parsear respuestas si es string
+                      if (typeof respuestas === 'string') {
+                        try {
+                          respuestas = JSON.parse(respuestas);
+                        } catch (e) {
+                          console.error('Error al parsear respuestas del DJ:', e);
+                          respuestas = {};
+                        }
+                      }
+                      
+                      // Asegurar que velas sea siempre un array válido
+                      if (respuestas.velas) {
+                        if (typeof respuestas.velas === 'string') {
+                          try {
+                            respuestas.velas = JSON.parse(respuestas.velas);
+                          } catch (e) {
+                            console.error('Error al parsear velas del DJ desde string:', e);
+                            respuestas.velas = [];
+                          }
+                        }
+                        if (!Array.isArray(respuestas.velas)) {
+                          console.warn('velas del DJ no es un array, convirtiendo a array vacío:', respuestas.velas);
+                          respuestas.velas = [];
+                        }
+                        // Filtrar solo objetos válidos
+                        respuestas.velas = respuestas.velas.filter(v => 
+                          v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
+                        );
+                      } else {
+                        respuestas.velas = [];
+                      }
 
                       return pasos.map((paso) => {
                         const tieneRespuestas = paso.preguntas.some((p) => {
