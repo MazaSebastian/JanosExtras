@@ -8,6 +8,7 @@ import { getSalonColor } from '@/utils/colors';
 import Calendar from '@/components/Calendar';
 import SalonCoordinatesEditor from '@/components/SalonCoordinatesEditor';
 import ContenidoPanel from '@/components/ContenidoPanel';
+import CoordinacionesAdminPanel from '@/components/CoordinacionesAdminPanel';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/AdminDashboard.module.css';
 
@@ -1006,6 +1007,11 @@ export default function AdminDashboardPage() {
               </section>
             )}
 
+            {activeMenu === 'coordinaciones' && (
+              <section id="coordinaciones" className={styles.section}>
+                <CoordinacionesAdminPanel />
+              </section>
+            )}
 
             {editingSalon && (
               <SalonCoordinatesEditor
