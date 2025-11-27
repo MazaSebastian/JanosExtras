@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAuth } from '@/utils/auth';
-import { adminAPI, salonesAPI } from '@/services/api';
+import { adminAPI } from '@/services/api';
 import DJLayout from '@/components/DJLayout';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/FechasLibresPanel.module.css';
@@ -15,8 +15,6 @@ export default function FechasLibresPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [disponibilidad, setDisponibilidad] = useState(null);
-  const [salones, setSalones] = useState([]);
-  const [salonFiltro, setSalonFiltro] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -27,20 +25,6 @@ export default function FechasLibresPage() {
     setUser(auth.user);
   }, [router]);
 
-  useEffect(() => {
-    if (user) {
-      loadSalones();
-    }
-  }, [user]);
-
-  const loadSalones = async () => {
-    try {
-      const response = await salonesAPI.getAll();
-      setSalones(response.data || []);
-    } catch (err) {
-      console.error('Error al cargar salones:', err);
-    }
-  };
 
   const buscarDisponibilidad = async () => {
     if (!fecha) {
@@ -62,18 +46,8 @@ export default function FechasLibresPage() {
     }
   };
 
-  const getSalonName = (salonId) => {
-    const salon = salones.find(s => s.id === salonId);
-    return salon ? salon.nombre : 'N/A';
-  };
-
-  const djsLibresFiltrados = salonFiltro
-    ? (disponibilidad?.djsLibres || []).filter(dj => dj.salon_id === parseInt(salonFiltro))
-    : (disponibilidad?.djsLibres || []);
-  
-  const djsOcupadosFiltrados = salonFiltro
-    ? (disponibilidad?.djsOcupados || []).filter(dj => dj.salon_id === parseInt(salonFiltro))
-    : (disponibilidad?.djsOcupados || []);
+  const djsLibresFiltrados = disponibilidad?.djsLibres || [];
+  const djsOcupadosFiltrados = disponibilidad?.djsOcupados || [];
 
   if (!user) {
     return <Loading message="Cargando..." fullScreen />;
@@ -97,19 +71,6 @@ export default function FechasLibresPage() {
                 onChange={(e) => setFecha(e.target.value)}
                 className={styles.dateInput}
               />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Filtrar por Salón (opcional):</label>
-              <select
-                value={salonFiltro}
-                onChange={(e) => setSalonFiltro(e.target.value)}
-                className={styles.selectInput}
-              >
-                <option value="">Todos los salones</option>
-                {salones.map(salon => (
-                  <option key={salon.id} value={salon.id}>{salon.nombre}</option>
-                ))}
-              </select>
             </div>
             <button
               type="button"
@@ -167,12 +128,6 @@ export default function FechasLibresPage() {
                           Disponible
                         </div>
                       </div>
-                      {dj.salon_id && (
-                        <div className={styles.djInfo}>
-                          <span className={styles.djLabel}>Salón asignado:</span>
-                          <span>{getSalonName(dj.salon_id)}</span>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -198,12 +153,6 @@ export default function FechasLibresPage() {
                           Ocupado
                         </div>
                       </div>
-                      {dj.salon_id && (
-                        <div className={styles.djInfo}>
-                          <span className={styles.djLabel}>Salón asignado:</span>
-                          <span>{getSalonName(dj.salon_id)}</span>
-                        </div>
-                      )}
                       <div className={styles.eventosList}>
                         <div className={styles.eventosTitle}>Eventos:</div>
                         {dj.eventos && dj.eventos.length > 0 ? (

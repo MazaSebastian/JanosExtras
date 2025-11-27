@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { adminAPI, salonesAPI } from '@/services/api';
+import { adminAPI } from '@/services/api';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/FechasLibresPanel.module.css';
 
@@ -10,8 +10,6 @@ export default function FechasLibresPanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [disponibilidad, setDisponibilidad] = useState(null);
-  const [salones, setSalones] = useState([]);
-  const [salonFiltro, setSalonFiltro] = useState('');
 
   // Cargar salones al montar
   useEffect(() => {
@@ -78,19 +76,6 @@ export default function FechasLibresPanel() {
               onChange={(e) => setFecha(e.target.value)}
               className={styles.dateInput}
             />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Filtrar por Salón (opcional):</label>
-            <select
-              value={salonFiltro}
-              onChange={(e) => setSalonFiltro(e.target.value)}
-              className={styles.selectInput}
-            >
-              <option value="">Todos los salones</option>
-              {salones.map(salon => (
-                <option key={salon.id} value={salon.id}>{salon.nombre}</option>
-              ))}
-            </select>
           </div>
           <button
             type="button"
@@ -179,13 +164,7 @@ export default function FechasLibresPanel() {
                         Ocupado
                       </div>
                     </div>
-                    {dj.salon_id && (
-                      <div className={styles.djInfo}>
-                        <span className={styles.djLabel}>Salón asignado:</span>
-                        <span>{getSalonName(dj.salon_id)}</span>
-                      </div>
-                    )}
-                    <div className={styles.eventosList}>
+                      <div className={styles.eventosList}>
                       <div className={styles.eventosTitle}>Eventos:</div>
                       {dj.eventos && dj.eventos.length > 0 ? (
                         dj.eventos.map((evento, idx) => (
