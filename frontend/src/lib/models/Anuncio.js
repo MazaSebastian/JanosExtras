@@ -1,4 +1,4 @@
-import { pool } from '../db.js';
+import pool from '../database-config.js';
 
 export class Anuncio {
   static async findAll(filters = {}) {
