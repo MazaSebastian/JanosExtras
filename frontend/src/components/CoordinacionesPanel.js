@@ -990,49 +990,47 @@ export default function CoordinacionesPanel() {
                               return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
                             }
                             
-                            // Filtrar y mostrar solo los pasos que tienen respuestas
-                            const pasosConRespuestas = pasos.filter((paso) => {
-                              // Verificar si el paso tiene al menos una pregunta con respuesta
-                              return paso.preguntas.some((p) => {
-                                const valor = respuestas[p.id];
-                                // Si tiene valor directo, el paso se muestra
-                                if (valor !== undefined && valor !== null && valor !== '') {
-                                  return true;
-                                }
-                                
-                                // También verificar si hay respuestas condicionales
+                            // Mostrar todos los pasos que tienen respuestas, igual que en la vista del cliente
+                            // No filtrar pasos, mostrar todos y manejar las condiciones en el render
+                            return pasos.map((paso) => {
+                              // Verificar si este paso tiene respuestas
+                              const preguntasRespondidas = paso.preguntas.filter(p => {
                                 const esCondicional = p.condicional && p.condicional.pregunta;
+                                let debeMostrar = true;
+                                
                                 if (esCondicional) {
                                   const valorCondicional = respuestas[p.condicional.pregunta];
                                   const valorEsperado = p.condicional.valor;
                                   
-                                  // Verificar si se cumple la condición
-                                  let seCumpleCondicion = false;
+                                  // Manejar tanto valores string como arrays (para botones)
                                   if (Array.isArray(valorCondicional)) {
-                                    seCumpleCondicion = valorCondicional.includes(valorEsperado);
+                                    debeMostrar = valorCondicional.includes(valorEsperado);
                                   } else if (typeof valorCondicional === 'string') {
-                                    seCumpleCondicion = valorCondicional === valorEsperado || 
-                                                       valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
-                                  }
-                                  
-                                  // Si se cumple la condición y tiene respuesta, mostrar el paso
-                                  if (seCumpleCondicion) {
-                                    const valorRespuesta = respuestas[p.id];
-                                    return valorRespuesta !== undefined && valorRespuesta !== null && valorRespuesta !== '';
+                                    debeMostrar = valorCondicional === valorEsperado || 
+                                                 valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
+                                  } else {
+                                    debeMostrar = false;
                                   }
                                 }
                                 
-                                return false;
+                                if (!debeMostrar) return false;
+                                
+                                const valor = respuestas[p.id];
+                                if (p.tipo === 'velas') {
+                                  return Array.isArray(valor) && valor.length > 0;
+                                }
+                                if (p.tipo === 'buttons') {
+                                  // Si es buttons, puede ser string (después de conversión) o array
+                                  if (typeof valor === 'string') {
+                                    return valor !== '';
+                                  }
+                                  return Array.isArray(valor) && valor.length > 0;
+                                }
+                                return valor !== undefined && valor !== null && valor !== '';
                               });
-                            });
-                            
-                            console.log(`Total pasos: ${pasos.length}, Pasos con respuestas: ${pasosConRespuestas.length}`);
-                            
-                            if (pasosConRespuestas.length === 0) {
-                              return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
-                            }
-                            
-                            return pasosConRespuestas.map((paso) => {
+
+                              // Si no hay preguntas respondidas en este paso, no mostrarlo
+                              if (preguntasRespondidas.length === 0) return null;
 
                               return (
                                 <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
