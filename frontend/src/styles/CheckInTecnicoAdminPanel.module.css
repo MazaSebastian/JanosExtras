@@ -157,7 +157,7 @@
   background-color: white !important;
 }
 
-.checkInsTable td * {
+.checkInsTable td *:not(.estadoBadge) {
   color: #1a1a1a !important;
 }
 
@@ -177,7 +177,7 @@
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: white;
+  color: white !important;
   text-transform: uppercase;
 }
 
