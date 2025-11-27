@@ -86,7 +86,7 @@ export class CoordinacionFlujo {
     }
 
     if (respuestas !== undefined) {
-      updates.push(`respuestas = $${paramIndex}`);
+      updates.push(`respuestas = $${paramIndex}::jsonb`);
       try {
         // Asegurarse de que respuestas es un objeto válido antes de stringify
         if (typeof respuestas !== 'object' || respuestas === null) {
@@ -119,15 +119,22 @@ export class CoordinacionFlujo {
     }
 
     updates.push(`fecha_actualizacion = CURRENT_TIMESTAMP`);
+    
+    // El coordinacion_id va al final, después de todos los parámetros
     values.push(coordinacion_id);
-    paramIndex++;
+    const coordinacionIdParam = paramIndex;
 
     const query = `
       UPDATE coordinaciones_flujo
       SET ${updates.join(', ')}
-      WHERE coordinacion_id = $${paramIndex}
+      WHERE coordinacion_id = $${coordinacionIdParam}
       RETURNING id, coordinacion_id, paso_actual, tipo_evento, respuestas, estado, completado, fecha_inicio, fecha_actualizacion, fecha_completado
     `;
+    
+    console.log('Query SQL:', query);
+    console.log('Valores:', values);
+    console.log('Total de parámetros:', values.length);
+    
     const result = await pool.query(query, values);
     
     if (!result.rows[0]) return null;
