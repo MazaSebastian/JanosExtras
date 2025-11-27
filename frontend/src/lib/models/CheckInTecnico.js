@@ -1,26 +1,5 @@
 import pool from '../database-config.js';
-
-// Lista de equipos técnicos por defecto
-export const EQUIPOS_DEFAULT = [
-  'Pantalla',
-  'Splitter',
-  'Sonido PA',
-  'Parlantes Sub',
-  'Mixer',
-  'Cables',
-  'Micrófonos',
-  'Luces',
-  'Proyector',
-  'Escenario',
-];
-
-// Estados posibles
-export const ESTADOS = {
-  OK: 'ok',
-  OBSERVACION: 'observacion',
-  REPARAR: 'reparar',
-  NO_APLICA: 'no_aplica',
-};
+import { ESTADOS } from '../../utils/checkInTecnico.js';
 
 export class CheckInTecnico {
   static async create({ dj_id, salon_id, fecha, evento_id, equipos, observaciones, estado_general }) {

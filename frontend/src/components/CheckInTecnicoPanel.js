@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { checkInTecnicoAPI, salonesAPI } from '@/services/api';
-import { EQUIPOS_DEFAULT, ESTADOS } from '@/lib/models/CheckInTecnico.js';
+import { EQUIPOS_DEFAULT, ESTADOS, getEstadoColor, getEstadoLabel, calcularEstadoGeneral } from '@/utils/checkInTecnico.js';
 import { LoadingButton, SkeletonCard } from '@/components/Loading';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -54,28 +54,6 @@ export default function CheckInTecnicoPanel() {
     }
   };
 
-  const calcularEstadoGeneral = (equipos) => {
-    if (!equipos || equipos.length === 0) return ESTADOS.OK;
-    
-    const estados = equipos.map(e => e.estado);
-    
-    // Si hay algún equipo que necesita reparación, el estado general es "reparar"
-    if (estados.includes(ESTADOS.REPARAR)) {
-      return ESTADOS.REPARAR;
-    }
-    
-    // Si hay alguna observación, el estado general es "observacion"
-    if (estados.includes(ESTADOS.OBSERVACION)) {
-      return ESTADOS.OBSERVACION;
-    }
-    
-    // Si todos están OK o No aplica, el estado general es "ok"
-    if (estados.every(e => e === ESTADOS.OK || e === ESTADOS.NO_APLICA)) {
-      return ESTADOS.OK;
-    }
-    
-    return ESTADOS.OK;
-  };
 
   const handleEquipoChange = (index, field, value) => {
     const nuevosEquipos = [...formData.equipos];
@@ -140,35 +118,6 @@ export default function CheckInTecnicoPanel() {
     setError('');
   };
 
-  const getEstadoColor = (estado) => {
-    switch (estado) {
-      case ESTADOS.OK:
-        return '#4caf50'; // Verde
-      case ESTADOS.OBSERVACION:
-        return '#ff9800'; // Amarillo/Naranja
-      case ESTADOS.REPARAR:
-        return '#f44336'; // Rojo
-      case ESTADOS.NO_APLICA:
-        return '#9e9e9e'; // Gris
-      default:
-        return '#9e9e9e';
-    }
-  };
-
-  const getEstadoLabel = (estado) => {
-    switch (estado) {
-      case ESTADOS.OK:
-        return 'OK';
-      case ESTADOS.OBSERVACION:
-        return 'Observación';
-      case ESTADOS.REPARAR:
-        return 'Reparar';
-      case ESTADOS.NO_APLICA:
-        return 'No Aplica';
-      default:
-        return estado;
-    }
-  };
 
   return (
     <div className={styles.container}>

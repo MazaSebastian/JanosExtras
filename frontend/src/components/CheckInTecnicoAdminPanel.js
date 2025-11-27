@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { checkInTecnicoAPI, salonesAPI } from '@/services/api';
-import { ESTADOS } from '@/lib/models/CheckInTecnico.js';
+import { ESTADOS, getEstadoColor, getEstadoLabel } from '@/utils/checkInTecnico.js';
 import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/CheckInTecnicoAdminPanel.module.css';
 
@@ -61,35 +61,6 @@ export default function CheckInTecnicoAdminPanel() {
     }
   };
 
-  const getEstadoColor = (estado) => {
-    switch (estado) {
-      case ESTADOS.OK:
-        return '#4caf50'; // Verde
-      case ESTADOS.OBSERVACION:
-        return '#ff9800'; // Amarillo/Naranja
-      case ESTADOS.REPARAR:
-        return '#f44336'; // Rojo
-      case ESTADOS.NO_APLICA:
-        return '#9e9e9e'; // Gris
-      default:
-        return '#9e9e9e';
-    }
-  };
-
-  const getEstadoLabel = (estado) => {
-    switch (estado) {
-      case ESTADOS.OK:
-        return 'OK';
-      case ESTADOS.OBSERVACION:
-        return 'Observación';
-      case ESTADOS.REPARAR:
-        return 'Reparar';
-      case ESTADOS.NO_APLICA:
-        return 'No Aplica';
-      default:
-        return estado;
-    }
-  };
 
   const handleViewDetails = async (checkInId) => {
     try {
