@@ -480,9 +480,10 @@ export default function PreCoordinacionPage() {
       console.log('Keys DESPUÉS de conversión:', Object.keys(respuestasParaGuardar));
       
       // Guardar respuestas en el servidor (no bloquear si falla)
+      // Marcar como finalizado = true porque el cliente está completando la pre-coordinación
       try {
-        console.log('Enviando respuestas al servidor...');
-        const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+        console.log('Enviando respuestas al servidor (FINALIZADO)...');
+        const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar, true);
         console.log('Respuesta del servidor:', response);
         console.log('Respuestas guardadas exitosamente');
       } catch (apiError) {

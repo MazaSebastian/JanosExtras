@@ -76,7 +76,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       // Guardar respuestas del cliente
-      const { respuestas } = req.body;
+      const { respuestas, finalizado } = req.body;
 
       console.log('API recibió respuestas:', respuestas);
       console.log('Total de respuestas recibidas:', respuestas ? Object.keys(respuestas).length : 0);
@@ -204,11 +204,16 @@ export default async function handler(req, res) {
         console.log('Respuestas finales completas:', JSON.stringify(flujo.respuestas, null, 2));
       }
 
-      // Marcar la coordinación como completada por el cliente
-      await Coordinacion.update(coordinacion.id, {
-        pre_coordinacion_completado_por_cliente: true,
-        pre_coordinacion_fecha_completado: new Date().toISOString(),
-      });
+      // Solo marcar como completada si el cliente finalizó la pre-coordinación
+      if (finalizado === true) {
+        console.log('Marcando coordinación como completada por el cliente');
+        await Coordinacion.update(coordinacion.id, {
+          pre_coordinacion_completado_por_cliente: true,
+          pre_coordinacion_fecha_completado: new Date().toISOString(),
+        });
+      } else {
+        console.log('Guardado de progreso - NO se marca como completada');
+      }
 
       return res.status(200).json({
         success: true,

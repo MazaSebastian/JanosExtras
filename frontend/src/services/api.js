@@ -148,12 +148,12 @@ export const preCoordinacionAPI = {
     });
     return publicApi.get(`/pre-coordinacion/${token}`);
   },
-  guardarRespuestas: (token, respuestas) => {
+  guardarRespuestas: (token, respuestas, finalizado = false) => {
     const publicApi = api.create({
       baseURL: api.defaults.baseURL,
       headers: {},
     });
-    return publicApi.post(`/pre-coordinacion/${token}`, { respuestas });
+    return publicApi.post(`/pre-coordinacion/${token}`, { respuestas, finalizado });
   },
 };
 
