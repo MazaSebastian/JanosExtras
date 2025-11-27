@@ -138,7 +138,14 @@ export default async function handler(req, res) {
         });
       }
       
+      console.log('=== FLUJO GUARDADO ===');
       console.log('Flujo guardado, respuestas finales:', flujo.respuestas);
+      console.log('Tipo de respuestas finales:', typeof flujo.respuestas);
+      if (flujo.respuestas) {
+        console.log('Keys de respuestas finales:', Object.keys(flujo.respuestas));
+        console.log('Total de respuestas finales:', Object.keys(flujo.respuestas).length);
+        console.log('Respuestas finales completas:', JSON.stringify(flujo.respuestas, null, 2));
+      }
 
       // Marcar la coordinación como completada por el cliente
       await Coordinacion.update(coordinacion.id, {
