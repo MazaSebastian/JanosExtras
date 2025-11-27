@@ -384,22 +384,33 @@ export default function PreCoordinacionPage() {
         }
       });
       
-      await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+      // Guardar respuestas en el servidor
+      const response = await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar);
+      console.log('Respuesta del servidor:', response);
       
       // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
       
-      // Ocultar resumen y marcar como enviada para mostrar mensaje de cierre
+      // Ocultar resumen inmediatamente
       setMostrarConfirmacion(false);
+      
+      // Marcar como enviada para mostrar mensaje de cierre
       setPreCoordinacionEnviada(true);
+      
+      // Desactivar estado de carga
       setGuardando(false);
       
       // Scroll al inicio para mostrar el mensaje de cierre
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      
     } catch (err) {
       console.error('Error al finalizar:', err);
-      setError(err.response?.data?.error || 'Error al guardar las respuestas. Por favor, intenta nuevamente.');
+      console.error('Error completo:', JSON.stringify(err, null, 2));
+      setError(err.response?.data?.error || err.message || 'Error al guardar las respuestas. Por favor, intenta nuevamente.');
       setGuardando(false);
+      // No ocultar el resumen si hay error para que el usuario pueda intentar de nuevo
     }
   };
 
