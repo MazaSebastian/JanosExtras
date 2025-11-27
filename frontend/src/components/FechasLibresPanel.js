@@ -11,26 +11,13 @@ export default function FechasLibresPanel() {
   const [error, setError] = useState('');
   const [disponibilidad, setDisponibilidad] = useState(null);
 
-  // Cargar salones al montar
-  useEffect(() => {
-    loadSalones();
-  }, []);
-
-  // Buscar disponibilidad automáticamente al cambiar la fecha
+  // Buscar disponibilidad automáticamente al cambiar la fecha (solo una vez al montar)
   useEffect(() => {
     if (fecha) {
       buscarDisponibilidad();
     }
-  }, [fecha]);
-
-  const loadSalones = async () => {
-    try {
-      const response = await salonesAPI.getAll();
-      setSalones(response.data || []);
-    } catch (err) {
-      console.error('Error al cargar salones:', err);
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const buscarDisponibilidad = async () => {
     if (!fecha) {
@@ -49,11 +36,6 @@ export default function FechasLibresPanel() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getSalonName = (salonId) => {
-    const salon = salones.find(s => s.id === salonId);
-    return salon ? salon.nombre : 'N/A';
   };
 
   const djsLibresFiltrados = disponibilidad?.djsLibres || [];
@@ -133,12 +115,6 @@ export default function FechasLibresPanel() {
                         Disponible
                       </div>
                     </div>
-                    {dj.salon_id && (
-                      <div className={styles.djInfo}>
-                        <span className={styles.djLabel}>Salón asignado:</span>
-                        <span>{getSalonName(dj.salon_id)}</span>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
