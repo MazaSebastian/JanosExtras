@@ -970,9 +970,21 @@ export default function CoordinacionesPanel() {
                             const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                             // Usar el flujo del cliente ya que las respuestas fueron guardadas con ese flujo
                             const pasos = tipoEvento ? CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [] : [];
-                            const respuestas = typeof resumenData.flujo.respuestas === 'string' 
-                              ? JSON.parse(resumenData.flujo.respuestas)
-                              : resumenData.flujo.respuestas;
+                            
+                            // Parsear respuestas correctamente
+                            let respuestas = resumenData.flujo.respuestas;
+                            if (typeof respuestas === 'string') {
+                              try {
+                                respuestas = JSON.parse(respuestas);
+                              } catch (e) {
+                                console.error('Error al parsear respuestas:', e);
+                                respuestas = {};
+                              }
+                            }
+                            
+                            console.log('Tipo evento:', tipoEvento);
+                            console.log('Pasos disponibles:', pasos.length);
+                            console.log('Respuestas:', respuestas);
                             
                             if (!respuestas || Object.keys(respuestas).length === 0) {
                               return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
@@ -992,9 +1004,10 @@ export default function CoordinacionesPanel() {
                                   if (Array.isArray(valorCondicional)) {
                                     debeMostrar = valorCondicional.includes(valorEsperado);
                                   } else if (typeof valorCondicional === 'string') {
-                                    // Si es string, puede ser una lista separada por comas
+                                    // Si es string, puede ser una lista separada por comas o el valor directo
                                     debeMostrar = valorCondicional === valorEsperado || 
-                                                 valorCondicional.includes(valorEsperado);
+                                                 valorCondicional.includes(valorEsperado) ||
+                                                 valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
                                   } else {
                                     debeMostrar = false;
                                   }
@@ -1003,10 +1016,24 @@ export default function CoordinacionesPanel() {
                                 if (!debeMostrar) return false;
                                 
                                 const valor = respuestas[p.id];
-                                return valor !== undefined && valor !== null && valor !== '';
+                                const tieneValor = valor !== undefined && valor !== null && valor !== '';
+                                
+                                // Si la pregunta es condicional y no se cumple, no contar
+                                if (esCondicional && !debeMostrar) return false;
+                                
+                                return tieneValor;
                               });
 
-                              if (preguntasConRespuestas.length === 0) return null;
+                              // Si el paso tiene al menos una pregunta con respuesta, mostrarlo
+                              const pasoTieneRespuestas = preguntasConRespuestas.length > 0 || 
+                                paso.preguntas.some((p) => {
+                                  const valor = respuestas[p.id];
+                                  return valor !== undefined && valor !== null && valor !== '';
+                                });
+                              
+                              console.log(`Paso ${paso.id} (${paso.titulo}): ${pasoTieneRespuestas ? 'Tiene respuestas' : 'Sin respuestas'}`);
+
+                              if (!pasoTieneRespuestas) return null;
 
                               return (
                                 <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
