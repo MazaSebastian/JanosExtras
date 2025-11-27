@@ -251,14 +251,14 @@ export default function CheckInTecnicoAdminPanel() {
             </div>
             <div className={styles.modalBody}>
               <div className={styles.detailRow}>
-                <strong>DJ:</strong> <span>{selectedCheckIn.dj_nombre}</span>
+                <strong>DJ:</strong> <span style={{ color: '#1a1a1a' }}>{selectedCheckIn.dj_nombre}</span>
               </div>
               <div className={styles.detailRow}>
-                <strong>Salón:</strong> <span>{selectedCheckIn.salon_nombre}</span>
+                <strong>Salón:</strong> <span style={{ color: '#1a1a1a' }}>{selectedCheckIn.salon_nombre}</span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Fecha:</strong>{' '}
-                <span>{format(new Date(selectedCheckIn.fecha_check_in), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
+                <span style={{ color: '#1a1a1a' }}>{format(new Date(selectedCheckIn.fecha_check_in), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Estado General:</strong>{' '}

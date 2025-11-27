@@ -262,7 +262,7 @@
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #f0f0f0;
-  color: #1a1a1a;
+  color: #1a1a1a !important;
 }
 
 .detailRow:last-child {
@@ -270,19 +270,23 @@
 }
 
 .detailRow strong {
-  color: #1a1a1a;
+  color: #1a1a1a !important;
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.detailRow > *:not(strong) {
-  color: #1a1a1a;
+.detailRow span {
+  color: #1a1a1a !important;
+}
+
+.detailRow > *:not(strong):not(span) {
+  color: #1a1a1a !important;
 }
 
 .detailRow p {
   margin: 0.5rem 0 0 0;
-  color: #1a1a1a;
+  color: #1a1a1a !important;
   line-height: 1.5;
 }
 
