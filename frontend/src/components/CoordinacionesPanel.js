@@ -990,10 +990,8 @@ export default function CoordinacionesPanel() {
                               return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
                             }
                             
-                            // Mostrar todos los pasos que tienen respuestas, igual que en la vista del cliente
-                            // No filtrar pasos, mostrar todos y manejar las condiciones en el render
+                            // Replicar exactamente la lógica del cliente - mostrar todos los pasos con respuestas
                             return pasos.map((paso) => {
-                              // Verificar si este paso tiene respuestas
                               const preguntasRespondidas = paso.preguntas.filter(p => {
                                 const esCondicional = p.condicional && p.condicional.pregunta;
                                 let debeMostrar = true;
@@ -1006,8 +1004,7 @@ export default function CoordinacionesPanel() {
                                   if (Array.isArray(valorCondicional)) {
                                     debeMostrar = valorCondicional.includes(valorEsperado);
                                   } else if (typeof valorCondicional === 'string') {
-                                    debeMostrar = valorCondicional === valorEsperado || 
-                                                 valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
+                                    debeMostrar = valorCondicional === valorEsperado;
                                   } else {
                                     debeMostrar = false;
                                   }
@@ -1020,71 +1017,16 @@ export default function CoordinacionesPanel() {
                                   return Array.isArray(valor) && valor.length > 0;
                                 }
                                 if (p.tipo === 'buttons') {
-                                  // Si es buttons, puede ser string (después de conversión) o array
+                                  // Manejar strings (después de conversión) y arrays
                                   if (typeof valor === 'string') {
                                     return valor.trim() !== '';
                                   }
                                   return Array.isArray(valor) && valor.length > 0;
                                 }
-                                // Para otros tipos (text, textarea, select), verificar que tenga valor
                                 return valor !== undefined && valor !== null && valor !== '';
                               });
 
-                              // Si no hay preguntas respondidas en este paso, no mostrarlo
                               if (preguntasRespondidas.length === 0) return null;
-                              
-                              // Este paso tiene respuestas, mostrarlo
-                              return true;
-                            }).filter(paso => paso !== null && paso !== false);
-                            
-                            // Si después del filtro no hay pasos, mostrar mensaje
-                            const pasosParaMostrar = pasos.filter((paso, index) => {
-                              // La lógica de filtrado ya está dentro del map, solo necesitamos mapear
-                              return true;
-                            }).map((paso) => {
-                              // Mover la lógica aquí para que funcione correctamente
-                              const preguntasRespondidas = paso.preguntas.filter(p => {
-                                const esCondicional = p.condicional && p.condicional.pregunta;
-                                let debeMostrar = true;
-                                
-                                if (esCondicional) {
-                                  const valorCondicional = respuestas[p.condicional.pregunta];
-                                  const valorEsperado = p.condicional.valor;
-                                  
-                                  // Manejar tanto valores string como arrays (para botones)
-                                  if (Array.isArray(valorCondicional)) {
-                                    debeMostrar = valorCondicional.includes(valorEsperado);
-                                  } else if (typeof valorCondicional === 'string') {
-                                    debeMostrar = valorCondicional === valorEsperado || 
-                                                 valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
-                                  } else {
-                                    debeMostrar = false;
-                                  }
-                                }
-                                
-                                if (!debeMostrar) return false;
-                                
-                                const valor = respuestas[p.id];
-                                if (p.tipo === 'velas') {
-                                  return Array.isArray(valor) && valor.length > 0;
-                                }
-                                if (p.tipo === 'buttons') {
-                                  if (typeof valor === 'string') {
-                                    return valor.trim() !== '';
-                                  }
-                                  return Array.isArray(valor) && valor.length > 0;
-                                }
-                                return valor !== undefined && valor !== null && valor !== '';
-                              });
-                              
-                              return preguntasRespondidas.length > 0 ? paso : null;
-                            }).filter(Boolean);
-                            
-                            if (pasosParaMostrar.length === 0) {
-                              return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
-                            }
-                            
-                            return pasosParaMostrar.map((paso) => {
 
                               return (
                                 <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
