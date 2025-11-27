@@ -995,8 +995,34 @@ export default function CoordinacionesPanel() {
                               // Verificar si el paso tiene al menos una pregunta con respuesta
                               return paso.preguntas.some((p) => {
                                 const valor = respuestas[p.id];
-                                // Si tiene valor, el paso se muestra (las condiciones se manejan en el render)
-                                return valor !== undefined && valor !== null && valor !== '';
+                                // Si tiene valor directo, el paso se muestra
+                                if (valor !== undefined && valor !== null && valor !== '') {
+                                  return true;
+                                }
+                                
+                                // También verificar si hay respuestas condicionales
+                                const esCondicional = p.condicional && p.condicional.pregunta;
+                                if (esCondicional) {
+                                  const valorCondicional = respuestas[p.condicional.pregunta];
+                                  const valorEsperado = p.condicional.valor;
+                                  
+                                  // Verificar si se cumple la condición
+                                  let seCumpleCondicion = false;
+                                  if (Array.isArray(valorCondicional)) {
+                                    seCumpleCondicion = valorCondicional.includes(valorEsperado);
+                                  } else if (typeof valorCondicional === 'string') {
+                                    seCumpleCondicion = valorCondicional === valorEsperado || 
+                                                       valorCondicional.toLowerCase().includes(valorEsperado.toLowerCase());
+                                  }
+                                  
+                                  // Si se cumple la condición y tiene respuesta, mostrar el paso
+                                  if (seCumpleCondicion) {
+                                    const valorRespuesta = respuestas[p.id];
+                                    return valorRespuesta !== undefined && valorRespuesta !== null && valorRespuesta !== '';
+                                  }
+                                }
+                                
+                                return false;
                               });
                             });
                             
