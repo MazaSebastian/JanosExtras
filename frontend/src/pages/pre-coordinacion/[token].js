@@ -426,20 +426,36 @@ export default function PreCoordinacionPage() {
             });
             
             // Combinar respuestas del servidor con las locales (las locales tienen prioridad)
-            respuestasCliente = {
+            const respuestasCombinadas = {
               ...respuestasServidorConvertidas,
               ...respuestasCliente,
             };
-            console.log('Respuestas combinadas (servidor + local):', respuestasCliente);
-            console.log('Total de respuestas combinadas:', Object.keys(respuestasCliente).length);
+            console.log('Respuestas combinadas (servidor + local):', respuestasCombinadas);
+            console.log('Total de respuestas combinadas:', Object.keys(respuestasCombinadas).length);
+            
+            // Actualizar el estado con las respuestas combinadas
+            setRespuestasCliente(respuestasCombinadas);
+            
+            // Usar las respuestas combinadas para guardar
+            respuestasParaGuardar = { ...respuestasCombinadas };
+          } else {
+            // Si no hay más respuestas en el servidor, usar las locales
+            respuestasParaGuardar = { ...respuestasCliente };
           }
         } catch (reloadError) {
           console.error('Error al recargar respuestas del servidor:', reloadError);
+          // Si falla la recarga, usar las respuestas locales
+          respuestasParaGuardar = { ...respuestasCliente };
         }
+      } else {
+        // Si hay suficientes respuestas, usar las locales directamente
+        respuestasParaGuardar = { ...respuestasCliente };
       }
       
-      // Convertir respuestas de botones a formato compatible
-      respuestasParaGuardar = { ...respuestasCliente };
+      // Si respuestasParaGuardar aún no está definido, usar respuestasCliente
+      if (!respuestasParaGuardar || Object.keys(respuestasParaGuardar).length === 0) {
+        respuestasParaGuardar = { ...respuestasCliente };
+      }
       Object.keys(respuestasParaGuardar).forEach(key => {
         const valor = respuestasParaGuardar[key];
         if (Array.isArray(valor)) {
