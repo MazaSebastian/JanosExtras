@@ -21,14 +21,15 @@ export default function AnunciosDisplay() {
       const response = await anunciosAPI.getAll({ soloActivos: 'false' });
       const anunciosData = response.data || [];
       
-      // Cargar anuncios descartados del localStorage
-      const dismissed = JSON.parse(localStorage.getItem('dismissedAnuncios') || '[]');
+      // Cargar anuncios descartados del sessionStorage (se resetea al cerrar sesión)
+      const dismissed = JSON.parse(sessionStorage.getItem('dismissedAnuncios') || '[]');
       setDismissedAnuncios(dismissed);
       
-      // Solo filtrar anuncios descartados por el usuario
+      // Solo filtrar anuncios descartados por el usuario en esta sesión
       // Los anuncios siempre se muestran, independientemente de activo o fechas
+      // Al reiniciar sesión, todos los anuncios volverán a aparecer
       const visibleAnuncios = anunciosData.filter(a => {
-        // No mostrar si fue descartado por el usuario
+        // No mostrar si fue descartado por el usuario en esta sesión
         if (dismissed.includes(a.id)) return false;
         
         // Mostrar todos los demás anuncios
@@ -46,7 +47,9 @@ export default function AnunciosDisplay() {
   const handleDismiss = (anuncioId) => {
     const newDismissed = [...dismissedAnuncios, anuncioId];
     setDismissedAnuncios(newDismissed);
-    localStorage.setItem('dismissedAnuncios', JSON.stringify(newDismissed));
+    // Usar sessionStorage en lugar de localStorage
+    // Se resetea automáticamente al cerrar la sesión/pestaña
+    sessionStorage.setItem('dismissedAnuncios', JSON.stringify(newDismissed));
     setAnuncios(anuncios.filter(a => a.id !== anuncioId));
   };
 
