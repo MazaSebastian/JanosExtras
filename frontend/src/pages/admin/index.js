@@ -1015,6 +1015,12 @@ export default function AdminDashboardPage() {
               </section>
             )}
 
+            {activeMenu === 'anuncios' && (
+              <section id="anuncios" className={styles.section}>
+                <AnunciosAdminPanel />
+              </section>
+            )}
+
             {editingSalon && (
               <SalonCoordinatesEditor
                 salon={editingSalon}
