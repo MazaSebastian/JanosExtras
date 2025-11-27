@@ -66,7 +66,6 @@ export default function AnunciosAdminPanel() {
       mensaje: anuncio.mensaje || '',
       tipo: anuncio.tipo || 'info',
       prioridad: anuncio.prioridad || 'normal',
-      activo: anuncio.activo !== undefined ? anuncio.activo : true,
       fecha_inicio: anuncio.fecha_inicio 
         ? format(new Date(anuncio.fecha_inicio), 'yyyy-MM-dd\'T\'HH:mm')
         : format(new Date(), 'yyyy-MM-dd\'T\'HH:mm'),
@@ -107,7 +106,6 @@ export default function AnunciosAdminPanel() {
       mensaje: '',
       tipo: 'info',
       prioridad: 'normal',
-      activo: true,
       fecha_inicio: format(new Date(), 'yyyy-MM-dd\'T\'HH:mm'),
       fecha_fin: '',
     });
@@ -242,16 +240,6 @@ export default function AnunciosAdminPanel() {
               </div>
             </div>
 
-            <div className={styles.formGroup}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={formData.activo}
-                  onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                />
-                <span>Visible para DJs (mostrar en sus dashboards)</span>
-              </label>
-            </div>
 
             <div className={styles.formActions}>
               <button type="submit" className={styles.saveButton}>
@@ -308,13 +296,6 @@ export default function AnunciosAdminPanel() {
                       style={{ backgroundColor: getPrioridadColor(anuncio.prioridad) }}
                     >
                       {anuncio.prioridad}
-                    </span>
-                    <span
-                      className={`${styles.badge} ${
-                        isAnuncioVisibleParaDJs(anuncio) ? styles.badgeActive : styles.badgeInactive
-                      }`}
-                    >
-                      {isAnuncioVisibleParaDJs(anuncio) ? 'Visible para DJs' : 'No visible para DJs'}
                     </span>
                   </div>
                 </div>
