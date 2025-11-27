@@ -997,6 +997,28 @@ export default function CoordinacionesPanel() {
                               }
                             }
                             
+                            // Asegurar que velas sea siempre un array válido
+                            if (respuestas.velas) {
+                              if (typeof respuestas.velas === 'string') {
+                                try {
+                                  respuestas.velas = JSON.parse(respuestas.velas);
+                                } catch (e) {
+                                  console.error('Error al parsear velas desde string:', e);
+                                  respuestas.velas = [];
+                                }
+                              }
+                              if (!Array.isArray(respuestas.velas)) {
+                                console.warn('velas no es un array, convirtiendo a array vacío:', respuestas.velas);
+                                respuestas.velas = [];
+                              }
+                              // Filtrar solo objetos válidos
+                              respuestas.velas = respuestas.velas.filter(v => 
+                                v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
+                              );
+                            } else {
+                              respuestas.velas = [];
+                            }
+                            
                             // Si respuestas sigue siendo null/undefined, usar objeto vacío
                             if (!respuestas || typeof respuestas !== 'object') {
                               console.warn('Respuestas no válidas, usando objeto vacío:', respuestas);
@@ -1226,28 +1248,48 @@ export default function CoordinacionesPanel() {
 
                               const valor = respuestas[pregunta.id];
 
-                              if (
-                                pregunta.tipo === 'velas' &&
-                                Array.isArray(valor) &&
-                                valor.length > 0
-                              ) {
-                                return (
-                                  <div key={pregunta.id} className={styles.resumenCampo}>
-                                    <span className={styles.resumenLabel}>
-                                      {pregunta.label}:
-                                    </span>
-                                    <div className={styles.resumenVelas}>
-                                      {valor.map((vela, idx) => (
-                                        <div key={vela.id || idx} className={styles.resumenVelaItem}>
-                                          <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
-                                          <div className={styles.resumenVelaCancion}>
-                                            🎵 {vela.cancion || 'Sin canción'}
-                                          </div>
+                              // Manejar velas específicamente
+                              if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
+                                let valorVelas = valor;
+                                
+                                // Si el valor es un string, intentar parsearlo
+                                if (typeof valorVelas === 'string') {
+                                  try {
+                                    valorVelas = JSON.parse(valorVelas);
+                                  } catch (e) {
+                                    console.error('Error al parsear velas desde string en flujo DJ:', e);
+                                    return null;
+                                  }
+                                }
+                                
+                                // Verificar que sea un array válido
+                                if (Array.isArray(valorVelas) && valorVelas.length > 0) {
+                                  // Filtrar solo objetos válidos
+                                  const velasValidas = valorVelas.filter(v => 
+                                    v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
+                                  );
+                                  
+                                  if (velasValidas.length > 0) {
+                                    return (
+                                      <div key={pregunta.id} className={styles.resumenCampo}>
+                                        <span className={styles.resumenLabel}>
+                                          {pregunta.label}:
+                                        </span>
+                                        <div className={styles.resumenVelas}>
+                                          {velasValidas.map((vela, idx) => (
+                                            <div key={vela.id || idx} className={styles.resumenVelaItem}>
+                                              <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
+                                              <div className={styles.resumenVelaCancion}>
+                                                🎵 {vela.cancion || 'Sin canción'}
+                                              </div>
+                                            </div>
+                                          ))}
                                         </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                );
+                                      </div>
+                                    );
+                                  }
+                                }
+                                return null;
                               }
 
                               // Si el valor es un array pero no es velas, no renderizarlo como string
