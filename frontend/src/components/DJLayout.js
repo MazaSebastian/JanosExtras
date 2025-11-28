@@ -23,6 +23,7 @@ export default function DJLayout({ user, children }) {
     { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋' },
     { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅' },
     { path: '/dashboard/check-in-tecnico', label: 'Check-In Técnico', icon: '🔧' },
+    { path: null, label: 'Adicionales de Técnica', icon: '⚡', inDevelopment: true },
   ];
 
   const handleMenuClick = (path) => {
@@ -70,14 +71,19 @@ export default function DJLayout({ user, children }) {
         <nav className={styles.menu}>
           {menuItems.map((item) => (
             <button
-              key={item.path}
+              key={item.path || item.label}
               className={`${styles.menuItem} ${
                 currentPath === item.path ? styles.menuItemActive : ''
-              }`}
-              onClick={() => handleMenuClick(item.path)}
+              } ${item.inDevelopment ? styles.menuItemInDevelopment : ''}`}
+              onClick={() => !item.inDevelopment && handleMenuClick(item.path)}
+              disabled={item.inDevelopment}
+              title={item.inDevelopment ? 'En desarrollo' : ''}
             >
               <span className={styles.menuIcon}>{item.icon}</span>
               <span className={styles.menuLabel}>{item.label}</span>
+              {item.inDevelopment && (
+                <span className={styles.developmentBadge}>Próximamente</span>
+              )}
             </button>
           ))}
         </nav>
