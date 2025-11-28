@@ -261,9 +261,11 @@
   /* Contenedor interno para centrar el contenido */
   .content > * {
     width: 100%;
-    max-width: calc(100vw - 4rem - 48px); /* Compensar botón hamburguesa */
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .layout {

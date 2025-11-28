@@ -485,8 +485,18 @@
 }
 
 @media (max-width: 768px) {
+  .panel {
+    padding: 1rem;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
   .header {
     flex-direction: column;
+    padding-bottom: 1rem;
   }
 
   .addButton {
@@ -500,10 +510,58 @@
   .filters {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
   }
 
+  .filterButton,
+  .filterActive,
   .priorityFilter {
     width: 100%;
+  }
+
+  .card {
+    padding: 1rem;
+    overflow-x: hidden;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cardTitleRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .cardHeader h4 {
+    white-space: normal;
+    word-wrap: break-word;
+    width: 100%;
+  }
+
+  .cardMetaInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .metaItem {
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  .cardActions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .description {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   /* Modal desplegable desde abajo en móviles */
@@ -697,21 +755,47 @@
     align-items: flex-end;
     padding: 0;
     background: rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
   }
 
   .modalContent {
     border-radius: 24px 24px 0 0;
     max-width: 100%;
+    width: 100%;
     max-height: 90vh;
     animation: slideUp 0.3s ease-out;
+    box-sizing: border-box;
   }
 
   .modalHeader {
     border-radius: 24px 24px 0 0;
+    padding: 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.25rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+
+  .resumenSeccion {
+    padding: 1rem;
+    overflow-x: hidden;
+  }
+
+  .resumenValor {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
   }
 
   .modalActions {
     flex-direction: column;
+    padding: 1rem;
   }
 
   .modalActions button {
