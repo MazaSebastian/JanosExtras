@@ -473,12 +473,15 @@
     min-height: 48px;
     display: flex;
     align-items: center;
-    white-space: nowrap;
+    justify-content: flex-start;
+    padding: 0.85rem 1rem;
   }
 
-  .menuLabel {
+  .menuItem span:last-child {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
   }
 
   .container {
