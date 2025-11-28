@@ -464,12 +464,21 @@
   }
 
   .menu {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .menuItem {
-    flex: 1 1 45%;
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .menuLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .container {
