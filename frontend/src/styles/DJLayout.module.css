@@ -206,15 +206,10 @@
   .content {
     padding: 1.5rem;
     padding-top: 5.5rem; /* Espacio para el botón hamburguesa */
-    padding-left: 1rem; /* Espacio adicional para evitar solapamiento */
+    padding-left: 4rem; /* Espacio para el botón hamburguesa (48px + 16px margen) */
     max-width: 100vw;
     width: 100%;
     box-sizing: border-box;
-  }
-
-  /* Agregar padding-left a los primeros elementos dentro del contenido para evitar solapamiento */
-  .content > *:first-child {
-    padding-left: 3.5rem; /* Espacio para el botón hamburguesa */
   }
 
   .layout {
