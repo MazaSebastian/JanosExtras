@@ -142,8 +142,41 @@
 }
 
 .hamburgerIcon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 24px;
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+.hamburgerLine {
   display: block;
-  line-height: 1;
+  width: 100%;
+  height: 3px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburgerButtonOpen .hamburgerIcon {
+  gap: 0;
+}
+
+.hamburgerButtonOpen .hamburgerLine:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburgerButtonOpen .hamburgerLine:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburgerButtonOpen .hamburgerLine:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
 }
 
 .overlay {

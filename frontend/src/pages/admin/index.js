@@ -380,11 +380,15 @@ export default function AdminDashboardPage() {
   return (
     <div className={styles.layout}>
       <button
-        className={styles.hamburgerButton}
+        className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
       >
-        <span className={styles.hamburgerIcon}>☰</span>
+        <span className={styles.hamburgerIcon}>
+          <span className={styles.hamburgerLine}></span>
+          <span className={styles.hamburgerLine}></span>
+          <span className={styles.hamburgerLine}></span>
+        </span>
       </button>
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.brand}>
