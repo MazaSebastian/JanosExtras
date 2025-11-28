@@ -512,10 +512,22 @@
   .container {
     padding: 1.5rem;
     padding-top: 5.5rem; /* Espacio para el botón hamburguesa */
-    padding-left: 4rem; /* Espacio para el botón hamburguesa (48px + 16px margen) */
+    padding-left: 1.5rem; /* Padding simétrico */
+    padding-right: 1.5rem; /* Padding simétrico */
     max-width: 100vw;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Contenedor interno para centrar el contenido */
+  .container > * {
+    width: 100%;
+    max-width: calc(100vw - 4rem - 48px); /* Compensar botón hamburguesa */
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .layout {
