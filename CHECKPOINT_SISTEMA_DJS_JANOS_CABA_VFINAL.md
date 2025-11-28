@@ -22,7 +22,10 @@ Este checkpoint representa el estado **100% funcional** de la plataforma de gest
 
 ### 1. Código Fuente
 - **Tag Git:** `Sistema-DJs-Janos-CABA-vFinal`
-- **Commit:** Verificar con `git show Sistema-DJs-Janos-CABA-vFinal`
+- **Commit Hash:** `0216cfd8e77e28aa2ef3ba1fa57bce777cafced5`
+- **Fecha del Commit:** 2025-11-28 01:11:28 -0300
+- **Mensaje:** "Feat: Agregar estilos para elemento 'Adicionales de Técnica' en desarrollo"
+- **Verificar:** `git show Sistema-DJs-Janos-CABA-vFinal`
 - **Repositorio:** https://github.com/MazaSebastian/JanosExtras.git
 
 ### 2. Base de Datos
