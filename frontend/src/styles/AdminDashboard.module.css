@@ -505,9 +505,7 @@
     flex: 1;
   }
 
-  .container {
-    padding: 1.5rem;
-  }
+  /* padding ya está definido arriba con padding-top y padding-left */
 
   .header {
     flex-direction: column;
