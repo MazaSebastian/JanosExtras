@@ -29,7 +29,7 @@
 }
 
 .navButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
   width: 36px;
   height: 36px;
@@ -94,7 +94,7 @@
 }
 
 .day:not(.blocked):not(.otherMonth):hover {
-  border-color: #667eea;
+  border-color: #772c87;
   background: #f5f7ff;
   transform: scale(1.05);
   z-index: 1;

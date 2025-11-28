@@ -117,7 +117,7 @@
 }
 
 .select:focus {
-  border-color: #667eea;
+  border-color: #772c87;
   outline: none;
 }
 
@@ -310,7 +310,7 @@
 .extrasValue {
   font-size: 18px;
   font-weight: 700;
-  color: #667eea;
+  color: #772c87;
 }
 
 .extrasValueHighlight {

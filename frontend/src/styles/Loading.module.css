@@ -59,7 +59,7 @@
 .spinnerRing {
   position: absolute;
   border: 3px solid transparent;
-  border-top-color: #667eea;
+  border-top-color: #772c87;
   border-radius: 50%;
   animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   will-change: transform;
@@ -68,7 +68,7 @@
 .spinnerRing:nth-child(1) {
   width: 100%;
   height: 100%;
-  border-top-color: #667eea;
+  border-top-color: #772c87;
   border-width: 3px;
   animation-delay: -0.45s;
 }
@@ -280,7 +280,7 @@
 /* Variantes de color para diferentes contextos */
 .primary .spinnerRing:nth-child(1),
 .spinnerContainer.primary .spinnerRing:nth-child(1) {
-  border-top-color: #667eea;
+  border-top-color: #772c87;
 }
 
 .primary .spinnerRing:nth-child(2),
@@ -310,8 +310,8 @@
 
 .gradient .spinnerRing:nth-child(1),
 .spinnerContainer.gradient .spinnerRing:nth-child(1) {
-  border-top-color: #667eea;
-  border-image: linear-gradient(45deg, #667eea, #764ba2) 1;
+  border-top-color: #772c87;
+  border-image: linear-gradient(45deg, #772c87, #9a4da8) 1;
 }
 
 .gradient .spinnerRing:nth-child(2),

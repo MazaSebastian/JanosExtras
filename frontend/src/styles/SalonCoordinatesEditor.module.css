@@ -61,7 +61,7 @@
   padding: 1rem;
   background: #f8f9ff;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #772c87;
 }
 
 .instructions p {
@@ -86,7 +86,7 @@
 .fullCoordinateInputField {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #667eea;
+  border: 2px solid #772c87;
   border-radius: 8px;
   font-size: 0.95rem;
   transition: border-color 0.2s;
@@ -141,13 +141,13 @@
 
 .coordinateInput:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #772c87;
+  box-shadow: 0 0 0 3px rgba(119, 44, 135, 0.1);
 }
 
 .applyButton {
   padding: 0.65rem 1.25rem;
-  background: #667eea;
+  background: #772c87;
   color: white;
   border: none;
   border-radius: 8px;
@@ -265,7 +265,7 @@
 }
 
 .saveButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   color: white;
 }
 

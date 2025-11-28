@@ -34,7 +34,7 @@
   font-size: 2rem;
   font-weight: 700;
   color: #333;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -142,8 +142,8 @@
 
 .toggleButton {
   background: transparent;
-  border: 1px solid #667eea;
-  color: #667eea;
+  border: 1px solid #772c87;
+  color: #772c87;
   border-radius: 6px;
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -153,10 +153,10 @@
 }
 
 .toggleButton:hover {
-  background: #667eea;
+  background: #772c87;
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(119, 44, 135, 0.3);
 }
 
 .listEmpty {

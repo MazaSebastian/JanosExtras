@@ -119,7 +119,7 @@
 }
 
 .progressStep.active .stepNumber {
-  background: #667eea;
+  background: #772c87;
   border-color: #772c87;
   color: white;
   transform: scale(1.1);
@@ -161,7 +161,7 @@
   margin: 0 0 1.5rem 0;
   font-size: 1.5rem;
   color: #333;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #772c87;
   padding-bottom: 0.5rem;
 }
 
@@ -221,7 +221,7 @@
   flex: 1;
   min-width: 200px;
   padding: 1.5rem 2rem;
-  border: 3px solid #667eea;
+  border: 3px solid #772c87;
   border-radius: 12px;
   background: white;
   color: #772c87;
@@ -288,7 +288,7 @@
 .buttonSecondary {
   background: white;
   color: #772c87;
-  border: 2px solid #667eea;
+  border: 2px solid #772c87;
 }
 
 .buttonSecondary:hover:not(:disabled) {
@@ -340,7 +340,7 @@
   border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
-  border: 2px solid #667eea;
+  border: 2px solid #772c87;
   box-shadow: 0 4px 16px rgba(119, 44, 135, 0.1);
 }
 
@@ -348,7 +348,7 @@
   margin: 0 0 0.5rem 0;
   font-size: 2rem;
   color: #333;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid #772c87;
   padding-bottom: 1rem;
 }
 
@@ -408,7 +408,7 @@
 .resumenVelaItem {
   padding: 1rem;
   background: #f9f9f9;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #772c87;
   border-radius: 8px;
 }
 
