@@ -191,6 +191,13 @@ export const FLUJOS_POR_TIPO = {
     },
     {
       id: 3,
+      titulo: 'Música de Recepción',
+      preguntas: [
+        { id: 'musica_recepcion', label: 'Descripción de la música de recepción', tipo: 'textarea', requerido: true },
+      ],
+    },
+    {
+      id: 4,
       titulo: 'Escenario',
       preguntas: [
         { id: 'requieren_escenario', label: '¿Requieren escenario?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -198,7 +205,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 5,
       titulo: 'Pantalla',
       preguntas: [
         { id: 'contratan_pantalla', label: '¿Contratan pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -206,14 +213,14 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 6,
       titulo: 'Sorteos',
       preguntas: [
         { id: 'realizan_sorteos', label: '¿Van a realizar sorteos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
       ],
     },
     {
-      id: 6,
+      id: 7,
       titulo: 'Música de Tanda',
       preguntas: [
         { id: 'hay_tandas_baile', label: '¿Va a haber tandas de baile?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },

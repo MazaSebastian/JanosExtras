@@ -542,6 +542,24 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Selecciona el estilo musical para tu evento',
       preguntas: [
         { 
+          id: 'musica_recepcion', 
+          label: '¿Qué tipo de música te gustaría durante la recepción?', 
+          tipo: 'buttons', 
+          requerido: true,
+          opciones: [
+            'Música Chill',
+            'Acústicos',
+            'Bossa N Nova',
+            'Rock Nacional',
+            'Pop Funcional',
+            'Deep House',
+            'Música Comercial',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
+        },
+        { 
           id: 'estilo_musical', 
           label: '¿Qué estilo musical prefieres para el evento?', 
           tipo: 'buttons', 

@@ -1,6 +1,6 @@
 import { authenticateToken } from '@/lib/auth.js';
 import { Fichada } from '@/lib/models/Fichada.js';
-import { checkRateLimit } from '@/lib/utils/rateLimiter.js';
+import { checkRateLimit } from '@/lib/utils/rateLimiterRedis.js';
 
 const allowedTipos = ['ingreso', 'egreso'];
 
@@ -14,9 +14,12 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     // Rate limiting: máximo 5 fichadas por minuto por DJ
-    if (!checkRateLimit(dj_id, 'fichada', 5, 60000)) {
+    const rateLimitResult = await checkRateLimit(dj_id, 'fichada', 5, 60000);
+    if (!rateLimitResult.allowed) {
+      const retryAfter = rateLimitResult.retryAfter || 60;
       return res.status(429).json({ 
-        error: 'Demasiadas solicitudes. Por favor, espera un momento antes de intentar nuevamente.' 
+        error: 'Demasiadas solicitudes. Por favor, espera un momento antes de intentar nuevamente.',
+        retryAfter 
       });
     }
 

@@ -27,9 +27,12 @@ if (USE_REAL_DB) {
     // Supabase pooler puede manejar más conexiones concurrentes
     max: isSupabasePooler ? 2 : 1, // 2 conexiones si usas pooler, 1 si no
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000, // Aumentado para evitar timeouts en picos
+    connectionTimeoutMillis: 10000, // Aumentado a 10s para evitar timeouts en picos
     // Configuraciones adicionales para mejor manejo de conexiones
     allowExitOnIdle: true, // Permite que la función termine cuando no hay conexiones activas
+    // Timeout para queries individuales (30 segundos, menos que el timeout de Vercel)
+    statement_timeout: 25000, // 25 segundos (menos que el timeout de función de 30s)
+    query_timeout: 25000,
   });
 
   pool.on('connect', () => {
