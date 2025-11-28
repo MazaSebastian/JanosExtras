@@ -103,7 +103,7 @@ export default function Login() {
           if (response.data.dj.rol === 'admin') {
             router.push('/admin');
           } else {
-            router.push('/dashboard');
+            router.push('/dashboard/home');
           }
         }
       }
