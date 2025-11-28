@@ -67,6 +67,34 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 3,
+      titulo: '🎵 Música de Recepción y Cena',
+      descripcion: 'Selecciona el tipo de música para la recepción y cena',
+      preguntas: [
+        { 
+          id: 'musica_recepcion_cena', 
+          label: '¿Qué tipo de música te gustaría durante la recepción y cena?', 
+          tipo: 'buttons', 
+          requerido: true,
+          opciones: [
+            'Música Chill',
+            'Acústicos',
+            'Bossa N Nova',
+            'Rock Nacional',
+            'Pop Funcional',
+            'Deep House',
+            'Música Comercial',
+            'Jazz',
+            'Música Clásica',
+            'Lounge',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
+        },
+      ],
+    },
+    {
+      id: 4,
       titulo: '🚪 Momentos Especiales',
       descripcion: 'Estos son los momentos más importantes de tu fiesta',
       preguntas: [
@@ -107,7 +135,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 5,
       titulo: '💃 El Vals',
       descripcion: 'El baile tradicional de los XV',
       preguntas: [
@@ -131,7 +159,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 6,
       titulo: '🕯️ Ceremonia de Velas',
       descripcion: 'Un momento muy emotivo donde honras a personas especiales',
       preguntas: [
@@ -155,7 +183,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 7,
       titulo: '🎭 Coreografías y Presentaciones',
       descripcion: '¿Tienes alguna presentación especial planificada?',
       preguntas: [
@@ -179,7 +207,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 7,
+      id: 8,
       titulo: '🥂 Brindis',
       descripcion: 'El momento del brindis',
       preguntas: [
@@ -193,7 +221,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 8,
+      id: 9,
       titulo: '🎊 Ingreso a Carioca',
       descripcion: 'El momento de la fiesta',
       preguntas: [
@@ -268,6 +296,34 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 3,
+      titulo: '🎵 Música de Recepción y Cena',
+      descripcion: 'Selecciona el tipo de música para la recepción y cena',
+      preguntas: [
+        { 
+          id: 'musica_recepcion_cena', 
+          label: '¿Qué tipo de música te gustaría durante la recepción y cena?', 
+          tipo: 'buttons', 
+          requerido: true,
+          opciones: [
+            'Música Chill',
+            'Acústicos',
+            'Bossa N Nova',
+            'Rock Nacional',
+            'Pop Funcional',
+            'Deep House',
+            'Música Comercial',
+            'Jazz',
+            'Música Clásica',
+            'Lounge',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
+        },
+      ],
+    },
+    {
+      id: 4,
       titulo: '🚪 Momentos Especiales',
       descripcion: 'Los momentos más importantes de tu celebración',
       preguntas: [
@@ -291,7 +347,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 5,
       titulo: '💒 Ceremonia',
       descripcion: 'Si realizan la ceremonia en el salón',
       preguntas: [
@@ -331,7 +387,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 6,
       titulo: '🚪 Ingreso al Salón',
       descripcion: 'El momento de la fiesta',
       preguntas: [
@@ -355,7 +411,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 7,
       titulo: '💃 El Vals',
       descripcion: 'El baile tradicional de los casamientos',
       preguntas: [
@@ -379,7 +435,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 7,
+      id: 8,
       titulo: '🎭 Coreografías',
       descripcion: '¿Tienen alguna presentación especial?',
       preguntas: [
@@ -403,7 +459,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 8,
+      id: 9,
       titulo: '🌹 Momentos Especiales',
       descripcion: 'Tradiciones del casamiento',
       preguntas: [
@@ -481,6 +537,34 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 3,
+      titulo: '🎵 Música de Recepción y Cena',
+      descripcion: 'Selecciona el tipo de música para la recepción y cena',
+      preguntas: [
+        { 
+          id: 'musica_recepcion_cena', 
+          label: '¿Qué tipo de música te gustaría durante la recepción y cena?', 
+          tipo: 'buttons', 
+          requerido: true,
+          opciones: [
+            'Música Chill',
+            'Acústicos',
+            'Bossa N Nova',
+            'Rock Nacional',
+            'Pop Funcional',
+            'Deep House',
+            'Música Comercial',
+            'Jazz',
+            'Música Clásica',
+            'Lounge',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
+        },
+      ],
+    },
+    {
+      id: 4,
       titulo: '🎤 Equipamiento',
       descripcion: 'Necesidades técnicas del evento',
       preguntas: [
@@ -521,7 +605,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 5,
       titulo: '🎁 Actividades',
       descripcion: 'Actividades especiales durante el evento',
       preguntas: [
@@ -537,7 +621,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 6,
       titulo: '🎵 Música del Evento',
       descripcion: 'Selecciona el estilo musical para tu evento',
       preguntas: [
@@ -577,7 +661,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 7,
       titulo: '🎶 Música para Bailar',
       descripcion: 'Si habrá momentos de baile',
       preguntas: [
@@ -732,6 +816,34 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 3,
+      titulo: '🎵 Música de Recepción y Cena',
+      descripcion: 'Selecciona el tipo de música para la recepción y cena',
+      preguntas: [
+        { 
+          id: 'musica_recepcion_cena', 
+          label: '¿Qué tipo de música te gustaría durante la recepción y cena?', 
+          tipo: 'buttons', 
+          requerido: true,
+          opciones: [
+            'Música Chill',
+            'Acústicos',
+            'Bossa N Nova',
+            'Rock Nacional',
+            'Pop Funcional',
+            'Deep House',
+            'Música Comercial',
+            'Jazz',
+            'Música Clásica',
+            'Lounge',
+            'Otro (especificar)'
+          ],
+          multiple: true,
+          permiteOtro: true
+        },
+      ],
+    },
+    {
+      id: 4,
       titulo: '🚪 Ingreso al Salón',
       descripcion: 'Tu momento especial',
       preguntas: [
@@ -755,7 +867,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 5,
       titulo: '🥂 Brindis',
       descripcion: 'El momento del brindis',
       preguntas: [
@@ -769,7 +881,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 6,
       titulo: '🎭 Coreografías',
       descripcion: '¿Tienes alguna presentación especial?',
       preguntas: [
@@ -793,7 +905,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 7,
       titulo: '🎊 Ingreso a Carioca',
       descripcion: 'El momento de la fiesta',
       preguntas: [
