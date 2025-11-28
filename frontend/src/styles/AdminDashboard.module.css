@@ -468,10 +468,15 @@
   }
 
   .container {
-    padding-top: 4.5rem; /* Espacio para el botón hamburguesa */
+    padding-top: 5.5rem; /* Espacio para el botón hamburguesa */
+    padding-left: 1rem; /* Espacio adicional para evitar solapamiento */
     max-width: 100vw;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .header {
+    padding-left: 4rem; /* Espacio para el botón hamburguesa y margen */
   }
 
   .layout {
