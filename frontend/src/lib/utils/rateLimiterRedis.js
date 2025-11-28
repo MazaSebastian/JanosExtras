@@ -16,26 +16,52 @@ import { checkRateLimit as memoryRateLimit } from './rateLimiter.js';
 
 let redisClient = null;
 let useRedis = false;
+let redisInitialized = false;
 
-// Intentar inicializar Redis si está disponible
-try {
-  // Solo importar si las variables de entorno están configuradas
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-    // Dynamic import para evitar errores si el paquete no está instalado
-    import('@upstash/redis').then(({ Redis }) => {
-      redisClient = new Redis({
+// Función para inicializar Redis de forma asíncrona y segura
+// Solo se ejecuta en runtime, nunca durante el build
+async function initializeRedis() {
+  // Solo intentar una vez
+  if (redisInitialized) {
+    return;
+  }
+  redisInitialized = true;
+
+  // Solo intentar si las variables de entorno están configuradas
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return;
+  }
+
+  // Solo intentar en el servidor (no en el cliente)
+  if (typeof window !== 'undefined') {
+    return;
+  }
+
+  try {
+    // Intentar importar dinámicamente solo en runtime (no durante build)
+    // Usar require dinámico para evitar errores de build si el paquete no está instalado
+    const redisModule = await Promise.resolve().then(() => {
+      try {
+        // Intentar importar solo si está disponible
+        return require('@upstash/redis');
+      } catch (e) {
+        // Paquete no instalado, retornar null
+        return null;
+      }
+    });
+
+    if (redisModule && redisModule.Redis) {
+      redisClient = new redisModule.Redis({
         url: process.env.UPSTASH_REDIS_REST_URL,
         token: process.env.UPSTASH_REDIS_REST_TOKEN,
       });
       useRedis = true;
       console.log('✅ Rate limiting con Redis activado');
-    }).catch(() => {
-      console.log('⚠️  Redis no disponible, usando rate limiting en memoria');
-    });
+    }
+  } catch (error) {
+    // Redis no disponible, usar memoria (silencioso)
+    useRedis = false;
   }
-} catch (error) {
-  // Redis no disponible, usar memoria
-  console.log('⚠️  Redis no configurado, usando rate limiting en memoria');
 }
 
 /**
@@ -44,9 +70,12 @@ try {
  * @param {string} action - Tipo de acción ('fichada', 'evento', etc.)
  * @param {number} maxRequests - Máximo de requests permitidos
  * @param {number} windowMs - Ventana de tiempo en milisegundos
- * @returns {Promise<boolean>} true si está permitido, false si excede el límite
+ * @returns {Promise<{allowed: boolean, retryAfter?: number}>} Resultado del rate limit
  */
 export async function checkRateLimit(djId, action = 'fichada', maxRequests = 5, windowMs = 60000) {
+  // Intentar inicializar Redis si aún no se ha hecho
+  await initializeRedis();
+  
   // Si Redis está disponible, usarlo
   if (useRedis && redisClient) {
     try {
@@ -76,7 +105,8 @@ export async function checkRateLimit(djId, action = 'fichada', maxRequests = 5, 
     } catch (error) {
       console.error('Error en rate limiting con Redis:', error);
       // Fallback a memoria en caso de error
-      return { allowed: memoryRateLimit(djId, action, maxRequests, windowMs) };
+      const allowed = memoryRateLimit(djId, action, maxRequests, windowMs);
+      return { allowed };
     }
   }
   
@@ -91,6 +121,8 @@ export async function checkRateLimit(djId, action = 'fichada', maxRequests = 5, 
  * @param {string} action - Tipo de acción
  */
 export async function resetRateLimit(djId, action = 'fichada') {
+  await initializeRedis();
+  
   if (useRedis && redisClient) {
     try {
       const key = `ratelimit:${djId}:${action}`;
@@ -101,4 +133,3 @@ export async function resetRateLimit(djId, action = 'fichada') {
   }
   // En memoria, el cleanup se hace automáticamente
 }
-
