@@ -78,7 +78,7 @@
   height: 80%;
   top: 10%;
   left: 10%;
-  border-top-color: #764ba2;
+  border-top-color: #9a4da8;
   border-width: 2.5px;
   animation-delay: -0.3s;
 }
@@ -285,7 +285,7 @@
 
 .primary .spinnerRing:nth-child(2),
 .spinnerContainer.primary .spinnerRing:nth-child(2) {
-  border-top-color: #764ba2;
+  border-top-color: #9a4da8;
 }
 
 .primary .spinnerRing:nth-child(3),
@@ -316,7 +316,7 @@
 
 .gradient .spinnerRing:nth-child(2),
 .spinnerContainer.gradient .spinnerRing:nth-child(2) {
-  border-top-color: #764ba2;
+  border-top-color: #9a4da8;
 }
 
 .gradient .spinnerRing:nth-child(3),
