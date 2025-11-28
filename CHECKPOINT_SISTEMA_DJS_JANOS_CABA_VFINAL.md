@@ -31,7 +31,20 @@ Este checkpoint representa el estado **100% funcional** de la plataforma de gest
 ### 2. Base de Datos
 - **Esquema completo:** `database/schema-completo.sql`
 - **Migraciones:** `database/migrations/`
+- **Scripts SQL:** Ver directorio `database/` para todos los scripts de creación de tablas
 - **Backup:** Realizar manualmente desde Supabase Dashboard
+- **Tablas principales:**
+  - `djs` - Información de DJs
+  - `salones` - Salones con coordenadas
+  - `eventos` - Eventos marcados
+  - `fichadas` - Registros de ingreso/egreso
+  - `coordinaciones` - Coordinaciones de eventos
+  - `coordinaciones_flujo` - Flujos de coordinación
+  - `software` - Recursos de software
+  - `shows` - Shows (solo admin)
+  - `contenido` - Contenido compartido
+  - `anuncios` - Anuncios de gerencia
+  - `check_in_tecnico` - Check-ins técnicos
 
 ### 3. Funcionalidades Incluidas
 
@@ -159,17 +172,34 @@ git checkout -b restore-vFinal Sistema-DJs-Janos-CABA-vFinal
 Asegúrate de que tu archivo `.env.local` en `frontend/` y las variables de entorno en Vercel estén configuradas correctamente:
 
 ```env
-# Base de datos
-DATABASE_URL=postgresql://...
-SUPABASE_URL=https://...
-SUPABASE_ANON_KEY=...
+# Base de datos PostgreSQL (Supabase)
+DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
+# O variables separadas:
+# DB_HOST=your-host.supabase.co
+# DB_PORT=5432
+# DB_NAME=postgres
+# DB_USER=postgres
+# DB_PASSWORD=your-password
+# DB_SSL=true
 
-# Autenticación
-JWT_SECRET=...
+# Supabase (opcional, si se usa)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+
+# Autenticación JWT
+JWT_SECRET=tu-secreto-jwt-seguro
+# Generar con: openssl rand -base64 32
 
 # URLs
 NEXT_PUBLIC_API_URL=https://janosdjs.com
+# O para desarrollo local:
+# NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# Google Maps API (para fichadas con geolocalización)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 ```
+
+**Nota:** Ver `frontend/sample.env.local` para un ejemplo completo.
 
 ### 4. Instalar dependencias
 
@@ -189,7 +219,21 @@ npm run build
 npm start
 ```
 
-### 6. Desplegar (si es necesario)
+### 6. Configurar Vercel (si es necesario)
+
+**IMPORTANTE:** Si estás configurando Vercel desde cero:
+
+1. Ve a [vercel.com](https://vercel.com) e inicia sesión con GitHub
+2. Importa el repositorio `JanosExtras`
+3. **Configuración crítica:**
+   - **Framework Preset:** Next.js
+   - **Root Directory:** `frontend` ⚠️ **ESTO ES CRÍTICO**
+   - **Build Command:** `npm run build` (por defecto)
+   - **Output Directory:** `.next` (por defecto)
+4. Agrega todas las variables de entorno mencionadas en el paso 3
+5. Despliega
+
+### 7. Desplegar (si es necesario)
 
 Si estás restaurando en un nuevo entorno o quieres asegurar que Vercel use el código restaurado:
 
@@ -264,6 +308,15 @@ git push origin main
 - La base de datos debe restaurarse manualmente desde Supabase
 - Mantener backups regulares de la base de datos
 - Documentar cualquier cambio importante después de este checkpoint
+
+## 📚 Documentación Adicional
+
+Para más detalles técnicos, consultar:
+- **`INFORME_PROYECTO.md`** - Documentación técnica completa del proyecto
+- **`DEPLOY.md`** - Guía detallada de despliegue en Vercel
+- **`MIGRACION_DB.md`** - Información sobre migración a base de datos
+- **`database/`** - Scripts SQL y migraciones
+- **`frontend/sample.env.local`** - Ejemplo de variables de entorno
 
 ---
 
