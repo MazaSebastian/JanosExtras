@@ -16,7 +16,8 @@ export default function Calendar({
   filterDjId,
   readOnly = false,
   startDateFilter,
-  endDateFilter
+  endDateFilter,
+  refreshTrigger = 0
 }) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [rawEvents, setRawEvents] = useState([]);
@@ -33,7 +34,7 @@ export default function Calendar({
     } else {
       setRawEvents([]);
     }
-  }, [salonId, currentYear]);
+  }, [salonId, currentYear, refreshTrigger]);
 
   const loadEvents = async () => {
     if (!salonId) return;

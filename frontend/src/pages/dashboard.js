@@ -57,18 +57,42 @@ export default function DashboardPage() {
   };
 
   const triggerRefreshSequence = () => {
+    // Preservar la posición del scroll antes de actualizar
+    const scrollPosition = window.scrollY;
+    const scrollContainer = document.querySelector(`.${styles.container}`);
+    const containerScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
+
+    // Actualizar triggers sin re-montar completamente
     setRefreshKey((prev) => prev + 1);
     setDashboardRefreshKey((prev) => prev + 1);
 
+    // Usar requestAnimationFrame para restaurar el scroll después de que el DOM se actualice
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Restaurar scroll de la ventana
+        if (scrollPosition > 0) {
+          window.scrollTo(0, scrollPosition);
+        }
+        
+        // Restaurar scroll del contenedor si existe
+        if (scrollContainer && containerScrollTop > 0) {
+          scrollContainer.scrollTop = containerScrollTop;
+        }
+      });
+    });
+
+    // Actualizar Dashboard de forma controlada
     if (dashboardRefreshFn) {
       setTimeout(() => {
+        const beforeScroll = window.scrollY;
         dashboardRefreshFn();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, beforeScroll);
+          });
+        });
       }, 300);
     }
-
-    setTimeout(() => {
-      setDashboardRefreshKey((prev) => prev + 1);
-    }, 600);
   };
 
   const handleDateClick = (date) => {
@@ -104,7 +128,6 @@ export default function DashboardPage() {
     <DJLayout user={user}>
       <div className={styles.container}>
         <Dashboard 
-          key={dashboardRefreshKey} 
           refreshTrigger={dashboardRefreshKey}
           onRefresh={setDashboardRefreshFn}
           salonInfo={userSalonInfo}
@@ -119,7 +142,7 @@ export default function DashboardPage() {
 
           {selectedSalon ? (
             <Calendar
-              key={refreshKey}
+              refreshTrigger={refreshKey}
               salonId={selectedSalon}
               onDateClick={handleDateClick}
               currentUserId={user?.id}
