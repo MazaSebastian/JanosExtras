@@ -64,9 +64,10 @@
   transition: all 0.2s ease;
   text-align: left;
   width: 100%;
+  position: relative;
 }
 
-.menuItem:hover {
+.menuItem:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
   transform: translateX(4px);
 }
@@ -77,6 +78,24 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.menuItemInDevelopment {
+  opacity: 0.5;
+  color: #999;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.menuItemInDevelopment:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: none;
+  color: #999;
+}
+
+.menuItemInDevelopment .menuIcon {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
 .menuIcon {
   font-size: 1.25rem;
   width: 24px;
@@ -85,6 +104,19 @@
 
 .menuLabel {
   flex: 1;
+}
+
+.developmentBadge {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #999;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .sidebarFooter {
