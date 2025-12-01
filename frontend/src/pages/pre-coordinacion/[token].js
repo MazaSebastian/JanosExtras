@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { preCoordinacionAPI } from '@/services/api';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 import Loading from '@/components/Loading';
+import ChatbotPreCoordinacion from '@/components/ChatbotPreCoordinacion';
 import styles from '@/styles/PreCoordinacion.module.css';
 
 export default function PreCoordinacionPage() {
@@ -1040,6 +1041,13 @@ export default function PreCoordinacionPage() {
       <footer className={styles.footer}>
         <p>Tu información será revisada por el DJ antes de la reunión. Gracias por completar este cuestionario.</p>
       </footer>
+
+      {/* Chatbot de ayuda - Opcional, no invasivo */}
+      <ChatbotPreCoordinacion
+        tipoEvento={tipoEventoNormalizado}
+        pasoActual={pasoActual}
+        respuestasCliente={respuestasCliente}
+      />
     </div>
   );
 }
