@@ -1,9 +1,37 @@
-import { procesarMensaje } from '@/lib/chatbot/knowledgeBase';
+import { procesarMensaje, buscarRespuesta } from '@/lib/chatbot/knowledgeBase';
 
 /**
  * API Endpoint para el Chatbot de Pre-Coordinación
- * Fase 1: MVP con reglas simples (sin IA)
+ * Fase 2: Híbrido - Reglas simples + OpenAI
  */
+
+// Inicializar OpenAI de forma lazy (solo cuando se necesite)
+let openaiClient = null;
+let openaiInitialized = false;
+
+async function getOpenAIClient() {
+  if (openaiInitialized) {
+    return openaiClient;
+  }
+  
+  openaiInitialized = true;
+  
+  if (!process.env.OPENAI_API_KEY) {
+    return null;
+  }
+
+  try {
+    const { default: OpenAI } = await import('openai');
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    console.log('✅ OpenAI inicializado correctamente');
+    return openaiClient;
+  } catch (error) {
+    console.warn('⚠️ OpenAI no disponible:', error.message);
+    return null;
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -17,15 +45,107 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Mensaje requerido' });
     }
 
-    // Procesar mensaje con la base de conocimiento
-    const respuesta = procesarMensaje(mensaje.trim(), contexto || {});
+    // Validar longitud del mensaje (prevenir abuso)
+    if (mensaje.length > 500) {
+      return res.status(400).json({ 
+        error: 'Mensaje demasiado largo',
+        respuesta: 'Por favor, envía un mensaje más corto (máximo 500 caracteres).'
+      });
+    }
 
-    // Retornar respuesta
+    const mensajeLimpio = mensaje.trim();
+    const contextoCompleto = contexto || {};
+
+    // ESTRATEGIA HÍBRIDA: Primero intentar con reglas simples (rápido y barato)
+    const respuestaSimple = procesarMensaje(mensajeLimpio, contextoCompleto);
+    
+    // Si encontramos una respuesta con reglas simples, usarla
+    // Solo usar OpenAI si la respuesta es genérica o no encontramos nada útil
+    const esRespuestaGenérica = respuestaSimple.tipo === 'default' || 
+                                 respuestaSimple.tipo === 'pregunta';
+    
+    if (!esRespuestaGenérica) {
+      // Tenemos una buena respuesta de reglas simples
+      return res.status(200).json({
+        respuesta: respuestaSimple.respuesta,
+        tipo: respuestaSimple.tipo,
+        sugerencias: respuestaSimple.sugerencias || null,
+        acciones: respuestaSimple.acciones || null,
+        fuente: 'reglas'
+      });
+    }
+
+    // Si no hay buena respuesta de reglas, intentar con OpenAI (si está disponible)
+    const openai = await getOpenAIClient();
+    if (openai && process.env.OPENAI_API_KEY) {
+      try {
+        const tipoEvento = contextoCompleto.tipoEvento || 'No especificado';
+        const pasoActual = contextoCompleto.pasoActual || 1;
+        const respuestasCliente = contextoCompleto.respuestasCliente || {};
+
+        // Construir prompt del sistema
+        const systemPrompt = `Eres un asistente amigable para pre-coordinación de eventos de DJs.
+Tu objetivo es ayudar a los clientes a completar su pre-coordinación de forma clara y amigable.
+
+INFORMACIÓN DEL EVENTO:
+- Tipo: ${tipoEvento}
+- Paso actual: ${pasoActual}
+- Respuestas ya completadas: ${JSON.stringify(respuestasCliente).substring(0, 500)}
+
+INSTRUCCIONES:
+1. Sé amigable, profesional y empático
+2. Explica términos técnicos de forma simple
+3. Sugiere opciones cuando el cliente no esté seguro
+4. Mantén respuestas concisas (máximo 3-4 oraciones)
+5. Si no sabes algo, admítelo y ofrece contactar al DJ
+6. Usa emojis moderadamente para hacer la conversación más amigable
+7. Responde en español argentino, de forma natural y cercana
+
+CONTEXTO:
+El cliente está completando un formulario de pre-coordinación paso a paso.
+Ayúdalo a entender qué información necesita y por qué.`;
+
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            {
+              role: 'user',
+              content: mensajeLimpio
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 200,
+          timeout: 10000 // 10 segundos timeout
+        });
+
+        const respuestaIA = completion.choices[0]?.message?.content?.trim();
+        
+        if (respuestaIA) {
+          return res.status(200).json({
+            respuesta: respuestaIA,
+            tipo: 'ia',
+            fuente: 'openai',
+            sugerencias: null,
+            acciones: null
+          });
+        }
+      } catch (errorOpenAI) {
+        console.error('Error con OpenAI:', errorOpenAI);
+        // Continuar con fallback a reglas simples
+      }
+    }
+
+    // Fallback: usar respuesta de reglas simples (aunque sea genérica)
     return res.status(200).json({
-      respuesta: respuesta.respuesta,
-      tipo: respuesta.tipo,
-      sugerencias: respuesta.sugerencias || null,
-      acciones: respuesta.acciones || null
+      respuesta: respuestaSimple.respuesta,
+      tipo: respuestaSimple.tipo,
+      sugerencias: respuestaSimple.sugerencias || null,
+      acciones: respuestaSimple.acciones || null,
+      fuente: 'reglas'
     });
 
   } catch (error) {
