@@ -86,17 +86,24 @@ export default async function handler(req, res) {
     // ESTRATEGIA HÍBRIDA: Primero intentar con reglas simples (rápido y barato)
     const respuestaSimple = procesarMensaje(mensajeLimpio, contextoCompleto);
     
+    // Detectar si la pregunta es sobre el chatbot mismo o OpenAI (usar IA para estas)
+    const esPreguntaSobreChatbot = mensajeLimpio.match(/(openai|ia|inteligencia artificial|chatbot|asistente|tecnología|tecnologia|usando|usa|funciona|funciona con)/i);
+    
     // Si encontramos una respuesta con reglas simples, usarla
-    // Solo usar OpenAI si la respuesta es genérica o no encontramos nada útil
+    // Solo usar OpenAI si la respuesta es genérica, es pregunta sobre el chatbot, o no encontramos nada útil
     const esRespuestaGenérica = respuestaSimple.tipo === 'default' || 
                                  respuestaSimple.tipo === 'pregunta';
     
-    console.log(`[Chatbot] Mensaje: "${mensajeLimpio}" | Tipo respuesta: ${respuestaSimple.tipo} | Es genérica: ${esRespuestaGenérica}`);
+    // Si es pregunta sobre el chatbot/OpenAI, siempre usar OpenAI (aunque tengamos FAQ)
+    const debeUsarOpenAI = esRespuestaGenérica || esPreguntaSobreChatbot;
+    
+    console.log(`[Chatbot] Mensaje: "${mensajeLimpio}" | Tipo respuesta: ${respuestaSimple.tipo} | Es genérica: ${esRespuestaGenérica} | Es sobre chatbot: ${!!esPreguntaSobreChatbot} | Debe usar OpenAI: ${debeUsarOpenAI}`);
     
     // Tipos que NO deben usar OpenAI (tienen respuestas específicas buenas)
+    // EXCEPTO si es pregunta sobre el chatbot mismo
     const tiposConBuenaRespuesta = ['saludo', 'despedida', 'ayuda', 'sugerencias', 'faq', 'termino'];
     
-    if (!esRespuestaGenérica && tiposConBuenaRespuesta.includes(respuestaSimple.tipo)) {
+    if (!debeUsarOpenAI && tiposConBuenaRespuesta.includes(respuestaSimple.tipo)) {
       // Tenemos una buena respuesta de reglas simples
       console.log(`[Chatbot] Usando respuesta de reglas simples (tipo: ${respuestaSimple.tipo})`);
       return res.status(200).json({
@@ -109,7 +116,7 @@ export default async function handler(req, res) {
     }
 
     // Si no hay buena respuesta de reglas, intentar con OpenAI (si está disponible)
-    console.log(`[Chatbot] Respuesta genérica detectada, intentando usar OpenAI...`);
+    console.log(`[Chatbot] ${esPreguntaSobreChatbot ? 'Pregunta sobre chatbot detectada' : 'Respuesta genérica detectada'}, intentando usar OpenAI...`);
     
     // Verificar API Key directamente (no depender de getOpenAIClient para esto)
     const apiKey = process.env.OPENAI_API_KEY?.trim();
