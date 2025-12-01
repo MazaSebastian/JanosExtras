@@ -110,14 +110,33 @@ export default async function handler(req, res) {
 
     // Si no hay buena respuesta de reglas, intentar con OpenAI (si está disponible)
     console.log(`[Chatbot] Respuesta genérica detectada, intentando usar OpenAI...`);
-    console.log(`[Chatbot] API Key presente: ${!!process.env.OPENAI_API_KEY}`);
-    console.log(`[Chatbot] API Key length: ${process.env.OPENAI_API_KEY?.length || 0}`);
+    
+    // Verificar API Key directamente (no depender de getOpenAIClient para esto)
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    console.log(`[Chatbot] API Key presente: ${!!apiKey}`);
+    console.log(`[Chatbot] API Key length: ${apiKey?.length || 0}`);
+    console.log(`[Chatbot] API Key prefix: ${apiKey?.substring(0, 10) || 'N/A'}`);
     
     const openai = await getOpenAIClient();
     console.log(`[Chatbot] Cliente OpenAI obtenido: ${!!openai}`);
     
-    if (openai) {
+    // Intentar usar OpenAI si tenemos la key (aunque getOpenAIClient haya fallado)
+    if (openai || apiKey) {
       try {
+        // Si no tenemos cliente pero sí tenemos API Key, crear uno nuevo
+        let clientToUse = openai;
+        if (!clientToUse && apiKey) {
+          console.log('[Chatbot] Creando cliente OpenAI directamente...');
+          const { default: OpenAI } = await import('openai');
+          clientToUse = new OpenAI({
+            apiKey: apiKey,
+          });
+        }
+
+        if (!clientToUse) {
+          throw new Error('No se pudo crear cliente de OpenAI');
+        }
+
         const tipoEvento = contextoCompleto.tipoEvento || 'No especificado';
         const pasoActual = contextoCompleto.pasoActual || 1;
         const respuestasCliente = contextoCompleto.respuestasCliente || {};
@@ -144,7 +163,8 @@ CONTEXTO:
 El cliente está completando un formulario de pre-coordinación paso a paso.
 Ayúdalo a entender qué información necesita y por qué.`;
 
-        const completion = await openai.chat.completions.create({
+        console.log('[Chatbot] Llamando a OpenAI API...');
+        const completion = await clientToUse.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [
             {
