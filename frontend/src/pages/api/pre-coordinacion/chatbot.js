@@ -235,7 +235,7 @@ Ayúdalo a entender qué información necesita y por qué.`;
     console.log('[Chatbot] Razón: OpenAI no disponible o falló');
     
     // Agregar información de debug SIEMPRE (para diagnosticar)
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    // Reutilizar apiKey que ya fue definida arriba
     const debugInfo = {
       debug: {
         apiKeyPresent: !!apiKey,
