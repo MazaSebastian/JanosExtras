@@ -689,6 +689,200 @@
   border-top: 2px solid #e0e0e0;
 }
 
+/* Estilos para pantalla de bienvenida */
+.bienvenidaContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.bienvenidaContent {
+  background: white;
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bienvenidaIcono {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+.bienvenidaTitulo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+}
+
+.bienvenidaSubtitulo {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+.bienvenidaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(119, 44, 135, 0.1);
+}
+
+.bienvenidaInfoItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.bienvenidaInfoLabel {
+  font-weight: 600;
+  color: #772c87;
+}
+
+.bienvenidaInfoValor {
+  color: #333;
+  font-weight: 500;
+}
+
+.bienvenidaMensaje {
+  margin: 2rem 0;
+  text-align: left;
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid #772c87;
+}
+
+.bienvenidaMensaje p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.7;
+  margin: 0 0 1rem 0;
+}
+
+.bienvenidaMensaje p:last-child {
+  margin-bottom: 0;
+}
+
+.bienvenidaChatbot {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  text-align: left;
+}
+
+.bienvenidaChatbotIcono {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.bienvenidaChatbotTexto {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.bienvenidaChatbotTexto strong {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.bienvenidaBoton {
+  margin-top: 2rem;
+  padding: 1.25rem 3rem;
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(119, 44, 135, 0.3);
+}
+
+.bienvenidaBoton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(119, 44, 135, 0.4);
+  background: linear-gradient(135deg, #5a1f6b 0%, #772c87 100%);
+}
+
+.bienvenidaBoton:active {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .bienvenidaContent {
+    padding: 2rem 1.5rem;
+  }
+
+  .bienvenidaTitulo {
+    font-size: 2rem;
+  }
+
+  .bienvenidaSubtitulo {
+    font-size: 1.1rem;
+  }
+
+  .bienvenidaInfoItem {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .bienvenidaBoton {
+    width: 100%;
+    padding: 1rem 2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .resumenContainer {
     padding: 1.5rem;

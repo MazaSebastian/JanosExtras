@@ -21,6 +21,7 @@ export default function PreCoordinacionPage() {
   const [preCoordinacionEnviada, setPreCoordinacionEnviada] = useState(false);
   const [showVelaModal, setShowVelaModal] = useState(false);
   const [velaForm, setVelaForm] = useState({ nombre: '', familiar: '', cancion: '' });
+  const [mostrarBienvenida, setMostrarBienvenida] = useState(true);
 
   useEffect(() => {
     if (token) {
@@ -71,6 +72,11 @@ export default function PreCoordinacionPage() {
       console.log('Keys convertidas:', Object.keys(respuestasConvertidas));
       
       setRespuestasCliente(respuestasConvertidas);
+      
+      // Si ya hay respuestas, no mostrar bienvenida (ya comenzó el proceso)
+      if (respuestas && Object.keys(respuestas).length > 0) {
+        setMostrarBienvenida(false);
+      }
       
       // Si ya hay respuestas, comenzar desde el primer paso no completado
       if (respuestas && Object.keys(respuestas).length > 0) {
@@ -574,6 +580,65 @@ export default function PreCoordinacionPage() {
           </p>
           <div className={styles.mensajeCierreDetalle}>
             <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // PRIORIDAD 2: Mostrar pantalla de bienvenida si es la primera vez
+  if (mostrarBienvenida) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.bienvenidaContainer}>
+          <div className={styles.bienvenidaContent}>
+            <div className={styles.bienvenidaIcono}>👋</div>
+            <h1 className={styles.bienvenidaTitulo}>
+              ¡Hola, {coordinacion.nombre_cliente || coordinacion.titulo || 'Cliente'}!
+            </h1>
+            <p className={styles.bienvenidaSubtitulo}>
+              Estamos muy contentos de acompañarte en la organización de tu evento
+            </p>
+            
+            <div className={styles.bienvenidaInfo}>
+              <div className={styles.bienvenidaInfoItem}>
+                <span className={styles.bienvenidaInfoLabel}>🎉 Tipo de Evento:</span>
+                <span className={styles.bienvenidaInfoValor}>{coordinacion.tipo_evento}</span>
+              </div>
+              {coordinacion.fecha_evento && (
+                <div className={styles.bienvenidaInfoItem}>
+                  <span className={styles.bienvenidaInfoLabel}>📅 Fecha:</span>
+                  <span className={styles.bienvenidaInfoValor}>
+                    {format(new Date(coordinacion.fecha_evento), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.bienvenidaMensaje}>
+              <p>
+                Para asegurarnos de que tu evento sea perfecto, necesitamos conocer algunos detalles sobre tus preferencias.
+              </p>
+              <p>
+                El proceso es simple y te guiaremos paso a paso. No te preocupes si no tienes todas las respuestas ahora mismo, 
+                puedes completar lo que sepas y continuar más tarde.
+              </p>
+            </div>
+
+            <div className={styles.bienvenidaChatbot}>
+              <div className={styles.bienvenidaChatbotIcono}>💬</div>
+              <p className={styles.bienvenidaChatbotTexto}>
+                <strong>¿Tienes dudas?</strong> No te preocupes, tenemos un asistente virtual disponible 
+                que puede ayudarte en cualquier momento. Solo haz clic en el botón de ayuda cuando lo necesites.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setMostrarBienvenida(false)}
+              className={styles.bienvenidaBoton}
+            >
+              Comenzar Pre-Coordinación
+            </button>
           </div>
         </div>
       </div>
