@@ -93,8 +93,12 @@ export default async function handler(req, res) {
     
     console.log(`[Chatbot] Mensaje: "${mensajeLimpio}" | Tipo respuesta: ${respuestaSimple.tipo} | Es genérica: ${esRespuestaGenérica}`);
     
-    if (!esRespuestaGenérica) {
+    // Tipos que NO deben usar OpenAI (tienen respuestas específicas buenas)
+    const tiposConBuenaRespuesta = ['saludo', 'despedida', 'ayuda', 'sugerencias', 'faq', 'termino'];
+    
+    if (!esRespuestaGenérica && tiposConBuenaRespuesta.includes(respuestaSimple.tipo)) {
       // Tenemos una buena respuesta de reglas simples
+      console.log(`[Chatbot] Usando respuesta de reglas simples (tipo: ${respuestaSimple.tipo})`);
       return res.status(200).json({
         respuesta: respuestaSimple.respuesta,
         tipo: respuestaSimple.tipo,
@@ -105,11 +109,14 @@ export default async function handler(req, res) {
     }
 
     // Si no hay buena respuesta de reglas, intentar con OpenAI (si está disponible)
-    console.log(`[Chatbot] Intentando usar OpenAI... | API Key presente: ${!!process.env.OPENAI_API_KEY}`);
+    console.log(`[Chatbot] Respuesta genérica detectada, intentando usar OpenAI...`);
+    console.log(`[Chatbot] API Key presente: ${!!process.env.OPENAI_API_KEY}`);
+    console.log(`[Chatbot] API Key length: ${process.env.OPENAI_API_KEY?.length || 0}`);
+    
     const openai = await getOpenAIClient();
     console.log(`[Chatbot] Cliente OpenAI obtenido: ${!!openai}`);
     
-    if (openai && process.env.OPENAI_API_KEY) {
+    if (openai) {
       try {
         const tipoEvento = contextoCompleto.tipoEvento || 'No especificado';
         const pasoActual = contextoCompleto.pasoActual || 1;
@@ -158,6 +165,7 @@ Ayúdalo a entender qué información necesita y por qué.`;
         
         if (respuestaIA) {
           console.log(`[Chatbot] ✅ Respuesta de OpenAI generada exitosamente`);
+          console.log(`[Chatbot] Respuesta length: ${respuestaIA.length} caracteres`);
           return res.status(200).json({
             respuesta: respuestaIA,
             tipo: 'ia',
@@ -167,14 +175,21 @@ Ayúdalo a entender qué información necesita y por qué.`;
           });
         } else {
           console.warn('[Chatbot] ⚠️ OpenAI no retornó respuesta válida');
+          console.warn('[Chatbot] Completion object:', JSON.stringify(completion, null, 2));
         }
       } catch (errorOpenAI) {
         console.error('[Chatbot] ❌ Error con OpenAI:', errorOpenAI.message);
+        console.error('[Chatbot] Error name:', errorOpenAI.name);
+        console.error('[Chatbot] Error code:', errorOpenAI.code);
+        if (errorOpenAI.response) {
+          console.error('[Chatbot] Error response:', errorOpenAI.response);
+        }
         console.error('[Chatbot] Stack:', errorOpenAI.stack);
         // Continuar con fallback a reglas simples
       }
     } else {
-      console.warn(`[Chatbot] ⚠️ OpenAI no disponible. Cliente: ${!!openai}, API Key: ${!!process.env.OPENAI_API_KEY}`);
+      console.warn(`[Chatbot] ⚠️ OpenAI no disponible. Cliente: ${!!openai}`);
+      console.warn(`[Chatbot] ⚠️ API Key configurada: ${!!process.env.OPENAI_API_KEY}`);
     }
 
     // Fallback: usar respuesta de reglas simples (aunque sea genérica)
