@@ -16,17 +16,35 @@ async function getOpenAIClient() {
   
   openaiInitialized = true;
   
+  // Debug: Verificar todas las variables de entorno relacionadas
+  const envKeys = Object.keys(process.env).filter(key => 
+    key.includes('OPENAI') || key.includes('OPEN_AI')
+  );
+  console.log('[Chatbot] Variables de entorno relacionadas con OpenAI:', envKeys);
+  console.log('[Chatbot] OPENAI_API_KEY existe:', !!process.env.OPENAI_API_KEY);
+  console.log('[Chatbot] OPENAI_API_KEY length:', process.env.OPENAI_API_KEY?.length || 0);
+  console.log('[Chatbot] OPENAI_API_KEY prefix:', process.env.OPENAI_API_KEY?.substring(0, 10) || 'N/A');
+  
   if (!process.env.OPENAI_API_KEY) {
     console.warn('⚠️ OPENAI_API_KEY no está configurada en variables de entorno');
+    console.warn('⚠️ Variables de entorno disponibles:', Object.keys(process.env).slice(0, 20));
+    return null;
+  }
+
+  // Verificar que la key no esté vacía o solo con espacios
+  const apiKey = process.env.OPENAI_API_KEY.trim();
+  if (!apiKey || apiKey.length < 50) {
+    console.warn('⚠️ OPENAI_API_KEY parece inválida (muy corta o vacía)');
     return null;
   }
 
   try {
     const { default: OpenAI } = await import('openai');
     openaiClient = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: apiKey,
     });
     console.log('✅ OpenAI inicializado correctamente');
+    console.log('✅ API Key length:', apiKey.length);
     return openaiClient;
   } catch (error) {
     console.error('⚠️ Error al inicializar OpenAI:', error.message);
