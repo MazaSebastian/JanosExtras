@@ -17,6 +17,7 @@ async function getOpenAIClient() {
   openaiInitialized = true;
   
   if (!process.env.OPENAI_API_KEY) {
+    console.warn('⚠️ OPENAI_API_KEY no está configurada en variables de entorno');
     return null;
   }
 
@@ -28,7 +29,8 @@ async function getOpenAIClient() {
     console.log('✅ OpenAI inicializado correctamente');
     return openaiClient;
   } catch (error) {
-    console.warn('⚠️ OpenAI no disponible:', error.message);
+    console.error('⚠️ Error al inicializar OpenAI:', error.message);
+    console.error('Stack:', error.stack);
     return null;
   }
 }
@@ -64,6 +66,8 @@ export default async function handler(req, res) {
     const esRespuestaGenérica = respuestaSimple.tipo === 'default' || 
                                  respuestaSimple.tipo === 'pregunta';
     
+    console.log(`[Chatbot] Mensaje: "${mensajeLimpio}" | Tipo respuesta: ${respuestaSimple.tipo} | Es genérica: ${esRespuestaGenérica}`);
+    
     if (!esRespuestaGenérica) {
       // Tenemos una buena respuesta de reglas simples
       return res.status(200).json({
@@ -76,7 +80,10 @@ export default async function handler(req, res) {
     }
 
     // Si no hay buena respuesta de reglas, intentar con OpenAI (si está disponible)
+    console.log(`[Chatbot] Intentando usar OpenAI... | API Key presente: ${!!process.env.OPENAI_API_KEY}`);
     const openai = await getOpenAIClient();
+    console.log(`[Chatbot] Cliente OpenAI obtenido: ${!!openai}`);
+    
     if (openai && process.env.OPENAI_API_KEY) {
       try {
         const tipoEvento = contextoCompleto.tipoEvento || 'No especificado';
@@ -125,6 +132,7 @@ Ayúdalo a entender qué información necesita y por qué.`;
         const respuestaIA = completion.choices[0]?.message?.content?.trim();
         
         if (respuestaIA) {
+          console.log(`[Chatbot] ✅ Respuesta de OpenAI generada exitosamente`);
           return res.status(200).json({
             respuesta: respuestaIA,
             tipo: 'ia',
@@ -132,11 +140,16 @@ Ayúdalo a entender qué información necesita y por qué.`;
             sugerencias: null,
             acciones: null
           });
+        } else {
+          console.warn('[Chatbot] ⚠️ OpenAI no retornó respuesta válida');
         }
       } catch (errorOpenAI) {
-        console.error('Error con OpenAI:', errorOpenAI);
+        console.error('[Chatbot] ❌ Error con OpenAI:', errorOpenAI.message);
+        console.error('[Chatbot] Stack:', errorOpenAI.stack);
         // Continuar con fallback a reglas simples
       }
+    } else {
+      console.warn(`[Chatbot] ⚠️ OpenAI no disponible. Cliente: ${!!openai}, API Key: ${!!process.env.OPENAI_API_KEY}`);
     }
 
     // Fallback: usar respuesta de reglas simples (aunque sea genérica)
