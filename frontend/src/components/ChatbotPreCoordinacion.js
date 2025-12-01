@@ -65,6 +65,9 @@ export default function ChatbotPreCoordinacion({
     setMensajes(prev => [...prev, nuevoMensaje]);
 
     try {
+      console.log('[Chatbot Frontend] Enviando mensaje:', mensajeUsuario);
+      console.log('[Chatbot Frontend] Contexto:', { tipoEvento, pasoActual, respuestasCliente });
+      
       // Llamar a la API del chatbot
       const response = await fetch('/api/pre-coordinacion/chatbot', {
         method: 'POST',
@@ -81,7 +84,12 @@ export default function ChatbotPreCoordinacion({
         })
       });
 
+      console.log('[Chatbot Frontend] Response status:', response.status);
+      console.log('[Chatbot Frontend] Response ok:', response.ok);
+
       const data = await response.json();
+      console.log('[Chatbot Frontend] Response data:', data);
+      console.log('[Chatbot Frontend] Fuente de respuesta:', data.fuente || 'no especificada');
 
       if (response.ok) {
         // Agregar respuesta del bot
@@ -89,13 +97,19 @@ export default function ChatbotPreCoordinacion({
           tipo: 'bot',
           texto: data.respuesta,
           timestamp: new Date(),
-          sugerencias: data.sugerencias
+          sugerencias: data.sugerencias,
+          fuente: data.fuente // Para debugging
         }]);
       } else {
         throw new Error(data.error || 'Error al procesar mensaje');
       }
     } catch (error) {
-      console.error('Error al enviar mensaje:', error);
+      console.error('[Chatbot Frontend] Error al enviar mensaje:', error);
+      console.error('[Chatbot Frontend] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       setMensajes(prev => [...prev, {
         tipo: 'bot',
         texto: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.',
