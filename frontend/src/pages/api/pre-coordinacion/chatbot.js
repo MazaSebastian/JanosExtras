@@ -178,8 +178,9 @@ Ayuda al cliente a entender qué información necesita.`;
         
         const startTime = Date.now();
         
-        // Timeout más corto para evitar problemas con Vercel (máximo 10s)
+        // Timeout más corto para evitar problemas con Vercel (máximo 8s)
         // Vercel tiene timeout de 30s, pero queremos responder rápido
+        // NO usar timeout como parámetro (no es soportado por la API)
         const completion = await Promise.race([
           clientToUse.chat.completions.create({
             model: 'gpt-3.5-turbo',
@@ -194,8 +195,8 @@ Ayuda al cliente a entender qué información necesita.`;
               }
             ],
             temperature: 0.7,
-            max_tokens: 150, // Reducido para respuestas más rápidas
-            timeout: 8000 // 8 segundos timeout (menos que Vercel)
+            max_tokens: 150 // Reducido para respuestas más rápidas
+            // NO incluir timeout aquí - no es un parámetro válido
           }),
           new Promise((_, reject) => 
             setTimeout(() => reject(new Error('OpenAI API timeout')), 8000)
