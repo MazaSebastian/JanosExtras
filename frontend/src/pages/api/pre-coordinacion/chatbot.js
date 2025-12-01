@@ -147,27 +147,29 @@ export default async function handler(req, res) {
         const pasoActual = contextoCompleto.pasoActual || 1;
         const respuestasCliente = contextoCompleto.respuestasCliente || {};
 
-        // Construir prompt del sistema
-        const systemPrompt = `Eres un asistente amigable para pre-coordinación de eventos de DJs.
-Tu objetivo es ayudar a los clientes a completar su pre-coordinación de forma clara y amigable.
+        // Construir prompt del sistema (simplificado para evitar errores)
+        let respuestasTexto = 'Ninguna respuesta completada aún';
+        try {
+          if (Object.keys(respuestasCliente).length > 0) {
+            respuestasTexto = JSON.stringify(respuestasCliente).substring(0, 300);
+          }
+        } catch (e) {
+          console.warn('[Chatbot] Error al serializar respuestasCliente:', e);
+        }
+        
+        const systemPrompt = `Eres un asistente amigable para pre-coordinación de eventos de DJs. Ayudas a clientes a completar su pre-coordinación.
 
-INFORMACIÓN DEL EVENTO:
-- Tipo: ${tipoEvento}
-- Paso actual: ${pasoActual}
-- Respuestas ya completadas: ${JSON.stringify(respuestasCliente).substring(0, 500)}
+Evento: ${tipoEvento} | Paso: ${pasoActual}
+Respuestas: ${respuestasTexto}
 
-INSTRUCCIONES:
-1. Sé amigable, profesional y empático
-2. Explica términos técnicos de forma simple
-3. Sugiere opciones cuando el cliente no esté seguro
-4. Mantén respuestas concisas (máximo 3-4 oraciones)
-5. Si no sabes algo, admítelo y ofrece contactar al DJ
-6. Usa emojis moderadamente para hacer la conversación más amigable
-7. Responde en español argentino, de forma natural y cercana
+Instrucciones:
+- Sé amigable y empático
+- Explica términos de forma simple
+- Sugiere opciones cuando el cliente no esté seguro
+- Responde en 2-3 oraciones máximo
+- Responde en español argentino
 
-CONTEXTO:
-El cliente está completando un formulario de pre-coordinación paso a paso.
-Ayúdalo a entender qué información necesita y por qué.`;
+Ayuda al cliente a entender qué información necesita.`;
 
         console.log('[Chatbot] Llamando a OpenAI API...');
         console.log('[Chatbot] Model: gpt-3.5-turbo');
