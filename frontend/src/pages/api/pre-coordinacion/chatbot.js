@@ -234,16 +234,20 @@ Ayúdalo a entender qué información necesita y por qué.`;
     console.log('[Chatbot] ⚠️ Usando fallback a reglas simples');
     console.log('[Chatbot] Razón: OpenAI no disponible o falló');
     
-    // Agregar información de debug en modo desarrollo
-    const debugInfo = process.env.NODE_ENV === 'development' ? {
+    // Agregar información de debug SIEMPRE (para diagnosticar)
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    const debugInfo = {
       debug: {
-        apiKeyPresent: !!process.env.OPENAI_API_KEY,
-        apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+        apiKeyPresent: !!apiKey,
+        apiKeyLength: apiKey?.length || 0,
+        apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'NO_KEY',
         openaiClient: !!openai,
         respuestaTipo: respuestaSimple.tipo,
-        esGenerica: esRespuestaGenérica
+        esGenerica: esRespuestaGenérica,
+        nodeEnv: process.env.NODE_ENV,
+        vercelEnv: process.env.VERCEL_ENV
       }
-    } : {};
+    };
     
     return res.status(200).json({
       respuesta: respuestaSimple.respuesta,
