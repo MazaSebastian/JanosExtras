@@ -15,7 +15,7 @@ Este checkpoint representa el estado del sistema **antes** de implementar el cha
 ## 🔖 Tag Git
 
 **Tag:** `antes-chatbot-pre-coordinacion`  
-**Commit Hash:** `388ed97`  
+**Commit Hash:** `15f1516866c27a524037564c53fe5b1cddb9e9dd` (388ed97)  
 **Fecha:** 2025-01-28
 
 ### Verificar Tag
