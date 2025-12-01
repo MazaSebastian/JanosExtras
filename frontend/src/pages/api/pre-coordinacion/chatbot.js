@@ -36,6 +36,13 @@ async function getOpenAIClient() {
 }
 
 export default async function handler(req, res) {
+  // Log inicial para verificar que el endpoint se está llamando
+  console.log('[Chatbot API] Request recibido:', {
+    method: req.method,
+    timestamp: new Date().toISOString(),
+    hasBody: !!req.body
+  });
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
