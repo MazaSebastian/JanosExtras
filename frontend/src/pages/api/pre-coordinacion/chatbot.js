@@ -121,7 +121,9 @@ export default async function handler(req, res) {
     console.log(`[Chatbot] Cliente OpenAI obtenido: ${!!openai}`);
     
     // Intentar usar OpenAI si tenemos la key (aunque getOpenAIClient haya fallado)
+    console.log(`[Chatbot] Evaluando condición: openai=${!!openai}, apiKey=${!!apiKey}`);
     if (openai || apiKey) {
+      console.log('[Chatbot] ✅ Condición cumplida, entrando al bloque de OpenAI');
       try {
         // Si no tenemos cliente pero sí tenemos API Key, crear uno nuevo
         let clientToUse = openai;
@@ -131,11 +133,15 @@ export default async function handler(req, res) {
           clientToUse = new OpenAI({
             apiKey: apiKey,
           });
+          console.log('[Chatbot] ✅ Cliente OpenAI creado directamente');
         }
 
         if (!clientToUse) {
+          console.error('[Chatbot] ❌ No se pudo crear cliente de OpenAI');
           throw new Error('No se pudo crear cliente de OpenAI');
         }
+        
+        console.log('[Chatbot] ✅ Cliente OpenAI listo para usar');
 
         const tipoEvento = contextoCompleto.tipoEvento || 'No especificado';
         const pasoActual = contextoCompleto.pasoActual || 1;
@@ -222,12 +228,14 @@ Ayúdalo a entender qué información necesita y por qué.`;
         }
         console.error('[Chatbot] Stack:', errorOpenAI.stack);
         // Continuar con fallback a reglas simples
+        console.log('[Chatbot] ⚠️ Continuando con fallback después de error');
       }
     } else {
-      console.warn(`[Chatbot] ⚠️ OpenAI no disponible`);
+      console.warn(`[Chatbot] ⚠️ OpenAI no disponible - NO entró al bloque`);
       console.warn(`[Chatbot] ⚠️ Cliente: ${!!openai}`);
       console.warn(`[Chatbot] ⚠️ API Key: ${!!apiKey}`);
       console.warn(`[Chatbot] ⚠️ process.env.OPENAI_API_KEY: ${!!process.env.OPENAI_API_KEY}`);
+      console.warn(`[Chatbot] ⚠️ Condición (openai || apiKey): ${!!(openai || apiKey)}`);
     }
 
     // Fallback: usar respuesta de reglas simples (aunque sea genérica)
@@ -244,8 +252,10 @@ Ayúdalo a entender qué información necesita y por qué.`;
         openaiClient: !!openai,
         respuestaTipo: respuestaSimple.tipo,
         esGenerica: esRespuestaGenérica,
+        condicionCumplida: !!(openai || apiKey),
         nodeEnv: process.env.NODE_ENV,
-        vercelEnv: process.env.VERCEL_ENV
+        vercelEnv: process.env.VERCEL_ENV,
+        razonFallback: !apiKey ? 'No API Key' : !openai ? 'No OpenAI client' : 'Error en llamada OpenAI'
       }
     };
     
