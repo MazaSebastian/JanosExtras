@@ -172,24 +172,34 @@ Ayúdalo a entender qué información necesita y por qué.`;
         console.log('[Chatbot] Llamando a OpenAI API...');
         console.log('[Chatbot] Model: gpt-3.5-turbo');
         console.log('[Chatbot] Mensaje usuario length:', mensajeLimpio.length);
+        console.log('[Chatbot] System prompt length:', systemPrompt.length);
         
         const startTime = Date.now();
-        const completion = await clientToUse.chat.completions.create({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: mensajeLimpio
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 200,
-          timeout: 15000 // 15 segundos timeout
-        });
+        
+        // Timeout más corto para evitar problemas con Vercel (máximo 10s)
+        // Vercel tiene timeout de 30s, pero queremos responder rápido
+        const completion = await Promise.race([
+          clientToUse.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              {
+                role: 'system',
+                content: systemPrompt
+              },
+              {
+                role: 'user',
+                content: mensajeLimpio
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 150, // Reducido para respuestas más rápidas
+            timeout: 8000 // 8 segundos timeout (menos que Vercel)
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('OpenAI API timeout')), 8000)
+          )
+        ]);
+        
         const elapsedTime = Date.now() - startTime;
         console.log(`[Chatbot] OpenAI API respondió en ${elapsedTime}ms`);
 
@@ -219,9 +229,22 @@ Ayúdalo a entender qué información necesita y por qué.`;
         console.error('[Chatbot] Error name:', errorOpenAI.name);
         console.error('[Chatbot] Error code:', errorOpenAI.code);
         console.error('[Chatbot] Error type:', errorOpenAI.constructor.name);
+        
+        // Manejar diferentes tipos de errores
+        if (errorOpenAI.message?.includes('timeout') || errorOpenAI.message?.includes('Timeout')) {
+          console.error('[Chatbot] ⏱️ Timeout al llamar a OpenAI');
+        } else if (errorOpenAI.status === 400 || errorOpenAI.response?.status === 400) {
+          console.error('[Chatbot] ❌ Error 400 de OpenAI - Request inválida');
+          console.error('[Chatbot] Verificar formato de mensajes o prompt');
+        } else if (errorOpenAI.status === 401 || errorOpenAI.response?.status === 401) {
+          console.error('[Chatbot] ❌ Error 401 de OpenAI - API Key inválida');
+        } else if (errorOpenAI.status === 429 || errorOpenAI.response?.status === 429) {
+          console.error('[Chatbot] ❌ Error 429 de OpenAI - Rate limit excedido');
+        }
+        
         if (errorOpenAI.response) {
           console.error('[Chatbot] Error response status:', errorOpenAI.response.status);
-          console.error('[Chatbot] Error response data:', errorOpenAI.response.data);
+          console.error('[Chatbot] Error response data:', JSON.stringify(errorOpenAI.response.data, null, 2));
         }
         if (errorOpenAI.cause) {
           console.error('[Chatbot] Error cause:', errorOpenAI.cause);
