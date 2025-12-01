@@ -164,6 +164,10 @@ El cliente está completando un formulario de pre-coordinación paso a paso.
 Ayúdalo a entender qué información necesita y por qué.`;
 
         console.log('[Chatbot] Llamando a OpenAI API...');
+        console.log('[Chatbot] Model: gpt-3.5-turbo');
+        console.log('[Chatbot] Mensaje usuario length:', mensajeLimpio.length);
+        
+        const startTime = Date.now();
         const completion = await clientToUse.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [
@@ -178,14 +182,17 @@ Ayúdalo a entender qué información necesita y por qué.`;
           ],
           temperature: 0.7,
           max_tokens: 200,
-          timeout: 10000 // 10 segundos timeout
+          timeout: 15000 // 15 segundos timeout
         });
+        const elapsedTime = Date.now() - startTime;
+        console.log(`[Chatbot] OpenAI API respondió en ${elapsedTime}ms`);
 
         const respuestaIA = completion.choices[0]?.message?.content?.trim();
         
         if (respuestaIA) {
           console.log(`[Chatbot] ✅ Respuesta de OpenAI generada exitosamente`);
           console.log(`[Chatbot] Respuesta length: ${respuestaIA.length} caracteres`);
+          console.log(`[Chatbot] Respuesta preview: ${respuestaIA.substring(0, 100)}...`);
           return res.status(200).json({
             respuesta: respuestaIA,
             tipo: 'ia',
@@ -195,24 +202,37 @@ Ayúdalo a entender qué información necesita y por qué.`;
           });
         } else {
           console.warn('[Chatbot] ⚠️ OpenAI no retornó respuesta válida');
-          console.warn('[Chatbot] Completion object:', JSON.stringify(completion, null, 2));
+          console.warn('[Chatbot] Completion object keys:', Object.keys(completion || {}));
+          console.warn('[Chatbot] Completion choices:', completion?.choices?.length || 0);
+          if (completion?.choices?.[0]) {
+            console.warn('[Chatbot] First choice:', JSON.stringify(completion.choices[0], null, 2));
+          }
         }
       } catch (errorOpenAI) {
         console.error('[Chatbot] ❌ Error con OpenAI:', errorOpenAI.message);
         console.error('[Chatbot] Error name:', errorOpenAI.name);
         console.error('[Chatbot] Error code:', errorOpenAI.code);
+        console.error('[Chatbot] Error type:', errorOpenAI.constructor.name);
         if (errorOpenAI.response) {
-          console.error('[Chatbot] Error response:', errorOpenAI.response);
+          console.error('[Chatbot] Error response status:', errorOpenAI.response.status);
+          console.error('[Chatbot] Error response data:', errorOpenAI.response.data);
+        }
+        if (errorOpenAI.cause) {
+          console.error('[Chatbot] Error cause:', errorOpenAI.cause);
         }
         console.error('[Chatbot] Stack:', errorOpenAI.stack);
         // Continuar con fallback a reglas simples
       }
     } else {
-      console.warn(`[Chatbot] ⚠️ OpenAI no disponible. Cliente: ${!!openai}`);
-      console.warn(`[Chatbot] ⚠️ API Key configurada: ${!!process.env.OPENAI_API_KEY}`);
+      console.warn(`[Chatbot] ⚠️ OpenAI no disponible`);
+      console.warn(`[Chatbot] ⚠️ Cliente: ${!!openai}`);
+      console.warn(`[Chatbot] ⚠️ API Key: ${!!apiKey}`);
+      console.warn(`[Chatbot] ⚠️ process.env.OPENAI_API_KEY: ${!!process.env.OPENAI_API_KEY}`);
     }
 
     // Fallback: usar respuesta de reglas simples (aunque sea genérica)
+    console.log('[Chatbot] ⚠️ Usando fallback a reglas simples');
+    console.log('[Chatbot] Razón: OpenAI no disponible o falló');
     return res.status(200).json({
       respuesta: respuestaSimple.respuesta,
       tipo: respuestaSimple.tipo,
