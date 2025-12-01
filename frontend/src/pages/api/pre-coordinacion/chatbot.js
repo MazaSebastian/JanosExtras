@@ -176,6 +176,8 @@ Instrucciones:
 - Responde en 2-3 oraciones máximo
 - Responde en español argentino
 
+IMPORTANTE: Si te preguntan sobre la tecnología que usas, puedes mencionar que usas inteligencia artificial (OpenAI) para ayudar a responder preguntas de forma más natural y contextual.
+
 Ayuda al cliente a entender qué información necesita.`;
 
         console.log('[Chatbot] Llamando a OpenAI API...');
