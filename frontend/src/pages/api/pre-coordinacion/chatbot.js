@@ -233,12 +233,25 @@ Ayúdalo a entender qué información necesita y por qué.`;
     // Fallback: usar respuesta de reglas simples (aunque sea genérica)
     console.log('[Chatbot] ⚠️ Usando fallback a reglas simples');
     console.log('[Chatbot] Razón: OpenAI no disponible o falló');
+    
+    // Agregar información de debug en modo desarrollo
+    const debugInfo = process.env.NODE_ENV === 'development' ? {
+      debug: {
+        apiKeyPresent: !!process.env.OPENAI_API_KEY,
+        apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+        openaiClient: !!openai,
+        respuestaTipo: respuestaSimple.tipo,
+        esGenerica: esRespuestaGenérica
+      }
+    } : {};
+    
     return res.status(200).json({
       respuesta: respuestaSimple.respuesta,
       tipo: respuestaSimple.tipo,
       sugerencias: respuestaSimple.sugerencias || null,
       acciones: respuestaSimple.acciones || null,
-      fuente: 'reglas'
+      fuente: 'reglas',
+      ...debugInfo
     });
 
   } catch (error) {
