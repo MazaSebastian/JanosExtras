@@ -208,8 +208,23 @@ export class Coordinacion {
       paramIndex++;
     }
     if (fecha_evento !== undefined) {
-      updates.push(`fecha_evento = $${paramIndex}`);
-      values.push(fecha_evento);
+      // Normalizar fecha_evento para asegurar formato YYYY-MM-DD
+      let fechaEventoParaDB = null;
+      if (fecha_evento !== null) {
+        if (typeof fecha_evento === 'string' && fecha_evento.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          fechaEventoParaDB = fecha_evento;
+        } else {
+          const fecha = fecha_evento instanceof Date ? fecha_evento : new Date(fecha_evento);
+          if (!isNaN(fecha.getTime())) {
+            const year = fecha.getFullYear();
+            const month = String(fecha.getMonth() + 1).padStart(2, '0');
+            const day = String(fecha.getDate()).padStart(2, '0');
+            fechaEventoParaDB = `${year}-${month}-${day}`;
+          }
+        }
+      }
+      updates.push(`fecha_evento = $${paramIndex}::date`);
+      values.push(fechaEventoParaDB);
       paramIndex++;
     }
     if (hora_evento !== undefined) {
