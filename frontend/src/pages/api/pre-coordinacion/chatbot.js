@@ -154,7 +154,38 @@ export default async function handler(req, res) {
         const pasoActual = contextoCompleto.pasoActual || 1;
         const respuestasCliente = contextoCompleto.respuestasCliente || {};
 
-        // Construir prompt del sistema (simplificado para evitar errores)
+        // Obtener información del paso actual para dar contexto al chatbot
+        let infoPasoActual = '';
+        try {
+          const flujo = CLIENTE_FLUJOS_POR_TIPO[tipoEvento];
+          if (flujo && Array.isArray(flujo)) {
+            const paso = flujo.find(p => p.id === pasoActual);
+            if (paso) {
+              infoPasoActual = `\n\nPASO ACTUAL (${pasoActual}):\n`;
+              infoPasoActual += `Título: ${paso.titulo}\n`;
+              if (paso.descripcion) {
+                infoPasoActual += `Descripción: ${paso.descripcion}\n`;
+              }
+              if (paso.preguntas && paso.preguntas.length > 0) {
+                infoPasoActual += `Preguntas en este paso:\n`;
+                paso.preguntas.forEach((pregunta, idx) => {
+                  infoPasoActual += `  ${idx + 1}. ${pregunta.label}`;
+                  if (pregunta.tipo === 'buttons' && pregunta.opciones) {
+                    infoPasoActual += `\n     Opciones: ${pregunta.opciones.join(', ')}`;
+                  }
+                  if (pregunta.ayuda) {
+                    infoPasoActual += `\n     Ayuda: ${pregunta.ayuda}`;
+                  }
+                  infoPasoActual += '\n';
+                });
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[Chatbot] Error al obtener información del paso actual:', e);
+        }
+
+        // Construir prompt del sistema con información del paso actual
         let respuestasTexto = 'Ninguna respuesta completada aún';
         try {
           if (Object.keys(respuestasCliente).length > 0) {
@@ -166,19 +197,26 @@ export default async function handler(req, res) {
         
         const systemPrompt = `Eres un asistente amigable para pre-coordinación de eventos de DJs. Ayudas a clientes a completar su pre-coordinación.
 
-Evento: ${tipoEvento} | Paso: ${pasoActual}
-Respuestas: ${respuestasTexto}
+CONTEXTO:
+- Tipo de Evento: ${tipoEvento}
+- Paso Actual: ${pasoActual}
+- Respuestas completadas: ${respuestasTexto}${infoPasoActual}
 
-Instrucciones:
+INSTRUCCIONES:
 - Sé amigable y empático
-- Explica términos de forma simple
+- Explica términos de forma simple y clara
+- Cuando el cliente pregunte sobre el paso actual, usa la información del paso para dar respuestas precisas
+- NO confundas conceptos: si el paso pregunta sobre "estilo de fiesta" (Princesa, Moderna, Descontracturado), NO es lo mismo que "tipo de música"
 - Sugiere opciones cuando el cliente no esté seguro
 - Responde en 2-3 oraciones máximo
-- Responde en español argentino
+- Responde en español argentino, de forma natural y cercana
 
-IMPORTANTE: Si te preguntan sobre la tecnología que usas, puedes mencionar que usas inteligencia artificial (OpenAI) para ayudar a responder preguntas de forma más natural y contextual.
+IMPORTANTE:
+- Si te preguntan sobre la tecnología que usas, puedes mencionar que usas inteligencia artificial (OpenAI)
+- Si el cliente pregunta sobre términos del paso actual, explica usando la información del paso proporcionada
+- Si no estás seguro de algo, admítelo y ofrece contactar al DJ
 
-Ayuda al cliente a entender qué información necesita.`;
+Ayuda al cliente a entender qué información necesita en el paso actual.`;
 
         console.log('[Chatbot] Llamando a OpenAI API...');
         console.log('[Chatbot] Model: gpt-3.5-turbo');
