@@ -120,9 +120,34 @@ export class Coordinacion {
   }
 
   static async create({ titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por }) {
+    // Asegurar que fecha_evento sea un string YYYY-MM-DD o null
+    // PostgreSQL DATE debe recibir el string directamente, no un objeto Date
+    let fechaEventoParaDB = null;
+    if (fecha_evento) {
+      if (typeof fecha_evento === 'string' && fecha_evento.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Ya está en formato correcto, usar directamente
+        fechaEventoParaDB = fecha_evento;
+      } else {
+        // Convertir a string YYYY-MM-DD
+        const fecha = fecha_evento instanceof Date ? fecha_evento : new Date(fecha_evento);
+        if (!isNaN(fecha.getTime())) {
+          const year = fecha.getFullYear();
+          const month = String(fecha.getMonth() + 1).padStart(2, '0');
+          const day = String(fecha.getDate()).padStart(2, '0');
+          fechaEventoParaDB = `${year}-${month}-${day}`;
+        }
+      }
+    }
+    
+    console.log('[Coordinacion.create] Fecha para DB:', {
+      recibida: fecha_evento,
+      procesada: fechaEventoParaDB,
+      tipo: typeof fecha_evento
+    });
+    
     const query = `
       INSERT INTO coordinaciones (titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8, $9, $10, $11, $12, $13, $14)
       RETURNING id, titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion
     `;
     const result = await pool.query(query, [
@@ -132,7 +157,7 @@ export class Coordinacion {
       telefono || null,
       tipo_evento || null,
       codigo_evento || null,
-      fecha_evento || null,
+      fechaEventoParaDB, // Usar la fecha procesada
       hora_evento || null,
       salon_id || null,
       dj_responsable_id || null,
@@ -141,6 +166,9 @@ export class Coordinacion {
       notas || null,
       creado_por,
     ]);
+    
+    console.log('[Coordinacion.create] Fecha guardada en DB:', result.rows[0]?.fecha_evento);
+    
     return result.rows[0];
   }
 

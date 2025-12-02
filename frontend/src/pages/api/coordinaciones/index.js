@@ -84,14 +84,13 @@ export default async function handler(req, res) {
         }
       }
       
-      // Log para debugging (solo en desarrollo)
-      if (process.env.NODE_ENV === 'development' && fecha_evento) {
-        console.log('[Coordinaciones API] Normalización de fecha:', {
-          original: fecha_evento,
-          normalizada: fechaEventoNormalizada,
-          tipo: typeof fecha_evento
-        });
-      }
+      // Log para debugging (siempre activo para diagnosticar)
+      console.log('[Coordinaciones API] Normalización de fecha:', {
+        original: fecha_evento,
+        normalizada: fechaEventoNormalizada,
+        tipo: typeof fecha_evento,
+        timestamp: new Date().toISOString()
+      });
 
       const coordinacion = await Coordinacion.create({
         titulo: tituloFinal,
