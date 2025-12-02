@@ -65,11 +65,20 @@ export default function CoordinacionesPanel() {
     }
   }, [showForm]);
 
-  // Cerrar menú Play al hacer clic fuera
+  // Cerrar menú Play al hacer clic fuera (solo en desktop)
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (playMenuOpen && !event.target.closest(`.${styles.playMenuContainer}`)) {
-        setPlayMenuOpen(null);
+      if (playMenuOpen) {
+        // En móviles, el overlay maneja el cierre
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          return;
+        }
+        // En desktop, cerrar si se hace clic fuera del contenedor
+        if (!event.target.closest(`.${styles.playMenuContainer}`) && 
+            !event.target.closest(`.${styles.playMenu}`)) {
+          setPlayMenuOpen(null);
+        }
       }
     };
     if (playMenuOpen) {
@@ -697,44 +706,46 @@ export default function CoordinacionesPanel() {
                       ▶️
                     </button>
                     {playMenuOpen === item.id && (
-                      <>
-                        <div 
-                          className={styles.playMenuOverlay}
-                          onClick={() => setPlayMenuOpen(null)}
-                        />
-                        <div className={styles.playMenu}>
-                          <button
-                            type="button"
-                            className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
-                            onClick={() => {
-                              handleIniciarCoordinacion(item.id);
-                              setPlayMenuOpen(null);
-                            }}
-                            disabled={item.estado === 'completado' || item.estado === 'completada'}
-                          >
-                            Iniciar Coordinación
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.playMenuItem}
-                            onClick={() => {
-                              if (item.pre_coordinacion_url) {
-                                setPreCoordinacionUrl(item.pre_coordinacion_url);
-                                setShowPreCoordinacionModal(true);
-                              } else {
-                                handleGenerarPreCoordinacion(item.id);
-                              }
-                              setPlayMenuOpen(null);
-                            }}
-                            disabled={generandoPreCoordinacion || !item.tipo_evento}
-                            title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
-                          >
-                            {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
-                          </button>
-                        </div>
-                      </>
+                      <div className={styles.playMenu}>
+                        <button
+                          type="button"
+                          className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleIniciarCoordinacion(item.id);
+                            setPlayMenuOpen(null);
+                          }}
+                          disabled={item.estado === 'completado' || item.estado === 'completada'}
+                        >
+                          Iniciar Coordinación
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.playMenuItem}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (item.pre_coordinacion_url) {
+                              setPreCoordinacionUrl(item.pre_coordinacion_url);
+                              setShowPreCoordinacionModal(true);
+                            } else {
+                              handleGenerarPreCoordinacion(item.id);
+                            }
+                            setPlayMenuOpen(null);
+                          }}
+                          disabled={generandoPreCoordinacion || !item.tipo_evento}
+                          title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
+                        >
+                          {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
+                        </button>
+                      </div>
                     )}
                   </div>
+                  {playMenuOpen === item.id && (
+                    <div 
+                      className={styles.playMenuOverlay}
+                      onClick={() => setPlayMenuOpen(null)}
+                    />
+                  )}
                   <button
                     type="button"
                     className={styles.whatsappButton}
