@@ -1,0 +1,25 @@
+{
+  "name": "Jano's DJ's - Sistema de Control de Eventos",
+  "short_name": "Jano's DJ's",
+  "description": "Sistema para controlar la cantidad de eventos realizados por cada DJ en diferentes salones",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#772c87",
+  "theme_color": "#772c87",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
