@@ -8,65 +8,7 @@ import { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/CoordinacionesPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
-
-/**
- * Formatea una fecha desde la base de datos evitando problemas de zona horaria
- * La fecha viene como string "YYYY-MM-DD" o "YYYY-MM-DDTHH:mm:ss.sssZ"
- * Formatea directamente desde el string sin crear objetos Date que puedan cambiar la fecha
- */
-function formatDateFromDB(fechaEvento) {
-  if (!fechaEvento) return '';
-  
-  // Si es string, extraer solo la parte de fecha (YYYY-MM-DD)
-  let fechaStr = fechaEvento;
-  if (typeof fechaEvento === 'string') {
-    // Extraer solo la parte de fecha (antes de T o espacio)
-    fechaStr = fechaEvento.split('T')[0].split(' ')[0];
-  } else if (fechaEvento instanceof Date) {
-    // Si es Date, usar métodos UTC para evitar problemas de zona horaria
-    const year = fechaEvento.getUTCFullYear();
-    const month = String(fechaEvento.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(fechaEvento.getUTCDate()).padStart(2, '0');
-    fechaStr = `${year}-${month}-${day}`;
-  }
-  
-  // Verificar formato YYYY-MM-DD
-  if (!fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    return fechaEvento; // Devolver original si no coincide
-  }
-  
-  // Formatear directamente desde el string: YYYY-MM-DD -> DD/MM/YYYY
-  const [year, month, day] = fechaStr.split('-');
-  return `${day}/${month}/${year}`;
-}
-
-/**
- * Formatea una fecha desde la base de datos para input type="date"
- * Devuelve formato YYYY-MM-DD
- */
-function formatDateFromDBForInput(fechaEvento) {
-  if (!fechaEvento) return '';
-  
-  // Si es string, extraer solo la parte de fecha (YYYY-MM-DD)
-  let fechaStr = fechaEvento;
-  if (typeof fechaEvento === 'string') {
-    // Extraer solo la parte de fecha (antes de T o espacio)
-    fechaStr = fechaEvento.split('T')[0].split(' ')[0];
-  } else if (fechaEvento instanceof Date) {
-    // Si es Date, usar métodos UTC para evitar problemas de zona horaria
-    const year = fechaEvento.getUTCFullYear();
-    const month = String(fechaEvento.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(fechaEvento.getUTCDate()).padStart(2, '0');
-    fechaStr = `${year}-${month}-${day}`;
-  }
-  
-  // Verificar formato YYYY-MM-DD
-  if (!fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    return fechaEvento; // Devolver original si no coincide
-  }
-  
-  return fechaStr;
-}
+import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
