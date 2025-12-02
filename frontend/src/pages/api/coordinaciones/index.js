@@ -48,13 +48,34 @@ export default async function handler(req, res) {
         djResponsableId = auth.user.id; // Si admin no especifica, usar el suyo
       }
 
+      // Normalizar fecha_evento para evitar problemas de zona horaria
+      // Si viene como string YYYY-MM-DD, mantenerlo así (PostgreSQL DATE)
+      // Si viene como Date o timestamp, extraer solo la fecha
+      let fechaEventoNormalizada = null;
+      if (fecha_evento) {
+        if (typeof fecha_evento === 'string' && fecha_evento.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // Ya está en formato YYYY-MM-DD, usar directamente
+          fechaEventoNormalizada = fecha_evento;
+        } else {
+          // Convertir a Date y luego a YYYY-MM-DD (sin hora)
+          const fecha = new Date(fecha_evento);
+          if (!isNaN(fecha.getTime())) {
+            // Usar getFullYear, getMonth, getDate para evitar problemas de zona horaria
+            const year = fecha.getFullYear();
+            const month = String(fecha.getMonth() + 1).padStart(2, '0');
+            const day = String(fecha.getDate()).padStart(2, '0');
+            fechaEventoNormalizada = `${year}-${month}-${day}`;
+          }
+        }
+      }
+
       const coordinacion = await Coordinacion.create({
         titulo: tituloFinal,
         descripcion: descripcion || null,
         nombre_cliente: nombre_cliente || null,
         tipo_evento: tipo_evento || null,
         codigo_evento: codigo_evento || null,
-        fecha_evento: fecha_evento || null,
+        fecha_evento: fechaEventoNormalizada,
         hora_evento: hora_evento || null,
         salon_id: salon_id ? parseInt(salon_id, 10) : null,
         dj_responsable_id: djResponsableId,
