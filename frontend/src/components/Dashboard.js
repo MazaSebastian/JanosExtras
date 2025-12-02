@@ -119,7 +119,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       const header = ['Fecha', 'Salón', 'Confirmado'];
       const rows = events.map((event) => [
         event.fecha_evento
-          ? format(new Date(event.fecha_evento), 'yyyy-MM-dd')
+          ? formatDateFromDBForInput(event.fecha_evento)
           : '',
         event.salon_nombre || '—',
         event.confirmado ? 'Sí' : 'No',
@@ -445,7 +445,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
                     <div>
                       <strong>
                         {event.fecha_evento
-                          ? format(new Date(event.fecha_evento), 'dd/MM/yyyy')
+                          ? formatDateFromDB(event.fecha_evento)
                           : '--/--'}
                       </strong>
                       <span>{event.salon_nombre || 'Sin salón'}</span>

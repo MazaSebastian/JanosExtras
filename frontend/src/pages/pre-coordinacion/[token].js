@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
+import { formatDateFromDBLong } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
 import { preCoordinacionAPI } from '@/services/api';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
@@ -609,7 +610,7 @@ export default function PreCoordinacionPage() {
                 <div className={styles.bienvenidaInfoItem}>
                   <span className={styles.bienvenidaInfoLabel}>📅 Fecha:</span>
                   <span className={styles.bienvenidaInfoValor}>
-                    {format(new Date(coordinacion.fecha_evento), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                    {formatDateFromDBLong(coordinacion.fecha_evento)}
                   </span>
                 </div>
               )}

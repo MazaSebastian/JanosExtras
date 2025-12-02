@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
+import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI, salonesAPI, adminAPI } from '@/services/api';
 import { SkeletonCard } from '@/components/Loading';
@@ -167,7 +168,7 @@ export default function CoordinacionesAdminPanel() {
       telefono: coordinacion.telefono || '',
       tipo_evento: coordinacion.tipo_evento || '',
       codigo_evento: coordinacion.codigo_evento || '',
-      fecha_evento: coordinacion.fecha_evento ? format(new Date(coordinacion.fecha_evento), 'yyyy-MM-dd') : '',
+      fecha_evento: coordinacion.fecha_evento ? formatDateFromDBForInput(coordinacion.fecha_evento) : '',
       dj_responsable_id: coordinacion.dj_responsable_id || '',
       estado: coordinacion.estado || 'pendiente',
       notas: coordinacion.notas || '',
@@ -388,7 +389,7 @@ export default function CoordinacionesAdminPanel() {
                   <td>{coordinacion.tipo_evento || 'N/A'}</td>
                   <td>
                     {coordinacion.fecha_evento
-                      ? format(new Date(coordinacion.fecha_evento), 'dd/MM/yyyy', { locale: es })
+                      ? formatDateFromDB(coordinacion.fecha_evento)
                       : 'N/A'}
                   </td>
                   <td>{getSalonName(coordinacion.salon_id)}</td>

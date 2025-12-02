@@ -779,7 +779,7 @@ export default function CoordinacionFlujo({ coordinacionId }) {
           </div>
           <div class="campo">
             <div class="campo-label">Fecha del Evento:</div>
-            <div class="campo-valor">${coordinacion?.fecha_evento ? format(new Date(coordinacion.fecha_evento), "dd/MM/yyyy") : 'N/A'}</div>
+            <div class="campo-valor">${coordinacion?.fecha_evento ? formatDateFromDB(coordinacion.fecha_evento) : 'N/A'}</div>
           </div>
         </div>
     `;
@@ -960,7 +960,7 @@ export default function CoordinacionFlujo({ coordinacionId }) {
               <div className={styles.resumenCampo}>
                 <span className={styles.resumenLabel}>Fecha del Evento:</span>
                 <span className={styles.resumenValor}>
-                  {format(new Date(coordinacion.fecha_evento), "dd/MM/yyyy", { locale: es })}
+                  {formatDateFromDB(coordinacion.fecha_evento)}
                 </span>
               </div>
             )}

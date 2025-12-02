@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
+import { formatDateFromDB } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
 import { getAuth } from '@/utils/auth';
 import { eventosAPI, fichadasAPI, coordinacionesAPI } from '@/services/api';
@@ -171,7 +172,7 @@ export default function DJHomePage() {
                         <div className={styles.listItemContent}>
                           <span className={styles.listItemTitle}>{coord.nombre_cliente || coord.titulo}</span>
                           <span className={styles.listItemSubtitle}>
-                            {coord.fecha_evento && format(new Date(coord.fecha_evento), 'dd/MM/yyyy', { locale: es })}
+                            {coord.fecha_evento && formatDateFromDB(coord.fecha_evento)}
                             {coord.tipo_evento && ` • ${coord.tipo_evento}`}
                           </span>
                         </div>
