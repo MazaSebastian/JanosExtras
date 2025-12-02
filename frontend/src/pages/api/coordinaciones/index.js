@@ -49,24 +49,48 @@ export default async function handler(req, res) {
       }
 
       // Normalizar fecha_evento para evitar problemas de zona horaria
-      // Si viene como string YYYY-MM-DD, mantenerlo así (PostgreSQL DATE)
-      // Si viene como Date o timestamp, extraer solo la fecha
+      // IMPORTANTE: Los inputs type="date" envían "YYYY-MM-DD" que debemos usar directamente
+      // NO crear objetos Date porque JavaScript los interpreta como UTC y puede restar un día
       let fechaEventoNormalizada = null;
       if (fecha_evento) {
-        if (typeof fecha_evento === 'string' && fecha_evento.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          // Ya está en formato YYYY-MM-DD, usar directamente
-          fechaEventoNormalizada = fecha_evento;
-        } else {
-          // Convertir a Date y luego a YYYY-MM-DD (sin hora)
-          const fecha = new Date(fecha_evento);
-          if (!isNaN(fecha.getTime())) {
-            // Usar getFullYear, getMonth, getDate para evitar problemas de zona horaria
-            const year = fecha.getFullYear();
-            const month = String(fecha.getMonth() + 1).padStart(2, '0');
-            const day = String(fecha.getDate()).padStart(2, '0');
-            fechaEventoNormalizada = `${year}-${month}-${day}`;
+        // Si es string y ya está en formato YYYY-MM-DD, usar directamente
+        if (typeof fecha_evento === 'string') {
+          // Limpiar espacios y verificar formato
+          const fechaLimpia = fecha_evento.trim();
+          if (fechaLimpia.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // Ya está en formato correcto, usar directamente (evita problemas de zona horaria)
+            fechaEventoNormalizada = fechaLimpia;
+          } else if (fechaLimpia.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+            // Formato DD/MM/YYYY - convertir a YYYY-MM-DD
+            const [day, month, year] = fechaLimpia.split('/');
+            fechaEventoNormalizada = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          } else {
+            // Intentar parsear como Date pero usar métodos locales para evitar UTC
+            const fecha = new Date(fechaLimpia);
+            if (!isNaN(fecha.getTime())) {
+              // Usar métodos locales (no UTC) para evitar problemas de zona horaria
+              const year = fecha.getFullYear();
+              const month = String(fecha.getMonth() + 1).padStart(2, '0');
+              const day = String(fecha.getDate()).padStart(2, '0');
+              fechaEventoNormalizada = `${year}-${month}-${day}`;
+            }
           }
+        } else if (fecha_evento instanceof Date) {
+          // Si ya es un objeto Date, usar métodos locales
+          const year = fecha_evento.getFullYear();
+          const month = String(fecha_evento.getMonth() + 1).padStart(2, '0');
+          const day = String(fecha_evento.getDate()).padStart(2, '0');
+          fechaEventoNormalizada = `${year}-${month}-${day}`;
         }
+      }
+      
+      // Log para debugging (solo en desarrollo)
+      if (process.env.NODE_ENV === 'development' && fecha_evento) {
+        console.log('[Coordinaciones API] Normalización de fecha:', {
+          original: fecha_evento,
+          normalizada: fechaEventoNormalizada,
+          tipo: typeof fecha_evento
+        });
       }
 
       const coordinacion = await Coordinacion.create({
