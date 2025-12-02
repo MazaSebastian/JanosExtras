@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { clearAuth } from '@/utils/auth';
 import styles from '@/styles/DJLayout.module.css';
 
@@ -14,17 +15,21 @@ export default function DJLayout({ user, children }) {
   };
 
   const menuItems = [
-    { path: '/dashboard/home', label: 'Home', icon: '🏠' },
-    { path: '/dashboard', label: 'Eventos y Extras', icon: '📊' },
-    { path: '/dashboard/fichadas', label: 'Fichadas', icon: '⏱️' },
-    { path: '/dashboard/software', label: 'Software', icon: '💻' },
-    { path: '/dashboard/shows', label: 'Shows', icon: '🎤' },
-    { path: '/dashboard/contenido', label: 'Contenido', icon: '📦' },
-    { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋' },
-    { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅' },
-    { path: '/dashboard/check-in-tecnico', label: 'Check-In Técnico', icon: '🔧' },
+    { path: '/dashboard/home', label: 'Home', icon: '🏠', pageTitle: 'Home' },
+    { path: '/dashboard', label: 'Eventos y Extras', icon: '📊', pageTitle: 'Eventos y Extras' },
+    { path: '/dashboard/fichadas', label: 'Fichadas', icon: '⏱️', pageTitle: 'Fichadas' },
+    { path: '/dashboard/software', label: 'Software', icon: '💻', pageTitle: 'Software' },
+    { path: '/dashboard/shows', label: 'Shows', icon: '🎤', pageTitle: 'Shows' },
+    { path: '/dashboard/contenido', label: 'Contenido', icon: '📦', pageTitle: 'Contenido' },
+    { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋', pageTitle: 'Coordinaciones' },
+    { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅', pageTitle: 'Fechas Libres' },
+    { path: '/dashboard/check-in-tecnico', label: 'Check-In Técnico', icon: '🔧', pageTitle: 'Check-In Técnico' },
     { path: null, label: 'Adicionales de Técnica', icon: '⚡', inDevelopment: true },
   ];
+
+  // Obtener el título de la página actual
+  const currentMenuItem = menuItems.find(item => item.path === currentPath);
+  const pageTitle = currentMenuItem?.pageTitle || 'Dashboard';
 
   const handleMenuClick = (path) => {
     router.push(path);
@@ -51,8 +56,13 @@ export default function DJLayout({ user, children }) {
   }, [menuOpen]);
 
   return (
-    <div className={styles.layout}>
-      <button
+    <>
+      <Head>
+        <title>Jano's DJ's - {pageTitle}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <div className={styles.layout}>
+        <button
         className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
@@ -96,6 +106,7 @@ export default function DJLayout({ user, children }) {
       {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
       <main className={styles.content}>{children}</main>
     </div>
+    </>
   );
 }
 

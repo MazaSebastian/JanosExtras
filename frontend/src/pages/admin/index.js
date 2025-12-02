@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { adminAPI, salonesAPI, fichadasAPI } from '@/services/api';
