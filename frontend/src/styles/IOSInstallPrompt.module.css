@@ -1,0 +1,140 @@
+.promptContainer {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 10000;
+  max-width: 400px;
+  margin: 0 auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.promptContent {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 2px solid #772c87;
+}
+
+.promptIcon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.promptTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #772c87;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+}
+
+.promptMessage {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.promptMessage strong {
+  color: #772c87;
+  font-weight: 600;
+}
+
+.promptSteps {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0 0 1rem 0;
+}
+
+.promptSteps p {
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+.promptSteps p:first-child {
+  margin-top: 0;
+}
+
+.promptSteps p:last-child {
+  margin-bottom: 0;
+}
+
+.promptSteps strong {
+  color: #772c87;
+  font-weight: 600;
+}
+
+.promptActions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.promptButton {
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(119, 44, 135, 0.3);
+}
+
+.promptButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
+}
+
+.promptButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .promptContainer {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .promptContent {
+    padding: 1.25rem;
+  }
+
+  .promptTitle {
+    font-size: 1.1rem;
+  }
+
+  .promptMessage {
+    font-size: 0.9rem;
+  }
+
+  .promptSteps {
+    padding: 0.75rem;
+  }
+
+  .promptSteps p {
+    font-size: 0.85rem;
+  }
+}
+

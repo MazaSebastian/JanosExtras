@@ -4,19 +4,28 @@ Esta guía explica cómo los usuarios pueden agregar la aplicación a la pantall
 
 ## 📱 iOS (iPhone/iPad)
 
-### Método 1: Desde Safari
-1. Abre Safari y navega a `janosdjs.com`
-2. Toca el botón **Compartir** (cuadrado con flecha hacia arriba) en la parte inferior
-3. Desplázate hacia abajo y toca **"Agregar a pantalla de inicio"** (o "Añadir a pantalla de inicio")
-4. Personaliza el nombre si lo deseas (por defecto será "Jano's DJ's")
-5. Toca **"Agregar"** en la esquina superior derecha
-6. ¡Listo! El icono aparecerá en tu pantalla de inicio
+### ⚠️ IMPORTANTE: Solo funciona en Safari
 
-### Método 2: Desde Chrome en iOS
-1. Abre Chrome y navega a `janosdjs.com`
-2. Toca el menú (tres puntos) en la parte inferior
-3. Selecciona **"Agregar a pantalla de inicio"**
-4. Confirma el nombre y toca **"Agregar"**
+**Chrome en iOS NO soporta la instalación de aplicaciones web.** Debes usar **Safari** para agregar la app a la pantalla de inicio.
+
+### Pasos para agregar a pantalla de inicio (Safari):
+
+1. **Abre Safari** (no Chrome) y navega a `janosdjs.com`
+2. Toca el botón **Compartir** (cuadrado con flecha hacia arriba) en la parte inferior de la pantalla
+3. Desplázate hacia abajo en el menú de compartir
+4. Busca y toca **"Agregar a pantalla de inicio"** (o "Añadir a pantalla de inicio")
+   - Si no lo ves, desplázate más hacia abajo o toca "Editar acciones..." para agregarlo
+5. Personaliza el nombre si lo deseas (por defecto será "Jano's DJ's")
+6. Toca **"Agregar"** en la esquina superior derecha
+7. ¡Listo! El icono aparecerá en tu pantalla de inicio
+
+### Si no aparece la opción "Agregar a pantalla de inicio":
+
+- ✅ Asegúrate de estar usando **Safari** (no Chrome ni otros navegadores)
+- ✅ Verifica que estés en `janosdjs.com` (con HTTPS)
+- ✅ Intenta cerrar y volver a abrir Safari
+- ✅ Si no aparece, desplázate hacia abajo en el menú de compartir o toca "Editar acciones..." para buscarlo
+- ✅ Asegúrate de que no estés en modo privado/incógnito
 
 ## 🤖 Android
 
