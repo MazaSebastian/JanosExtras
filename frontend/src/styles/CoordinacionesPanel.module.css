@@ -349,6 +349,10 @@
   background: transparent !important;
 }
 
+.playMenuOverlay {
+  display: none;
+}
+
 .playMenu {
   position: absolute;
   top: calc(100% + 0.5rem);
@@ -557,6 +561,63 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 0.5rem;
+    position: relative;
+  }
+
+  .playMenuContainer {
+    position: relative;
+    width: 100%;
+  }
+
+  .playMenuOverlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .playMenu {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideUpMenu 0.3s ease-out;
+    min-width: auto;
+  }
+
+  @keyframes slideUpMenu {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .playMenuItem {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    text-align: center;
   }
 
   .description {
