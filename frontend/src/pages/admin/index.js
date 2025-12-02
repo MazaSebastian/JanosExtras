@@ -66,17 +66,21 @@ export default function AdminDashboardPage() {
   });
 
   const menuItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'overview', label: 'Resumen general', icon: '📊' },
-    { id: 'coordinaciones', label: 'Coordinaciones', icon: '📋' },
-    { id: 'anuncios', label: 'Anuncios', icon: '📢' },
-    { id: 'fechas-libres', label: 'Fechas Libres', icon: '📅' },
-    { id: 'check-in-tecnico', label: 'Check-In Técnico', icon: '🔧' },
-    { id: 'salones', label: 'Salones', icon: '🏢' },
-    { id: 'fichadas', label: 'Fichadas', icon: '⏰' },
-    { id: 'contenido', label: 'Contenido', icon: '📦' },
-    { id: 'calendar', label: 'Calendario', icon: '📅' },
+    { id: 'home', label: 'Home', icon: '🏠', pageTitle: 'Home' },
+    { id: 'overview', label: 'Resumen General', icon: '📊', pageTitle: 'Resumen General' },
+    { id: 'coordinaciones', label: 'Coordinaciones', icon: '📋', pageTitle: 'Coordinaciones' },
+    { id: 'anuncios', label: 'Anuncios', icon: '📢', pageTitle: 'Anuncios' },
+    { id: 'fechas-libres', label: 'Fechas Libres', icon: '📅', pageTitle: 'Fechas Libres' },
+    { id: 'check-in-tecnico', label: 'Check-In Técnico', icon: '🔧', pageTitle: 'Check-In Técnico' },
+    { id: 'salones', label: 'Salones', icon: '🏢', pageTitle: 'Salones' },
+    { id: 'fichadas', label: 'Fichadas', icon: '⏰', pageTitle: 'Fichadas' },
+    { id: 'contenido', label: 'Contenido', icon: '📦', pageTitle: 'Contenido' },
+    { id: 'calendar', label: 'Calendario', icon: '📅', pageTitle: 'Calendario' },
   ];
+
+  // Obtener el título de la página actual
+  const currentMenuItem = menuItems.find(item => item.id === activeMenu);
+  const pageTitle = currentMenuItem?.pageTitle || 'Admin';
 
   useEffect(() => {
     const auth = getAuth();
@@ -1218,6 +1222,7 @@ export default function AdminDashboardPage() {
       )}
       </div>
     </div>
+    </>
   );
 }
 
