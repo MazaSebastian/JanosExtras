@@ -1,4 +1,6 @@
 import { procesarMensaje, buscarRespuesta } from '@/lib/chatbot/knowledgeBase';
+import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * API Endpoint para el Chatbot de Pre-Coordinación
