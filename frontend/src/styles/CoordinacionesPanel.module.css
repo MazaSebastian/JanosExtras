@@ -585,6 +585,12 @@
     /* Asegurar que esté en la capa correcta */
     transform: translateZ(0);
     will-change: opacity;
+    /* Prevenir que el overlay se mueva con scroll */
+    -webkit-overflow-scrolling: touch;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* Asegurar que cubra toda la pantalla incluso durante scroll */
+    position: fixed !important;
   }
 
   @keyframes fadeIn {
@@ -610,12 +616,19 @@
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     animation: slideUpMenu 0.3s ease-out;
-    /* Asegurar posicionamiento fijo */
+    /* Asegurar posicionamiento fijo - no se mueve con scroll */
     transform: translateZ(0);
     will-change: transform;
     /* Prevenir scroll en el menú */
     overflow-y: auto;
     max-height: 50vh;
+    /* Asegurar que esté siempre visible durante scroll */
+    -webkit-overflow-scrolling: touch;
+    /* Prevenir que el menú se mueva con el scroll del viewport */
+    position: fixed !important;
+    /* Forzar que esté en la capa de composición correcta */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   @keyframes slideUpMenu {

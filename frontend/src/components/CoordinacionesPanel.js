@@ -87,6 +87,31 @@ export default function CoordinacionesPanel() {
     }
   }, [playMenuOpen]);
 
+  // Prevenir scroll del body cuando el menú está abierto en móvil
+  useEffect(() => {
+    if (playMenuOpen) {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        // Guardar la posición actual del scroll
+        const scrollY = window.scrollY;
+        // Prevenir scroll del body
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+        
+        return () => {
+          // Restaurar scroll al cerrar
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          window.scrollTo(0, scrollY);
+        };
+      }
+    }
+  }, [playMenuOpen]);
+
   const loadCoordinaciones = async () => {
     try {
       setLoading(true);
