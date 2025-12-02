@@ -79,11 +79,75 @@ frontend/public/
 | android-chrome-192x192.png | 192x192 | PNG | Android (pantalla de inicio) |
 | android-chrome-512x512.png | 512x512 | PNG | Android/PWA (alta resolución) |
 
+## 🎨 Instrucciones para Photoshop
+
+### Paso 1: Crear el Diseño Base
+1. Abre Photoshop y crea un nuevo documento:
+   - **Tamaño:** 512x512 píxeles (el más grande, luego redimensionaremos)
+   - **Resolución:** 72 píxeles/pulgada (suficiente para web)
+   - **Modo de color:** RGB
+   - **Fondo:** Transparente
+
+2. Diseña tu icono:
+   - Usa el logo existente (`logo-janos-blanco.png`) como referencia
+   - Deja un margen de seguridad del 10-15% (aproximadamente 50-75 píxeles desde los bordes)
+   - Asegúrate de que el diseño sea reconocible incluso cuando se reduzca
+
+### Paso 2: Exportar cada Tamaño
+
+#### Para PNG (favicon.png, apple-touch-icon.png, android-chrome):
+1. **Redimensionar:**
+   - Ve a `Imagen > Tamaño de imagen`
+   - Cambia las dimensiones según el tamaño necesario
+   - Asegúrate de que "Remuestrear imagen" esté activado
+   - Usa "Bicúbica automática" como método de remuestreo
+
+2. **Exportar:**
+   - Ve a `Archivo > Exportar > Exportar como...`
+   - Formato: PNG
+   - Marca "Transparencia" si usas fondo transparente
+   - Calidad: 100%
+   - Guarda con el nombre correspondiente
+
+#### Tamaños a exportar:
+- **favicon.png:** 32x32 píxeles
+- **apple-touch-icon.png:** 180x180 píxeles
+- **android-chrome-192x192.png:** 192x192 píxeles
+- **android-chrome-512x512.png:** 512x512 píxeles (puede ser el original)
+
+#### Para ICO (favicon.ico):
+1. **Opción 1: Desde Photoshop (si tienes plugin):**
+   - Exporta primero como PNG en los tamaños: 16x16, 32x32, 48x48
+   - Usa un convertidor online como [CloudConvert](https://cloudconvert.com/png-to-ico) para combinar los PNGs en un ICO
+
+2. **Opción 2: Usar herramienta online (Recomendado):**
+   - Exporta desde Photoshop: 16x16, 32x32, 48x48 como PNGs
+   - Ve a [Favicon.io](https://favicon.io/favicon-converter/) o [CloudConvert](https://cloudconvert.com/png-to-ico)
+   - Sube los 3 PNGs y descarga el ICO resultante
+
+### Paso 3: Optimización
+1. **Optimizar PNGs:**
+   - Usa `Archivo > Exportar > Exportar para Web (heredado)...`
+   - Formato: PNG-24 (si necesitas transparencia) o PNG-8
+   - Reduce el tamaño de archivo sin perder calidad visible
+
+2. **Verificar:**
+   - Asegúrate de que todos los archivos tengan los nombres exactos
+   - Verifica que los tamaños sean correctos (puedes verificar en Finder/Explorador)
+
+### 📋 Checklist de Exportación
+
+- [ ] favicon.png (32x32)
+- [ ] apple-touch-icon.png (180x180)
+- [ ] android-chrome-192x192.png (192x192)
+- [ ] android-chrome-512x512.png (512x512)
+- [ ] favicon.ico (16x16, 32x32, 48x48) - usar convertidor online
+
 ## 🔧 Herramientas Recomendadas
 
-- **Para crear ICO:** [CloudConvert](https://cloudconvert.com/png-to-ico) o [Favicon.io](https://favicon.io/)
-- **Para optimizar PNG:** [TinyPNG](https://tinypng.com/)
-- **Para generar todos los tamaños:** [RealFaviconGenerator](https://realfavicongenerator.net/)
+- **Para crear ICO desde PNGs:** [CloudConvert](https://cloudconvert.com/png-to-ico) o [Favicon.io](https://favicon.io/favicon-converter/)
+- **Para optimizar PNG:** [TinyPNG](https://tinypng.com/) o la función "Exportar para Web" de Photoshop
+- **Para generar todos los tamaños automáticamente:** [RealFaviconGenerator](https://realfavicongenerator.net/) - puedes subir el 512x512 y generar todos los demás
 
 ## 📝 Notas Importantes
 
