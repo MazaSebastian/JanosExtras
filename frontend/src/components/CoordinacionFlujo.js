@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { coordinacionesAPI } from '@/services/api';
 import Loading from '@/components/Loading';
 import styles from '@/styles/CoordinacionFlujo.module.css';
+import { formatDateFromDB } from '@/utils/dateFormat';
 
 // Definición de pasos por tipo de evento
 export const FLUJOS_POR_TIPO = {
