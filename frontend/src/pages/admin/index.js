@@ -383,7 +383,12 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className={styles.layout}>
+    <>
+      <Head>
+        <title>Jano's DJ's - {pageTitle}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <div className={styles.layout}>
       <button
         className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
         onClick={() => setMenuOpen(!menuOpen)}
