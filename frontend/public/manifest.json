@@ -3,10 +3,14 @@
   "short_name": "Jano's DJ's",
   "description": "Sistema para controlar la cantidad de eventos realizados por cada DJ en diferentes salones",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#772c87",
   "theme_color": "#772c87",
   "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "lang": "es-AR",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -19,6 +23,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Ir al inicio",
+      "url": "/dashboard/home",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Coordinaciones",
+      "short_name": "Coordinaciones",
+      "description": "Ver coordinaciones",
+      "url": "/dashboard/coordinaciones",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
