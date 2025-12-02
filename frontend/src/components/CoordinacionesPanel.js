@@ -9,6 +9,65 @@ import styles from '@/styles/CoordinacionesPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 
+/**
+ * Formatea una fecha desde la base de datos evitando problemas de zona horaria
+ * La fecha viene como string "YYYY-MM-DD" o "YYYY-MM-DDTHH:mm:ss.sssZ"
+ * Formatea directamente desde el string sin crear objetos Date que puedan cambiar la fecha
+ */
+function formatDateFromDB(fechaEvento) {
+  if (!fechaEvento) return '';
+  
+  // Si es string, extraer solo la parte de fecha (YYYY-MM-DD)
+  let fechaStr = fechaEvento;
+  if (typeof fechaEvento === 'string') {
+    // Extraer solo la parte de fecha (antes de T o espacio)
+    fechaStr = fechaEvento.split('T')[0].split(' ')[0];
+  } else if (fechaEvento instanceof Date) {
+    // Si es Date, usar métodos UTC para evitar problemas de zona horaria
+    const year = fechaEvento.getUTCFullYear();
+    const month = String(fechaEvento.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(fechaEvento.getUTCDate()).padStart(2, '0');
+    fechaStr = `${year}-${month}-${day}`;
+  }
+  
+  // Verificar formato YYYY-MM-DD
+  if (!fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return fechaEvento; // Devolver original si no coincide
+  }
+  
+  // Formatear directamente desde el string: YYYY-MM-DD -> DD/MM/YYYY
+  const [year, month, day] = fechaStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Formatea una fecha desde la base de datos para input type="date"
+ * Devuelve formato YYYY-MM-DD
+ */
+function formatDateFromDBForInput(fechaEvento) {
+  if (!fechaEvento) return '';
+  
+  // Si es string, extraer solo la parte de fecha (YYYY-MM-DD)
+  let fechaStr = fechaEvento;
+  if (typeof fechaEvento === 'string') {
+    // Extraer solo la parte de fecha (antes de T o espacio)
+    fechaStr = fechaEvento.split('T')[0].split(' ')[0];
+  } else if (fechaEvento instanceof Date) {
+    // Si es Date, usar métodos UTC para evitar problemas de zona horaria
+    const year = fechaEvento.getUTCFullYear();
+    const month = String(fechaEvento.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(fechaEvento.getUTCDate()).padStart(2, '0');
+    fechaStr = `${year}-${month}-${day}`;
+  }
+  
+  // Verificar formato YYYY-MM-DD
+  if (!fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return fechaEvento; // Devolver original si no coincide
+  }
+  
+  return fechaStr;
+}
+
 export default function CoordinacionesPanel() {
   const router = useRouter();
   const [user, setUser] = useState(null);
@@ -225,7 +284,7 @@ export default function CoordinacionesPanel() {
       telefono: item.telefono || '',
       tipo_evento: item.tipo_evento || '',
       codigo_evento: item.codigo_evento || '',
-      fecha_evento: item.fecha_evento ? format(new Date(item.fecha_evento), 'yyyy-MM-dd') : '',
+      fecha_evento: item.fecha_evento ? formatDateFromDBForInput(item.fecha_evento) : '',
       descripcion: item.descripcion || '',
       hora_evento: item.hora_evento || '',
       salon_id: item.salon_id ? String(item.salon_id) : '',
@@ -395,7 +454,7 @@ export default function CoordinacionesPanel() {
     const nombreCliente = coordinacion.nombre_cliente || 'Cliente';
     const tipoEvento = coordinacion.tipo_evento || 'Evento';
     const fechaEvento = coordinacion.fecha_evento 
-      ? format(new Date(coordinacion.fecha_evento), "dd/MM/yyyy", { locale: es })
+      ? formatDateFromDB(coordinacion.fecha_evento)
       : '';
     
     let mensaje = `Hola ${nombreCliente}! 👋\n\n`;
@@ -692,7 +751,7 @@ export default function CoordinacionesPanel() {
                     <div className={styles.cardMetaInfo}>
                       {item.fecha_evento && (
                         <span className={styles.metaItem}>
-                          📅 Fecha del Evento: {format(new Date(item.fecha_evento), "dd/MM/yyyy", { locale: es })}
+                          📅 Fecha del Evento: {formatDateFromDB(item.fecha_evento)}
                         </span>
                       )}
                       {item.tipo_evento && (
