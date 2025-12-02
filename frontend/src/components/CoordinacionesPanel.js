@@ -69,7 +69,7 @@ export default function CoordinacionesPanel() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (playMenuOpen) {
-        // En móviles, el overlay maneja el cierre
+        // En móviles, el overlay maneja el cierre - no hacer nada aquí
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
           return;
@@ -82,8 +82,13 @@ export default function CoordinacionesPanel() {
       }
     };
     if (playMenuOpen) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      // Usar capture phase para detectar antes que otros handlers
+      document.addEventListener('click', handleClickOutside, true);
+      document.addEventListener('touchend', handleClickOutside, true);
+      return () => {
+        document.removeEventListener('click', handleClickOutside, true);
+        document.removeEventListener('touchend', handleClickOutside, true);
+      };
     }
   }, [playMenuOpen]);
 
@@ -734,17 +739,43 @@ export default function CoordinacionesPanel() {
                       <>
                         <div 
                           className={styles.playMenuOverlay}
-                          onClick={() => setPlayMenuOpen(null)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPlayMenuOpen(null);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPlayMenuOpen(null);
+                          }}
                           onTouchStart={(e) => {
-                            // Prevenir que el touch se propague
+                            // Prevenir que el touch se propague pero permitir el cierre
                             e.stopPropagation();
                           }}
                         />
-                        <div className={styles.playMenu}>
+                        <div 
+                          className={styles.playMenu}
+                          onClick={(e) => {
+                            // Prevenir que clicks dentro del menú cierren el overlay
+                            e.stopPropagation();
+                          }}
+                          onTouchEnd={(e) => {
+                            // Prevenir que touches dentro del menú cierren el overlay
+                            e.stopPropagation();
+                          }}
+                        >
                           <button
                             type="button"
                             className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
                             onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleIniciarCoordinacion(item.id);
+                              setPlayMenuOpen(null);
+                            }}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
                               handleIniciarCoordinacion(item.id);
                               setPlayMenuOpen(null);
@@ -757,6 +788,18 @@ export default function CoordinacionesPanel() {
                             type="button"
                             className={styles.playMenuItem}
                             onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (item.pre_coordinacion_url) {
+                                setPreCoordinacionUrl(item.pre_coordinacion_url);
+                                setShowPreCoordinacionModal(true);
+                              } else {
+                                handleGenerarPreCoordinacion(item.id);
+                              }
+                              setPlayMenuOpen(null);
+                            }}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
                               if (item.pre_coordinacion_url) {
                                 setPreCoordinacionUrl(item.pre_coordinacion_url);
