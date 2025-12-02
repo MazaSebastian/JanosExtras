@@ -706,46 +706,50 @@ export default function CoordinacionesPanel() {
                       ▶️
                     </button>
                     {playMenuOpen === item.id && (
-                      <div className={styles.playMenu}>
-                        <button
-                          type="button"
-                          className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
-                          onClick={(e) => {
+                      <>
+                        <div 
+                          className={styles.playMenuOverlay}
+                          onClick={() => setPlayMenuOpen(null)}
+                          onTouchStart={(e) => {
+                            // Prevenir que el touch se propague
                             e.stopPropagation();
-                            handleIniciarCoordinacion(item.id);
-                            setPlayMenuOpen(null);
                           }}
-                          disabled={item.estado === 'completado' || item.estado === 'completada'}
-                        >
-                          Iniciar Coordinación
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.playMenuItem}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (item.pre_coordinacion_url) {
-                              setPreCoordinacionUrl(item.pre_coordinacion_url);
-                              setShowPreCoordinacionModal(true);
-                            } else {
-                              handleGenerarPreCoordinacion(item.id);
-                            }
-                            setPlayMenuOpen(null);
-                          }}
-                          disabled={generandoPreCoordinacion || !item.tipo_evento}
-                          title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
-                        >
-                          {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
-                        </button>
-                      </div>
+                        />
+                        <div className={styles.playMenu}>
+                          <button
+                            type="button"
+                            className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleIniciarCoordinacion(item.id);
+                              setPlayMenuOpen(null);
+                            }}
+                            disabled={item.estado === 'completado' || item.estado === 'completada'}
+                          >
+                            Iniciar Coordinación
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.playMenuItem}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (item.pre_coordinacion_url) {
+                                setPreCoordinacionUrl(item.pre_coordinacion_url);
+                                setShowPreCoordinacionModal(true);
+                              } else {
+                                handleGenerarPreCoordinacion(item.id);
+                              }
+                              setPlayMenuOpen(null);
+                            }}
+                            disabled={generandoPreCoordinacion || !item.tipo_evento}
+                            title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
+                          >
+                            {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
-                  {playMenuOpen === item.id && (
-                    <div 
-                      className={styles.playMenuOverlay}
-                      onClick={() => setPlayMenuOpen(null)}
-                    />
-                  )}
                   <button
                     type="button"
                     className={styles.whatsappButton}

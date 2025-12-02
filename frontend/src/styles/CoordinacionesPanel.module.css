@@ -364,6 +364,9 @@
   z-index: 100;
   overflow: hidden;
   border: 1px solid #e0e0e0;
+  /* Asegurar que no se desplace */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .playMenuItem {
@@ -579,6 +582,9 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
     animation: fadeIn 0.2s ease-out;
+    /* Asegurar que esté en la capa correcta */
+    transform: translateZ(0);
+    will-change: opacity;
   }
 
   @keyframes fadeIn {
@@ -591,26 +597,33 @@
   }
 
   .playMenu {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-width: 100%;
+    /* Resetear estilos de desktop */
+    position: fixed !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     animation: slideUpMenu 0.3s ease-out;
-    min-width: auto;
+    /* Asegurar posicionamiento fijo */
+    transform: translateZ(0);
+    will-change: transform;
+    /* Prevenir scroll en el menú */
+    overflow-y: auto;
+    max-height: 50vh;
   }
 
   @keyframes slideUpMenu {
     from {
-      transform: translateY(100%);
+      transform: translateY(100%) translateZ(0);
     }
     to {
-      transform: translateY(0);
+      transform: translateY(0) translateZ(0);
     }
   }
 
