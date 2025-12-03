@@ -154,15 +154,37 @@ Este es el error que estás viendo ahora. Tienes dos opciones:
 
 Si la aplicación está en modo **"Testing"**, necesitas agregar tu cuenta de Google como usuario de prueba:
 
+**Método A: Usando la interfaz clásica (Recomendado)**
+
 1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Selecciona tu proyecto
-3. Ve a **APIs & Services** → **OAuth consent screen**
-4. En la sección **"Test users"**, haz clic en **"+ ADD USERS"**
-5. Agrega tu email de Google (el que usas para iniciar sesión):
+2. Selecciona tu proyecto **"Janos DJ's"**
+3. En el menú lateral izquierdo, busca **"APIs & Services"** (puede estar en el menú principal, no en "Google Auth Platform")
+4. Haz clic en **"OAuth consent screen"** (pantalla de consentimiento OAuth)
+5. Scroll hacia abajo hasta encontrar la sección **"Test users"**
+6. Haz clic en **"+ ADD USERS"**
+7. Agrega tu email de Google (el que usas para iniciar sesión):
    - `djsebamaza@gmail.com` (o el email que estés usando)
    - Puedes agregar múltiples emails separados por comas
-6. Haz clic en **"ADD"**
-7. Espera unos segundos y vuelve a intentar conectar Google Calendar
+8. Haz clic en **"ADD"**
+9. Espera unos segundos y vuelve a intentar conectar Google Calendar
+
+**Método B: Si no encuentras "OAuth consent screen" en el menú**
+
+1. Ve directamente a esta URL (reemplaza `TU_PROJECT_ID` con el ID de tu proyecto):
+   ```
+   https://console.cloud.google.com/apis/credentials/consent?project=TU_PROJECT_ID
+   ```
+   
+   O usa esta URL genérica y selecciona tu proyecto:
+   ```
+   https://console.cloud.google.com/apis/credentials/consent
+   ```
+
+2. En esa página, scroll hacia abajo hasta **"Test users"**
+3. Haz clic en **"+ ADD USERS"**
+4. Agrega tu email y haz clic en **"ADD"**
+
+**Nota**: Si estás en la nueva interfaz de "Google Auth Platform", los Test Users están en la interfaz clásica de "OAuth consent screen". Puedes acceder desde el menú principal de Google Cloud Console → **APIs & Services** → **OAuth consent screen**.
 
 **Nota**: Si agregas más usuarios que necesiten usar la app, agrégalos también aquí.
 
@@ -188,10 +210,14 @@ Si quieres que cualquier usuario pueda usar la aplicación sin agregarlos manual
 
 Para ver en qué modo está tu aplicación:
 
-1. Ve a **APIs & Services** → **OAuth consent screen**
+1. Ve a **APIs & Services** → **OAuth consent screen** (o usa la URL directa: `https://console.cloud.google.com/apis/credentials/consent`)
 2. En la parte superior verás:
    - **"Testing"** → Solo usuarios de prueba pueden acceder
    - **"In production"** → Cualquier usuario puede acceder (requiere verificación)
+
+**Si no encuentras "OAuth consent screen" en el menú:**
+- Busca en el menú principal de Google Cloud Console (no en "Google Auth Platform")
+- O ve directamente a: `https://console.cloud.google.com/apis/credentials/consent`
 
 ## 🆘 Si Nada Funciona
 
