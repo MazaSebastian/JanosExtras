@@ -1027,11 +1027,7 @@ export default function CoordinacionesPanel() {
                       <div className={styles.resumenCampo}>
                         <span className={styles.resumenLabel}>Fecha del Evento:</span>
                         <span className={styles.resumenValor}>
-                          {format(
-                            new Date(resumenData.coordinacion.fecha_evento),
-                            'dd/MM/yyyy',
-                            { locale: es }
-                          )}
+                          {formatDateFromDB(resumenData.coordinacion.fecha_evento)}
                         </span>
                       </div>
                     )}
