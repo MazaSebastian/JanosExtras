@@ -962,13 +962,6 @@ export default function CoordinacionesPanel() {
         </div>
       )}
 
-        {/* Componente de conexión Google Calendar */}
-        {user && (
-          <div style={{ marginBottom: '2rem' }}>
-            <GoogleCalendarConnect onStatusChange={setGoogleCalendarConnected} />
-          </div>
-        )}
-
         {/* Modal de Agendar Videollamada */}
         {showAgendarVideollamada && coordinacionParaVideollamada && (
           <AgendarVideollamadaModal
