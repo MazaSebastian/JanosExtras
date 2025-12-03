@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { formatDateFromDB } from '@/utils/dateFormat';
+import api from '@/services/api';
 import styles from '@/styles/AgendarVideollamadaModal.module.css';
 
 /**
@@ -58,34 +59,22 @@ export default function AgendarVideollamadaModal({
       setLoading(true);
       setError('');
 
-      const response = await fetch('/api/google-calendar/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          coordinacion_id: coordinacion.id,
-          fecha: formData.fecha,
-          hora: formData.hora,
-          duracion: formData.duracion,
-          descripcion: formData.descripcion
-        })
+      const response = await api.post('/google-calendar/events', {
+        coordinacion_id: coordinacion.id,
+        fecha: formData.fecha,
+        hora: formData.hora,
+        duracion: formData.duracion,
+        descripcion: formData.descripcion
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al agendar videollamada');
-      }
-
       if (onSuccess) {
-        onSuccess(data.event);
+        onSuccess(response.data.event);
       }
 
       onClose();
     } catch (err) {
       console.error('Error al agendar videollamada:', err);
-      setError(err.message || 'Error al agendar videollamada. Por favor, intenta de nuevo.');
+      setError(err.response?.data?.error || err.message || 'Error al agendar videollamada. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }

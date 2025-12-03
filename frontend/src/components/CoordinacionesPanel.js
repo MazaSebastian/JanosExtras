@@ -51,21 +51,8 @@ export default function CoordinacionesPanel() {
   const [coordinacionParaVideollamada, setCoordinacionParaVideollamada] = useState(null);
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
 
-  // Verificar estado de Google Calendar al cargar
-  useEffect(() => {
-    const checkGoogleCalendarStatus = async () => {
-      try {
-        const response = await fetch('/api/google-calendar/status');
-        const data = await response.json();
-        setGoogleCalendarConnected(data.connected);
-      } catch (error) {
-        console.error('Error al verificar estado de Google Calendar:', error);
-      }
-    };
-    if (user) {
-      checkGoogleCalendarStatus();
-    }
-  }, [user]);
+  // El componente GoogleCalendarConnect manejará la verificación del estado
+  // No necesitamos verificarlo aquí, solo mostramos el componente si hay user
 
   // Verificar si hay parámetros de Google Calendar en la URL (después de OAuth)
   useEffect(() => {

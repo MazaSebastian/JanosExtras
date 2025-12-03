@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import api from '@/services/api';
 import styles from '@/styles/GoogleCalendarConnect.module.css';
 
 /**
@@ -17,14 +18,17 @@ export default function GoogleCalendarConnect({ onStatusChange }) {
   const checkStatus = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/google-calendar/status');
-      const data = await response.json();
-      setConnected(data.connected);
+      const response = await api.get('/google-calendar/status');
+      setConnected(response.data.connected);
       if (onStatusChange) {
-        onStatusChange(data.connected);
+        onStatusChange(response.data.connected);
       }
     } catch (error) {
       console.error('Error al verificar estado de Google Calendar:', error);
+      // Si es un error 401, el usuario no está autenticado, pero no mostramos el componente de error
+      if (error.response?.status !== 401) {
+        // Solo mostrar error si no es de autenticación
+      }
     } finally {
       setLoading(false);
     }
@@ -33,12 +37,11 @@ export default function GoogleCalendarConnect({ onStatusChange }) {
   const handleConnect = async () => {
     try {
       setConnecting(true);
-      const response = await fetch('/api/google-calendar/auth');
-      const data = await response.json();
+      const response = await api.get('/google-calendar/auth');
       
-      if (data.authUrl) {
+      if (response.data.authUrl) {
         // Redirigir a Google OAuth
-        window.location.href = data.authUrl;
+        window.location.href = response.data.authUrl;
       } else {
         alert('Error al obtener URL de autenticación');
       }
@@ -57,12 +60,9 @@ export default function GoogleCalendarConnect({ onStatusChange }) {
 
     try {
       setDisconnecting(true);
-      const response = await fetch('/api/google-calendar/disconnect', {
-        method: 'DELETE'
-      });
-      const data = await response.json();
+      const response = await api.delete('/google-calendar/disconnect');
       
-      if (data.success) {
+      if (response.data.success) {
         setConnected(false);
         if (onStatusChange) {
           onStatusChange(false);
