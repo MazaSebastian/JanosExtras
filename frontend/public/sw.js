@@ -47,6 +47,11 @@ self.addEventListener('activate', (event) => {
 
 // Estrategia: Network First, luego Cache
 self.addEventListener('fetch', (event) => {
+  // Ignorar requests de extensiones de Chrome
+  if (event.request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+
   // Solo cachear requests GET
   if (event.request.method !== 'GET') {
     return;
@@ -57,15 +62,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Solo cachear requests HTTP/HTTPS (no chrome-extension, data:, blob:, etc.)
+  if (!event.request.url.startsWith('http://') && !event.request.url.startsWith('https://')) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clonar la respuesta para cachearla
-        const responseToCache = response.clone();
-        
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+        // Solo cachear respuestas válidas y del mismo origen
+        if (response && response.status === 200 && response.type === 'basic') {
+          // Clonar la respuesta para cachearla
+          const responseToCache = response.clone();
+          
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache).catch((err) => {
+              // Ignorar errores de cache (ej: chrome-extension)
+              console.warn('Service Worker: No se pudo cachear', event.request.url, err);
+            });
+          });
+        }
         
         return response;
       })
