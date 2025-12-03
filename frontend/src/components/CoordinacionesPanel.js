@@ -534,6 +534,13 @@ export default function CoordinacionesPanel() {
         </div>
       )}
 
+      {/* Componente de conexión Google Calendar */}
+      {user && (
+        <div style={{ marginBottom: '2rem' }}>
+          <GoogleCalendarConnect onStatusChange={setGoogleCalendarConnected} />
+        </div>
+      )}
+
       {showForm && (
         <div className={styles.formModal}>
           <div className={styles.formContent}>
@@ -870,6 +877,23 @@ export default function CoordinacionesPanel() {
                   >
                     💬
                   </button>
+                  {googleCalendarConnected && (
+                    <button
+                      type="button"
+                      className={styles.videocallButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAgendarVideollamada(item);
+                      }}
+                      onTouchEnd={(e) => {
+                        e.stopPropagation();
+                        handleAgendarVideollamada(item);
+                      }}
+                      title={item.videollamada_agendada ? `Videollamada agendada para ${item.videollamada_fecha ? formatDateFromDB(item.videollamada_fecha) : 'fecha no disponible'}` : 'Agendar Videollamada'}
+                    >
+                      {item.videollamada_agendada ? '📹' : '📅'}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={styles.viewButton}
