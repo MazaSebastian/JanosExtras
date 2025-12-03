@@ -1,12 +1,26 @@
-# Solución: Error "OAuth client was not found" en Google Calendar
+# Solución: Errores OAuth en Google Calendar
 
-## 🔴 Problema
+## 🔴 Problemas Comunes
+
+### Error 1: "OAuth client was not found" (Error 401: invalid_client)
 
 Cuando intentas conectar Google Calendar, aparece el error:
 - **"The OAuth client was not found"**
 - **Error 401: invalid_client**
 
 Esto significa que el `GOOGLE_CLIENT_ID` configurado en Vercel no coincide con el registrado en Google Cloud Console.
+
+### Error 2: "Acceso bloqueado" (Error 403: access_denied) ⭐ **TU CASO ACTUAL**
+
+Cuando intentas conectar Google Calendar, aparece el error:
+- **"Acceso bloqueado: janosdjs.com no completó el proceso de verificación de Google"**
+- **"La app se está probando y solo los verificadores aprobados por los desarrolladores pueden acceder a ella"**
+- **Error 403: access_denied**
+
+Esto significa que:
+- ✅ El CLIENT_ID es correcto (Google lo reconoce)
+- ❌ La aplicación está en modo **"Testing"** y tu cuenta no está en la lista de usuarios de prueba
+- O la aplicación necesita ser verificada por Google para uso en producción
 
 ## ✅ Solución Paso a Paso
 
@@ -132,6 +146,53 @@ GOOGLE_REDIRECT_URI=https://janosdjs.com/api/google-calendar/callback
 4. **Redirect URI incorrecto**: Debe ser exactamente `https://janosdjs.com/api/google-calendar/callback`
 5. **Variables en el ambiente incorrecto**: Asegúrate de que estén en **Production**
 
+## ✅ Solución para Error 403: access_denied (TU CASO)
+
+Este es el error que estás viendo ahora. Tienes dos opciones:
+
+### Opción 1: Agregar Usuarios de Prueba (Rápido - Recomendado para empezar)
+
+Si la aplicación está en modo **"Testing"**, necesitas agregar tu cuenta de Google como usuario de prueba:
+
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Selecciona tu proyecto
+3. Ve a **APIs & Services** → **OAuth consent screen**
+4. En la sección **"Test users"**, haz clic en **"+ ADD USERS"**
+5. Agrega tu email de Google (el que usas para iniciar sesión):
+   - `djsebamaza@gmail.com` (o el email que estés usando)
+   - Puedes agregar múltiples emails separados por comas
+6. Haz clic en **"ADD"**
+7. Espera unos segundos y vuelve a intentar conectar Google Calendar
+
+**Nota**: Si agregas más usuarios que necesiten usar la app, agrégalos también aquí.
+
+### Opción 2: Publicar la Aplicación (Para uso en producción)
+
+Si quieres que cualquier usuario pueda usar la aplicación sin agregarlos manualmente:
+
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Selecciona tu proyecto
+3. Ve a **APIs & Services** → **OAuth consent screen**
+4. En la parte superior, verás el estado actual (probablemente "Testing")
+5. Haz clic en **"PUBLISH APP"** (Publicar aplicación)
+6. Confirma la acción
+
+**⚠️ IMPORTANTE**: Para publicar la aplicación, Google puede requerir:
+- Verificación del dominio `janosdjs.com`
+- Información adicional sobre la aplicación
+- Revisión de Google (puede tomar varios días)
+
+**Para uso interno/privado**, es mejor usar la **Opción 1** (usuarios de prueba).
+
+### Verificar el Estado Actual
+
+Para ver en qué modo está tu aplicación:
+
+1. Ve a **APIs & Services** → **OAuth consent screen**
+2. En la parte superior verás:
+   - **"Testing"** → Solo usuarios de prueba pueden acceder
+   - **"In production"** → Cualquier usuario puede acceder (requiere verificación)
+
 ## 🆘 Si Nada Funciona
 
 1. Crea un **nuevo** OAuth Client ID en Google Cloud Console:
@@ -142,6 +203,7 @@ GOOGLE_REDIRECT_URI=https://janosdjs.com/api/google-calendar/callback
    - Redirect URI: `https://janosdjs.com/api/google-calendar/callback`
    - Guarda y copia el nuevo Client ID y Secret
    - Actualiza las variables en Vercel con los nuevos valores
+   - **NO OLVIDES**: Agregar tu email como usuario de prueba en OAuth consent screen
 
 2. Verifica que el dominio `janosdjs.com` esté verificado en Google Cloud Console (si es necesario)
 
