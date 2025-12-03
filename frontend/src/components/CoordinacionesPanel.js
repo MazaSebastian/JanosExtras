@@ -9,6 +9,8 @@ import styles from '@/styles/CoordinacionesPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
+import AgendarVideollamadaModal from '@/components/AgendarVideollamadaModal';
+import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
@@ -45,6 +47,43 @@ export default function CoordinacionesPanel() {
   const [showPreCoordinacionModal, setShowPreCoordinacionModal] = useState(false);
   const [preCoordinacionUrl, setPreCoordinacionUrl] = useState('');
   const [generandoPreCoordinacion, setGenerandoPreCoordinacion] = useState(false);
+  const [showAgendarVideollamada, setShowAgendarVideollamada] = useState(false);
+  const [coordinacionParaVideollamada, setCoordinacionParaVideollamada] = useState(null);
+  const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
+
+  // Verificar estado de Google Calendar al cargar
+  useEffect(() => {
+    const checkGoogleCalendarStatus = async () => {
+      try {
+        const response = await fetch('/api/google-calendar/status');
+        const data = await response.json();
+        setGoogleCalendarConnected(data.connected);
+      } catch (error) {
+        console.error('Error al verificar estado de Google Calendar:', error);
+      }
+    };
+    if (user) {
+      checkGoogleCalendarStatus();
+    }
+  }, [user]);
+
+  // Verificar si hay parámetros de Google Calendar en la URL (después de OAuth)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('google_calendar_connected') === 'true') {
+        setGoogleCalendarConnected(true);
+        // Limpiar URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      if (params.get('google_calendar_error')) {
+        const error = params.get('google_calendar_error');
+        alert(`Error al conectar Google Calendar: ${error}`);
+        // Limpiar URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, []);
 
   // Cargar información del usuario
   useEffect(() => {
@@ -365,6 +404,21 @@ export default function CoordinacionesPanel() {
   const closeResumenModal = () => {
     setViewingResumen(null);
     setResumenData(null);
+  };
+
+  const handleAgendarVideollamada = (coordinacion) => {
+    if (!googleCalendarConnected) {
+      alert('Por favor, conecta tu Google Calendar primero para poder agendar videollamadas.');
+      return;
+    }
+    setCoordinacionParaVideollamada(coordinacion);
+    setShowAgendarVideollamada(true);
+  };
+
+  const handleVideollamadaAgendada = (eventData) => {
+    // Recargar coordinaciones para mostrar la información actualizada
+    loadCoordinaciones();
+    alert('¡Videollamada agendada exitosamente! Se ha creado el evento en tu Google Calendar con link de Google Meet.');
   };
 
   const handleWhatsApp = (coordinacion) => {
@@ -908,8 +962,28 @@ export default function CoordinacionesPanel() {
         </div>
       )}
 
-      {/* Modal de Pre-Coordinación */}
-      {showPreCoordinacionModal && (
+        {/* Componente de conexión Google Calendar */}
+        {user && (
+          <div style={{ marginBottom: '2rem' }}>
+            <GoogleCalendarConnect onStatusChange={setGoogleCalendarConnected} />
+          </div>
+        )}
+
+        {/* Modal de Agendar Videollamada */}
+        {showAgendarVideollamada && coordinacionParaVideollamada && (
+          <AgendarVideollamadaModal
+            coordinacion={coordinacionParaVideollamada}
+            isOpen={showAgendarVideollamada}
+            onClose={() => {
+              setShowAgendarVideollamada(false);
+              setCoordinacionParaVideollamada(null);
+            }}
+            onSuccess={handleVideollamadaAgendada}
+          />
+        )}
+
+        {/* Modal de Pre-Coordinación */}
+        {showPreCoordinacionModal && (
         <div className={styles.modalOverlay} onClick={() => setShowPreCoordinacionModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>

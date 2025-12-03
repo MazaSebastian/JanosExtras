@@ -405,7 +405,8 @@
 .viewButton,
 .editButton,
 .deleteButton,
-.whatsappButton {
+.whatsappButton,
+.videollamadaButton {
   padding: 0.4rem;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -413,6 +414,15 @@
   transition: all 0.2s ease;
   border: none;
   background: transparent;
+}
+
+.videollamadaButton {
+  color: #4285f4;
+}
+
+.videollamadaButton:hover {
+  background: #e8f0fe;
+  transform: scale(1.1);
 }
 
 .whatsappButton {

@@ -56,6 +56,11 @@ export class Coordinacion {
         c.pre_coordinacion_fecha_creacion,
         c.pre_coordinacion_completado_por_cliente,
         c.pre_coordinacion_fecha_completado,
+        c.google_calendar_event_id,
+        c.videollamada_agendada,
+        c.videollamada_fecha,
+        c.videollamada_duracion,
+        c.videollamada_meet_link,
         d.nombre AS dj_responsable_nombre,
         d.color_hex AS dj_responsable_color,
         s.nombre AS salon_nombre,
@@ -105,6 +110,11 @@ export class Coordinacion {
         c.pre_coordinacion_fecha_creacion,
         c.pre_coordinacion_completado_por_cliente,
         c.pre_coordinacion_fecha_completado,
+        c.google_calendar_event_id,
+        c.videollamada_agendada,
+        c.videollamada_fecha,
+        c.videollamada_duracion,
+        c.videollamada_meet_link,
         d.nombre AS dj_responsable_nombre,
         d.color_hex AS dj_responsable_color,
         s.nombre AS salon_nombre,
@@ -172,7 +182,7 @@ export class Coordinacion {
     return result.rows[0];
   }
 
-  static async update(id, { titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado }) {
+  static async update(id, { titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link }) {
     const updates = [];
     const values = [];
     let paramIndex = 1;
@@ -293,6 +303,36 @@ export class Coordinacion {
       paramIndex++;
     }
 
+    if (google_calendar_event_id !== undefined) {
+      updates.push(`google_calendar_event_id = $${paramIndex}`);
+      values.push(google_calendar_event_id);
+      paramIndex++;
+    }
+
+    if (videollamada_agendada !== undefined) {
+      updates.push(`videollamada_agendada = $${paramIndex}`);
+      values.push(videollamada_agendada);
+      paramIndex++;
+    }
+
+    if (videollamada_fecha !== undefined) {
+      updates.push(`videollamada_fecha = $${paramIndex}`);
+      values.push(videollamada_fecha);
+      paramIndex++;
+    }
+
+    if (videollamada_duracion !== undefined) {
+      updates.push(`videollamada_duracion = $${paramIndex}`);
+      values.push(videollamada_duracion);
+      paramIndex++;
+    }
+
+    if (videollamada_meet_link !== undefined) {
+      updates.push(`videollamada_meet_link = $${paramIndex}`);
+      values.push(videollamada_meet_link);
+      paramIndex++;
+    }
+
     if (updates.length === 0) {
       return await this.findById(id);
     }
@@ -308,7 +348,7 @@ export class Coordinacion {
       UPDATE coordinaciones
       SET ${updates.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado
+      RETURNING id, titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link
     `;
     
     try {
