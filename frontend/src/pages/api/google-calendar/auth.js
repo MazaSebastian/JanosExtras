@@ -18,15 +18,40 @@ export default async function handler(req, res) {
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } = process.env;
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
+    console.error('Google Calendar: Variables de entorno faltantes', {
+      hasClientId: !!GOOGLE_CLIENT_ID,
+      hasClientSecret: !!GOOGLE_CLIENT_SECRET,
+      hasRedirectUri: !!GOOGLE_REDIRECT_URI
+    });
     return res.status(500).json({ 
       error: 'Google Calendar no está configurado. Contacta al administrador.' 
     });
   }
 
+  // Validar formato del CLIENT_ID (debe ser un string sin espacios)
+  const cleanClientId = GOOGLE_CLIENT_ID.trim();
+  if (cleanClientId.length < 20) {
+    console.error('Google Calendar: CLIENT_ID parece inválido (muy corto)', {
+      length: cleanClientId.length,
+      startsWith: cleanClientId.substring(0, 10)
+    });
+    return res.status(500).json({ 
+      error: 'CLIENT_ID de Google Calendar parece inválido. Verifica la configuración en Vercel.' 
+    });
+  }
+
+  // Log para debugging (sin mostrar el secret completo)
+  console.log('Google Calendar: Iniciando OAuth con', {
+    clientIdLength: cleanClientId.length,
+    clientIdStart: cleanClientId.substring(0, 20) + '...',
+    redirectUri: GOOGLE_REDIRECT_URI,
+    hasSecret: !!GOOGLE_CLIENT_SECRET
+  });
+
   const oauth2Client = new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URI
+    cleanClientId,
+    GOOGLE_CLIENT_SECRET.trim(),
+    GOOGLE_REDIRECT_URI.trim()
   );
 
   // Scopes necesarios para Google Calendar
