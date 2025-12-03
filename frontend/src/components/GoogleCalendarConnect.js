@@ -47,7 +47,22 @@ export default function GoogleCalendarConnect({ onStatusChange }) {
       }
     } catch (error) {
       console.error('Error al conectar Google Calendar:', error);
-      alert('Error al conectar Google Calendar. Por favor, intenta de nuevo.');
+      console.error('Error response:', error.response);
+      
+      // Mostrar mensaje de error más específico
+      let errorMessage = 'Error al conectar Google Calendar. Por favor, intenta de nuevo.';
+      
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Error del servidor. Verifica que las credenciales de Google Calendar estén configuradas correctamente.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'No estás autenticado. Por favor, inicia sesión nuevamente.';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'No tienes permisos para realizar esta acción.';
+      }
+      
+      alert(errorMessage);
     } finally {
       setConnecting(false);
     }
