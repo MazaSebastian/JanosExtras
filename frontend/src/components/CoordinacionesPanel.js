@@ -52,7 +52,6 @@ export default function CoordinacionesPanel() {
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
   const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
   const [tooltipData, setTooltipData] = useState({ show: false, items: [], x: 0, y: 0 });
-  const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
 
   // El componente GoogleCalendarConnect manejará la verificación del estado
   // No necesitamos verificarlo aquí, solo mostramos el componente si hay user
