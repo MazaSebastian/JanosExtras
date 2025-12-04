@@ -115,21 +115,52 @@ export class GoogleCalendarClient {
     }
 
     try {
+      console.log('📅 Creando evento en Google Calendar:', {
+        summary,
+        startDateTime,
+        endDateTime,
+        timeZone,
+        calendarId: 'primary'
+      });
+
       const response = await this.calendar.events.insert({
         calendarId: 'primary',
         conferenceDataVersion: conferenceData ? 1 : 0,
         requestBody: event
       });
 
-      return {
+      console.log('✅ Evento creado exitosamente:', {
         eventId: response.data.id,
         htmlLink: response.data.htmlLink,
         meetLink: response.data.hangoutLink || response.data.conferenceData?.entryPoints?.[0]?.uri || null,
         start: response.data.start.dateTime,
-        end: response.data.end.dateTime
+        end: response.data.end.dateTime,
+        calendarId: response.data.organizer?.email || 'primary'
+      });
+
+      // Verificar que el link de Meet se generó correctamente
+      const meetLink = response.data.hangoutLink || 
+                      response.data.conferenceData?.entryPoints?.[0]?.uri || 
+                      null;
+      
+      if (!meetLink && conferenceData) {
+        console.warn('⚠️ Se solicitó Google Meet pero no se generó el link');
+      }
+
+      return {
+        eventId: response.data.id,
+        htmlLink: response.data.htmlLink,
+        meetLink: meetLink,
+        start: response.data.start.dateTime,
+        end: response.data.end.dateTime,
+        calendarId: response.data.organizer?.email || 'primary'
       };
     } catch (error) {
-      console.error('Error al crear evento en Google Calendar:', error);
+      console.error('❌ Error al crear evento en Google Calendar:', {
+        error: error.message,
+        code: error.code,
+        details: error.response?.data
+      });
       throw new Error(`Error al crear evento: ${error.message}`);
     }
   }

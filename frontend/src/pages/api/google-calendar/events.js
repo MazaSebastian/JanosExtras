@@ -40,8 +40,23 @@ export default async function handler(req, res) {
       await calendarClient.initialize();
 
       // Construir fecha/hora de inicio y fin
-      const startDateTime = new Date(`${fecha}T${hora}:00`);
+      // Asegurar formato correcto de fecha (YYYY-MM-DD) y hora (HH:MM)
+      const fechaFormateada = fecha.includes('T') ? fecha.split('T')[0] : fecha;
+      const horaFormateada = hora.includes(':') ? hora : `${hora.substring(0, 2)}:${hora.substring(2)}`;
+      
+      const startDateTime = new Date(`${fechaFormateada}T${horaFormateada}:00`);
       const endDateTime = new Date(startDateTime.getTime() + duracion * 60 * 1000);
+
+      console.log('📅 Datos del evento a crear:', {
+        fecha,
+        hora,
+        fechaFormateada,
+        horaFormateada,
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
+        duracion,
+        timeZone: 'America/Argentina/Buenos_Aires'
+      });
 
       // Preparar descripción del evento
       const eventDescription = descripcion || `
@@ -54,14 +69,30 @@ ${coordinacion.descripcion ? `\n\nNotas:\n${coordinacion.descripcion}` : ''}
       `.trim();
 
       // Crear evento en Google Calendar
+      const eventSummary = `Coordinación: ${coordinacion.nombre_cliente || coordinacion.titulo} - ${coordinacion.tipo_evento || 'Evento'}`;
+      
+      console.log('🚀 Iniciando creación de evento en Google Calendar:', {
+        summary: eventSummary,
+        coordinacion_id,
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString()
+      });
+
       const eventResult = await calendarClient.createEvent({
-        summary: `Coordinación: ${coordinacion.nombre_cliente || coordinacion.titulo} - ${coordinacion.tipo_evento || 'Evento'}`,
+        summary: eventSummary,
         description: eventDescription,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
         timeZone: 'America/Argentina/Buenos_Aires',
         attendees: coordinacion.telefono ? [] : [], // Podríamos agregar email del cliente si está disponible
         conferenceData: true // Incluir Google Meet
+      });
+
+      console.log('✅ Evento creado, resultado:', {
+        eventId: eventResult.eventId,
+        htmlLink: eventResult.htmlLink,
+        meetLink: eventResult.meetLink,
+        calendarId: eventResult.calendarId
       });
 
       // Actualizar coordinación con información del evento
