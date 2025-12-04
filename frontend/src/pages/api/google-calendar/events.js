@@ -102,8 +102,8 @@ ${coordinacion.descripcion ? `\n\nNotas:\n${coordinacion.descripcion}` : ''}
       console.log('🚀 Iniciando creación de evento en Google Calendar:', {
         summary: eventSummary,
         coordinacion_id,
-        startDateTime: startDateTime.toISOString(),
-        endDateTime: endDateTime.toISOString()
+        startDateTime: startDateTimeISO,
+        endDateTime: endDateTimeISO
       });
 
       const eventResult = await calendarClient.createEvent({
@@ -123,11 +123,14 @@ ${coordinacion.descripcion ? `\n\nNotas:\n${coordinacion.descripcion}` : ''}
         calendarId: eventResult.calendarId
       });
 
+      // Crear objeto Date para guardar en la base de datos (sin zona horaria, solo fecha/hora)
+      const videollamadaFecha = new Date(`${fechaFormateada}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00`);
+
       // Actualizar coordinación con información del evento
       await Coordinacion.update(coordinacion_id, {
         google_calendar_event_id: eventResult.eventId,
         videollamada_agendada: true,
-        videollamada_fecha: startDateTime,
+        videollamada_fecha: videollamadaFecha,
         videollamada_duracion: duracion,
         videollamada_meet_link: eventResult.meetLink
       });
@@ -143,10 +146,26 @@ ${coordinacion.descripcion ? `\n\nNotas:\n${coordinacion.descripcion}` : ''}
         }
       });
     } catch (error) {
-      console.error('Error al crear evento en Google Calendar:', error);
+      console.error('❌ Error al crear evento en Google Calendar:', {
+        error: error.message,
+        stack: error.stack,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // Proporcionar mensaje de error más específico
+      let errorMessage = 'Error al crear evento en Google Calendar';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       return res.status(500).json({ 
-        error: 'Error al crear evento en Google Calendar',
-        message: error.message 
+        error: errorMessage,
+        details: error.response?.data || error.message,
+        code: error.code || error.response?.status
       });
     }
   }
