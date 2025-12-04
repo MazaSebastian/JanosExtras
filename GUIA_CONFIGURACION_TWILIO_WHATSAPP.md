@@ -14,12 +14,17 @@
 4. Verifica tu email
 5. **¡Obtendrás $15.50 de crédito gratis!** 🎉
 
-## 🔧 Paso 2: Verificar Número de WhatsApp Business
+## 🔧 Paso 2: Activar WhatsApp Sandbox
 
-1. En el Dashboard de Twilio, ve a **Messaging** → **Try it out** → **Send a WhatsApp message**
-2. O ve directamente a: [Twilio Console - Messaging](https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn)
-3. Sigue las instrucciones para verificar tu número de WhatsApp Business
-4. **IMPORTANTE**: Este proceso puede tardar unos minutos o días dependiendo de la verificación
+1. En el Dashboard de Twilio, ve a **Develop** → **Messaging** → **Try it out** → **Send a WhatsApp message**
+2. O ve directamente a: [Twilio Console - WhatsApp Sandbox](https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn)
+3. Si es la primera vez, haz clic en **"Get started"** o **"Activate Sandbox"**
+4. Acepta los términos de servicio y confirma
+5. **IMPORTANTE**: 
+   - Twilio te dará un número de teléfono y un código único
+   - Debes enviar un mensaje de WhatsApp con ese código al número que Twilio te proporciona
+   - Una vez conectado, recibirás una confirmación
+   - Este proceso es solo para desarrollo/pruebas (Sandbox)
 
 ## 🔧 Paso 3: Obtener Credenciales
 
@@ -48,16 +53,26 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+1234567890
 
 ## 🔧 Paso 5: Configurar Webhook URL
 
-1. En Twilio Console, ve a **Messaging** → **Settings** → **WhatsApp Sandbox** (o **WhatsApp Business** si ya está verificado)
-2. En **"A MESSAGE COMES IN"**, configura:
-   ```
-   https://janosdjs.com/api/whatsapp/webhook
-   ```
-3. En **"STATUS CALLBACK URL"**, configura:
-   ```
-   https://janosdjs.com/api/whatsapp/status
-   ```
-4. Guarda los cambios
+**Opción A: Si estás usando WhatsApp Sandbox (desarrollo/pruebas):**
+
+1. En Twilio Console, ve a **Develop** → **Messaging** → **Try it out** → **Send a WhatsApp message**
+2. O ve directamente a: [WhatsApp Sandbox](https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn)
+3. En la sección **"Sandbox Configuration"** o **"Configuration"**, busca:
+   - **"When a message comes in"** o **"A MESSAGE COMES IN"**
+   - **"Status callback URL"** o **"STATUS CALLBACK URL"**
+4. Configura las URLs:
+   - **"When a message comes in"**: `https://janosdjs.com/api/whatsapp/webhook`
+   - **"Status callback URL"**: `https://janosdjs.com/api/whatsapp/status`
+5. Haz clic en **"Save"** o **"Update"**
+
+**Opción B: Si tienes WhatsApp Business verificado (producción):**
+
+1. En Twilio Console, ve a **Develop** → **Messaging** → **Settings**
+2. Busca la sección **"WhatsApp Business"** o **"WhatsApp"**
+3. Si no aparece, puede que necesites verificar tu número de WhatsApp Business primero
+4. Configura los webhooks de la misma manera que en la Opción A
+
+**Nota**: Si no encuentras la opción de webhooks en Settings, es porque WhatsApp Sandbox se configura desde "Try it out", no desde Settings.
 
 ## 🔧 Paso 6: Ejecutar Migraciones SQL en Supabase
 
