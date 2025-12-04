@@ -420,45 +420,9 @@ export default function CoordinacionesPanel() {
       return;
     }
 
-    // Limpiar el teléfono (quitar espacios, guiones, paréntesis)
-    const telefonoLimpio = coordinacion.telefono.replace(/[\s\-\(\)]/g, '');
-    
-    // Si no empieza con código de país, asumir que es Argentina (+54)
-    // El usuario puede editar el número si es necesario
-    let numeroWhatsApp = telefonoLimpio;
-    if (!telefonoLimpio.startsWith('+') && !telefonoLimpio.startsWith('54')) {
-      // Si empieza con 0, quitarlo y agregar código de país
-      if (telefonoLimpio.startsWith('0')) {
-        numeroWhatsApp = '54' + telefonoLimpio.substring(1);
-      } else {
-        numeroWhatsApp = '54' + telefonoLimpio;
-      }
-    } else if (telefonoLimpio.startsWith('54')) {
-      numeroWhatsApp = telefonoLimpio;
-    } else if (telefonoLimpio.startsWith('+')) {
-      numeroWhatsApp = telefonoLimpio.substring(1);
-    }
-
-    // Crear mensaje pre-formateado
-    const nombreCliente = coordinacion.nombre_cliente || 'Cliente';
-    const tipoEvento = coordinacion.tipo_evento || 'Evento';
-    const fechaEvento = coordinacion.fecha_evento 
-      ? formatDateFromDB(coordinacion.fecha_evento)
-      : '';
-    
-    let mensaje = `Hola ${nombreCliente}! 👋\n\n`;
-    mensaje += `Te contacto respecto a tu ${tipoEvento}`;
-    if (fechaEvento) {
-      mensaje += ` del ${fechaEvento}`;
-    }
-    mensaje += `.\n\n¿Podemos coordinar algunos detalles?`;
-    
-    // Codificar el mensaje para URL
-    const mensajeCodificado = encodeURIComponent(mensaje);
-    
-    // Abrir WhatsApp
-    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
-    window.open(urlWhatsApp, '_blank');
+    // Abrir panel de WhatsApp con esta coordinación
+    setWhatsappCoordinacionId(coordinacion.id);
+    setWhatsappPanelOpen(true);
   };
 
   // Cerrar menú al hacer clic fuera
