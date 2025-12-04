@@ -44,18 +44,46 @@ export default async function handler(req, res) {
       const fechaFormateada = fecha.includes('T') ? fecha.split('T')[0] : fecha;
       const horaFormateada = hora.includes(':') ? hora : `${hora.substring(0, 2)}:${hora.substring(2)}`;
       
-      const startDateTime = new Date(`${fechaFormateada}T${horaFormateada}:00`);
-      const endDateTime = new Date(startDateTime.getTime() + duracion * 60 * 1000);
+      // IMPORTANTE: Crear la fecha en la zona horaria de Argentina (UTC-3)
+      // El problema es que cuando creamos un Date y lo convertimos a ISO, se convierte a UTC
+      // Solución: crear el string ISO directamente con la zona horaria de Argentina (-03:00)
+      
+      // Parsear la hora para obtener horas y minutos
+      const [horas, minutos] = horaFormateada.split(':').map(Number);
+      
+      // Crear fecha de inicio en formato ISO con zona horaria de Argentina (UTC-3)
+      // Formato: YYYY-MM-DDTHH:MM:SS-03:00
+      const startDateTimeISO = `${fechaFormateada}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00-03:00`;
+      
+      // Calcular fecha de fin sumando la duración
+      // Crear un objeto Date temporal para calcular la hora de fin
+      // Usamos la fecha/hora como si fuera en Argentina (sin conversión UTC)
+      const tempStartDate = new Date(`${fechaFormateada}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00`);
+      const tempEndDate = new Date(tempStartDate.getTime() + duracion * 60 * 1000);
+      
+      // Extraer horas y minutos de la fecha de fin
+      const endHours = tempEndDate.getHours();
+      const endMinutes = tempEndDate.getMinutes();
+      
+      // Verificar si la duración hace que pase al día siguiente
+      const endDate = tempEndDate.getDate() !== tempStartDate.getDate() 
+        ? tempEndDate.toISOString().split('T')[0] 
+        : fechaFormateada;
+      
+      // Crear fecha de fin en formato ISO con zona horaria de Argentina
+      const endDateTimeISO = `${endDate}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00-03:00`;
 
-      console.log('📅 Datos del evento a crear:', {
+      console.log('📅 Datos del evento a crear (con zona horaria corregida):', {
         fecha,
         hora,
         fechaFormateada,
         horaFormateada,
-        startDateTime: startDateTime.toISOString(),
-        endDateTime: endDateTime.toISOString(),
+        horas,
+        minutos,
+        startDateTimeISO,
+        endDateTimeISO,
         duracion,
-        timeZone: 'America/Argentina/Buenos_Aires'
+        timeZone: 'America/Argentina/Buenos_Aires (UTC-3)'
       });
 
       // Preparar descripción del evento
@@ -81,8 +109,8 @@ ${coordinacion.descripcion ? `\n\nNotas:\n${coordinacion.descripcion}` : ''}
       const eventResult = await calendarClient.createEvent({
         summary: eventSummary,
         description: eventDescription,
-        startDateTime: startDateTime.toISOString(),
-        endDateTime: endDateTime.toISOString(),
+        startDateTime: startDateTimeISO, // Usar el formato ISO con zona horaria de Argentina
+        endDateTime: endDateTimeISO, // Usar el formato ISO con zona horaria de Argentina
         timeZone: 'America/Argentina/Buenos_Aires',
         attendees: coordinacion.telefono ? [] : [], // Podríamos agregar email del cliente si está disponible
         conferenceData: true // Incluir Google Meet
