@@ -649,6 +649,13 @@ export default function CoordinacionFlujo({ coordinacionId }) {
     });
   };
 
+  // Constante para identificar respuestas pendientes
+  const VALOR_PENDIENTE = '__PENDIENTE__';
+  
+  const esPendiente = (valor) => {
+    return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
+  };
+
   const validarPaso = () => {
     if (!paso) return false;
     
@@ -661,7 +668,11 @@ export default function CoordinacionFlujo({ coordinacionId }) {
       return p.requerido;
     });
     
-    return preguntasRequeridas.every(p => respuestas[p.id] !== undefined && respuestas[p.id] !== '');
+    // Permitir avanzar si todas las preguntas requeridas tienen respuesta O están marcadas como pendientes
+    return preguntasRequeridas.every(p => {
+      const valor = respuestas[p.id];
+      return (valor !== undefined && valor !== '') || esPendiente(valor);
+    });
   };
 
   const handleSiguiente = async () => {
@@ -967,6 +978,55 @@ export default function CoordinacionFlujo({ coordinacionId }) {
             )}
           </div>
 
+          {/* Sección de Items Pendientes */}
+          {(() => {
+            const itemsPendientes = [];
+            pasos.forEach((paso) => {
+              paso.preguntas.forEach((pregunta) => {
+                const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                const debeMostrar = !esCondicional || 
+                  (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                
+                if (!debeMostrar) return;
+                
+                const valor = respuestas[pregunta.id];
+                if (esPendiente(valor)) {
+                  itemsPendientes.push({
+                    paso: paso.titulo,
+                    pregunta: pregunta.label
+                  });
+                }
+              });
+            });
+            
+            if (itemsPendientes.length > 0) {
+              return (
+                <div className={styles.resumenSeccion} style={{
+                  background: '#fff3e0',
+                  border: '2px solid #ff9800',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  marginBottom: '1.5rem'
+                }}>
+                  <h3 className={styles.resumenSeccionTitulo} style={{ color: '#e65100' }}>
+                    ⏳ Items Pendientes ({itemsPendientes.length})
+                  </h3>
+                  <p style={{ color: '#e65100', marginBottom: '1rem', fontSize: '0.95rem' }}>
+                    Los siguientes items quedaron pendientes de confirmar. Recuerda contactar al cliente antes del evento.
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                    {itemsPendientes.map((item, idx) => (
+                      <li key={idx} style={{ marginBottom: '0.5rem', color: '#e65100' }}>
+                        <strong>{item.paso}:</strong> {item.pregunta}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {pasos.map((paso) => {
             const tieneRespuestas = paso.preguntas.some((p) => {
               const esCondicional = p.condicional && p.condicional.pregunta;
@@ -974,8 +1034,8 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                 (respuestas[p.condicional.pregunta] === p.condicional.valor);
               if (!debeMostrar) return false;
               const valor = respuestas[p.id];
-              return valor !== undefined && valor !== null && valor !== '' && 
-                     (p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0));
+              // Incluir pendientes en la verificación
+              return (valor !== undefined && valor !== null && valor !== '') || esPendiente(valor);
             });
 
             if (!tieneRespuestas) return null;
@@ -991,6 +1051,23 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                   if (!debeMostrar) return null;
                   
                   const valor = respuestas[pregunta.id];
+                  
+                  // Si está pendiente, mostrar como pendiente
+                  if (esPendiente(valor)) {
+                    return (
+                      <div key={pregunta.id} className={styles.resumenCampo} style={{
+                        background: '#fff3e0',
+                        padding: '0.75rem',
+                        borderRadius: '6px',
+                        border: '1px solid #ff9800',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <span className={styles.resumenLabel} style={{ color: '#e65100', fontWeight: 600 }}>
+                          {pregunta.label}: <span style={{ fontSize: '0.9rem' }}>⏳ PENDIENTE</span>
+                        </span>
+                      </div>
+                    );
+                  }
                   
                   if (pregunta.tipo === 'velas' && Array.isArray(valor) && valor.length > 0) {
                     return (
@@ -1085,43 +1162,144 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                 return null;
               }
               
+              const valorActual = respuestas[pregunta.id] || '';
+              const estaPendiente = esPendiente(valorActual);
+              
               return (
                 <div key={pregunta.id} className={styles.pregunta}>
                 <label>
                   {pregunta.label}
                   {pregunta.requerido && debeMostrar && <span className={styles.required}> *</span>}
+                  {estaPendiente && (
+                    <span style={{ 
+                      marginLeft: '0.5rem', 
+                      color: '#ff9800', 
+                      fontWeight: 600,
+                      fontSize: '0.85rem'
+                    }}>
+                      ⏳ PENDIENTE
+                    </span>
+                  )}
                 </label>
                 {pregunta.tipo === 'text' && (
-                  <input
-                    type="text"
-                    value={respuestas[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    required={pregunta.requerido}
-                  />
+                  <>
+                    <input
+                      type="text"
+                      value={estaPendiente ? '' : valorActual}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      required={pregunta.requerido && !estaPendiente}
+                      disabled={estaPendiente}
+                      style={estaPendiente ? { opacity: 0.5, backgroundColor: '#fff3e0' } : {}}
+                    />
+                    <button
+                      type="button"
+                      className={styles.pendienteButton}
+                      onClick={() => handleInputChange(pregunta.id, estaPendiente ? '' : VALOR_PENDIENTE)}
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: estaPendiente ? '#ff9800' : '#f5f5f5',
+                        color: estaPendiente ? 'white' : '#666',
+                        border: estaPendiente ? '2px solid #ff9800' : '2px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {estaPendiente ? '✓ Marcado como Pendiente' : '⏳ Marcar como Pendiente'}
+                    </button>
+                  </>
                 )}
                 {pregunta.tipo === 'number' && (
-                  <input
-                    type="number"
-                    value={respuestas[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    required={pregunta.requerido}
-                  />
+                  <>
+                    <input
+                      type="number"
+                      value={estaPendiente ? '' : valorActual}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      required={pregunta.requerido && !estaPendiente}
+                      disabled={estaPendiente}
+                      style={estaPendiente ? { opacity: 0.5, backgroundColor: '#fff3e0' } : {}}
+                    />
+                    <button
+                      type="button"
+                      className={styles.pendienteButton}
+                      onClick={() => handleInputChange(pregunta.id, estaPendiente ? '' : VALOR_PENDIENTE)}
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: estaPendiente ? '#ff9800' : '#f5f5f5',
+                        color: estaPendiente ? 'white' : '#666',
+                        border: estaPendiente ? '2px solid #ff9800' : '2px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {estaPendiente ? '✓ Marcado como Pendiente' : '⏳ Marcar como Pendiente'}
+                    </button>
+                  </>
                 )}
                 {pregunta.tipo === 'time' && (
-                  <input
-                    type="time"
-                    value={respuestas[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    required={pregunta.requerido}
-                  />
+                  <>
+                    <input
+                      type="time"
+                      value={estaPendiente ? '' : valorActual}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      required={pregunta.requerido && !estaPendiente}
+                      disabled={estaPendiente}
+                      style={estaPendiente ? { opacity: 0.5, backgroundColor: '#fff3e0' } : {}}
+                    />
+                    <button
+                      type="button"
+                      className={styles.pendienteButton}
+                      onClick={() => handleInputChange(pregunta.id, estaPendiente ? '' : VALOR_PENDIENTE)}
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: estaPendiente ? '#ff9800' : '#f5f5f5',
+                        color: estaPendiente ? 'white' : '#666',
+                        border: estaPendiente ? '2px solid #ff9800' : '2px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {estaPendiente ? '✓ Marcado como Pendiente' : '⏳ Marcar como Pendiente'}
+                    </button>
+                  </>
                 )}
                 {pregunta.tipo === 'textarea' && (
-                  <textarea
-                    value={respuestas[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    rows={4}
-                    required={pregunta.requerido}
-                  />
+                  <>
+                    <textarea
+                      value={estaPendiente ? '' : valorActual}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      rows={4}
+                      required={pregunta.requerido && !estaPendiente}
+                      disabled={estaPendiente}
+                      style={estaPendiente ? { opacity: 0.5, backgroundColor: '#fff3e0' } : {}}
+                    />
+                    <button
+                      type="button"
+                      className={styles.pendienteButton}
+                      onClick={() => handleInputChange(pregunta.id, estaPendiente ? '' : VALOR_PENDIENTE)}
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: estaPendiente ? '#ff9800' : '#f5f5f5',
+                        color: estaPendiente ? 'white' : '#666',
+                        border: estaPendiente ? '2px solid #ff9800' : '2px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {estaPendiente ? '✓ Marcado como Pendiente' : '⏳ Marcar como Pendiente'}
+                    </button>
+                  </>
                 )}
                 {pregunta.tipo === 'velas' && (
                   <div className={styles.velasContainer}>
@@ -1154,45 +1332,89 @@ export default function CoordinacionFlujo({ coordinacionId }) {
                   </div>
                 )}
                 {pregunta.tipo === 'select' && (pregunta.id === 'tema_fiesta' || pregunta.id === 'estilo_casamiento' || pregunta.id === 'tematica_evento') ? (
-                  <div className={styles.tematicaButtons}>
-                    {pregunta.opciones.map((opcion) => {
-                      const valorActual = respuestas[pregunta.id];
-                      const estaSeleccionado = valorActual === opcion;
-                      // Log para depuración solo la primera vez que se renderiza
-                      if (pregunta.id === 'tema_fiesta' && valorActual && pregunta.opciones.indexOf(opcion) === 0) {
-                        console.log(`🔍 Renderizando botones tema_fiesta:`, { 
-                          valorActual, 
-                          todasLasOpciones: pregunta.opciones,
-                          estaSeleccionadoParaEstaOpcion: estaSeleccionado
-                        });
-                      }
-                      return (
-                        <button
-                          key={opcion}
-                          type="button"
-                          className={`${styles.tematicaButton} ${
-                            estaSeleccionado ? styles.tematicaButtonActive : ''
-                          }`}
-                          onClick={() => handleInputChange(pregunta.id, opcion)}
-                        >
-                          {opcion}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <>
+                    <div className={styles.tematicaButtons}>
+                      {pregunta.opciones.map((opcion) => {
+                        const valorActualSelect = respuestas[pregunta.id];
+                        const estaSeleccionado = valorActualSelect === opcion && !esPendiente(valorActualSelect);
+                        // Log para depuración solo la primera vez que se renderiza
+                        if (pregunta.id === 'tema_fiesta' && valorActualSelect && pregunta.opciones.indexOf(opcion) === 0) {
+                          console.log(`🔍 Renderizando botones tema_fiesta:`, { 
+                            valorActualSelect, 
+                            todasLasOpciones: pregunta.opciones,
+                            estaSeleccionadoParaEstaOpcion: estaSeleccionado
+                          });
+                        }
+                        return (
+                          <button
+                            key={opcion}
+                            type="button"
+                            className={`${styles.tematicaButton} ${
+                              estaSeleccionado ? styles.tematicaButtonActive : ''
+                            }`}
+                            onClick={() => handleInputChange(pregunta.id, opcion)}
+                            disabled={estaPendiente}
+                            style={estaPendiente ? { opacity: 0.5 } : {}}
+                          >
+                            {opcion}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.pendienteButton}
+                      onClick={() => handleInputChange(pregunta.id, estaPendiente ? '' : VALOR_PENDIENTE)}
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: estaPendiente ? '#ff9800' : '#f5f5f5',
+                        color: estaPendiente ? 'white' : '#666',
+                        border: estaPendiente ? '2px solid #ff9800' : '2px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {estaPendiente ? '✓ Marcado como Pendiente' : '⏳ Marcar como Pendiente'}
+                    </button>
+                  </>
                 ) : pregunta.tipo === 'select' ? (
-                  <select
-                    value={respuestas[pregunta.id] || ''}
-                    onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
-                    required={pregunta.requerido}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {pregunta.opciones.map((opcion) => (
-                      <option key={opcion} value={opcion}>
-                        {opcion}
-                      </option>
-                    ))}
-                  </select>
+                  <>
+                    <select
+                      value={estaPendiente ? '' : (respuestas[pregunta.id] || '')}
+                      onChange={(e) => handleInputChange(pregunta.id, e.target.value)}
+                      required={pregunta.requerido && !estaPendiente}
+                      disabled={estaPendiente}
+                      style={estaPendiente ? { opacity: 0.5, backgroundColor: '#fff3e0' } : {}}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {pregunta.opciones.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className={styles.pendienteButton}
+                      onClick={() => handleInputChange(pregunta.id, estaPendiente ? '' : VALOR_PENDIENTE)}
+                      style={{
+                        marginTop: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: estaPendiente ? '#ff9800' : '#f5f5f5',
+                        color: estaPendiente ? 'white' : '#666',
+                        border: estaPendiente ? '2px solid #ff9800' : '2px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {estaPendiente ? '✓ Marcado como Pendiente' : '⏳ Marcar como Pendiente'}
+                    </button>
+                  </>
                 ) : null}
                 </div>
               );

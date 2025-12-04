@@ -1419,6 +1419,12 @@ export default function CoordinacionesPanel() {
                       const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
                       let respuestas = resumenData.flujo.respuestas;
                       
+                      // Constante para identificar respuestas pendientes
+                      const VALOR_PENDIENTE = '__PENDIENTE__';
+                      const esPendiente = (valor) => {
+                        return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
+                      };
+                      
                       // Parsear respuestas si es string
                       if (typeof respuestas === 'string') {
                         try {
@@ -1428,6 +1434,26 @@ export default function CoordinacionesPanel() {
                           respuestas = {};
                         }
                       }
+                      
+                      // Recopilar items pendientes
+                      const itemsPendientes = [];
+                      pasos.forEach((paso) => {
+                        paso.preguntas.forEach((pregunta) => {
+                          const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                          const debeMostrar = !esCondicional || 
+                            (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                          
+                          if (!debeMostrar) return;
+                          
+                          const valor = respuestas[pregunta.id];
+                          if (esPendiente(valor)) {
+                            itemsPendientes.push({
+                              paso: paso.titulo,
+                              pregunta: pregunta.label
+                            });
+                          }
+                        });
+                      });
                       
                       // Asegurar que velas sea siempre un array válido
                       if (respuestas.velas) {
@@ -1451,7 +1477,34 @@ export default function CoordinacionesPanel() {
                         respuestas.velas = [];
                       }
 
-                      return pasos.map((paso) => {
+                      return (
+                        <>
+                          {/* Sección de Items Pendientes */}
+                          {itemsPendientes.length > 0 && (
+                            <div className={styles.resumenSeccion} style={{
+                              background: '#fff3e0',
+                              border: '2px solid #ff9800',
+                              borderRadius: '8px',
+                              padding: '1rem',
+                              marginBottom: '1.5rem'
+                            }}>
+                              <h3 className={styles.resumenSeccionTitulo} style={{ color: '#e65100' }}>
+                                ⏳ Items Pendientes ({itemsPendientes.length})
+                              </h3>
+                              <p style={{ color: '#e65100', marginBottom: '1rem', fontSize: '0.95rem' }}>
+                                Los siguientes items quedaron pendientes de confirmar. Recuerda contactar al cliente antes del evento.
+                              </p>
+                              <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                                {itemsPendientes.map((item, idx) => (
+                                  <li key={idx} style={{ marginBottom: '0.5rem', color: '#e65100' }}>
+                                    <strong>{item.paso}:</strong> {item.pregunta}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {pasos.map((paso) => {
                         const tieneRespuestas = paso.preguntas.some((p) => {
                           const esCondicional = p.condicional && p.condicional.pregunta;
                           const debeMostrar =
@@ -1459,11 +1512,11 @@ export default function CoordinacionesPanel() {
                             respuestas[p.condicional.pregunta] === p.condicional.valor;
                           if (!debeMostrar) return false;
                           const valor = respuestas[p.id];
+                          // Incluir pendientes en la verificación
                           return (
-                            valor !== undefined &&
-                            valor !== null &&
-                            valor !== '' &&
-                            (p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0))
+                            (valor !== undefined && valor !== null && valor !== '') || esPendiente(valor)
+                          ) && (
+                            p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0) || esPendiente(valor)
                           );
                         });
 
@@ -1483,6 +1536,23 @@ export default function CoordinacionesPanel() {
                               if (!debeMostrar) return null;
 
                               const valor = respuestas[pregunta.id];
+                              
+                              // Si está pendiente, mostrar como pendiente
+                              if (esPendiente(valor)) {
+                                return (
+                                  <div key={pregunta.id} className={styles.resumenCampo} style={{
+                                    background: '#fff3e0',
+                                    padding: '0.75rem',
+                                    borderRadius: '6px',
+                                    border: '1px solid #ff9800',
+                                    marginBottom: '0.5rem'
+                                  }}>
+                                    <span className={styles.resumenLabel} style={{ color: '#e65100', fontWeight: 600 }}>
+                                      {pregunta.label}: <span style={{ fontSize: '0.9rem' }}>⏳ PENDIENTE</span>
+                                    </span>
+                                  </div>
+                                );
+                              }
 
                               // Manejar velas específicamente
                               if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
@@ -1557,7 +1627,9 @@ export default function CoordinacionesPanel() {
                             })}
                           </div>
                         );
-                      });
+                      })}
+                        </>
+                      );
                     })()
                   ) : (
                     <div className={styles.resumenSeccion}>
