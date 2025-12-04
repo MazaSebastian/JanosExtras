@@ -69,9 +69,15 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+1234567890
    - Este campo probablemente esté vacío
    - Ingresa: `https://janosdjs.com/api/whatsapp/status`
    - Asegúrate de que el dropdown **"Method"** esté en **"POST"**
+   - **IMPORTANTE**: Este webhook recibe actualizaciones de estado de mensajes enviados (queued, sent, delivered, read, failed)
 
 5. Haz clic en el botón azul **"Save"** (abajo de los campos)
 6. ✅ Deberías ver un mensaje de confirmación
+
+**Nota sobre mensajes enviados desde Twilio Console:**
+- Los mensajes enviados desde la consola de Twilio NO pasan por el webhook de "When a message comes in"
+- Solo pasan por el webhook de "Status callback URL" cuando cambia su estado
+- Para que aparezcan en el frontend, deben enviarse desde la aplicación o recibirse como respuesta del cliente
 
 **Nota importante:**
 - Estas URLs deben estar desplegadas en Vercel antes de configurarlas
