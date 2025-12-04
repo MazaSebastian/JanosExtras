@@ -53,26 +53,38 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+1234567890
 
 ## 🔧 Paso 5: Configurar Webhook URL
 
-**Opción A: Si estás usando WhatsApp Sandbox (desarrollo/pruebas):**
+**Para WhatsApp Sandbox (desarrollo/pruebas):**
 
 1. En Twilio Console, ve a **Develop** → **Messaging** → **Try it out** → **Send a WhatsApp message**
 2. O ve directamente a: [WhatsApp Sandbox](https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn)
-3. En la sección **"Sandbox Configuration"** o **"Configuration"**, busca:
-   - **"When a message comes in"** o **"A MESSAGE COMES IN"**
-   - **"Status callback URL"** o **"STATUS CALLBACK URL"**
-4. Configura las URLs:
-   - **"When a message comes in"**: `https://janosdjs.com/api/whatsapp/webhook`
-   - **"Status callback URL"**: `https://janosdjs.com/api/whatsapp/status`
-5. Haz clic en **"Save"** o **"Update"**
+3. Haz clic en la pestaña **"Sandbox settings"** (arriba, junto a "Sandbox")
+4. En la sección **"Sandbox Configuration"**, verás dos campos:
+   
+   **a) "When a message comes in":**
+   - Reemplaza la URL que está ahí (probablemente algo como `https://xxx.twil.io/demo-reply`)
+   - Ingresa: `https://janosdjs.com/api/whatsapp/webhook`
+   - Asegúrate de que el dropdown **"Method"** esté en **"POST"** (debería estar así por defecto)
+   
+   **b) "Status callback URL":**
+   - Este campo probablemente esté vacío
+   - Ingresa: `https://janosdjs.com/api/whatsapp/status`
+   - Asegúrate de que el dropdown **"Method"** esté en **"POST"**
 
-**Opción B: Si tienes WhatsApp Business verificado (producción):**
+5. Haz clic en el botón azul **"Save"** (abajo de los campos)
+6. ✅ Deberías ver un mensaje de confirmación
+
+**Nota importante:**
+- Estas URLs deben estar desplegadas en Vercel antes de configurarlas
+- Si aún no has creado los endpoints, puedes dejarlas vacías temporalmente y configurarlas después
+- El campo "When a message comes in" es obligatorio para recibir mensajes
+- El campo "Status callback URL" es opcional pero recomendado para saber el estado de los mensajes enviados
+
+**Para WhatsApp Business (producción - cuando tengas tu número verificado):**
 
 1. En Twilio Console, ve a **Develop** → **Messaging** → **Settings**
 2. Busca la sección **"WhatsApp Business"** o **"WhatsApp"**
-3. Si no aparece, puede que necesites verificar tu número de WhatsApp Business primero
-4. Configura los webhooks de la misma manera que en la Opción A
-
-**Nota**: Si no encuentras la opción de webhooks en Settings, es porque WhatsApp Sandbox se configura desde "Try it out", no desde Settings.
+3. Si no aparece, necesitas verificar tu número de WhatsApp Business primero
+4. Configura los webhooks de la misma manera que en Sandbox
 
 ## 🔧 Paso 6: Ejecutar Migraciones SQL en Supabase
 
