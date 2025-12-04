@@ -168,43 +168,74 @@ Si la aplicación está en modo **"Testing"**, necesitas agregar tu cuenta de Go
 8. Haz clic en **"ADD"**
 9. Espera unos segundos y vuelve a intentar conectar Google Calendar
 
-**Método B: Si no encuentras "OAuth consent screen" en el menú**
+**Método B: Si no encuentras "OAuth consent screen" en el menú o la URL directa no funciona**
 
-1. Ve directamente a esta URL (reemplaza `TU_PROJECT_ID` con el ID de tu proyecto):
+Si la URL directa no funciona, intenta estos pasos:
+
+1. **Desde el menú principal de Google Cloud Console** (no desde "Google Auth Platform"):
+   - Haz clic en el menú hamburguesa (☰) en la parte superior izquierda
+   - Busca **"APIs & Services"** en el menú principal
+   - Haz clic en **"APIs & Services"**
+   - Luego busca **"OAuth consent screen"** en el submenú
+
+2. **O intenta esta URL alternativa** (interfaz clásica):
    ```
-   https://console.cloud.google.com/apis/credentials/consent?project=TU_PROJECT_ID
-   ```
-   
-   O usa esta URL genérica y selecciona tu proyecto:
-   ```
-   https://console.cloud.google.com/apis/credentials/consent
+   https://console.cloud.google.com/apis/credentials/consent?project=janos-djs
    ```
 
-2. En esa página, scroll hacia abajo hasta **"Test users"**
-3. Haz clic en **"+ ADD USERS"**
-4. Agrega tu email y haz clic en **"ADD"**
+3. **Si aún no aparece, busca en "Settings" dentro de Google Auth Platform**:
+   - En el menú lateral izquierdo, haz clic en **"Settings"**
+   - Busca una sección relacionada con "Testing" o "Test users"
 
-**Nota**: Si estás en la nueva interfaz de "Google Auth Platform", los Test Users están en la interfaz clásica de "OAuth consent screen". Puedes acceder desde el menú principal de Google Cloud Console → **APIs & Services** → **OAuth consent screen**.
+**Método C: Si NADA de lo anterior funciona - Publicar la aplicación directamente**
+
+Si no puedes encontrar "Test users" en ninguna parte, puedes intentar **publicar la aplicación directamente**:
+
+1. Ve a: `https://console.cloud.google.com/apis/credentials/consent?project=janos-djs`
+2. O desde el menú: **APIs & Services** → **OAuth consent screen**
+3. En la parte superior de la página, busca un botón que diga **"PUBLISH APP"** o **"Publish"**
+4. Haz clic en ese botón
+5. Confirma la acción
+
+**⚠️ IMPORTANTE**: Publicar la aplicación puede requerir verificación de Google, pero a veces funciona inmediatamente para aplicaciones internas.
 
 **Nota**: Si agregas más usuarios que necesiten usar la app, agrégalos también aquí.
 
-### Opción 2: Publicar la Aplicación (Para uso en producción)
+### Opción 2: Publicar la Aplicación (Solución alternativa si no encuentras Test Users)
 
-Si quieres que cualquier usuario pueda usar la aplicación sin agregarlos manualmente:
+Si no puedes encontrar "Test users" en ninguna parte, puedes intentar **publicar la aplicación directamente**:
 
-1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Selecciona tu proyecto
-3. Ve a **APIs & Services** → **OAuth consent screen**
-4. En la parte superior, verás el estado actual (probablemente "Testing")
-5. Haz clic en **"PUBLISH APP"** (Publicar aplicación)
-6. Confirma la acción
+**Método A: Desde la interfaz clásica**
 
-**⚠️ IMPORTANTE**: Para publicar la aplicación, Google puede requerir:
-- Verificación del dominio `janosdjs.com`
-- Información adicional sobre la aplicación
-- Revisión de Google (puede tomar varios días)
+1. Ve a esta URL:
+   ```
+   https://console.cloud.google.com/apis/credentials/consent?project=janos-djs
+   ```
 
-**Para uso interno/privado**, es mejor usar la **Opción 1** (usuarios de prueba).
+2. En la parte superior de la página, busca:
+   - Un banner que diga **"Your app is currently in testing mode"**
+   - O un botón que diga **"PUBLISH APP"** o **"Publish"**
+
+3. Haz clic en **"PUBLISH APP"** o **"Publish"**
+
+4. Confirma la acción
+
+**Método B: Desde el menú principal**
+
+1. En Google Cloud Console, haz clic en el menú hamburguesa (☰)
+2. Ve a **APIs & Services** → **OAuth consent screen**
+3. Busca el botón **"PUBLISH APP"** en la parte superior
+4. Haz clic y confirma
+
+**⚠️ IMPORTANTE**: 
+- Publicar la aplicación puede requerir verificación de Google
+- Para aplicaciones internas/privadas, a veces funciona inmediatamente
+- Si Google requiere verificación, puede tomar varios días
+- Si publicas la app, cualquier usuario podrá acceder (no solo usuarios de prueba)
+
+**Si publicar no funciona o requiere verificación**, entonces necesitamos encontrar "Test users". En ese caso, intenta:
+- Revisar en **"Settings"** dentro de "Google Auth Platform"
+- O contactar a Google Cloud Support
 
 ### Verificar el Estado Actual
 
