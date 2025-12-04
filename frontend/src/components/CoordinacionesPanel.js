@@ -50,6 +50,9 @@ export default function CoordinacionesPanel() {
   const [showAgendarVideollamada, setShowAgendarVideollamada] = useState(false);
   const [coordinacionParaVideollamada, setCoordinacionParaVideollamada] = useState(null);
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
+  const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
+  const [tooltipData, setTooltipData] = useState({ show: false, items: [], x: 0, y: 0 });
+  const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
 
   // El componente GoogleCalendarConnect manejará la verificación del estado
   // No necesitamos verificarlo aquí, solo mostramos el componente si hay user
@@ -479,6 +482,85 @@ export default function CoordinacionesPanel() {
     return colors[estado] || '#999';
   };
 
+  // Constante para identificar respuestas pendientes
+  const VALOR_PENDIENTE = '__PENDIENTE__';
+  const esPendiente = (valor) => {
+    return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
+  };
+
+  // Función para obtener items pendientes de una coordinación
+  const obtenerItemsPendientes = useCallback(async (coordinacion) => {
+    // Si ya está en cache, devolverlo
+    if (flujosCache[coordinacion.id]) {
+      return flujosCache[coordinacion.id];
+    }
+
+    // Solo verificar si la coordinación está completada
+    if (coordinacion.estado !== 'completado' && coordinacion.estado !== 'completada') {
+      return { items: [], count: 0 };
+    }
+
+    try {
+      // Cargar el flujo de la coordinación
+      const flujoResponse = await coordinacionesAPI.getFlujo(coordinacion.id);
+      const flujo = flujoResponse.data || flujoResponse;
+      
+      if (!flujo || !flujo.respuestas) {
+        return { items: [], count: 0 };
+      }
+
+      const tipoEvento = coordinacion.tipo_evento?.trim();
+      const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+      
+      let respuestas = flujo.respuestas;
+      
+      // Parsear respuestas si es string
+      if (typeof respuestas === 'string') {
+        try {
+          respuestas = JSON.parse(respuestas);
+        } catch (e) {
+          console.error('Error al parsear respuestas:', e);
+          respuestas = {};
+        }
+      }
+
+      const itemsPendientes = [];
+      pasos.forEach((paso) => {
+        paso.preguntas.forEach((pregunta) => {
+          const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+          const debeMostrar = !esCondicional || 
+            (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+          
+          if (!debeMostrar) return;
+          
+          const valor = respuestas[pregunta.id];
+          if (esPendiente(valor)) {
+            itemsPendientes.push({
+              paso: paso.titulo,
+              pregunta: pregunta.label
+            });
+          }
+        });
+      });
+
+      const result = {
+        items: itemsPendientes,
+        count: itemsPendientes.length
+      };
+
+      // Guardar en cache
+      setFlujosCache(prev => ({
+        ...prev,
+        [coordinacion.id]: result
+      }));
+
+      return result;
+    } catch (err) {
+      console.error('Error al obtener items pendientes:', err);
+      return { items: [], count: 0 };
+    }
+  }, [flujosCache]);
+
   const getPrioridadColor = (prioridad) => {
     const colors = {
       baja: '#9e9e9e',
@@ -752,12 +834,23 @@ export default function CoordinacionesPanel() {
                     </div>
                   </div>
                   <div className={styles.badges}>
-                    <span
-                      className={styles.badge}
-                      style={{ backgroundColor: getEstadoColor(item.estado) }}
-                    >
-                      {item.estado.replace('_', ' ').toUpperCase()}
-                    </span>
+                    <PendientesBadge 
+                      coordinacion={item}
+                      obtenerItemsPendientes={obtenerItemsPendientes}
+                      getEstadoColor={getEstadoColor}
+                      onShowTooltip={(items, e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setTooltipData({
+                          show: true,
+                          items: items,
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        });
+                      }}
+                      onHideTooltip={() => {
+                        setTooltipData({ show: false, items: [], x: 0, y: 0 });
+                      }}
+                    />
                     {item.prioridad && item.prioridad !== 'normal' && (
                       <span
                         className={styles.badge}
@@ -1658,7 +1751,107 @@ export default function CoordinacionesPanel() {
           </div>
         </div>
       )}
+
+      {/* Tooltip de items pendientes */}
+      {tooltipData.show && tooltipData.items.length > 0 && (
+        <div
+          className={styles.pendientesTooltip}
+          style={{
+            left: `${tooltipData.x}px`,
+            top: `${tooltipData.y}px`,
+            transform: 'translate(-50%, -100%)'
+          }}
+        >
+          <div className={styles.tooltipHeader}>
+            ⏳ Items Pendientes ({tooltipData.items.length})
+          </div>
+          <ul className={styles.tooltipList}>
+            {tooltipData.items.map((item, idx) => (
+              <li key={idx}>
+                <strong>{item.paso}:</strong> {item.pregunta}
+              </li>
+            ))}
+          </ul>
+          <div className={styles.tooltipArrow}>          </div>
+        </div>
+      )}
+
+      {/* Tooltip de items pendientes */}
+      {tooltipData.show && tooltipData.items.length > 0 && (
+        <div
+          className={styles.pendientesTooltip}
+          style={{
+            left: `${tooltipData.x}px`,
+            top: `${tooltipData.y}px`,
+            transform: 'translate(-50%, -100%)'
+          }}
+        >
+          <div className={styles.tooltipHeader}>
+            ⏳ Items Pendientes ({tooltipData.items.length})
+          </div>
+          <ul className={styles.tooltipList}>
+            {tooltipData.items.map((item, idx) => (
+              <li key={idx}>
+                <strong>{item.paso}:</strong> {item.pregunta}
+              </li>
+            ))}
+          </ul>
+          <div className={styles.tooltipArrow}></div>
+        </div>
+      )}
     </section>
+  );
+}
+
+
+// Componente para el badge con detección de pendientes
+function PendientesBadge({ coordinacion, obtenerItemsPendientes, getEstadoColor, onShowTooltip, onHideTooltip }) {
+  const [pendientesData, setPendientesData] = useState({ items: [], count: 0, loading: false });
+
+  useEffect(() => {
+    // Solo cargar si está completada
+    if (coordinacion.estado === 'completado' || coordinacion.estado === 'completada') {
+      setPendientesData(prev => ({ ...prev, loading: true }));
+      obtenerItemsPendientes(coordinacion).then(data => {
+        setPendientesData({ items: data.items, count: data.count, loading: false });
+      });
+    }
+  }, [coordinacion.id, coordinacion.estado, obtenerItemsPendientes]);
+
+  const handleMouseEnter = (e) => {
+    if (pendientesData.count > 0) {
+      onShowTooltip(pendientesData.items, e);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    onHideTooltip();
+  };
+
+  return (
+    <span
+      className={styles.badge}
+      style={{ 
+        backgroundColor: getEstadoColor(coordinacion.estado),
+        position: 'relative'
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {coordinacion.estado.replace('_', ' ').toUpperCase()}
+      {pendientesData.count > 0 && (
+        <span
+          style={{
+            marginLeft: '0.5rem',
+            fontSize: '0.85em',
+            fontWeight: 700
+          }}
+          title={`${pendientesData.count} item(s) pendiente(s)`}
+        >
+          ⚠️ {pendientesData.count}
+        </span>
+      )}
+    </span>
   );
 }
 
