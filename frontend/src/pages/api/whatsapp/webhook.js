@@ -42,37 +42,73 @@ export default async function handler(req, res) {
     }
 
     // Limpiar el número (quitar "whatsapp:" si está presente)
-    const fromNumber = From.replace('whatsapp:', '');
-    const toNumber = To.replace('whatsapp:', '');
+    const fromNumber = From.replace('whatsapp:', '').replace(/^\+/, ''); // Quitar whatsapp: y +
+    const toNumber = To.replace('whatsapp:', '').replace(/^\+/, '');
+
+    console.log('🔍 Buscando coordinación para número:', {
+      fromNumber,
+      toNumber,
+      fromOriginal: From,
+      toOriginal: To
+    });
 
     // Buscar coordinación por número de teléfono
     // El formato puede variar, intentar diferentes formatos
     const coordinaciones = await Coordinacion.findAll({});
     let coordinacion = null;
 
+    // Función para normalizar números para comparación
+    const normalizePhone = (phone) => {
+      if (!phone) return '';
+      // Quitar espacios, guiones, paréntesis, y el prefijo whatsapp:
+      let normalized = phone.toString().replace(/[\s\-\(\)]/g, '').replace('whatsapp:', '').replace(/^\+/, '');
+      // Si empieza con 0, quitarlo
+      if (normalized.startsWith('0')) {
+        normalized = normalized.substring(1);
+      }
+      // Si no empieza con 54 (Argentina), agregarlo
+      if (!normalized.startsWith('54') && normalized.length > 0) {
+        normalized = '54' + normalized;
+      }
+      return normalized;
+    };
+
+    const normalizedFrom = normalizePhone(fromNumber);
+
     // Buscar coordinación que coincida con el número
     for (const coord of coordinaciones) {
       if (!coord.telefono) continue;
       
-      // Limpiar y normalizar números para comparar
-      const coordPhone = coord.telefono.replace(/[\s\-\(\)]/g, '');
-      const fromPhone = fromNumber.replace(/[\s\-\(\)]/g, '');
+      const normalizedCoord = normalizePhone(coord.telefono);
       
-      // Comparar sin código de país o con código
-      if (coordPhone === fromPhone || 
-          coordPhone === fromPhone.substring(2) || 
-          coordPhone === `54${fromPhone.substring(2)}` ||
-          `54${coordPhone}` === fromPhone) {
+      console.log('🔍 Comparando:', {
+        coordId: coord.id,
+        coordPhone: coord.telefono,
+        normalizedCoord,
+        normalizedFrom,
+        match: normalizedCoord === normalizedFrom
+      });
+      
+      // Comparar números normalizados
+      if (normalizedCoord === normalizedFrom) {
         coordinacion = coord;
+        console.log('✅ Coordinación encontrada:', coord.id);
         break;
       }
     }
 
-    // Si no encontramos coordinación, crear una conversación genérica
-    // O podríamos devolver un error, dependiendo del caso de uso
+    // Si no encontramos coordinación, aún así guardar el mensaje
+    // para que aparezca en el panel (con coordinacion_id null)
     if (!coordinacion) {
-      console.warn('⚠️ No se encontró coordinación para el número:', fromNumber);
-      // Por ahora, responder con un mensaje genérico
+      console.warn('⚠️ No se encontró coordinación para el número:', {
+        fromNumber,
+        normalizedFrom,
+        totalCoordinaciones: coordinaciones.length
+      });
+      
+      // Crear conversación sin coordinación (coordinacion_id será null)
+      // Necesitamos modificar el modelo para permitir esto, o crear una coordinación temporal
+      // Por ahora, responder y no guardar
       const twiml = new twilio.twiml.MessagingResponse();
       twiml.message('Hola! No encontramos una coordinación asociada a este número. Por favor, contacta con tu DJ directamente.');
       res.type('text/xml');
@@ -80,9 +116,11 @@ export default async function handler(req, res) {
     }
 
     // Buscar o crear conversación
+    // Guardar número sin el prefijo + para consistencia
+    const phoneToSave = fromNumber.replace(/^\+/, '');
     const conversacion = await WhatsAppConversacion.findOrCreate(
       coordinacion.id,
-      fromNumber,
+      phoneToSave,
       ProfileName || null
     );
 
@@ -92,8 +130,8 @@ export default async function handler(req, res) {
       conversacionId: conversacion.id,
       coordinacionId: coordinacion.id,
       twilioMessageSid: MessageSid,
-      fromNumber: fromNumber,
-      toNumber: toNumber,
+      fromNumber: phoneToSave, // Usar número normalizado sin +
+      toNumber: toNumber.replace(/^\+/, ''),
       body: Body,
       direction: 'inbound',
       status: 'delivered',
@@ -107,10 +145,12 @@ export default async function handler(req, res) {
       true // Es inbound
     );
 
-    console.log('✅ Mensaje guardado:', {
+    console.log('✅ Mensaje guardado exitosamente:', {
       mensajeId: mensaje.id,
       coordinacionId: coordinacion.id,
-      conversacionId: conversacion.id
+      conversacionId: conversacion.id,
+      fromNumber: phoneToSave,
+      bodyPreview: Body.substring(0, 50)
     });
 
     // Responder a Twilio con TwiML (opcional)

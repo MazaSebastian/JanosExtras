@@ -107,23 +107,42 @@ export default async function handler(req, res) {
 
     // Guardar en base de datos si hay coordinación
     if (coordinacion) {
+      // Normalizar número para guardar (sin + y sin whatsapp:)
+      const phoneToSave = phoneNumber.replace(/^\+/, '').replace('whatsapp:', '');
+      
+      console.log('💾 Guardando mensaje en BD:', {
+        coordinacionId: coordinacion.id,
+        phoneToSave,
+        messageLength: message.length
+      });
+
       // Buscar o crear conversación
       const conversacion = await WhatsAppConversacion.findOrCreate(
         coordinacion.id,
-        phoneNumber.replace(/^\+/, ''), // Guardar sin el +
+        phoneToSave,
         null
       );
 
+      console.log('✅ Conversación encontrada/creada:', {
+        conversacionId: conversacion.id,
+        phoneNumber: conversacion.phone_number
+      });
+
       // Guardar mensaje enviado
-      await WhatsAppMensaje.create({
+      const mensajeGuardado = await WhatsAppMensaje.create({
         conversacionId: conversacion.id,
         coordinacionId: coordinacion.id,
         twilioMessageSid: twilioMessage.sid,
-        fromNumber: whatsappNumber.replace('whatsapp:', ''),
-        toNumber: whatsappToNumber.replace('whatsapp:', ''),
+        fromNumber: whatsappNumber.replace('whatsapp:', '').replace(/^\+/, ''),
+        toNumber: whatsappToNumber.replace('whatsapp:', '').replace(/^\+/, ''),
         body: message,
         direction: 'outbound',
         status: twilioMessage.status || 'sent'
+      });
+
+      console.log('✅ Mensaje guardado en BD:', {
+        mensajeId: mensajeGuardado.id,
+        conversacionId: conversacion.id
       });
 
       // Actualizar última actividad
@@ -132,6 +151,8 @@ export default async function handler(req, res) {
         message.substring(0, 100),
         false // Es outbound
       );
+    } else {
+      console.warn('⚠️ No se guardó mensaje: coordinación no encontrada');
     }
 
     res.status(200).json({
