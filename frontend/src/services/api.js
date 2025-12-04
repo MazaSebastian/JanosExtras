@@ -177,6 +177,13 @@ export const checkInTecnicoAPI = {
   getResumen: (params = {}) => api.get('/check-in-tecnico/resumen', { params }),
 };
 
+// WhatsApp API
+export const whatsappAPI = {
+  send: (data) => api.post('/whatsapp/send', data),
+  getConversations: (params = {}) => api.get('/whatsapp/conversations', { params }),
+  getMessages: (phone, params = {}) => api.get(`/whatsapp/conversations/${phone}/messages`, { params }),
+  getUnreadCount: () => api.get('/whatsapp/unread-count'),
+};
 
 export default api;
 

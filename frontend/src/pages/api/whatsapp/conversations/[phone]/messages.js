@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { phone } = req.query;
+    const { phone } = req.query; // Next.js pasa el parámetro dinámico en req.query
     const { limit = 50, offset = 0 } = req.query;
 
     if (!phone) {
