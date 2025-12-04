@@ -159,9 +159,26 @@ export class GoogleCalendarClient {
       console.error('❌ Error al crear evento en Google Calendar:', {
         error: error.message,
         code: error.code,
-        details: error.response?.data
+        status: error.response?.status,
+        details: error.response?.data,
+        eventData: {
+          summary,
+          startDateTime,
+          endDateTime,
+          timeZone
+        }
       });
-      throw new Error(`Error al crear evento: ${error.message}`);
+      
+      // Proporcionar mensaje de error más específico
+      let errorMessage = `Error al crear evento: ${error.message}`;
+      if (error.response?.data?.error) {
+        const googleError = error.response.data.error;
+        errorMessage = `Error de Google Calendar: ${googleError.message || googleError}`;
+      } else if (error.code) {
+        errorMessage = `Error de Google Calendar (${error.code}): ${error.message}`;
+      }
+      
+      throw new Error(errorMessage);
     }
   }
 
