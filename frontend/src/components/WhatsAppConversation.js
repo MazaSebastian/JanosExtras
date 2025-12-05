@@ -16,6 +16,26 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const loadMessages = useCallback(async () => {
+    if (!conversation?.phone_number) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+      const { data } = await whatsappAPI.getMessages(conversation.phone_number);
+      setMessages(data.mensajes || []);
+    } catch (err) {
+      console.error('Error al cargar mensajes:', err);
+      setError('Error al cargar mensajes');
+    } finally {
+      setLoading(false);
+    }
+  }, [conversation?.phone_number]);
+
   useEffect(() => {
     if (conversation) {
       loadMessages();
@@ -36,26 +56,6 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const loadMessages = useCallback(async () => {
-    if (!conversation?.phone_number) return;
-    
-    try {
-      setLoading(true);
-      setError('');
-      const { data } = await whatsappAPI.getMessages(conversation.phone_number);
-      setMessages(data.mensajes || []);
-    } catch (err) {
-      console.error('Error al cargar mensajes:', err);
-      setError('Error al cargar mensajes');
-    } finally {
-      setLoading(false);
-    }
-  }, [conversation?.phone_number]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

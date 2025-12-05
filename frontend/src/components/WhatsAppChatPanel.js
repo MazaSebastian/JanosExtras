@@ -14,6 +14,22 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const loadConversations = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const { data } = await whatsappAPI.getConversations();
+      console.log('📋 Conversaciones cargadas:', data);
+      setConversations(data || []);
+    } catch (err) {
+      console.error('❌ Error al cargar conversaciones:', err);
+      console.error('Detalles del error:', err.response?.data || err.message);
+      setError('Error al cargar conversaciones');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       loadConversations();
@@ -40,22 +56,6 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
       }
     }
   }, [coordinacionId, conversations]);
-
-  const loadConversations = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const { data } = await whatsappAPI.getConversations();
-      console.log('📋 Conversaciones cargadas:', data);
-      setConversations(data || []);
-    } catch (err) {
-      console.error('❌ Error al cargar conversaciones:', err);
-      console.error('Detalles del error:', err.response?.data || err.message);
-      setError('Error al cargar conversaciones');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
