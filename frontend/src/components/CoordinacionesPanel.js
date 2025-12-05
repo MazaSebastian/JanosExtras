@@ -11,8 +11,6 @@ import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import AgendarVideollamadaModal from '@/components/AgendarVideollamadaModal';
 import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
-import WhatsAppFloatingButton from '@/components/WhatsAppFloatingButton';
-import WhatsAppChatPanel from '@/components/WhatsAppChatPanel';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
@@ -54,8 +52,6 @@ export default function CoordinacionesPanel() {
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
   const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
   const [tooltipData, setTooltipData] = useState({ show: false, items: [], x: 0, y: 0 });
-  const [whatsappPanelOpen, setWhatsappPanelOpen] = useState(false);
-  const [whatsappCoordinacionId, setWhatsappCoordinacionId] = useState(null);
 
   // El componente GoogleCalendarConnect manejará la verificación del estado
   // No necesitamos verificarlo aquí, solo mostramos el componente si hay user
@@ -420,9 +416,10 @@ export default function CoordinacionesPanel() {
       return;
     }
 
-    // Abrir panel de WhatsApp con esta coordinación
-    setWhatsappCoordinacionId(coordinacion.id);
-    setWhatsappPanelOpen(true);
+    // Abrir WhatsApp Web con el número
+    const phoneNumber = coordinacion.telefono.replace(/[\s\-\(\)]/g, '');
+    const whatsappUrl = `https://wa.me/${phoneNumber}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   // Cerrar menú al hacer clic fuera
@@ -1743,23 +1740,6 @@ export default function CoordinacionesPanel() {
         </div>
       )}
 
-      {/* Icono flotante de WhatsApp */}
-      <WhatsAppFloatingButton 
-        onOpen={() => {
-          setWhatsappCoordinacionId(null);
-          setWhatsappPanelOpen(true);
-        }}
-      />
-
-      {/* Panel de chat de WhatsApp */}
-      <WhatsAppChatPanel
-        isOpen={whatsappPanelOpen}
-        onClose={() => {
-          setWhatsappPanelOpen(false);
-          setWhatsappCoordinacionId(null);
-        }}
-        coordinacionId={whatsappCoordinacionId}
-      />
     </section>
   );
 }
