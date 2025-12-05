@@ -131,25 +131,19 @@ export default async function handler(req, res) {
       `;
       const existingConv = await db.query(findQuery, [phoneToSave]);
 
-      if (existingConv.rows.length > 0) {
-        // Hay conversación previa, usar el dj_id de esa conversación
+      if (existingConv.rows.length > 0 && existingConv.rows[0].dj_id) {
+        // Hay conversación previa con DJ asignado, usar ese DJ
         djIdParaGuardar = existingConv.rows[0].dj_id;
         conversacion = existingConv.rows[0];
         console.log('✅ Conversación sin coordinación encontrada, usando DJ:', djIdParaGuardar);
       } else {
-        // No hay conversación previa, crear una nueva sin dj_id
-        // Esto permitirá que TODOS los DJs vean la conversación
-        // El primer DJ que responda "reclamará" la conversación
-        console.log('📝 Creando nueva conversación sin coordinación ni DJ asignado');
-        
-        const insertQuery = `
-          INSERT INTO whatsapp_conversaciones (phone_number, contact_name, coordinacion_id, dj_id)
-          VALUES ($1, $2, NULL, NULL)
-          RETURNING *
-        `;
-        const newConv = await db.query(insertQuery, [phoneToSave, ProfileName || null]);
-        conversacion = newConv.rows[0];
-        console.log('✅ Conversación sin coordinación creada:', conversacion.id);
+        // No hay conversación previa con DJ asignado, no podemos determinar a qué DJ pertenece
+        // No guardamos el mensaje para mantener la privacidad (cada DJ solo ve sus conversaciones)
+        console.warn('⚠️ No se puede determinar DJ para mensaje sin coordinación ni conversación previa');
+        const twiml = new twilio.twiml.MessagingResponse();
+        twiml.message('Hola! No encontramos una coordinación asociada a este número. Por favor, crea una coordinación en el sistema o contacta directamente con tu DJ.');
+        res.type('text/xml');
+        return res.send(twiml.toString());
       }
     }
 
