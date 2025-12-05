@@ -19,7 +19,17 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
       setLoading(true);
       setError('');
       const { data } = await whatsappAPI.getConversations();
-      console.log('📋 Conversaciones cargadas:', data);
+      console.log('📋 Conversaciones cargadas:', {
+        total: data?.length || 0,
+        conversaciones: data?.map(c => ({
+          id: c.id,
+          phone_number: c.phone_number,
+          coordinacion_id: c.coordinacion_id,
+          unread_count: c.unread_count,
+          nombre_cliente: c.nombre_cliente,
+          coordinacion_titulo: c.coordinacion_titulo
+        })) || []
+      });
       setConversations(data || []);
     } catch (err) {
       console.error('❌ Error al cargar conversaciones:', err);
@@ -36,13 +46,13 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
     }
   }, [isOpen, loadConversations]);
 
-  // Actualizar conversaciones cada 10 segundos cuando el panel está abierto
+  // Actualizar conversaciones cada 5 segundos cuando el panel está abierto (más frecuente)
   useEffect(() => {
     if (!isOpen) return;
     
     const interval = setInterval(() => {
       loadConversations();
-    }, 10000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, [isOpen, loadConversations]);

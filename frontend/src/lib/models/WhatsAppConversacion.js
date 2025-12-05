@@ -152,7 +152,14 @@ export class WhatsAppConversacion {
    * Actualizar última actividad de una conversación
    */
   static async updateLastActivity(conversacionId, messagePreview, isInbound = false) {
-    const updateUnread = isInbound ? ', unread_count = unread_count + 1' : '';
+    const updateUnread = isInbound ? ', unread_count = COALESCE(unread_count, 0) + 1' : '';
+    
+    console.log('📝 Actualizando última actividad:', {
+      conversacionId,
+      isInbound,
+      willIncrementUnread: isInbound,
+      messagePreview: messagePreview?.substring(0, 50)
+    });
     
     const query = `
       UPDATE whatsapp_conversaciones
@@ -166,6 +173,13 @@ export class WhatsAppConversacion {
     `;
     
     const result = await db.query(query, [conversacionId, messagePreview]);
+    
+    console.log('✅ Última actividad actualizada:', {
+      conversacionId,
+      unreadCount: result.rows[0]?.unread_count,
+      lastMessageAt: result.rows[0]?.last_message_at
+    });
+    
     return result.rows[0];
   }
 

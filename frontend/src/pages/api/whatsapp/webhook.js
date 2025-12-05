@@ -149,6 +149,15 @@ export default async function handler(req, res) {
 
     // Guardar mensaje recibido
     const mediaUrl = NumMedia > 0 ? MediaUrl0 : null;
+    
+    console.log('💾 Guardando mensaje en BD:', {
+      conversacionId: conversacion.id,
+      coordinacionId: coordinacion?.id || null,
+      phoneNumber: phoneToSave,
+      messageLength: Body.length,
+      direction: 'inbound'
+    });
+    
     const mensaje = await WhatsAppMensaje.create({
       conversacionId: conversacion.id,
       coordinacionId: coordinacion?.id || null,
@@ -161,12 +170,24 @@ export default async function handler(req, res) {
       mediaUrl: mediaUrl
     });
 
-    // Actualizar última actividad de la conversación
-    await WhatsAppConversacion.updateLastActivity(
+    console.log('✅ Mensaje guardado en BD:', {
+      mensajeId: mensaje.id,
+      conversacionId: conversacion.id
+    });
+
+    // Actualizar última actividad de la conversación (esto incrementa unread_count)
+    console.log('📝 Actualizando última actividad e incrementando unread_count...');
+    const conversacionActualizada = await WhatsAppConversacion.updateLastActivity(
       conversacion.id,
       Body.substring(0, 100), // Preview de 100 caracteres
-      true // Es inbound
+      true // Es inbound - esto incrementa unread_count
     );
+    
+    console.log('✅ Conversación actualizada con nuevo mensaje:', {
+      conversacionId: conversacion.id,
+      unreadCount: conversacionActualizada?.unread_count,
+      lastMessageAt: conversacionActualizada?.last_message_at
+    });
 
     console.log('✅ Mensaje guardado exitosamente:', {
       mensajeId: mensaje.id,

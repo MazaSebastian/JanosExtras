@@ -12,10 +12,10 @@ export default function WhatsAppFloatingButton({ onOpen }) {
   useEffect(() => {
     loadUnreadCount();
     
-    // Actualizar contador cada 30 segundos
+    // Actualizar contador cada 10 segundos (más frecuente para detectar nuevos mensajes)
     const interval = setInterval(() => {
       loadUnreadCount();
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);

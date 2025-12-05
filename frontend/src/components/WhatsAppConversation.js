@@ -42,13 +42,13 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
     }
   }, [conversation?.id, loadMessages]);
 
-  // Actualizar mensajes cada 5 segundos cuando la conversación está abierta
+  // Actualizar mensajes cada 3 segundos cuando la conversación está abierta (más frecuente)
   useEffect(() => {
     if (!conversation) return;
     
     const interval = setInterval(() => {
       loadMessages();
-    }, 5000);
+    }, 3000);
     
     return () => clearInterval(interval);
   }, [conversation?.id, loadMessages]);
