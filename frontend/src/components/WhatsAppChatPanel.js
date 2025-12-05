@@ -66,6 +66,19 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
     loadConversations(); // Recargar para actualizar contadores
   };
 
+  // Exponer función para recargar desde componentes hijos
+  useEffect(() => {
+    if (selectedConversation) {
+      // Si hay una conversación seleccionada, recargar la lista periódicamente
+      // para detectar nuevas conversaciones
+      const interval = setInterval(() => {
+        loadConversations();
+      }, 15000); // Cada 15 segundos
+      
+      return () => clearInterval(interval);
+    }
+  }, [selectedConversation, loadConversations]);
+
   const filteredConversations = conversations.filter(conv => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();

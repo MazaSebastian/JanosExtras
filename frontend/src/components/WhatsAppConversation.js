@@ -82,14 +82,17 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
 
       console.log('📤 Enviando mensaje:', payload);
 
-      await whatsappAPI.send(payload);
+      const response = await whatsappAPI.send(payload);
+      
+      console.log('✅ Mensaje enviado exitosamente:', response.data);
 
       setMessageText('');
       
-      // Recargar mensajes después de un breve delay
+      // Recargar mensajes inmediatamente y luego después de un breve delay
+      await loadMessages();
       setTimeout(() => {
         loadMessages();
-      }, 1000);
+      }, 2000);
     } catch (err) {
       console.error('❌ Error al enviar mensaje:', err);
       setError(err.response?.data?.error || 'Error al enviar mensaje');

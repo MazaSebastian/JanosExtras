@@ -18,6 +18,11 @@ export default async function handler(req, res) {
   try {
     const { unread_only } = req.query;
     
+    console.log('📋 Obteniendo conversaciones para DJ:', {
+      djId: auth.user.id,
+      unreadOnly: unread_only === 'true'
+    });
+    
     let conversaciones;
     if (unread_only === 'true') {
       conversaciones = await WhatsAppConversacion.findUnreadByDjId(auth.user.id);
@@ -25,10 +30,27 @@ export default async function handler(req, res) {
       conversaciones = await WhatsAppConversacion.findByDjId(auth.user.id);
     }
 
+    console.log('✅ Conversaciones encontradas:', {
+      count: conversaciones.length,
+      conversaciones: conversaciones.map(c => ({
+        id: c.id,
+        coordinacion_id: c.coordinacion_id,
+        phone_number: c.phone_number,
+        nombre_cliente: c.nombre_cliente,
+        coordinacion_titulo: c.coordinacion_titulo,
+        last_message_at: c.last_message_at,
+        unread_count: c.unread_count
+      }))
+    });
+
     res.json(conversaciones);
   } catch (error) {
     console.error('❌ Error al obtener conversaciones:', error);
-    res.status(500).json({ error: 'Error al obtener conversaciones' });
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Error al obtener conversaciones',
+      details: error.message 
+    });
   }
 }
 

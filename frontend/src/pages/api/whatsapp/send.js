@@ -151,6 +151,12 @@ export default async function handler(req, res) {
         message.substring(0, 100),
         false // Es outbound
       );
+
+      console.log('✅ Conversación actualizada:', {
+        conversacionId: conversacion.id,
+        coordinacionId: coordinacion.id,
+        phoneNumber: phoneToSave
+      });
     } else {
       console.warn('⚠️ No se guardó mensaje: coordinación no encontrada');
     }
@@ -158,7 +164,8 @@ export default async function handler(req, res) {
     res.status(200).json({
       success: true,
       messageSid: twilioMessage.sid,
-      status: twilioMessage.status
+      status: twilioMessage.status,
+      conversacionId: coordinacion ? conversacion?.id : null
     });
   } catch (error) {
     console.error('❌ Error al enviar mensaje de WhatsApp:', error);
