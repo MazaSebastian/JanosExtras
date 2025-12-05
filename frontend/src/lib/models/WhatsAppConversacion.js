@@ -74,7 +74,7 @@ export class WhatsAppConversacion {
 
   /**
    * Obtener todas las conversaciones de un DJ
-   * Incluye conversaciones con coordinación Y sin coordinación (solo del DJ)
+   * Incluye conversaciones con coordinación, sin coordinación del DJ, Y sin DJ asignado (para que todos las vean)
    */
   static async findByDjId(djId) {
     const query = `
@@ -85,7 +85,9 @@ export class WhatsAppConversacion {
       FROM whatsapp_conversaciones wc
       LEFT JOIN coordinaciones c ON wc.coordinacion_id = c.id
       WHERE 
-        (c.dj_responsable_id = $1 OR (wc.coordinacion_id IS NULL AND wc.dj_id = $1))
+        (c.dj_responsable_id = $1 OR 
+         (wc.coordinacion_id IS NULL AND wc.dj_id = $1) OR
+         (wc.coordinacion_id IS NULL AND wc.dj_id IS NULL))
       ORDER BY wc.last_message_at DESC NULLS LAST, wc.updated_at DESC
     `;
     
@@ -95,7 +97,7 @@ export class WhatsAppConversacion {
 
   /**
    * Obtener conversaciones con mensajes no leídos
-   * Incluye conversaciones con coordinación Y sin coordinación (solo del DJ)
+   * Incluye conversaciones con coordinación, sin coordinación del DJ, Y sin DJ asignado
    */
   static async findUnreadByDjId(djId) {
     const query = `
@@ -106,7 +108,9 @@ export class WhatsAppConversacion {
       FROM whatsapp_conversaciones wc
       LEFT JOIN coordinaciones c ON wc.coordinacion_id = c.id
       WHERE 
-        (c.dj_responsable_id = $1 OR (wc.coordinacion_id IS NULL AND wc.dj_id = $1))
+        (c.dj_responsable_id = $1 OR 
+         (wc.coordinacion_id IS NULL AND wc.dj_id = $1) OR
+         (wc.coordinacion_id IS NULL AND wc.dj_id IS NULL))
         AND wc.unread_count > 0
       ORDER BY wc.last_message_at DESC
     `;
@@ -117,7 +121,7 @@ export class WhatsAppConversacion {
 
   /**
    * Obtener contador total de mensajes no leídos
-   * Incluye conversaciones con coordinación Y sin coordinación (solo del DJ)
+   * Incluye conversaciones con coordinación, sin coordinación del DJ, Y sin DJ asignado
    */
   static async getUnreadCount(djId) {
     try {
@@ -126,7 +130,9 @@ export class WhatsAppConversacion {
         FROM whatsapp_conversaciones wc
         LEFT JOIN coordinaciones c ON wc.coordinacion_id = c.id
         WHERE 
-          (c.dj_responsable_id = $1 OR (wc.coordinacion_id IS NULL AND wc.dj_id = $1))
+          (c.dj_responsable_id = $1 OR 
+           (wc.coordinacion_id IS NULL AND wc.dj_id = $1) OR
+           (wc.coordinacion_id IS NULL AND wc.dj_id IS NULL))
       `;
       
       console.log('🔍 Ejecutando query para contador de no leídos:', {

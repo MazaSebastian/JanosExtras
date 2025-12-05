@@ -5,7 +5,7 @@
 ALTER TABLE whatsapp_conversaciones 
   ALTER COLUMN coordinacion_id DROP NOT NULL;
 
--- 2. Agregar campo dj_id para asociar conversaciones sin coordinación a un DJ
+-- 2. Agregar campo dj_id para asociar conversaciones sin coordinación a un DJ (puede ser NULL)
 ALTER TABLE whatsapp_conversaciones 
   ADD COLUMN IF NOT EXISTS dj_id INTEGER REFERENCES djs(id) ON DELETE CASCADE;
 

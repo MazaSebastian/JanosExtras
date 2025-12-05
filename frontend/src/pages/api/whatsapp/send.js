@@ -3,6 +3,7 @@ import { authenticateToken } from '@/lib/auth.js';
 import { WhatsAppConversacion } from '@/lib/models/WhatsAppConversacion.js';
 import { WhatsAppMensaje } from '@/lib/models/WhatsAppMensaje.js';
 import { Coordinacion } from '@/lib/models/Coordinacion.js';
+import db from '@/lib/database-config.js';
 
 /**
  * Endpoint para enviar mensajes de WhatsApp
@@ -105,61 +106,102 @@ export default async function handler(req, res) {
       status: twilioMessage.status
     });
 
-    // Guardar en base de datos si hay coordinación
+    // Normalizar número para guardar (sin + y sin whatsapp:)
+    const phoneToSave = phoneNumber.replace(/^\+/, '').replace('whatsapp:', '');
+    
+    let conversacion;
+
     if (coordinacion) {
-      // Normalizar número para guardar (sin + y sin whatsapp:)
-      const phoneToSave = phoneNumber.replace(/^\+/, '').replace('whatsapp:', '');
-      
-      console.log('💾 Guardando mensaje en BD:', {
+      // Caso 1: Hay coordinación
+      console.log('💾 Guardando mensaje en BD con coordinación:', {
         coordinacionId: coordinacion.id,
         phoneToSave,
         messageLength: message.length
       });
 
       // Buscar o crear conversación
-      const conversacion = await WhatsAppConversacion.findOrCreate(
+      conversacion = await WhatsAppConversacion.findOrCreate(
         coordinacion.id,
         phoneToSave,
         null
       );
-
-      console.log('✅ Conversación encontrada/creada:', {
-        conversacionId: conversacion.id,
-        phoneNumber: conversacion.phone_number
-      });
-
-      // Guardar mensaje enviado
-      const mensajeGuardado = await WhatsAppMensaje.create({
-        conversacionId: conversacion.id,
-        coordinacionId: coordinacion.id,
-        twilioMessageSid: twilioMessage.sid,
-        fromNumber: whatsappNumber.replace('whatsapp:', '').replace(/^\+/, ''),
-        toNumber: whatsappToNumber.replace('whatsapp:', '').replace(/^\+/, ''),
-        body: message,
-        direction: 'outbound',
-        status: twilioMessage.status || 'sent'
-      });
-
-      console.log('✅ Mensaje guardado en BD:', {
-        mensajeId: mensajeGuardado.id,
-        conversacionId: conversacion.id
-      });
-
-      // Actualizar última actividad
-      await WhatsAppConversacion.updateLastActivity(
-        conversacion.id,
-        message.substring(0, 100),
-        false // Es outbound
-      );
-
-      console.log('✅ Conversación actualizada:', {
-        conversacionId: conversacion.id,
-        coordinacionId: coordinacion.id,
-        phoneNumber: phoneToSave
-      });
     } else {
-      console.warn('⚠️ No se guardó mensaje: coordinación no encontrada');
+      // Caso 2: No hay coordinación, buscar conversación existente por número
+      console.log('💾 Guardando mensaje sin coordinación, buscando conversación por número:', phoneToSave);
+      
+      const findQuery = `
+        SELECT * FROM whatsapp_conversaciones
+        WHERE phone_number = $1
+        ORDER BY last_message_at DESC NULLS LAST, created_at DESC
+        LIMIT 1
+      `;
+      const existingConv = await db.query(findQuery, [phoneToSave]);
+
+      if (existingConv.rows.length > 0) {
+        conversacion = existingConv.rows[0];
+        
+        // Si la conversación no tiene dj_id, "reclamarla" asignándola al DJ que responde
+        if (!conversacion.dj_id) {
+          console.log('🔐 Reclamando conversación sin DJ asignado para DJ:', auth.user.id);
+          const updateQuery = `
+            UPDATE whatsapp_conversaciones
+            SET dj_id = $1, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2
+            RETURNING *
+          `;
+          const updated = await db.query(updateQuery, [auth.user.id, conversacion.id]);
+          conversacion = updated.rows[0];
+        }
+      } else {
+        // No hay conversación previa, crear una nueva asignada al DJ que envía
+        console.log('📝 Creando nueva conversación sin coordinación para DJ:', auth.user.id);
+        const insertQuery = `
+          INSERT INTO whatsapp_conversaciones (phone_number, contact_name, coordinacion_id, dj_id)
+          VALUES ($1, $2, NULL, $3)
+          RETURNING *
+        `;
+        const newConv = await db.query(insertQuery, [phoneToSave, null, auth.user.id]);
+        conversacion = newConv.rows[0];
+      }
     }
+
+    console.log('✅ Conversación encontrada/creada:', {
+      conversacionId: conversacion.id,
+      phoneNumber: conversacion.phone_number,
+      coordinacionId: conversacion.coordinacion_id,
+      djId: conversacion.dj_id
+    });
+
+    // Guardar mensaje enviado
+    const mensajeGuardado = await WhatsAppMensaje.create({
+      conversacionId: conversacion.id,
+      coordinacionId: coordinacion?.id || null,
+      twilioMessageSid: twilioMessage.sid,
+      fromNumber: whatsappNumber.replace('whatsapp:', '').replace(/^\+/, ''),
+      toNumber: whatsappToNumber.replace('whatsapp:', '').replace(/^\+/, ''),
+      body: message,
+      direction: 'outbound',
+      status: twilioMessage.status || 'sent'
+    });
+
+    console.log('✅ Mensaje guardado en BD:', {
+      mensajeId: mensajeGuardado.id,
+      conversacionId: conversacion.id
+    });
+
+    // Actualizar última actividad
+    await WhatsAppConversacion.updateLastActivity(
+      conversacion.id,
+      message.substring(0, 100),
+      false // Es outbound
+    );
+
+    console.log('✅ Conversación actualizada:', {
+      conversacionId: conversacion.id,
+      coordinacionId: coordinacion?.id || null,
+      djId: conversacion.dj_id,
+      phoneNumber: phoneToSave
+    });
 
     res.status(200).json({
       success: true,
