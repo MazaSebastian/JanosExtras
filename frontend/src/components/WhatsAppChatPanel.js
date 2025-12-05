@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { whatsappAPI } from '@/services/api';
 import WhatsAppConversation from './WhatsAppConversation';
 import Loading from './Loading';
@@ -18,7 +18,18 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
     if (isOpen) {
       loadConversations();
     }
-  }, [isOpen]);
+  }, [isOpen, loadConversations]);
+
+  // Actualizar conversaciones cada 10 segundos cuando el panel está abierto
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const interval = setInterval(() => {
+      loadConversations();
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [isOpen, loadConversations]);
 
   // Si se pasa coordinacionId, abrir esa conversación automáticamente
   useEffect(() => {
@@ -30,7 +41,7 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
     }
   }, [coordinacionId, conversations]);
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -44,7 +55,7 @@ export default function WhatsAppChatPanel({ isOpen, onClose, coordinacionId = nu
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);

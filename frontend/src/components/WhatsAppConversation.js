@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { whatsappAPI } from '@/services/api';
 import WhatsAppMessage from './WhatsAppMessage';
 import Loading from './Loading';
@@ -20,7 +20,18 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
     if (conversation) {
       loadMessages();
     }
-  }, [conversation?.id]);
+  }, [conversation?.id, loadMessages]);
+
+  // Actualizar mensajes cada 5 segundos cuando la conversación está abierta
+  useEffect(() => {
+    if (!conversation) return;
+    
+    const interval = setInterval(() => {
+      loadMessages();
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [conversation?.id, loadMessages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -30,7 +41,9 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
+    if (!conversation?.phone_number) return;
+    
     try {
       setLoading(true);
       setError('');
@@ -42,7 +55,7 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [conversation?.phone_number]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -53,10 +66,23 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
       setSending(true);
       setError('');
 
-      await whatsappAPI.send({
-        coordinacion_id: conversation.coordinacion_id,
+      const payload = {
         message: messageText.trim()
-      });
+      };
+
+      // Incluir coordinacion_id si está disponible
+      if (conversation.coordinacion_id) {
+        payload.coordinacion_id = conversation.coordinacion_id;
+      }
+
+      // Incluir phone_number si está disponible (para casos sin coordinación)
+      if (conversation.phone_number) {
+        payload.to_phone_number = conversation.phone_number;
+      }
+
+      console.log('📤 Enviando mensaje:', payload);
+
+      await whatsappAPI.send(payload);
 
       setMessageText('');
       
@@ -65,7 +91,7 @@ export default function WhatsAppConversation({ conversation, onBack, onClose }) 
         loadMessages();
       }, 1000);
     } catch (err) {
-      console.error('Error al enviar mensaje:', err);
+      console.error('❌ Error al enviar mensaje:', err);
       setError(err.response?.data?.error || 'Error al enviar mensaje');
     } finally {
       setSending(false);

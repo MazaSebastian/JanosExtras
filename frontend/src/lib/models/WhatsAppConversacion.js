@@ -6,19 +6,72 @@ import db from '../database-config.js';
 export class WhatsAppConversacion {
   /**
    * Buscar o crear una conversación
+   * @param {number|null} coordinacionId - ID de coordinación (puede ser null)
+   * @param {string} phoneNumber - Número de teléfono
+   * @param {string|null} contactName - Nombre del contacto
+   * @param {number|null} djId - ID del DJ (requerido si coordinacionId es null)
    */
-  static async findOrCreate(coordinacionId, phoneNumber, contactName = null) {
-    const query = `
+  static async findOrCreate(coordinacionId, phoneNumber, contactName = null, djId = null) {
+    // Si no hay coordinación, necesitamos djId para asociar la conversación
+    if (!coordinacionId && !djId) {
+      throw new Error('Se requiere coordinacionId o djId para crear una conversación');
+    }
+
+    // Primero intentar buscar conversación existente
+    let findQuery;
+    let findParams;
+    
+    if (coordinacionId) {
+      findQuery = `
+        SELECT * FROM whatsapp_conversaciones
+        WHERE coordinacion_id = $1 AND phone_number = $2
+      `;
+      findParams = [coordinacionId, phoneNumber];
+    } else {
+      // Buscar por phone_number y djId (a través de coordinaciones)
+      findQuery = `
+        SELECT wc.* FROM whatsapp_conversaciones wc
+        INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
+        WHERE wc.phone_number = $1 AND c.dj_responsable_id = $2
+        LIMIT 1
+      `;
+      findParams = [phoneNumber, djId];
+    }
+
+    const findResult = await db.query(findQuery, findParams);
+    
+    if (findResult.rows.length > 0) {
+      // Actualizar nombre de contacto si se proporciona
+      if (contactName) {
+        const updateQuery = `
+          UPDATE whatsapp_conversaciones
+          SET contact_name = COALESCE($1, contact_name),
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $2
+          RETURNING *
+        `;
+        const updateResult = await db.query(updateQuery, [contactName, findResult.rows[0].id]);
+        return updateResult.rows[0];
+      }
+      return findResult.rows[0];
+    }
+
+    // Si no existe, crear nueva conversación
+    // Si no hay coordinación, necesitamos crear una conversación "huérfana"
+    // Para esto, necesitamos modificar la tabla para permitir coordinacion_id NULL
+    // Por ahora, si no hay coordinación, no podemos crear la conversación
+    // Esto se manejará en el webhook
+    if (!coordinacionId) {
+      throw new Error('No se puede crear conversación sin coordinación. Use coordinacionId o djId.');
+    }
+
+    const insertQuery = `
       INSERT INTO whatsapp_conversaciones (coordinacion_id, phone_number, contact_name)
       VALUES ($1, $2, $3)
-      ON CONFLICT (coordinacion_id, phone_number)
-      DO UPDATE SET 
-        contact_name = COALESCE(EXCLUDED.contact_name, whatsapp_conversaciones.contact_name),
-        updated_at = CURRENT_TIMESTAMP
       RETURNING *
     `;
     
-    const result = await db.query(query, [coordinacionId, phoneNumber, contactName]);
+    const result = await db.query(insertQuery, [coordinacionId, phoneNumber, contactName]);
     return result.rows[0];
   }
 

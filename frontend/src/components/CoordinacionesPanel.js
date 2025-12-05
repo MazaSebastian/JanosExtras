@@ -1739,30 +1739,6 @@ export default function CoordinacionesPanel() {
               </li>
             ))}
           </ul>
-          <div className={styles.tooltipArrow}>          </div>
-        </div>
-      )}
-
-      {/* Tooltip de items pendientes */}
-      {tooltipData.show && tooltipData.items.length > 0 && (
-        <div
-          className={styles.pendientesTooltip}
-          style={{
-            left: `${tooltipData.x}px`,
-            top: `${tooltipData.y}px`,
-            transform: 'translate(-50%, -100%)'
-          }}
-        >
-          <div className={styles.tooltipHeader}>
-            ⏳ Items Pendientes ({tooltipData.items.length})
-          </div>
-          <ul className={styles.tooltipList}>
-            {tooltipData.items.map((item, idx) => (
-              <li key={idx}>
-                <strong>{item.paso}:</strong> {item.pregunta}
-              </li>
-            ))}
-          </ul>
           <div className={styles.tooltipArrow}></div>
         </div>
       )}
