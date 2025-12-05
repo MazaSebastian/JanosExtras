@@ -22,10 +22,25 @@ export default function WhatsAppFloatingButton({ onOpen }) {
 
   const loadUnreadCount = async () => {
     try {
-      const { data } = await whatsappAPI.getUnreadCount();
-      setUnreadCount(data.count || 0);
+      // Agregar timeout de 5 segundos para evitar que se cuelgue
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      );
+
+      const response = await Promise.race([
+        whatsappAPI.getUnreadCount(),
+        timeoutPromise
+      ]);
+
+      const { data } = response;
+      setUnreadCount(data?.count || 0);
     } catch (error) {
       console.error('Error al obtener contador de no leídos:', error);
+      // En caso de error, mantener el contador actual o poner 0
+      // No actualizar loading para que no se quede en estado de carga
+      if (error.message === 'Timeout') {
+        console.warn('⏱️ Timeout al obtener contador de no leídos');
+      }
     } finally {
       setLoading(false);
     }

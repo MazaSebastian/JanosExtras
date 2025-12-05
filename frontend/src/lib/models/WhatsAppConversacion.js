@@ -111,15 +111,31 @@ export class WhatsAppConversacion {
    * Obtener contador total de mensajes no leídos
    */
   static async getUnreadCount(djId) {
-    const query = `
-      SELECT SUM(wc.unread_count) as total
-      FROM whatsapp_conversaciones wc
-      INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
-      WHERE c.dj_responsable_id = $1
-    `;
-    
-    const result = await db.query(query, [djId]);
-    return parseInt(result.rows[0]?.total || 0, 10);
+    try {
+      const query = `
+        SELECT COALESCE(SUM(wc.unread_count), 0) as total
+        FROM whatsapp_conversaciones wc
+        INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
+        WHERE c.dj_responsable_id = $1
+      `;
+      
+      console.log('🔍 Ejecutando query para contador de no leídos:', {
+        djId,
+        query: query.substring(0, 100) + '...'
+      });
+
+      const result = await db.query(query, [djId]);
+      
+      const count = parseInt(result.rows[0]?.total || 0, 10);
+      
+      console.log('✅ Contador calculado:', count);
+      
+      return count;
+    } catch (error) {
+      console.error('❌ Error en getUnreadCount:', error);
+      // En caso de error, retornar 0 en lugar de lanzar excepción
+      return 0;
+    }
   }
 
   /**
