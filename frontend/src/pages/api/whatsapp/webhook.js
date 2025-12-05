@@ -2,6 +2,7 @@ import twilio from 'twilio';
 import { WhatsAppConversacion } from '@/lib/models/WhatsAppConversacion.js';
 import { WhatsAppMensaje } from '@/lib/models/WhatsAppMensaje.js';
 import { Coordinacion } from '@/lib/models/Coordinacion.js';
+import db from '@/lib/database-config.js';
 
 /**
  * Webhook para recibir mensajes de WhatsApp desde Twilio
@@ -97,40 +98,62 @@ export default async function handler(req, res) {
       }
     }
 
-    // Si no encontramos coordinación, aún así guardar el mensaje
-    // para que aparezca en el panel (con coordinacion_id null)
-    if (!coordinacion) {
+    // Guardar número sin el prefijo + para consistencia
+    const phoneToSave = fromNumber.replace(/^\+/, '');
+
+    let conversacion;
+    let djIdParaGuardar = null;
+
+    if (coordinacion) {
+      // Caso 1: Hay coordinación asociada
+      console.log('✅ Coordinación encontrada:', coordinacion.id);
+      djIdParaGuardar = coordinacion.dj_responsable_id;
+      
+      conversacion = await WhatsAppConversacion.findOrCreate(
+        coordinacion.id,
+        phoneToSave,
+        ProfileName || null
+      );
+    } else {
+      // Caso 2: No hay coordinación, buscar si hay conversación previa con este número
       console.warn('⚠️ No se encontró coordinación para el número:', {
         fromNumber,
         normalizedFrom,
         totalCoordinaciones: coordinaciones.length
       });
-      
-      // Crear conversación sin coordinación (coordinacion_id será null)
-      // Necesitamos modificar el modelo para permitir esto, o crear una coordinación temporal
-      // Por ahora, responder y no guardar
-      const twiml = new twilio.twiml.MessagingResponse();
-      twiml.message('Hola! No encontramos una coordinación asociada a este número. Por favor, contacta con tu DJ directamente.');
-      res.type('text/xml');
-      return res.send(twiml.toString());
-    }
 
-    // Buscar o crear conversación
-    // Guardar número sin el prefijo + para consistencia
-    const phoneToSave = fromNumber.replace(/^\+/, '');
-    const conversacion = await WhatsAppConversacion.findOrCreate(
-      coordinacion.id,
-      phoneToSave,
-      ProfileName || null
-    );
+      // Buscar conversación existente sin coordinación con este número
+      const findQuery = `
+        SELECT * FROM whatsapp_conversaciones
+        WHERE coordinacion_id IS NULL AND phone_number = $1
+        ORDER BY last_message_at DESC NULLS LAST, created_at DESC
+        LIMIT 1
+      `;
+      const existingConv = await db.query(findQuery, [phoneToSave]);
+
+      if (existingConv.rows.length > 0) {
+        // Hay conversación previa, usar el dj_id de esa conversación
+        djIdParaGuardar = existingConv.rows[0].dj_id;
+        conversacion = existingConv.rows[0];
+        console.log('✅ Conversación sin coordinación encontrada, usando DJ:', djIdParaGuardar);
+      } else {
+        // No hay conversación previa, no podemos determinar el DJ
+        // Por ahora, no guardamos el mensaje pero respondemos
+        console.warn('⚠️ No se puede determinar DJ para mensaje sin coordinación');
+        const twiml = new twilio.twiml.MessagingResponse();
+        twiml.message('Hola! No encontramos una coordinación asociada a este número. Por favor, contacta con tu DJ directamente o crea una coordinación primero.');
+        res.type('text/xml');
+        return res.send(twiml.toString());
+      }
+    }
 
     // Guardar mensaje recibido
     const mediaUrl = NumMedia > 0 ? MediaUrl0 : null;
     const mensaje = await WhatsAppMensaje.create({
       conversacionId: conversacion.id,
-      coordinacionId: coordinacion.id,
+      coordinacionId: coordinacion?.id || null,
       twilioMessageSid: MessageSid,
-      fromNumber: phoneToSave, // Usar número normalizado sin +
+      fromNumber: phoneToSave,
       toNumber: toNumber.replace(/^\+/, ''),
       body: Body,
       direction: 'inbound',
@@ -147,10 +170,11 @@ export default async function handler(req, res) {
 
     console.log('✅ Mensaje guardado exitosamente:', {
       mensajeId: mensaje.id,
-      coordinacionId: coordinacion.id,
+      coordinacionId: coordinacion?.id || null,
       conversacionId: conversacion.id,
       fromNumber: phoneToSave,
-      bodyPreview: Body.substring(0, 50)
+      bodyPreview: Body.substring(0, 50),
+      sinCoordinacion: !coordinacion
     });
 
     // Responder a Twilio con TwiML (opcional)

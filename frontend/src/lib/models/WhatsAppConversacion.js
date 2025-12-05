@@ -22,20 +22,19 @@ export class WhatsAppConversacion {
     let findParams;
     
     if (coordinacionId) {
+      // Buscar por coordinación y teléfono
       findQuery = `
         SELECT * FROM whatsapp_conversaciones
         WHERE coordinacion_id = $1 AND phone_number = $2
       `;
       findParams = [coordinacionId, phoneNumber];
     } else {
-      // Buscar por phone_number y djId (a través de coordinaciones)
+      // Buscar conversación sin coordinación por dj_id y teléfono
       findQuery = `
-        SELECT wc.* FROM whatsapp_conversaciones wc
-        INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
-        WHERE wc.phone_number = $1 AND c.dj_responsable_id = $2
-        LIMIT 1
+        SELECT * FROM whatsapp_conversaciones
+        WHERE coordinacion_id IS NULL AND dj_id = $1 AND phone_number = $2
       `;
-      findParams = [phoneNumber, djId];
+      findParams = [djId, phoneNumber];
     }
 
     const findResult = await db.query(findQuery, findParams);
@@ -57,33 +56,36 @@ export class WhatsAppConversacion {
     }
 
     // Si no existe, crear nueva conversación
-    // Si no hay coordinación, necesitamos crear una conversación "huérfana"
-    // Para esto, necesitamos modificar la tabla para permitir coordinacion_id NULL
-    // Por ahora, si no hay coordinación, no podemos crear la conversación
-    // Esto se manejará en el webhook
-    if (!coordinacionId) {
-      throw new Error('No se puede crear conversación sin coordinación. Use coordinacionId o djId.');
-    }
-
-    const insertQuery = `
-      INSERT INTO whatsapp_conversaciones (coordinacion_id, phone_number, contact_name)
-      VALUES ($1, $2, $3)
-      RETURNING *
-    `;
+    const insertQuery = coordinacionId
+      ? `INSERT INTO whatsapp_conversaciones (coordinacion_id, phone_number, contact_name)
+         VALUES ($1, $2, $3)
+         RETURNING *`
+      : `INSERT INTO whatsapp_conversaciones (dj_id, phone_number, contact_name, coordinacion_id)
+         VALUES ($1, $2, $3, NULL)
+         RETURNING *`;
     
-    const result = await db.query(insertQuery, [coordinacionId, phoneNumber, contactName]);
+    const insertParams = coordinacionId
+      ? [coordinacionId, phoneNumber, contactName]
+      : [djId, phoneNumber, contactName];
+    
+    const result = await db.query(insertQuery, insertParams);
     return result.rows[0];
   }
 
   /**
    * Obtener todas las conversaciones de un DJ
+   * Incluye conversaciones con coordinación Y sin coordinación (solo del DJ)
    */
   static async findByDjId(djId) {
     const query = `
-      SELECT wc.*, c.nombre_cliente, c.titulo as coordinacion_titulo
+      SELECT 
+        wc.*, 
+        c.nombre_cliente, 
+        c.titulo as coordinacion_titulo
       FROM whatsapp_conversaciones wc
-      INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
-      WHERE c.dj_responsable_id = $1
+      LEFT JOIN coordinaciones c ON wc.coordinacion_id = c.id
+      WHERE 
+        (c.dj_responsable_id = $1 OR (wc.coordinacion_id IS NULL AND wc.dj_id = $1))
       ORDER BY wc.last_message_at DESC NULLS LAST, wc.updated_at DESC
     `;
     
@@ -93,13 +95,19 @@ export class WhatsAppConversacion {
 
   /**
    * Obtener conversaciones con mensajes no leídos
+   * Incluye conversaciones con coordinación Y sin coordinación (solo del DJ)
    */
   static async findUnreadByDjId(djId) {
     const query = `
-      SELECT wc.*, c.nombre_cliente, c.titulo as coordinacion_titulo
+      SELECT 
+        wc.*, 
+        c.nombre_cliente, 
+        c.titulo as coordinacion_titulo
       FROM whatsapp_conversaciones wc
-      INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
-      WHERE c.dj_responsable_id = $1 AND wc.unread_count > 0
+      LEFT JOIN coordinaciones c ON wc.coordinacion_id = c.id
+      WHERE 
+        (c.dj_responsable_id = $1 OR (wc.coordinacion_id IS NULL AND wc.dj_id = $1))
+        AND wc.unread_count > 0
       ORDER BY wc.last_message_at DESC
     `;
     
@@ -109,14 +117,16 @@ export class WhatsAppConversacion {
 
   /**
    * Obtener contador total de mensajes no leídos
+   * Incluye conversaciones con coordinación Y sin coordinación (solo del DJ)
    */
   static async getUnreadCount(djId) {
     try {
       const query = `
         SELECT COALESCE(SUM(wc.unread_count), 0) as total
         FROM whatsapp_conversaciones wc
-        INNER JOIN coordinaciones c ON wc.coordinacion_id = c.id
-        WHERE c.dj_responsable_id = $1
+        LEFT JOIN coordinaciones c ON wc.coordinacion_id = c.id
+        WHERE 
+          (c.dj_responsable_id = $1 OR (wc.coordinacion_id IS NULL AND wc.dj_id = $1))
       `;
       
       console.log('🔍 Ejecutando query para contador de no leídos:', {
