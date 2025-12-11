@@ -130,7 +130,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       rows.push([
         'Eventos extras',
         summary?.eventos_extras ??
-          Math.max(0, (summary?.eventos_mes ?? events.length) - 8),
+        Math.max(0, (summary?.eventos_mes ?? events.length) - 8),
       ]);
 
       downloadCSV(
@@ -171,33 +171,35 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       setLoading(true);
       const response = isRangeActive
         ? await eventosAPI.getSummaryByRange(
-            activeRange.startDate,
-            activeRange.endDate
-          )
+          activeRange.startDate,
+          activeRange.endDate
+        )
         : await eventosAPI.getMonthlySummary(selectedYear, selectedMonth);
       const data = response.data || {};
-      
+
       const totalEventosHistoricos = parseInt(data.total_eventos, 10) || 0;
       const eventosDelPeriodo =
         parseInt(data.eventos_mes ?? data.total_eventos, 10) || 0;
-      const eventosExtras =
-        data.eventos_extras ?? Math.max(0, eventosDelPeriodo - 8);
+      const eventosExtras = isRangeActive
+        ? (data.eventos_extras ?? Math.max(0, eventosDelPeriodo - 8))
+        : 0;
+
       const cotizacionExtra = data.cotizacion_extra || 47000;
       const sueldoAdicional = eventosExtras * cotizacionExtra;
-      
+
       // Logs de debug (remover en producción)
       if (process.env.NODE_ENV === 'development') {
         console.log('📊 Resumen mensual cargado:', {
           año: selectedYear,
           mes: selectedMonth,
-          total_eventos: totalEventos,
+          total_eventos: totalEventosHistoricos,
           eventos_extras: eventosExtras,
           sueldo_adicional: sueldoAdicional,
           cotizacion_extra: cotizacionExtra,
           raw_data: data
         });
       }
-      
+
       setSummary({
         ...data,
         total_eventos: isRangeActive ? eventosDelPeriodo : totalEventosHistoricos,
@@ -367,7 +369,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
 
           <div className={styles.extrasSection}>
             <h3 className={styles.extrasTitle}>Información de Extras</h3>
-            
+
             <div className={styles.extrasInfo}>
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Cotización actual del extra:</span>
@@ -379,27 +381,14 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Total de eventos extras realizados:</span>
                 <span className={styles.extrasValue}>
-                  {summary?.eventos_extras !== undefined
-                    ? summary.eventos_extras
-                    : summary?.eventos_mes
-                    ? Math.max(0, summary.eventos_mes - 8)
-                    : 0}
+                  {summary?.eventos_extras || 0}
                 </span>
               </div>
 
               <div className={styles.extrasRow}>
                 <span className={styles.extrasLabel}>Sueldo Adicional:</span>
                 <span className={styles.extrasValueHighlight}>
-                  {(
-                    summary?.sueldo_adicional !== undefined
-                      ? summary.sueldo_adicional
-                      : ((summary?.eventos_extras !== undefined
-                          ? summary.eventos_extras
-                          : summary?.eventos_mes
-                          ? Math.max(0, summary.eventos_mes - 8)
-                          : 0) *
-                        (summary?.cotizacion_extra || 47000))
-                  ).toLocaleString('es-AR')}
+                  ${(summary?.sueldo_adicional || 0).toLocaleString('es-AR')}
                 </span>
               </div>
             </div>
@@ -407,58 +396,58 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
             {summary?.eventos_mes > 0 && (
               <div className={styles.extrasNote}>
                 <small>
-                  * Los primeros 8 eventos del período corresponden al sueldo base. 
+                  * Los primeros 8 eventos del período corresponden al sueldo base.
                   Los eventos extras se cuentan a partir del evento número 9.
                 </small>
               </div>
             )}
           </div>
 
-        {detailVisible && (
-          <div className={styles.detailSection}>
-            <div className={styles.detailHeader}>
-              <h3>
-                Detalle de eventos del período (
-                {summary?.eventos_mes || summary?.total_eventos || 0})
-              </h3>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={toggleDetail}
-              >
-                Cerrar
-              </button>
-            </div>
-            {detailError && (
-              <div className={styles.error}>{detailError}</div>
-            )}
-            {detailLoading ? (
-              <Loading message="Cargando eventos..." size="small" />
-            ) : detailEvents.length === 0 ? (
-              <div className={styles.detailEmpty}>
-                No tienes eventos registrados en este mes.
+          {detailVisible && (
+            <div className={styles.detailSection}>
+              <div className={styles.detailHeader}>
+                <h3>
+                  Detalle de eventos del período (
+                  {summary?.eventos_mes || summary?.total_eventos || 0})
+                </h3>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={toggleDetail}
+                >
+                  Cerrar
+                </button>
               </div>
-            ) : (
-              <div className={styles.detailList}>
-                {detailEvents.map((event) => (
-                  <div key={event.id} className={styles.detailItem}>
-                    <div>
-                      <strong>
-                        {event.fecha_evento
-                          ? formatDateFromDB(event.fecha_evento)
-                          : '--/--'}
-                      </strong>
-                      <span>{event.salon_nombre || 'Sin salón'}</span>
+              {detailError && (
+                <div className={styles.error}>{detailError}</div>
+              )}
+              {detailLoading ? (
+                <Loading message="Cargando eventos..." size="small" />
+              ) : detailEvents.length === 0 ? (
+                <div className={styles.detailEmpty}>
+                  No tienes eventos registrados en este mes.
+                </div>
+              ) : (
+                <div className={styles.detailList}>
+                  {detailEvents.map((event) => (
+                    <div key={event.id} className={styles.detailItem}>
+                      <div>
+                        <strong>
+                          {event.fecha_evento
+                            ? formatDateFromDB(event.fecha_evento)
+                            : '--/--'}
+                        </strong>
+                        <span>{event.salon_nombre || 'Sin salón'}</span>
+                      </div>
+                      <span className={styles.detailStatus}>
+                        {event.confirmado ? 'Confirmado' : 'Pendiente'}
+                      </span>
                     </div>
-                    <span className={styles.detailStatus}>
-                      {event.confirmado ? 'Confirmado' : 'Pendiente'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
