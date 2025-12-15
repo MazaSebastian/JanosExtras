@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
+import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import Loading, { LoadingButton, SkeletonCard, Skeleton } from '@/components/Loading';
 import styles from '@/styles/Dashboard.module.css';
 

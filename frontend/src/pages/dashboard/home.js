@@ -100,16 +100,7 @@ export default function DJHomePage() {
                   <span className={styles.statLabel}>Eventos del Mes</span>
                   <span className={styles.statValue}>{summary?.eventos_mes || 0}</span>
                 </div>
-                <div className={styles.stat}>
-                  <span className={styles.statLabel}>Eventos Extras</span>
-                  <span className={styles.statValue}>{summary?.eventos_extras || 0}</span>
-                </div>
-                {summary?.sueldo_adicional && (
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>Sueldo Adicional</span>
-                    <span className={styles.statValue}>${summary.sueldo_adicional.toLocaleString()}</span>
-                  </div>
-                )}
+
                 <button
                   className={styles.cardAction}
                   onClick={() => router.push('/dashboard')}
