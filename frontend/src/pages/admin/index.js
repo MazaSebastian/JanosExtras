@@ -13,6 +13,7 @@ import CoordinacionesAdminPanel from '@/components/CoordinacionesAdminPanel';
 import AnunciosAdminPanel from '@/components/AnunciosAdminPanel';
 import FechasLibresPanel from '@/components/FechasLibresPanel';
 import CheckInTecnicoAdminPanel from '@/components/CheckInTecnicoAdminPanel';
+import LiveFichadasPanel from '@/components/LiveFichadasPanel';
 import Loading, { SkeletonCard } from '@/components/Loading';
 import styles from '@/styles/AdminDashboard.module.css';
 
@@ -58,6 +59,7 @@ export default function AdminDashboardPage() {
     startDate: '',
     endDate: '',
   });
+  const [fichadasViewMode, setFichadasViewMode] = useState('live'); // 'live' or 'history'
   const [menuOpen, setMenuOpen] = useState(false);
   const [homeData, setHomeData] = useState({
     coordinaciones: [],
@@ -191,14 +193,14 @@ export default function AdminDashboardPage() {
           prev?.djs?.map((dj) =>
             dj.id === editingDj.id
               ? {
-                  ...dj,
-                  nombre: editForm.nombre,
-                  salon_id: payload.salon_id,
-                  salon_nombre: payload.salon_id
-                    ? getSalonName(payload.salon_id)
-                    : null,
-                  color_hex: editForm.color_hex,
-                }
+                ...dj,
+                nombre: editForm.nombre,
+                salon_id: payload.salon_id,
+                salon_nombre: payload.salon_id
+                  ? getSalonName(payload.salon_id)
+                  : null,
+                color_hex: editForm.color_hex,
+              }
               : dj
           ) || [],
       }));
@@ -228,7 +230,7 @@ export default function AdminDashboardPage() {
 
   const loadFichadas = useCallback(async () => {
     if (!data) return;
-    
+
     try {
       setLoadingFichadas(true);
       const params = {};
@@ -260,9 +262,9 @@ export default function AdminDashboardPage() {
     const handleClickOutside = (event) => {
       const sidebar = document.querySelector(`.${styles.sidebar}`);
       const hamburgerButton = document.querySelector(`.${styles.hamburgerButton}`);
-      
-      if (sidebar && !sidebar.contains(event.target) && 
-          hamburgerButton && !hamburgerButton.contains(event.target)) {
+
+      if (sidebar && !sidebar.contains(event.target) &&
+        hamburgerButton && !hamburgerButton.contains(event.target)) {
         setMenuOpen(false);
       }
     };
@@ -354,7 +356,7 @@ export default function AdminDashboardPage() {
       setViewingDjEvents(dj);
       setLoadingEvents(true);
       setDjEvents([]);
-      
+
       const response = await adminAPI.getDjEvents(dj.id);
       setDjEvents(response.data || []);
     } catch (error) {
@@ -389,844 +391,875 @@ export default function AdminDashboardPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <div className={styles.layout}>
-      <button
-        className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
-      >
-        <span className={styles.hamburgerIcon}>
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-        </span>
-      </button>
-      <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
-        <div className={styles.brand}>
-          <div className={styles.brandLogoContainer}>
-            <img 
-              src="/logo-janos-blanco.png" 
-              alt="Logo Jano's" 
-              className={styles.brandLogo}
-            />
-          </div>
-          <div>
-            <p className={styles.brandSubtitle}>Sistema de Administracion de DJ's</p>
-          </div>
-        </div>
-        <nav className={styles.menu}>
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`${styles.menuItem} ${
-                activeMenu === item.id ? styles.menuItemActive : ''
-              }`}
-              onClick={() => handleMenuClick(item.id)}
-            >
-              <span className={styles.menuIcon}>{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-      {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
-      <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.subtitle}>Panel Administrativo</p>
-          <h1 className={styles.title}>Control General DJs</h1>
-        </div>
-        <div className={styles.headerActions}>
-          <button className={styles.secondaryButton} onClick={handleGoToDJ}>
-            Ir al Dashboard de DJ
-          </button>
-          <button className={styles.logoutButton} onClick={handleLogout}>
-            Cerrar sesión
-          </button>
-        </div>
-      </header>
-
-      <section className={styles.filters}>
-        <div className={styles.filterGroup}>
-          <label>Año</label>
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className={styles.filterGroup}>
-          <label>Mes</label>
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-          >
-            {months.map((month, index) => (
-              <option key={month} value={index + 1}>
-                {month}
-              </option>
-            ))}
-          </select>
-        </div>
         <button
-          className={styles.refreshButton}
-          onClick={loadDashboardData}
-          disabled={loading}
+          className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
         >
-          {loading ? 'Actualizando...' : 'Actualizar'}
+          <span className={styles.hamburgerIcon}>
+            <span className={styles.hamburgerLine}></span>
+            <span className={styles.hamburgerLine}></span>
+            <span className={styles.hamburgerLine}></span>
+          </span>
         </button>
-      </section>
-
-      {error && <div className={styles.error}>{error}</div>}
-
-      {loading && !data ? (
-        <Loading message="Cargando información..." />
-      ) : (
-        data && (
-          <>
-            {activeMenu === 'home' && (
-              <section id="home" className={styles.homeSection}>
-                <div className={styles.homeHeader}>
-                  <h2>Bienvenido, {user.nombre}</h2>
-                  <p>Resumen general del sistema</p>
-                </div>
-                <div className={styles.homeGrid}>
-                  {/* Resumen General */}
-                  <div className={styles.homeCard}>
-                    <div className={styles.homeCardHeader}>
-                      <span className={styles.homeCardIcon}>📊</span>
-                      <h3>Resumen General</h3>
-                    </div>
-                    <div className={styles.homeCardContent}>
-                      <div className={styles.homeStat}>
-                        <span className={styles.homeStatLabel}>Total DJs</span>
-                        <span className={styles.homeStatValue}>{formatNumber(data.summary.total_djs)}</span>
-                      </div>
-                      <div className={styles.homeStat}>
-                        <span className={styles.homeStatLabel}>Eventos del Mes</span>
-                        <span className={styles.homeStatValue}>{formatNumber(data.summary.total_eventos_mes)}</span>
-                      </div>
-                      <div className={styles.homeStat}>
-                        <span className={styles.homeStatLabel}>Salones Activos</span>
-                        <span className={styles.homeStatValue}>
-                          {formatNumber(data.summary.salones_con_eventos)} / {formatNumber(data.summary.total_salones)}
-                        </span>
-                      </div>
-                      <button
-                        className={styles.homeCardAction}
-                        onClick={() => setActiveMenu('overview')}
-                      >
-                        Ver Detalles →
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Fichadas Recientes */}
-                  <div className={styles.homeCard}>
-                    <div className={styles.homeCardHeader}>
-                      <span className={styles.homeCardIcon}>⏰</span>
-                      <h3>Fichadas Recientes</h3>
-                    </div>
-                    <div className={styles.homeCardContent}>
-                      {homeData.loading ? (
-                        <p>Cargando...</p>
-                      ) : homeData.recentFichadas.length === 0 ? (
-                        <p className={styles.homeEmptyMessage}>No hay fichadas recientes</p>
-                      ) : (
-                        <div className={styles.homeList}>
-                          {homeData.recentFichadas.map((fichada) => (
-                            <div key={fichada.id} className={styles.homeListItem}>
-                              <span className={styles.homeListItemIcon}>
-                                {fichada.tipo === 'ingreso' ? '⬇️' : '⬆️'}
-                              </span>
-                              <div className={styles.homeListItemContent}>
-                                <span className={styles.homeListItemTitle}>
-                                  {fichada.dj_nombre || 'DJ'}
-                                </span>
-                                <span className={styles.homeListItemSubtitle}>
-                                  {fichada.tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} •{' '}
-                                  {format(new Date(fichada.registrado_en), 'dd/MM/yyyy HH:mm', { locale: es })}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <button
-                        className={styles.homeCardAction}
-                        onClick={() => setActiveMenu('fichadas')}
-                      >
-                        Ver Todas →
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* DJs Activos */}
-                  <div className={styles.homeCard}>
-                    <div className={styles.homeCardHeader}>
-                      <span className={styles.homeCardIcon}>🎧</span>
-                      <h3>DJs con Actividad</h3>
-                    </div>
-                    <div className={styles.homeCardContent}>
-                      <div className={styles.homeStat}>
-                        <span className={styles.homeStatLabel}>DJs Activos</span>
-                        <span className={styles.homeStatValue}>
-                          {formatNumber(data.summary.djs_con_eventos)} / {formatNumber(data.summary.total_djs)}
-                        </span>
-                      </div>
-                      <div className={styles.homeStat}>
-                        <span className={styles.homeStatLabel}>Top DJs del Mes</span>
-                        <div className={styles.homeTopDJs}>
-                          {data.djs
-                            .filter(dj => dj.rol !== 'admin')
-                            .sort((a, b) => (b.total_eventos || 0) - (a.total_eventos || 0))
-                            .slice(0, 3)
-                            .map((dj) => (
-                              <div key={dj.id} className={styles.homeTopDJItem}>
-                                <span
-                                  className={styles.homeTopDJColor}
-                                  style={{ backgroundColor: dj.color_hex || getSalonColor(dj.salon_id || dj.id) }}
-                                />
-                                <span className={styles.homeTopDJName}>{dj.nombre}</span>
-                                <span className={styles.homeTopDJEvents}>{dj.total_eventos || 0} eventos</span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                      <button
-                        className={styles.homeCardAction}
-                        onClick={() => setActiveMenu('djs')}
-                      >
-                        Ver Todos →
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-            {activeMenu === 'overview' && (
-              <section id="overview">
-                <div className={styles.summaryGrid}>
-                  <div className={styles.card}>
-                    <h3>Total DJs</h3>
-                    <p>{formatNumber(data.summary.total_djs)}</p>
-                  </div>
-                  <div className={styles.card}>
-                    <h3>Salones activos</h3>
-                    <p>
-                      {formatNumber(data.summary.salones_con_eventos)} /{' '}
-                      {formatNumber(data.summary.total_salones)}
-                    </p>
-                  </div>
-                  <div className={styles.card}>
-                    <h3>Eventos del mes</h3>
-                    <p>{formatNumber(data.summary.total_eventos_mes)}</p>
-                  </div>
-                  <div className={styles.card}>
-                    <h3>DJs con actividad</h3>
-                    <p>
-                      {formatNumber(data.summary.djs_con_eventos)} /{' '}
-                      {formatNumber(data.summary.total_djs)}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className={styles.section} style={{ marginTop: '2rem' }}>
-                  <div className={styles.sectionHeader}>
-                    <div>
-                      <h2>DJs</h2>
-                      <p>Actividad mensual por DJ</p>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.exportButton}
-                      onClick={handleExportDJs}
-                      disabled={!data?.djs?.length}
-                    >
-                      Exportar CSV
-                    </button>
-                  </div>
-                  <div className={styles.tableWrapper}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th>DJ</th>
-                          <th>Rol</th>
-                          <th>Salón</th>
-                          <th>Eventos</th>
-                          <th>Extras</th>
-                          <th>Último evento</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.djs
-                          .filter((dj) => dj.rol !== 'admin')
-                          .map((dj) => {
-                          const resolvedColor =
-                            dj.color_hex || getSalonColor(dj.salon_id || dj.id);
-                          return (
-                            <tr key={dj.id}>
-                              <td data-label="DJ" className={styles.djNameCell}>
-                                <span
-                                  className={styles.djColorDot}
-                                  style={{ backgroundColor: resolvedColor }}
-                                  title={`Color de ${dj.nombre}`}
-                                />
-                                <span 
-                                  className={styles.djNameClickable}
-                                  onClick={() => handleViewDjEvents(dj)}
-                                  title="Ver eventos de este DJ"
-                                >
-                                  {dj.nombre}
-                                </span>
-                                <button
-                                  type="button"
-                                  className={styles.editButton}
-                                  onClick={() => openEditModal(dj)}
-                                  title={`Editar ${dj.nombre}`}
-                                >
-                                  ✏️
-                                </button>
-                              </td>
-                            <td data-label="Rol">
-                              <span
-                                className={
-                                  dj.rol === 'admin'
-                                    ? styles.badgeAdmin
-                                    : styles.badgeDj
-                                }
-                              >
-                                {dj.rol}
-                              </span>
-                            </td>
-                            <td data-label="Salón">
-                              {dj.salon_nombre || 'Sin salón'}
-                            </td>
-                            <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
-                            <td
-                              data-label="Extras"
-                              className={dj.eventos_extras > 0 ? styles.highlight : ''}
-                            >
-                              {formatNumber(dj.eventos_extras)}
-                            </td>
-                              <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {activeMenu === 'salones' && (
-              <section id="salones" className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <div>
-                    <h2>Salones</h2>
-                    <p>Gestión de salones y coordenadas para geolocalización</p>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.exportButton}
-                    onClick={handleExportSalones}
-                    disabled={!data?.salones?.length}
-                  >
-                    Exportar CSV
-                  </button>
-                </div>
-                <div className={styles.tableWrapper}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>Salón</th>
-                        <th>Dirección</th>
-                        <th>Coordenadas</th>
-                        <th>Eventos del mes</th>
-                        <th>DJs activos</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.salones.map((salon) => (
-                        <tr key={salon.id}>
-                          <td data-label="Salón">
-                            <strong>{salon.nombre}</strong>
-                          </td>
-                          <td data-label="Dirección">{salon.direccion || '—'}</td>
-                          <td data-label="Coordenadas">
-                            {salon.latitud && salon.longitud ? (
-                              <span className={styles.coordinatesOk}>
-                                ✓ {parseFloat(salon.latitud).toFixed(4)}, {parseFloat(salon.longitud).toFixed(4)}
-                              </span>
-                            ) : (
-                              <span className={styles.coordinatesMissing}>
-                                ⚠️ No configuradas
-                              </span>
-                            )}
-                          </td>
-                          <td data-label="Eventos">{formatNumber(salon.total_eventos)}</td>
-                          <td data-label="DJs">{formatNumber(salon.djs_activos)}</td>
-                          <td data-label="Acciones">
-                            <button
-                              type="button"
-                              className={styles.editButton}
-                              onClick={() => setEditingSalon(salon)}
-                              title="Configurar coordenadas"
-                            >
-                              📍 Configurar
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            )}
-
-            {activeMenu === 'calendar' && (
-              <section id="calendar" className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <h2>Calendario anual por DJ</h2>
-                  <p>Seleccioná un DJ para visualizar sus eventos del año</p>
-                </div>
-                <div className={styles.calendarFilters}>
-                  <div className={styles.djSelector}>
-                    <label htmlFor="dj-calendar-select">DJ</label>
-                  <select
-                    id="dj-calendar-select"
-                    value={selectedDjId || ''}
-                    onChange={(e) => setSelectedDjId(parseInt(e.target.value, 10))}
-                  >
-                    {data.djs
-                      .filter((dj) => dj.rol !== 'admin')
-                      .map((dj) => (
-                        <option key={dj.id} value={dj.id}>
-                          {dj.nombre} {dj.salon_nombre ? `(${dj.salon_nombre})` : ''}
-                        </option>
-                      ))}
-                  </select>
-                  </div>
-                  <div className={styles.dateRangeFilter}>
-                    <label>
-                      Desde
-                      <input
-                        type="date"
-                        value={calendarStartDate}
-                        onChange={(e) => setCalendarStartDate(e.target.value)}
-                      />
-                    </label>
-                    <label>
-                      Hasta
-                      <input
-                        type="date"
-                        value={calendarEndDate}
-                        onChange={(e) => setCalendarEndDate(e.target.value)}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className={styles.clearRangeButton}
-                      onClick={clearCalendarRange}
-                      disabled={!calendarStartDate && !calendarEndDate}
-                    >
-                      Limpiar
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {selectedDjId ? (
-                (() => {
-                  const selectedDj = data.djs.find((dj) => dj.id === selectedDjId);
-                  if (!selectedDj) {
-                    return (
-                      <div className={styles.emptyState}>
-                        No se encontró información del DJ seleccionado.
-                      </div>
-                    );
-                  }
-
-                  if (!selectedDj.salon_id) {
-                    return (
-                      <div className={styles.emptyState}>
-                        Este DJ no tiene un salón asignado, no es posible mostrar su calendario.
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <Calendar
-                      salonId={selectedDj.salon_id}
-                      filterDjId={selectedDj.id}
-                      readOnly
-                      startDateFilter={calendarStartDate || undefined}
-                      endDateFilter={calendarEndDate || undefined}
-                    />
-                  );
-                })()
-              ) : (
-                <div className={styles.emptyState}>No hay DJs disponibles.</div>
-              )}
-            </section>
-            )}
-
-            {activeMenu === 'fichadas' && data && (
-              <section id="fichadas" className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <div>
-                    <h2>Fichadas</h2>
-                    <p>Control de ingresos y egresos de DJs</p>
-                  </div>
-                </div>
-
-                {/* Filtros */}
-                <div className={styles.filtersContainer}>
-                  <div className={styles.filterGroup}>
-                    <label htmlFor="fichadas-dj-filter">DJ</label>
-                    <select
-                      id="fichadas-dj-filter"
-                      value={fichadasFilter.djId}
-                      onChange={(e) =>
-                        setFichadasFilter((prev) => ({ ...prev, djId: e.target.value }))
-                      }
-                    >
-                      <option value="">Todos los DJs</option>
-                      {data.djs
-                        ?.filter((dj) => dj.rol !== 'admin')
-                        .map((dj) => (
-                          <option key={dj.id} value={dj.id}>
-                            {dj.nombre}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <div className={styles.filterGroup}>
-                    <label htmlFor="fichadas-tipo-filter">Tipo</label>
-                    <select
-                      id="fichadas-tipo-filter"
-                      value={fichadasFilter.tipo}
-                      onChange={(e) =>
-                        setFichadasFilter((prev) => ({ ...prev, tipo: e.target.value }))
-                      }
-                    >
-                      <option value="">Todos</option>
-                      <option value="ingreso">Ingreso</option>
-                      <option value="egreso">Egreso</option>
-                    </select>
-                  </div>
-
-                  <div className={styles.filterGroup}>
-                    <label htmlFor="fichadas-start-date">Desde</label>
-                    <input
-                      id="fichadas-start-date"
-                      type="date"
-                      value={fichadasFilter.startDate}
-                      onChange={(e) =>
-                        setFichadasFilter((prev) => ({ ...prev, startDate: e.target.value }))
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.filterGroup}>
-                    <label htmlFor="fichadas-end-date">Hasta</label>
-                    <input
-                      id="fichadas-end-date"
-                      type="date"
-                      value={fichadasFilter.endDate}
-                      onChange={(e) =>
-                        setFichadasFilter((prev) => ({ ...prev, endDate: e.target.value }))
-                      }
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    className={styles.refreshButton}
-                    onClick={() => setFichadasFilter({ djId: '', tipo: '', startDate: '', endDate: '' })}
-                  >
-                    Limpiar filtros
-                  </button>
-                </div>
-
-                {/* Tabla de fichadas */}
-                {loadingFichadas ? (
-                  <Loading message="Cargando fichadas..." size="small" />
-                ) : fichadas.length === 0 ? (
-                  <div className={styles.emptyState}>
-                    <p>No se encontraron fichadas con los filtros seleccionados.</p>
-                  </div>
-                ) : (
-                  <div className={styles.tableWrapper}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th>Fecha y hora</th>
-                          <th>DJ</th>
-                          <th>Tipo</th>
-                          <th>Salón</th>
-                          <th>Comentario</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {fichadas.map((fichada) => (
-                          <tr key={fichada.id}>
-                            <td data-label="Fecha y hora">
-                              {new Date(fichada.registrado_en).toLocaleString('es-AR', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </td>
-                            <td data-label="DJ">
-                              <div className={styles.djNameCell}>
-                                {fichada.dj_color && (
-                                  <span
-                                    className={styles.djColorDot}
-                                    style={{ backgroundColor: fichada.dj_color }}
-                                  />
-                                )}
-                                <strong>{fichada.dj_nombre}</strong>
-                              </div>
-                            </td>
-                            <td data-label="Tipo">
-                              <span
-                                className={
-                                  fichada.tipo === 'ingreso'
-                                    ? styles.badgeIngreso
-                                    : styles.badgeEgreso
-                                }
-                              >
-                                {fichada.tipo === 'ingreso' ? '✅ Ingreso' : '🚪 Egreso'}
-                              </span>
-                            </td>
-                            <td data-label="Salón">
-                              {fichada.salon_nombre || '—'}
-                            </td>
-                            <td data-label="Comentario">
-                              {fichada.comentario || '—'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {activeMenu === 'contenido' && (
-              <section id="contenido" className={styles.section}>
-                <ContenidoPanel />
-              </section>
-            )}
-
-            {activeMenu === 'coordinaciones' && (
-              <section id="coordinaciones" className={styles.section}>
-                <CoordinacionesAdminPanel />
-              </section>
-            )}
-
-            {activeMenu === 'anuncios' && (
-              <section id="anuncios" className={styles.section}>
-                <AnunciosAdminPanel />
-              </section>
-            )}
-
-            {activeMenu === 'fechas-libres' && (
-              <section id="fechas-libres" className={styles.section}>
-                <FechasLibresPanel />
-              </section>
-            )}
-
-            {activeMenu === 'check-in-tecnico' && (
-              <section id="check-in-tecnico" className={styles.section}>
-                <CheckInTecnicoAdminPanel />
-              </section>
-            )}
-
-            {editingSalon && (
-              <SalonCoordinatesEditor
-                salon={editingSalon}
-                onClose={() => setEditingSalon(null)}
-                onSave={() => {
-                  loadDashboardData();
-                }}
+        <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
+          <div className={styles.brand}>
+            <div className={styles.brandLogoContainer}>
+              <img
+                src="/logo-janos-blanco.png"
+                alt="Logo Jano's"
+                className={styles.brandLogo}
               />
-            )}
+            </div>
+            <div>
+              <p className={styles.brandSubtitle}>Sistema de Administracion de DJ's</p>
+            </div>
+          </div>
+          <nav className={styles.menu}>
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`${styles.menuItem} ${activeMenu === item.id ? styles.menuItemActive : ''
+                  }`}
+                onClick={() => handleMenuClick(item.id)}
+              >
+                <span className={styles.menuIcon}>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+        {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
+        <div className={styles.container}>
+          <header className={styles.header}>
+            <div>
+              <p className={styles.subtitle}>Panel Administrativo</p>
+              <h1 className={styles.title}>Control General DJs</h1>
+            </div>
+            <div className={styles.headerActions}>
+              <button className={styles.secondaryButton} onClick={handleGoToDJ}>
+                Ir al Dashboard de DJ
+              </button>
+              <button className={styles.logoutButton} onClick={handleLogout}>
+                Cerrar sesión
+              </button>
+            </div>
+          </header>
 
-            {editingDj && (
-              <div className={styles.modalOverlay} onClick={closeEditModal}>
-                <div
-                  className={styles.modalContent}
-                  onClick={(e) => e.stopPropagation()}
-                  role="dialog"
-                  aria-modal="true"
-                >
-                  <h3 className={styles.modalTitle}>Editar DJ</h3>
-                  <p className={styles.modalSubtitle}>
-                    {editingDj.nombre} — {editingDj.salon_nombre || 'Sin salón'}
-                  </p>
+          <section className={styles.filters}>
+            <div className={styles.filterGroup}>
+              <label>Año</label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.filterGroup}>
+              <label>Mes</label>
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              >
+                {months.map((month, index) => (
+                  <option key={month} value={index + 1}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              className={styles.refreshButton}
+              onClick={loadDashboardData}
+              disabled={loading}
+            >
+              {loading ? 'Actualizando...' : 'Actualizar'}
+            </button>
+          </section>
 
-                  {editError && <div className={styles.error}>{editError}</div>}
+          {error && <div className={styles.error}>{error}</div>}
 
-                  <div className={styles.modalForm}>
-                    <label className={styles.modalLabel}>
-                      Nombre
-                      <input
-                        type="text"
-                        value={editForm.nombre}
-                        onChange={(e) =>
-                          handleEditChange('nombre', e.target.value)
-                        }
-                        className={styles.modalInput}
-                      />
-                    </label>
-
-                    <label className={styles.modalLabel}>
-                      Salón
-                      <select
-                        value={editForm.salon_id}
-                        onChange={(e) =>
-                          handleEditChange('salon_id', e.target.value)
-                        }
-                        className={styles.modalSelect}
-                        disabled={editingDj?.rol === 'admin'}
-                      >
-                        <option value="">Sin salón asignado</option>
-                        {data.salones.map((salon) => (
-                          <option key={salon.id} value={salon.id}>
-                            {salon.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      {editingDj?.rol === 'admin' && (
-                        <small className={styles.fieldHint}>
-                          Los administradores no tienen salón asignado.
-                        </small>
-                      )}
-                    </label>
-
-                    <label className={styles.modalLabel}>
-                      Color identificatorio
-                      <div className={styles.colorField}>
-                        <input
-                          type="color"
-                          value={editForm.color_hex}
-                          onChange={(e) =>
-                            handleEditChange('color_hex', e.target.value)
-                          }
-                        />
-                        <span>{editForm.color_hex}</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  <div className={styles.modalActions}>
-                    <button
-                      type="button"
-                      className={styles.secondaryButton}
-                      onClick={closeEditModal}
-                      disabled={savingEdit}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.primaryButton}
-                      onClick={handleSaveEdit}
-                      disabled={savingEdit || !editForm.nombre.trim()}
-                    >
-                      {savingEdit ? 'Guardando...' : 'Guardar cambios'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Modal de eventos del DJ */}
-            {viewingDjEvents && (
-              <div className={styles.modalOverlay} onClick={closeDjEventsModal}>
-                <div
-                  className={`${styles.modalContent} ${styles.eventsModalContent}`}
-                  onClick={(e) => e.stopPropagation()}
-                  role="dialog"
-                  aria-modal="true"
-                >
-                  <div className={styles.modalHeader}>
-                    <h3 className={styles.modalTitle}>
-                      Eventos de {viewingDjEvents.nombre}
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={closeDjEventsModal}
-                      className={styles.closeButton}
-                      aria-label="Cerrar"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <div className={styles.modalBody}>
-                    {loadingEvents ? (
-                      <Loading message="Cargando eventos..." size="small" />
-                    ) : djEvents.length === 0 ? (
-                      <div className={styles.emptyState}>
-                        <p>Este DJ no tiene eventos registrados.</p>
-                      </div>
-                    ) : (
-                      <div className={styles.eventsList}>
-                        <div className={styles.eventsSummary}>
-                          <strong>Total de eventos: {djEvents.length}</strong>
+          {loading && !data ? (
+            <Loading message="Cargando información..." />
+          ) : (
+            data && (
+              <>
+                {activeMenu === 'home' && (
+                  <section id="home" className={styles.homeSection}>
+                    <div className={styles.homeHeader}>
+                      <h2>Bienvenido, {user.nombre}</h2>
+                      <p>Resumen general del sistema</p>
+                    </div>
+                    <div className={styles.homeGrid}>
+                      {/* Resumen General */}
+                      <div className={styles.homeCard}>
+                        <div className={styles.homeCardHeader}>
+                          <span className={styles.homeCardIcon}>📊</span>
+                          <h3>Resumen General</h3>
                         </div>
-                        <div className={`${styles.tableWrapper} ${styles.eventsTableWrapper}`}>
-                          <table className={styles.table}>
+                        <div className={styles.homeCardContent}>
+                          <div className={styles.homeStat}>
+                            <span className={styles.homeStatLabel}>Total DJs</span>
+                            <span className={styles.homeStatValue}>{formatNumber(data.summary.total_djs)}</span>
+                          </div>
+                          <div className={styles.homeStat}>
+                            <span className={styles.homeStatLabel}>Eventos del Mes</span>
+                            <span className={styles.homeStatValue}>{formatNumber(data.summary.total_eventos_mes)}</span>
+                          </div>
+                          <div className={styles.homeStat}>
+                            <span className={styles.homeStatLabel}>Salones Activos</span>
+                            <span className={styles.homeStatValue}>
+                              {formatNumber(data.summary.salones_con_eventos)} / {formatNumber(data.summary.total_salones)}
+                            </span>
+                          </div>
+                          <button
+                            className={styles.homeCardAction}
+                            onClick={() => setActiveMenu('overview')}
+                          >
+                            Ver Detalles →
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Fichadas Recientes */}
+                      <div className={styles.homeCard}>
+                        <div className={styles.homeCardHeader}>
+                          <span className={styles.homeCardIcon}>⏰</span>
+                          <h3>Fichadas Recientes</h3>
+                        </div>
+                        <div className={styles.homeCardContent}>
+                          {homeData.loading ? (
+                            <p>Cargando...</p>
+                          ) : homeData.recentFichadas.length === 0 ? (
+                            <p className={styles.homeEmptyMessage}>No hay fichadas recientes</p>
+                          ) : (
+                            <div className={styles.homeList}>
+                              {homeData.recentFichadas.map((fichada) => (
+                                <div key={fichada.id} className={styles.homeListItem}>
+                                  <span className={styles.homeListItemIcon}>
+                                    {fichada.tipo === 'ingreso' ? '⬇️' : '⬆️'}
+                                  </span>
+                                  <div className={styles.homeListItemContent}>
+                                    <span className={styles.homeListItemTitle}>
+                                      {fichada.dj_nombre || 'DJ'}
+                                    </span>
+                                    <span className={styles.homeListItemSubtitle}>
+                                      {fichada.tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} •{' '}
+                                      {format(new Date(fichada.registrado_en), 'dd/MM/yyyy HH:mm', { locale: es })}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <button
+                            className={styles.homeCardAction}
+                            onClick={() => setActiveMenu('fichadas')}
+                          >
+                            Ver Todas →
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* DJs Activos */}
+                      <div className={styles.homeCard}>
+                        <div className={styles.homeCardHeader}>
+                          <span className={styles.homeCardIcon}>🎧</span>
+                          <h3>DJs con Actividad</h3>
+                        </div>
+                        <div className={styles.homeCardContent}>
+                          <div className={styles.homeStat}>
+                            <span className={styles.homeStatLabel}>DJs Activos</span>
+                            <span className={styles.homeStatValue}>
+                              {formatNumber(data.summary.djs_con_eventos)} / {formatNumber(data.summary.total_djs)}
+                            </span>
+                          </div>
+                          <div className={styles.homeStat}>
+                            <span className={styles.homeStatLabel}>Top DJs del Mes</span>
+                            <div className={styles.homeTopDJs}>
+                              {data.djs
+                                .filter(dj => dj.rol !== 'admin')
+                                .sort((a, b) => (b.total_eventos || 0) - (a.total_eventos || 0))
+                                .slice(0, 3)
+                                .map((dj) => (
+                                  <div key={dj.id} className={styles.homeTopDJItem}>
+                                    <span
+                                      className={styles.homeTopDJColor}
+                                      style={{ backgroundColor: dj.color_hex || getSalonColor(dj.salon_id || dj.id) }}
+                                    />
+                                    <span className={styles.homeTopDJName}>{dj.nombre}</span>
+                                    <span className={styles.homeTopDJEvents}>{dj.total_eventos || 0} eventos</span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                          <button
+                            className={styles.homeCardAction}
+                            onClick={() => setActiveMenu('djs')}
+                          >
+                            Ver Todos →
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                )}
+                {activeMenu === 'overview' && (
+                  <section id="overview">
+                    <div className={styles.summaryGrid}>
+                      <div className={styles.card}>
+                        <h3>Total DJs</h3>
+                        <p>{formatNumber(data.summary.total_djs)}</p>
+                      </div>
+                      <div className={styles.card}>
+                        <h3>Salones activos</h3>
+                        <p>
+                          {formatNumber(data.summary.salones_con_eventos)} /{' '}
+                          {formatNumber(data.summary.total_salones)}
+                        </p>
+                      </div>
+                      <div className={styles.card}>
+                        <h3>Eventos del mes</h3>
+                        <p>{formatNumber(data.summary.total_eventos_mes)}</p>
+                      </div>
+                      <div className={styles.card}>
+                        <h3>DJs con actividad</h3>
+                        <p>
+                          {formatNumber(data.summary.djs_con_eventos)} /{' '}
+                          {formatNumber(data.summary.total_djs)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className={styles.section} style={{ marginTop: '2rem' }}>
+                      <div className={styles.sectionHeader}>
+                        <div>
+                          <h2>DJs</h2>
+                          <p>Actividad mensual por DJ</p>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.exportButton}
+                          onClick={handleExportDJs}
+                          disabled={!data?.djs?.length}
+                        >
+                          Exportar CSV
+                        </button>
+                      </div>
+                      <div className={styles.tableWrapper}>
+                        <table className={styles.table}>
                           <thead>
                             <tr>
-                              <th>Fecha</th>
+                              <th>DJ</th>
+                              <th>Rol</th>
                               <th>Salón</th>
+                              <th>Eventos</th>
+                              <th>Extras</th>
+                              <th>Último evento</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {djEvents.map((evento) => (
-                              <tr key={evento.id}>
-                                <td data-label="Fecha">
-                                  {new Date(evento.fecha_evento).toLocaleDateString('es-AR', {
-                                    day: '2-digit',
-                                    month: 'long',
-                                    year: 'numeric',
-                                  })}
-                                </td>
-                                <td data-label="Salón">
-                                  <strong>{evento.salon_nombre || 'N/A'}</strong>
-                                </td>
-                              </tr>
-                            ))}
-                            </tbody>
-                          </table>
+                            {data.djs
+                              .filter((dj) => dj.rol !== 'admin')
+                              .map((dj) => {
+                                const resolvedColor =
+                                  dj.color_hex || getSalonColor(dj.salon_id || dj.id);
+                                return (
+                                  <tr key={dj.id}>
+                                    <td data-label="DJ" className={styles.djNameCell}>
+                                      <span
+                                        className={styles.djColorDot}
+                                        style={{ backgroundColor: resolvedColor }}
+                                        title={`Color de ${dj.nombre}`}
+                                      />
+                                      <span
+                                        className={styles.djNameClickable}
+                                        onClick={() => handleViewDjEvents(dj)}
+                                        title="Ver eventos de este DJ"
+                                      >
+                                        {dj.nombre}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className={styles.editButton}
+                                        onClick={() => openEditModal(dj)}
+                                        title={`Editar ${dj.nombre}`}
+                                      >
+                                        ✏️
+                                      </button>
+                                    </td>
+                                    <td data-label="Rol">
+                                      <span
+                                        className={
+                                          dj.rol === 'admin'
+                                            ? styles.badgeAdmin
+                                            : styles.badgeDj
+                                        }
+                                      >
+                                        {dj.rol}
+                                      </span>
+                                    </td>
+                                    <td data-label="Salón">
+                                      {dj.salon_nombre || 'Sin salón'}
+                                    </td>
+                                    <td data-label="Eventos">{formatNumber(dj.total_eventos)}</td>
+                                    <td
+                                      data-label="Extras"
+                                      className={dj.eventos_extras > 0 ? styles.highlight : ''}
+                                    >
+                                      {formatNumber(dj.eventos_extras)}
+                                    </td>
+                                    <td data-label="Último evento">{formatDate(dj.ultimo_evento)}</td>
+                                  </tr>
+                                );
+                              })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {activeMenu === 'salones' && (
+                  <section id="salones" className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                      <div>
+                        <h2>Salones</h2>
+                        <p>Gestión de salones y coordenadas para geolocalización</p>
+                      </div>
+                      <button
+                        type="button"
+                        className={styles.exportButton}
+                        onClick={handleExportSalones}
+                        disabled={!data?.salones?.length}
+                      >
+                        Exportar CSV
+                      </button>
+                    </div>
+                    <div className={styles.tableWrapper}>
+                      <table className={styles.table}>
+                        <thead>
+                          <tr>
+                            <th>Salón</th>
+                            <th>Dirección</th>
+                            <th>Coordenadas</th>
+                            <th>Eventos del mes</th>
+                            <th>DJs activos</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.salones.map((salon) => (
+                            <tr key={salon.id}>
+                              <td data-label="Salón">
+                                <strong>{salon.nombre}</strong>
+                              </td>
+                              <td data-label="Dirección">{salon.direccion || '—'}</td>
+                              <td data-label="Coordenadas">
+                                {salon.latitud && salon.longitud ? (
+                                  <span className={styles.coordinatesOk}>
+                                    ✓ {parseFloat(salon.latitud).toFixed(4)}, {parseFloat(salon.longitud).toFixed(4)}
+                                  </span>
+                                ) : (
+                                  <span className={styles.coordinatesMissing}>
+                                    ⚠️ No configuradas
+                                  </span>
+                                )}
+                              </td>
+                              <td data-label="Eventos">{formatNumber(salon.total_eventos)}</td>
+                              <td data-label="DJs">{formatNumber(salon.djs_activos)}</td>
+                              <td data-label="Acciones">
+                                <button
+                                  type="button"
+                                  className={styles.editButton}
+                                  onClick={() => setEditingSalon(salon)}
+                                  title="Configurar coordenadas"
+                                >
+                                  📍 Configurar
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                )}
+
+                {activeMenu === 'calendar' && (
+                  <section id="calendar" className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                      <div>
+                        <h2>Calendario anual por DJ</h2>
+                        <p>Seleccioná un DJ para visualizar sus eventos del año</p>
+                      </div>
+                      <div className={styles.calendarFilters}>
+                        <div className={styles.djSelector}>
+                          <label htmlFor="dj-calendar-select">DJ</label>
+                          <select
+                            id="dj-calendar-select"
+                            value={selectedDjId || ''}
+                            onChange={(e) => setSelectedDjId(parseInt(e.target.value, 10))}
+                          >
+                            {data.djs
+                              .filter((dj) => dj.rol !== 'admin')
+                              .map((dj) => (
+                                <option key={dj.id} value={dj.id}>
+                                  {dj.nombre} {dj.salon_nombre ? `(${dj.salon_nombre})` : ''}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                        <div className={styles.dateRangeFilter}>
+                          <label>
+                            Desde
+                            <input
+                              type="date"
+                              value={calendarStartDate}
+                              onChange={(e) => setCalendarStartDate(e.target.value)}
+                            />
+                          </label>
+                          <label>
+                            Hasta
+                            <input
+                              type="date"
+                              value={calendarEndDate}
+                              onChange={(e) => setCalendarEndDate(e.target.value)}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            className={styles.clearRangeButton}
+                            onClick={clearCalendarRange}
+                            disabled={!calendarStartDate && !calendarEndDate}
+                          >
+                            Limpiar
+                          </button>
                         </div>
                       </div>
+                    </div>
+
+                    {selectedDjId ? (
+                      (() => {
+                        const selectedDj = data.djs.find((dj) => dj.id === selectedDjId);
+                        if (!selectedDj) {
+                          return (
+                            <div className={styles.emptyState}>
+                              No se encontró información del DJ seleccionado.
+                            </div>
+                          );
+                        }
+
+                        if (!selectedDj.salon_id) {
+                          return (
+                            <div className={styles.emptyState}>
+                              Este DJ no tiene un salón asignado, no es posible mostrar su calendario.
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <Calendar
+                            salonId={selectedDj.salon_id}
+                            filterDjId={selectedDj.id}
+                            readOnly
+                            startDateFilter={calendarStartDate || undefined}
+                            endDateFilter={calendarEndDate || undefined}
+                          />
+                        );
+                      })()
+                    ) : (
+                      <div className={styles.emptyState}>No hay DJs disponibles.</div>
                     )}
+                  </section>
+                )}
+
+                {activeMenu === 'fichadas' && data && (
+                  <section id="fichadas" className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                      <div>
+                        <h2>Fichadas</h2>
+                        <p>Control de ingresos y egresos de DJs</p>
+                      </div>
+                      <div className={styles.headerToggle}>
+                        <button
+                          className={`${styles.toggleButton} ${fichadasViewMode === 'live' ? styles.active : ''}`}
+                          onClick={() => setFichadasViewMode('live')}
+                        >
+                          🔴 En Vivo
+                        </button>
+                        <button
+                          className={`${styles.toggleButton} ${fichadasViewMode === 'history' ? styles.active : ''}`}
+                          onClick={() => setFichadasViewMode('history')}
+                        >
+                          📅 Historial
+                        </button>
+                      </div>
+                    </div>
+
+                    {fichadasViewMode === 'live' ? (
+                      <LiveFichadasPanel />
+                    ) : (
+                      <>
+                        <div className={styles.filtersContainer}>
+                          <div className={styles.filterGroup}>
+                            <label htmlFor="fichadas-dj-filter">DJ</label>
+                            <select
+                              id="fichadas-dj-filter"
+                              value={fichadasFilter.djId}
+                              onChange={(e) =>
+                                setFichadasFilter((prev) => ({ ...prev, djId: e.target.value }))
+                              }
+                            >
+                              <option value="">Todos los DJs</option>
+                              {data.djs
+                                ?.filter((dj) => dj.rol !== 'admin')
+                                .map((dj) => (
+                                  <option key={dj.id} value={dj.id}>
+                                    {dj.nombre}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+
+                          <div className={styles.filterGroup}>
+                            <label htmlFor="fichadas-tipo-filter">Tipo</label>
+                            <select
+                              id="fichadas-tipo-filter"
+                              value={fichadasFilter.tipo}
+                              onChange={(e) =>
+                                setFichadasFilter((prev) => ({ ...prev, tipo: e.target.value }))
+                              }
+                            >
+                              <option value="">Todos</option>
+                              <option value="ingreso">Ingreso</option>
+                              <option value="egreso">Egreso</option>
+                            </select>
+                          </div>
+
+                          <div className={styles.filterGroup}>
+                            <label htmlFor="fichadas-start-date">Desde</label>
+                            <input
+                              id="fichadas-start-date"
+                              type="date"
+                              value={fichadasFilter.startDate}
+                              onChange={(e) =>
+                                setFichadasFilter((prev) => ({ ...prev, startDate: e.target.value }))
+                              }
+                            />
+                          </div>
+
+                          <div className={styles.filterGroup}>
+                            <label htmlFor="fichadas-end-date">Hasta</label>
+                            <input
+                              id="fichadas-end-date"
+                              type="date"
+                              value={fichadasFilter.endDate}
+                              onChange={(e) =>
+                                setFichadasFilter((prev) => ({ ...prev, endDate: e.target.value }))
+                              }
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            className={styles.refreshButton}
+                            onClick={() => setFichadasFilter({ djId: '', tipo: '', startDate: '', endDate: '' })}
+                          >
+                            Limpiar filtros
+                          </button>
+
+                          <button
+                            type="button"
+                            className={styles.exportButton}
+                            onClick={() => {
+                              const params = new URLSearchParams();
+                              if (fichadasFilter.startDate) params.append('startDate', fichadasFilter.startDate);
+                              if (fichadasFilter.endDate) params.append('endDate', fichadasFilter.endDate);
+                              window.location.href = `/api/fichadas/export?${params.toString()}`;
+                            }}
+                            title="Descargar reporte en CSV"
+                          >
+                            📄 Exportar
+                          </button>
+                        </div>
+
+                        {loadingFichadas ? (
+                          <Loading message="Cargando fichadas..." size="small" />
+                        ) : fichadas.length === 0 ? (
+                          <div className={styles.emptyState}>
+                            <p>No se encontraron fichadas con los filtros seleccionados.</p>
+                          </div>
+                        ) : (
+                          <div className={styles.tableWrapper}>
+                            <table className={styles.table}>
+                              <thead>
+                                <tr>
+                                  <th>Fecha y hora</th>
+                                  <th>DJ</th>
+                                  <th>Tipo</th>
+                                  <th>Salón</th>
+                                  <th>Comentario</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {fichadas.map((fichada) => (
+                                  <tr key={fichada.id}>
+                                    <td data-label="Fecha y hora">
+                                      {new Date(fichada.registrado_en).toLocaleString('es-AR', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </td>
+                                    <td data-label="DJ">
+                                      <div className={styles.djNameCell}>
+                                        {fichada.dj_color && (
+                                          <span
+                                            className={styles.djColorDot}
+                                            style={{ backgroundColor: fichada.dj_color }}
+                                          />
+                                        )}
+                                        <strong>{fichada.dj_nombre}</strong>
+                                      </div>
+                                    </td>
+                                    <td data-label="Tipo">
+                                      <span
+                                        className={
+                                          fichada.tipo === 'ingreso'
+                                            ? styles.badgeIngreso
+                                            : styles.badgeEgreso
+                                        }
+                                      >
+                                        {fichada.tipo === 'ingreso' ? '✅ Ingreso' : '🚪 Egreso'}
+                                      </span>
+                                    </td>
+                                    <td data-label="Salón">
+                                      {fichada.salon_nombre || '—'}
+                                    </td>
+                                    <td data-label="Comentario">
+                                      {fichada.comentario || '—'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </section>
+                )}
+
+                {activeMenu === 'contenido' && (
+                  <section id="contenido" className={styles.section}>
+                    <ContenidoPanel />
+                  </section>
+                )}
+
+                {activeMenu === 'coordinaciones' && (
+                  <section id="coordinaciones" className={styles.section}>
+                    <CoordinacionesAdminPanel />
+                  </section>
+                )}
+
+                {activeMenu === 'anuncios' && (
+                  <section id="anuncios" className={styles.section}>
+                    <AnunciosAdminPanel />
+                  </section>
+                )}
+
+                {activeMenu === 'fechas-libres' && (
+                  <section id="fechas-libres" className={styles.section}>
+                    <FechasLibresPanel />
+                  </section>
+                )}
+
+                {activeMenu === 'check-in-tecnico' && (
+                  <section id="check-in-tecnico" className={styles.section}>
+                    <CheckInTecnicoAdminPanel />
+                  </section>
+                )}
+
+                {editingSalon && (
+                  <SalonCoordinatesEditor
+                    salon={editingSalon}
+                    onClose={() => setEditingSalon(null)}
+                    onSave={() => {
+                      loadDashboardData();
+                    }}
+                  />
+                )}
+
+                {editingDj && (
+                  <div className={styles.modalOverlay} onClick={closeEditModal}>
+                    <div
+                      className={styles.modalContent}
+                      onClick={(e) => e.stopPropagation()}
+                      role="dialog"
+                      aria-modal="true"
+                    >
+                      <h3 className={styles.modalTitle}>Editar DJ</h3>
+                      <p className={styles.modalSubtitle}>
+                        {editingDj.nombre} — {editingDj.salon_nombre || 'Sin salón'}
+                      </p>
+
+                      {editError && <div className={styles.error}>{editError}</div>}
+
+                      <div className={styles.modalForm}>
+                        <label className={styles.modalLabel}>
+                          Nombre
+                          <input
+                            type="text"
+                            value={editForm.nombre}
+                            onChange={(e) =>
+                              handleEditChange('nombre', e.target.value)
+                            }
+                            className={styles.modalInput}
+                          />
+                        </label>
+
+                        <label className={styles.modalLabel}>
+                          Salón
+                          <select
+                            value={editForm.salon_id}
+                            onChange={(e) =>
+                              handleEditChange('salon_id', e.target.value)
+                            }
+                            className={styles.modalSelect}
+                            disabled={editingDj?.rol === 'admin'}
+                          >
+                            <option value="">Sin salón asignado</option>
+                            {data.salones.map((salon) => (
+                              <option key={salon.id} value={salon.id}>
+                                {salon.nombre}
+                              </option>
+                            ))}
+                          </select>
+                          {editingDj?.rol === 'admin' && (
+                            <small className={styles.fieldHint}>
+                              Los administradores no tienen salón asignado.
+                            </small>
+                          )}
+                        </label>
+
+                        <label className={styles.modalLabel}>
+                          Color identificatorio
+                          <div className={styles.colorField}>
+                            <input
+                              type="color"
+                              value={editForm.color_hex}
+                              onChange={(e) =>
+                                handleEditChange('color_hex', e.target.value)
+                              }
+                            />
+                            <span>{editForm.color_hex}</span>
+                          </div>
+                        </label>
+                      </div>
+
+                      <div className={styles.modalActions}>
+                        <button
+                          type="button"
+                          className={styles.secondaryButton}
+                          onClick={closeEditModal}
+                          disabled={savingEdit}
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.primaryButton}
+                          onClick={handleSaveEdit}
+                          disabled={savingEdit || !editForm.nombre.trim()}
+                        >
+                          {savingEdit ? 'Guardando...' : 'Guardar cambios'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
-          </>
-        )
-      )}
-      </div>
-    </div>
+                )}
+
+                {/* Modal de eventos del DJ */}
+                {viewingDjEvents && (
+                  <div className={styles.modalOverlay} onClick={closeDjEventsModal}>
+                    <div
+                      className={`${styles.modalContent} ${styles.eventsModalContent}`}
+                      onClick={(e) => e.stopPropagation()}
+                      role="dialog"
+                      aria-modal="true"
+                    >
+                      <div className={styles.modalHeader}>
+                        <h3 className={styles.modalTitle}>
+                          Eventos de {viewingDjEvents.nombre}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={closeDjEventsModal}
+                          className={styles.closeButton}
+                          aria-label="Cerrar"
+                        >
+                          ×
+                        </button>
+                      </div>
+
+                      <div className={styles.modalBody}>
+                        {loadingEvents ? (
+                          <Loading message="Cargando eventos..." size="small" />
+                        ) : djEvents.length === 0 ? (
+                          <div className={styles.emptyState}>
+                            <p>Este DJ no tiene eventos registrados.</p>
+                          </div>
+                        ) : (
+                          <div className={styles.eventsList}>
+                            <div className={styles.eventsSummary}>
+                              <strong>Total de eventos: {djEvents.length}</strong>
+                            </div>
+                            <div className={`${styles.tableWrapper} ${styles.eventsTableWrapper}`}>
+                              <table className={styles.table}>
+                                <thead>
+                                  <tr>
+                                    <th>Fecha</th>
+                                    <th>Salón</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {djEvents.map((evento) => (
+                                    <tr key={evento.id}>
+                                      <td data-label="Fecha">
+                                        {new Date(evento.fecha_evento).toLocaleDateString('es-AR', {
+                                          day: '2-digit',
+                                          month: 'long',
+                                          year: 'numeric',
+                                        })}
+                                      </td>
+                                      <td data-label="Salón">
+                                        <strong>{evento.salon_nombre || 'N/A'}</strong>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )
+          )}
+        </div>
+      </div >
     </>
   );
 }

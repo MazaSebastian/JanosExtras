@@ -9,7 +9,7 @@ export class Fichada {
       async () => {
         // Usar transacción para garantizar consistencia
         const client = await pool.connect();
-        
+
         try {
           await client.query('BEGIN');
 
@@ -96,7 +96,7 @@ export class Fichada {
             RETURNING id, dj_id, tipo, comentario, registrado_en
           `;
           const insertResult = await client.query(insertQuery, [dj_id, tipo, comentario]);
-          
+
           await client.query('COMMIT');
           return insertResult.rows[0];
         } catch (error) {
@@ -205,6 +205,69 @@ export class Fichada {
     values.push(limit);
 
     const result = await pool.query(query, values);
+    return result.rows;
+  }
+
+  static async getLiveStatus() {
+    const query = `
+      SELECT 
+        d.id, 
+        d.nombre, 
+        d.rol, 
+        d.salon_id,
+        s.nombre as salon_nombre,
+        f.tipo as ultimo_tipo,
+        f.registrado_en as ultima_fichada,
+        f.latitud, 
+        f.longitud
+      FROM djs d
+      LEFT JOIN salones s ON d.salon_id = s.id
+      LEFT JOIN LATERAL (
+        SELECT tipo, registrado_en, latitud, longitud
+        FROM fichadas
+        WHERE dj_id = d.id
+        ORDER BY registrado_en DESC
+        LIMIT 1
+      ) f ON true
+      WHERE d.activo = true
+      ORDER BY d.nombre ASC
+    `;
+    const result = await pool.query(query);
+    return result.rows;
+  }
+
+  static async getExportData({ startDate, endDate }) {
+    let query = `
+    SELECT
+    f.id,
+      f.registrado_en,
+      f.tipo,
+      f.comentario,
+      d.nombre as dj_nombre,
+      s.nombre as salon_nombre
+      FROM fichadas f
+      JOIN djs d ON f.dj_id = d.id
+      LEFT JOIN salones s ON d.salon_id = s.id
+      WHERE 1 = 1
+      `;
+    const params = [];
+    let paramCount = 1;
+
+    if (startDate) {
+      query += ` AND f.registrado_en >= $${paramCount} `;
+      params.push(startDate);
+      paramCount++;
+    }
+
+    if (endDate) {
+      query += ` AND f.registrado_en <= $${paramCount} `;
+      params.push(endDate);
+      paramCount++;
+    }
+
+    query += ` ORDER BY f.registrado_en DESC`;
+
+    const result = await pool.query(query, params);
     return result.rows;
   }
 }

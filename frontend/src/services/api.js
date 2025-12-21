@@ -90,6 +90,7 @@ export const adminAPI = {
     api.get(`/admin/djs/${djId}/eventos`),
   getFichadas: (params = {}) =>
     api.get('/admin/fichadas', { params }),
+  getLiveStatus: () => api.get('/fichadas/live'),
   getFechasLibres: (fecha) => api.get('/admin/fechas-libres', { params: { fecha } }),
 };
 
