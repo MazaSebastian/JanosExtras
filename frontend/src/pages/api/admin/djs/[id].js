@@ -1,4 +1,4 @@
-import { authenticateToken } from '@/lib/auth.js';
+import { requireRole } from '@/lib/middleware/security.js';
 import { DJ } from '@/lib/models/DJ.js';
 import { updateDjSchema } from '@/utils/validation.js';
 import * as Sentry from '@sentry/nextjs';
@@ -10,13 +10,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const auth = authenticateToken(req);
+  const auth = requireRole(req, ['admin']);
   if (auth.error) {
     return res.status(auth.status).json({ error: auth.error });
-  }
-
-  if (auth.user.rol !== 'admin') {
-    return res.status(403).json({ error: 'Acceso restringido' });
   }
 
   try {
@@ -26,8 +22,8 @@ export default async function handler(req, res) {
         req.body?.salon_id === null || req.body?.salon_id === ''
           ? null
           : req.body?.salon_id !== undefined
-          ? parseInt(req.body?.salon_id, 10)
-          : undefined,
+            ? parseInt(req.body?.salon_id, 10)
+            : undefined,
       color_hex: req.body?.color_hex,
     });
 

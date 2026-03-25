@@ -1,4 +1,4 @@
-import { authenticateToken } from '@/lib/auth.js';
+import { requireRole } from '@/lib/middleware/security.js';
 import { Event } from '@/lib/models/Event.js';
 import pool from '@/lib/database-config.js';
 
@@ -7,14 +7,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const auth = authenticateToken(req);
+  const auth = requireRole(req, ['admin', 'dj']);
   if (auth.error) {
     return res.status(auth.status).json({ error: auth.error });
-  }
-
-  // Permitir acceso tanto a admins como a DJs
-  if (auth.user.rol !== 'admin' && auth.user.rol !== 'dj') {
-    return res.status(403).json({ error: 'Acceso restringido' });
   }
 
   const { fecha } = req.query;

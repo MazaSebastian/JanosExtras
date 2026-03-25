@@ -1,6 +1,13 @@
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
 export const authenticateToken = (req) => {
+  if (!JWT_SECRET) {
+    console.error('❌ CRITICAL: JWT_SECRET no está configurado en las variables de entorno');
+    return { error: 'Error de configuración del servidor', status: 500 };
+  }
+
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -9,7 +16,7 @@ export const authenticateToken = (req) => {
   }
 
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET || 'sistema_djs_secreto_jwt_cambiar_en_produccion_12345');
+    const user = jwt.verify(token, JWT_SECRET);
     return { user };
   } catch (err) {
     return { error: 'Token inválido o expirado', status: 401 };

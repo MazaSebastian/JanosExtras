@@ -13,15 +13,15 @@ let pool;
 if (USE_REAL_DB) {
   // Usar PostgreSQL
   console.log('📊 Usando PostgreSQL');
-  
+
   // Configuración optimizada para Vercel serverless
   // Si usas Supabase Connection Pooler, puede manejar más conexiones
   const isSupabasePooler = process.env.DATABASE_URL?.includes('pooler.supabase.com');
-  
+
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DB_SSL === 'true' || process.env.DATABASE_URL?.includes('sslmode=require') 
-      ? { rejectUnauthorized: false } 
+    ssl: process.env.DB_SSL === 'true' || isSupabasePooler || process.env.DATABASE_URL?.includes('sslmode=require') || process.env.DATABASE_URL?.includes('supabase.co')
+      ? { rejectUnauthorized: false }
       : false,
     // En serverless, cada función tiene su propio pool
     // Supabase pooler puede manejar más conexiones concurrentes

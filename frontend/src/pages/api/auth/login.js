@@ -8,6 +8,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    console.error('❌ CRITICAL: JWT_SECRET no está configurado en las variables de entorno');
+    return res.status(500).json({ error: 'Error de configuración del servidor' });
+  }
+
   try {
     const parsed = loginSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -30,7 +36,7 @@ export default async function handler(req, res) {
     // Generar token JWT
     const token = jwt.sign(
       { id: dj.id, nombre: dj.nombre, rol: dj.rol },
-      process.env.JWT_SECRET || 'sistema_djs_secreto_jwt_cambiar_en_produccion_12345',
+      jwtSecret,
       { expiresIn: '7d' }
     );
 
@@ -50,4 +56,5 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 }
+
 

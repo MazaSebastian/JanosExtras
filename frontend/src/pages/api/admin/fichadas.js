@@ -1,4 +1,4 @@
-import { authenticateToken } from '@/lib/auth.js';
+import { requireRole } from '@/lib/middleware/security.js';
 import { Fichada } from '@/lib/models/Fichada.js';
 
 export default async function handler(req, res) {
@@ -6,14 +6,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const auth = authenticateToken(req);
+  const auth = requireRole(req, ['admin']);
   if (auth.error) {
     return res.status(auth.status).json({ error: auth.error });
-  }
-
-  // Solo administradores pueden ver todas las fichadas
-  if (auth.user.rol !== 'admin') {
-    return res.status(403).json({ error: 'Acceso restringido' });
   }
 
   try {
