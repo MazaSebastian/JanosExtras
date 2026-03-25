@@ -15,9 +15,7 @@ const pool = new Pool({
   // database: process.env.DB_NAME,
   // user: process.env.DB_USER,
   // password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSL === 'true' || isSupabasePooler || process.env.DATABASE_URL?.includes('sslmode=require') || process.env.DATABASE_URL?.includes('supabase.co')
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: { rejectUnauthorized: false },
   max: isSupabasePooler ? 2 : 1, // 2 conexiones si usas pooler, 1 si no
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000, // Aumentado a 10s para evitar timeouts en picos

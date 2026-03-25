@@ -20,9 +20,7 @@ if (USE_REAL_DB) {
 
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DB_SSL === 'true' || isSupabasePooler || process.env.DATABASE_URL?.includes('sslmode=require') || process.env.DATABASE_URL?.includes('supabase.co')
-      ? { rejectUnauthorized: false }
-      : false,
+    ssl: { rejectUnauthorized: false },
     // En serverless, cada función tiene su propio pool
     // Supabase pooler puede manejar más conexiones concurrentes
     max: isSupabasePooler ? 2 : 1, // 2 conexiones si usas pooler, 1 si no
