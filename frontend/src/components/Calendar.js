@@ -15,6 +15,7 @@ export default function Calendar({
   onExistingEventClick,
   filterDjId,
   readOnly = false,
+  adminMode = false,
   startDateFilter,
   endDateFilter,
   refreshTrigger = 0
@@ -22,7 +23,7 @@ export default function Calendar({
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [rawEvents, setRawEvents] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Mapa de feriados para el año actual y años adyacentes (para meses que muestran días de otros años)
   const feriadosMap = useMemo(() => {
     return getFeriadosMap(currentYear - 1, currentYear + 1);
@@ -38,7 +39,7 @@ export default function Calendar({
 
   const loadEvents = async () => {
     if (!salonId) return;
-    
+
     try {
       setLoading(true);
       const response = await eventosAPI.getBySalon(salonId, currentYear);
@@ -153,8 +154,8 @@ export default function Calendar({
     if (!isSameMonth(date, monthDate)) {
       return;
     }
-    
-    if (readOnly) {
+
+    if (readOnly && !adminMode) {
       return;
     }
 
@@ -172,7 +173,7 @@ export default function Calendar({
     if (isFull) {
       return;
     }
-    
+
     if (onDateClick) {
       onDateClick(date);
     }
@@ -212,7 +213,7 @@ export default function Calendar({
         {months.map((month, monthIndex) => (
           <div key={monthIndex} className={styles.monthContainer}>
             <h3 className={styles.monthTitle}>{month.monthName}</h3>
-            
+
             <div className={styles.weekDays}>
               {weekDays.map((day) => (
                 <div key={day} className={styles.weekDay}>
@@ -234,12 +235,12 @@ export default function Calendar({
                 const tooltipNames = eventsForDate
                   .map((event) => event.dj_nombre || 'DJ sin nombre')
                   .join(', ');
-                
+
                 // Verificar si es feriado
                 const dateKey = format(date, 'yyyy-MM-dd');
                 const feriadoInfo = feriadosMap.get(dateKey);
                 const isHoliday = Boolean(feriadoInfo);
-                
+
                 const dayClasses = [styles.day];
                 if (!isCurrentMonth) dayClasses.push(styles.otherMonth);
                 if (isHoliday) dayClasses.push(styles.holiday);

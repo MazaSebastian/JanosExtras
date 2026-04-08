@@ -7,13 +7,13 @@
 }
 
 .header h2 {
-  color: #333;
+  color: #fff;
   margin-bottom: 0.5rem;
   font-size: 1.75rem;
 }
 
 .header p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.95rem;
 }
 
@@ -40,15 +40,18 @@
 
 /* Formulario */
 .formContainer {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem;
 }
 
 .formContainer h3 {
-  color: #772c87;
+  color: #fff;
   margin-top: 0;
   margin-bottom: 1.5rem;
 }
@@ -67,7 +70,7 @@
 
 .formGroup label {
   font-weight: 600;
-  color: #333;
+  color: #fff;
   font-size: 0.9rem;
 }
 
@@ -75,18 +78,21 @@
 .formGroup select,
 .formGroup textarea {
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
 }
 
 .formGroup input:focus,
 .formGroup select:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #772c87;
-  box-shadow: 0 0 0 2px rgba(119, 44, 135, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .formGroup textarea {
@@ -136,9 +142,9 @@
 
 .cancelButton {
   padding: 0.75rem 1.5rem;
-  background: #f5f5f5;
-  color: #666;
-  border: 1px solid #ddd;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
@@ -146,7 +152,7 @@
 }
 
 .cancelButton:hover {
-  background: #e0e0e0;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Lista de Anuncios */
@@ -157,15 +163,19 @@
 }
 
 .anuncioCard {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   transition: all 0.2s;
+  color: #fff;
 }
 
 .anuncioCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 /* Removido: Los anuncios se ven igual independientemente de su estado */
@@ -173,7 +183,7 @@
 .anuncioHeader {
   padding: 1.5rem;
   border-left: 4px solid;
-  background: #fafafa;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .anuncioTitleRow {
@@ -186,7 +196,7 @@
 
 .anuncioTitleRow h3 {
   margin: 0;
-  color: #333;
+  color: #fff;
   font-size: 1.2rem;
   flex: 1;
 }
@@ -219,7 +229,7 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.85rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .anuncioContent {
@@ -229,7 +239,7 @@
 
 .anuncioContent p {
   margin: 0;
-  color: #333;
+  color: #fff;
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -238,29 +248,30 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem 1.5rem;
-  background: #f9f9f9;
-  border-top: 1px solid #e0e0e0;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .actionButton {
   padding: 0.5rem 1rem;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s;
 }
 
 .actionButton:hover {
-  background: #f0f0f0;
-  border-color: #772c87;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .deleteButton:hover {
-  background: #fee;
+  background: rgba(244, 67, 54, 0.2);
   border-color: #f44336;
-  color: #f44336;
+  color: #ffcdd2;
 }
 
 /* Estados */
@@ -280,9 +291,11 @@
 .empty {
   padding: 3rem;
   text-align: center;
-  color: #666;
-  background: #f9f9f9;
-  border-radius: 8px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
 }
 
 @media (max-width: 768px) {
@@ -298,4 +311,3 @@
     flex-wrap: wrap;
   }
 }
-

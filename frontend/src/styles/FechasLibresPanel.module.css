@@ -7,23 +7,27 @@
 }
 
 .header h2 {
-  color: #333;
+  color: #fff;
   margin-bottom: 0.5rem;
   font-size: 1.75rem;
 }
 
 .header p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.95rem;
 }
 
 /* Búsqueda */
 .searchSection {
-  background: white;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   margin-bottom: 2rem;
+  color: #fff;
 }
 
 .searchForm {
@@ -41,23 +45,26 @@
 
 .formGroup label {
   font-weight: 600;
-  color: #333;
+  color: #fff;
   font-size: 0.9rem;
 }
 
 .dateInput,
 .selectInput {
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
   font-size: 0.9rem;
 }
 
 .dateInput:focus,
 .selectInput:focus {
   outline: none;
-  border-color: #772c87;
-  box-shadow: 0 0 0 2px rgba(119, 44, 135, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
 .searchButton {
@@ -116,11 +123,11 @@
 }
 
 .sectionTitle {
-  color: #333;
+  color: #fff;
   font-size: 1.3rem;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #772c87;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Grid de DJs */
@@ -131,16 +138,21 @@
 }
 
 .djCard {
-  background: white;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   border-left: 4px solid;
   transition: all 0.2s;
+  color: #fff;
 }
 
 .djCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
 }
 
@@ -162,7 +174,7 @@
 .djName {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: #fff;
 }
 
 .djStatusBadge {
@@ -187,7 +199,7 @@
   display: flex;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 1rem;
 }
 
@@ -199,12 +211,12 @@
 .eventosList {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .eventosTitle {
   font-weight: 600;
-  color: #333;
+  color: #fff;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
@@ -214,24 +226,24 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem;
-  background: #f9f9f9;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
   margin-bottom: 0.5rem;
   font-size: 0.85rem;
 }
 
 .eventoSalon {
   font-weight: 600;
-  color: #333;
+  color: #fff;
   flex: 1;
 }
 
 .eventoFecha {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .eventoConfirmado {
-  color: #4CAF50;
+  color: #66bb6a;
   font-weight: 600;
   font-size: 0.8rem;
 }
@@ -253,17 +265,21 @@
 .emptyMessage {
   padding: 2rem;
   text-align: center;
-  background: #f9f9f9;
-  border-radius: 8px;
-  color: #666;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  color: #fff;
 }
 
 .placeholder {
   padding: 3rem;
   text-align: center;
-  background: #f9f9f9;
-  border-radius: 8px;
-  color: #666;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  color: #fff;
 }
 
 @media (max-width: 768px) {
@@ -275,4 +291,3 @@
     grid-template-columns: 1fr;
   }
 }
-

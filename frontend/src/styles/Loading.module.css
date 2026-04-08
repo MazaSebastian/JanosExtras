@@ -36,6 +36,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -97,6 +98,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -115,10 +117,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.1);
@@ -153,10 +158,13 @@
 }
 
 @keyframes fade-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
+
   50% {
     opacity: 0.5;
     transform: translateY(-2px);
@@ -201,14 +209,12 @@
 
 /* Skeleton Loading */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #f5f5f5 0%,
-    #f0f0f0 25%,
-    #e8e8e8 50%,
-    #f0f0f0 75%,
-    #f5f5f5 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.1) 25%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.1) 75%,
+      rgba(255, 255, 255, 0.05) 100%);
   background-size: 200% 100%;
   border-radius: 4px;
   position: relative;
@@ -226,12 +232,10 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.6),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   animation: skeleton-shine 2s ease-in-out infinite;
 }
 
@@ -239,6 +243,7 @@
   0% {
     left: -100%;
   }
+
   100% {
     left: 100%;
   }
@@ -257,6 +262,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -270,11 +276,13 @@
 }
 
 .skeletonCard {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1.5rem;
   border-radius: 12px;
-  border: 1px solid #e8e8e8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* Variantes de color para diferentes contextos */
@@ -400,4 +408,3 @@
     gap: 0.5rem;
   }
 }
-

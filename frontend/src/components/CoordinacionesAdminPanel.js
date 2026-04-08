@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
@@ -45,6 +46,20 @@ export default function CoordinacionesAdminPanel() {
     loadDjs();
   }, []);
 
+  // Bloquear scroll de la página cuando hay modales abiertos
+  useEffect(() => {
+    if (editingId || viewingResumen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup en desmontaje
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [editingId, viewingResumen]);
+
   // Recargar coordinaciones cuando cambian los filtros
   useEffect(() => {
     loadCoordinaciones();
@@ -54,11 +69,11 @@ export default function CoordinacionesAdminPanel() {
     try {
       setLoading(true);
       setError('');
-      
+
       const params = {
         activo: 'true',
       };
-      
+
       if (filters.djId) {
         params.dj_responsable_id = filters.djId;
       }
@@ -68,15 +83,15 @@ export default function CoordinacionesAdminPanel() {
       if (filters.salonId) {
         params.salon_id = filters.salonId;
       }
-      
+
       const response = await coordinacionesAPI.getAll(params);
       let coordinacionesData = response.data || [];
-      
+
       // Filtrar por tipo de evento si está seleccionado
       if (filters.tipoEvento) {
         coordinacionesData = coordinacionesData.filter(c => c.tipo_evento === filters.tipoEvento);
       }
-      
+
       // Filtrar por rango de fechas si está seleccionado
       if (filters.fechaDesde || filters.fechaHasta) {
         coordinacionesData = coordinacionesData.filter(c => {
@@ -94,7 +109,7 @@ export default function CoordinacionesAdminPanel() {
           return true;
         });
       }
-      
+
       setCoordinaciones(coordinacionesData);
     } catch (err) {
       console.error('Error al cargar coordinaciones:', err);
@@ -128,11 +143,11 @@ export default function CoordinacionesAdminPanel() {
     try {
       setLoadingResumen(true);
       setViewingResumen(coordinacion.id);
-      
+
       // Cargar coordinación completa
       const coordResponse = await coordinacionesAPI.getById(coordinacion.id);
       const coordinacionData = coordResponse.data || coordResponse;
-      
+
       // Cargar flujo si existe
       let flujo = null;
       try {
@@ -141,7 +156,7 @@ export default function CoordinacionesAdminPanel() {
       } catch (err) {
         console.log('No se encontró flujo de coordinación');
       }
-      
+
       setResumenData({
         coordinacion: coordinacionData,
         flujo,
@@ -191,12 +206,12 @@ export default function CoordinacionesAdminPanel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       if (editingId) {
         await coordinacionesAPI.update(editingId, formData);
       }
-      
+
       setEditingId(null);
       setFormData({
         titulo: '',
@@ -238,7 +253,7 @@ export default function CoordinacionesAdminPanel() {
       acc[djName] = (acc[djName] || 0) + 1;
       return acc;
     }, {});
-    
+
     return { total, porEstado, porDj };
   }, [coordinaciones, djs]);
 
@@ -443,7 +458,7 @@ export default function CoordinacionesAdminPanel() {
       )}
 
       {/* Modal de Edición */}
-      {editingId && (
+      {editingId && typeof document !== 'undefined' && createPortal(
         <div className={styles.modalOverlay} onClick={() => setEditingId(null)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
@@ -456,126 +471,129 @@ export default function CoordinacionesAdminPanel() {
                 ×
               </button>
             </div>
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label>Título:</label>
-                <input
-                  type="text"
-                  value={formData.titulo}
-                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                  required
-                />
-              </div>
+            <div className={styles.modalBody}>
+              <form onSubmit={handleSubmit} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label>Título:</label>
+                  <input
+                    type="text"
+                    value={formData.titulo}
+                    onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                    required
+                  />
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Cliente:</label>
-                <input
-                  type="text"
-                  value={formData.nombre_cliente}
-                  onChange={(e) => setFormData({ ...formData, nombre_cliente: e.target.value })}
-                  required
-                />
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Cliente:</label>
+                  <input
+                    type="text"
+                    value={formData.nombre_cliente}
+                    onChange={(e) => setFormData({ ...formData, nombre_cliente: e.target.value })}
+                    required
+                  />
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Teléfono:</label>
-                <input
-                  type="text"
-                  value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                />
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Teléfono:</label>
+                  <input
+                    type="text"
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  />
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Tipo de Evento:</label>
-                <select
-                  value={formData.tipo_evento}
-                  onChange={(e) => setFormData({ ...formData, tipo_evento: e.target.value })}
-                  required
-                >
-                  <option value="">Seleccionar...</option>
-                  <option value="XV">XV</option>
-                  <option value="Casamiento">Casamiento</option>
-                  <option value="Corporativo">Corporativo</option>
-                  <option value="Cumpleaños">Cumpleaños</option>
-                </select>
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Tipo de Evento:</label>
+                  <select
+                    value={formData.tipo_evento}
+                    onChange={(e) => setFormData({ ...formData, tipo_evento: e.target.value })}
+                    required
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="XV">XV</option>
+                    <option value="Casamiento">Casamiento</option>
+                    <option value="Corporativo">Corporativo</option>
+                    <option value="Cumpleaños">Cumpleaños</option>
+                  </select>
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Código de Evento:</label>
-                <input
-                  type="text"
-                  value={formData.codigo_evento}
-                  onChange={(e) => setFormData({ ...formData, codigo_evento: e.target.value })}
-                />
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Código de Evento:</label>
+                  <input
+                    type="text"
+                    value={formData.codigo_evento}
+                    onChange={(e) => setFormData({ ...formData, codigo_evento: e.target.value })}
+                  />
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Fecha del Evento:</label>
-                <input
-                  type="date"
-                  value={formData.fecha_evento}
-                  onChange={(e) => setFormData({ ...formData, fecha_evento: e.target.value })}
-                  required
-                />
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Fecha del Evento:</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_evento}
+                    onChange={(e) => setFormData({ ...formData, fecha_evento: e.target.value })}
+                    required
+                  />
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>DJ Responsable:</label>
-                <select
-                  value={formData.dj_responsable_id}
-                  onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
-                  required
-                >
-                  <option value="">Seleccionar DJ...</option>
-                  {djs.map(dj => (
-                    <option key={dj.id} value={dj.id}>{dj.nombre}</option>
-                  ))}
-                </select>
-              </div>
+                <div className={styles.formGroup}>
+                  <label>DJ Responsable:</label>
+                  <select
+                    value={formData.dj_responsable_id}
+                    onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
+                    required
+                  >
+                    <option value="">Seleccionar DJ...</option>
+                    {djs.map(dj => (
+                      <option key={dj.id} value={dj.id}>{dj.nombre}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Estado:</label>
-                <select
-                  value={formData.estado}
-                  onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                  required
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en_proceso">En Proceso</option>
-                  <option value="completada">Completada</option>
-                  <option value="cancelada">Cancelada</option>
-                </select>
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Estado:</label>
+                  <select
+                    value={formData.estado}
+                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    required
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En Proceso</option>
+                    <option value="completada">Completada</option>
+                    <option value="cancelada">Cancelada</option>
+                  </select>
+                </div>
 
-              <div className={styles.formGroup}>
-                <label>Notas:</label>
-                <textarea
-                  value={formData.notas}
-                  onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                  rows={4}
-                />
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Notas:</label>
+                  <textarea
+                    value={formData.notas}
+                    onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                    rows={4}
+                  />
+                </div>
 
-              <div className={styles.formActions}>
-                <button type="submit" className={styles.saveButton}>
-                  Guardar Cambios
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingId(null)}
-                  className={styles.cancelButton}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
+                <div className={styles.formActions}>
+                  <button type="submit" className={styles.saveButton}>
+                    Guardar Cambios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    className={styles.cancelButton}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal de Resumen */}
-      {viewingResumen && resumenData && (
+      {viewingResumen && resumenData && typeof document !== 'undefined' && createPortal(
         <div className={styles.modalOverlay} onClick={closeResumenModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
@@ -661,21 +679,22 @@ export default function CoordinacionesAdminPanel() {
 
                   {/* Respuestas del Cliente */}
                   {resumenData.coordinacion?.pre_coordinacion_completado_por_cliente && resumenData.flujo && resumenData.flujo.respuestas && (
-                    <div className={styles.resumenSeccion} style={{ 
-                      background: '#e8f5e9', 
-                      padding: '1rem', 
+                    <div className={styles.resumenSeccion} style={{
+                      background: 'rgba(46, 125, 50, 0.2)',
+                      borderLeft: '4px solid #66bb6a',
+                      padding: '1rem',
                       borderRadius: '8px',
                       marginBottom: '1.5rem',
                     }}>
-                      <h4 style={{ color: '#2e7d32', marginBottom: '0.75rem', fontSize: '1rem' }}>
+                      <h4 style={{ color: '#81c784', marginBottom: '0.75rem', fontSize: '1rem' }}>
                         Respuestas del Cliente:
                       </h4>
                       {(() => {
                         const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                         const pasos = tipoEvento ? CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [] : [];
-                        
+
                         let respuestas = resumenData.flujo.respuestas;
-                        
+
                         if (typeof respuestas === 'string') {
                           try {
                             respuestas = JSON.parse(respuestas);
@@ -684,7 +703,7 @@ export default function CoordinacionesAdminPanel() {
                             respuestas = {};
                           }
                         }
-                        
+
                         // Asegurar que velas sea siempre un array válido
                         if (respuestas.velas) {
                           if (typeof respuestas.velas === 'string') {
@@ -698,34 +717,34 @@ export default function CoordinacionesAdminPanel() {
                           if (!Array.isArray(respuestas.velas)) {
                             respuestas.velas = [];
                           }
-                          respuestas.velas = respuestas.velas.filter(v => 
+                          respuestas.velas = respuestas.velas.filter(v =>
                             v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
                           );
                         } else {
                           respuestas.velas = [];
                         }
-                        
+
                         return pasos.map((paso) => {
                           const preguntasRespondidas = paso.preguntas.filter((p) => {
                             const esCondicional = p.condicional && p.condicional.pregunta;
                             let debeMostrar = true;
-                            
+
                             if (esCondicional) {
                               const valorCondicional = respuestas[p.condicional.pregunta];
                               const valorEsperado = p.condicional.valor;
-                              
+
                               if (Array.isArray(valorCondicional)) {
                                 debeMostrar = valorCondicional.includes(valorEsperado);
                               } else if (typeof valorCondicional === 'string') {
-                                debeMostrar = valorCondicional === valorEsperado || 
-                                             valorCondicional.includes(valorEsperado);
+                                debeMostrar = valorCondicional === valorEsperado ||
+                                  valorCondicional.includes(valorEsperado);
                               } else {
                                 debeMostrar = false;
                               }
                             }
-                            
+
                             if (!debeMostrar) return false;
-                            
+
                             const valor = respuestas[p.id];
                             if (p.tipo === 'velas') {
                               return Array.isArray(valor) && valor.length > 0;
@@ -740,24 +759,24 @@ export default function CoordinacionesAdminPanel() {
 
                           return (
                             <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
-                              <h5 style={{ 
-                                color: '#2e7d32', 
-                                fontSize: '0.95rem', 
+                              <h5 style={{
+                                color: '#a5d6a7',
+                                fontSize: '0.95rem',
                                 fontWeight: 600,
                                 marginBottom: '0.5rem',
                                 paddingBottom: '0.5rem',
-                                borderBottom: '1px solid #c8e6c9'
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
                               }}>
                                 {paso.titulo}
                               </h5>
                               {paso.preguntas.map((pregunta) => {
                                 const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
                                 let debeMostrar = true;
-                                
+
                                 if (esCondicional) {
                                   const valorCondicional = respuestas[pregunta.condicional.pregunta];
                                   const valorEsperado = pregunta.condicional.valor;
-                                  
+
                                   if (Array.isArray(valorCondicional)) {
                                     debeMostrar = valorCondicional.includes(valorEsperado);
                                   } else if (typeof valorCondicional === 'string') {
@@ -766,7 +785,7 @@ export default function CoordinacionesAdminPanel() {
                                     debeMostrar = false;
                                   }
                                 }
-                                
+
                                 if (!debeMostrar) return null;
 
                                 const valor = respuestas[pregunta.id];
@@ -778,11 +797,12 @@ export default function CoordinacionesAdminPanel() {
                                       <span className={styles.resumenLabel}>{pregunta.label}:</span>
                                       <div className={styles.resumenValor}>
                                         {valor.map((vela, idx) => (
-                                          <div key={idx} style={{ 
+                                          <div key={idx} style={{
                                             marginBottom: '0.5rem',
                                             padding: '0.5rem',
-                                            background: '#f1f8f4',
-                                            borderRadius: '4px'
+                                            background: 'rgba(255, 255, 255, 0.1)',
+                                            borderRadius: '4px',
+                                            color: '#fff'
                                           }}>
                                             <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
                                             <br />
@@ -842,9 +862,9 @@ export default function CoordinacionesAdminPanel() {
               ) : null}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
 }
-

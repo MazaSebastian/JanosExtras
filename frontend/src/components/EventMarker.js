@@ -5,7 +5,7 @@ import { eventosAPI } from '@/services/api';
 import { LoadingButton } from '@/components/Loading';
 import styles from '@/styles/EventMarker.module.css';
 
-export default function EventMarker({ date, salonId, onEventCreated, onClose }) {
+export default function EventMarker({ date, salonId, djId, onEventCreated, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,12 +18,17 @@ export default function EventMarker({ date, salonId, onEventCreated, onClose }) 
     try {
       setLoading(true);
       setError('');
-      
-      const fecha_evento = format(date, 'yyyy-MM-dd');
-      await eventosAPI.create({
-        salon_id: salonId,
-        fecha_evento,
-      });
+
+      const payload = {
+        salon_id: parseInt(salonId, 10),
+        fecha_evento: format(date, 'yyyy-MM-dd'),
+      };
+
+      if (djId) {
+        payload.dj_id = djId;
+      }
+
+      await eventosAPI.create(payload);
 
       if (onEventCreated) {
         onEventCreated();
@@ -32,7 +37,7 @@ export default function EventMarker({ date, salonId, onEventCreated, onClose }) 
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Error al marcar el evento';
       setError(errorMessage);
-      
+
       // Si la fecha ya está ocupada, cerrar el modal después de mostrar el error
       if (
         errorMessage.includes('ocupada') ||
@@ -53,7 +58,7 @@ export default function EventMarker({ date, salonId, onEventCreated, onClose }) 
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h3 className={styles.title}>Marcar Evento</h3>
-        
+
         <div className={styles.dateInfo}>
           <strong>Fecha:</strong>{' '}
           {format(date, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}

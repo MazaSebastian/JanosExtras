@@ -21,7 +21,15 @@ export default async function handler(req, res) {
       }
 
       const { salon_id, fecha_evento } = parsed.data;
-      const dj_id = auth.user.id;
+
+      let dj_id = auth.user.id;
+      let is_new_assignment = false;
+
+      // Allow admins to assign events directly to DJs
+      if (auth.user.rol === 'admin' && req.body.dj_id) {
+        dj_id = parseInt(req.body.dj_id, 10);
+        is_new_assignment = true;
+      }
 
       // Verificar que el salón existe
       const salon = await Salon.findById(salon_id);
@@ -35,7 +43,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Fecha inválida' });
       }
 
-      const event = await Event.create({ dj_id, salon_id, fecha_evento: fecha });
+      const event = await Event.create({ dj_id, salon_id, fecha_evento: fecha, is_new_assignment });
       res.status(201).json(event);
     } catch (error) {
       const knownConflicts = [

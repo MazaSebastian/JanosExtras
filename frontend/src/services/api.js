@@ -45,7 +45,7 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  register: (data) => api.post('/auth/register', data),
+  register: (data) => api.post('/auth/register', data, { baseURL: '/api' }),
   login: (data) => api.post('/auth/login', data),
   getProfile: () => api.get('/auth/profile'),
 };
@@ -78,14 +78,17 @@ export const eventosAPI = {
   getSummaryByRange: (startDate, endDate) =>
     requestSummary({ startDate, endDate }),
   delete: (id) => api.delete(`/eventos/${id}`),
+  getUnreadAssignments: () => api.get('/eventos/unread'),
+  markAssignmentsSeen: () => api.post('/eventos/mark-seen'),
 };
 
-// Admin API
 export const adminAPI = {
   getDashboard: (year, month) =>
     api.get('/admin/dashboard', { params: { year, month } }),
   updateDj: (djId, data) =>
     api.patch(`/admin/djs/${djId}`, data),
+  deleteDj: (djId) =>
+    api.delete(`/admin/djs/${djId}`),
   getDjEvents: (djId) =>
     api.get(`/admin/djs/${djId}/eventos`),
   getFichadas: (params = {}) =>

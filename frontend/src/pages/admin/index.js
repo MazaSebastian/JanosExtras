@@ -3,10 +3,11 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { adminAPI, salonesAPI, fichadasAPI } from '@/services/api';
+import { adminAPI, salonesAPI, fichadasAPI, authAPI } from '@/services/api';
 import { getAuth, clearAuth } from '@/utils/auth';
 import { getSalonColor } from '@/utils/colors';
 import Calendar from '@/components/Calendar';
+import EventMarker from '@/components/EventMarker';
 import SalonCoordinatesEditor from '@/components/SalonCoordinatesEditor';
 import ContenidoPanel from '@/components/ContenidoPanel';
 import CoordinacionesAdminPanel from '@/components/CoordinacionesAdminPanel';
@@ -53,6 +54,20 @@ export default function AdminDashboardPage() {
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [fichadas, setFichadas] = useState([]);
   const [loadingFichadas, setLoadingFichadas] = useState(false);
+  const [showEventMarker, setShowEventMarker] = useState(false);
+  const [selectedEventMarkerDate, setSelectedEventMarkerDate] = useState(null);
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
+
+  // New State for Creating DJs
+  const [creatingDj, setCreatingDj] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [createForm, setCreateForm] = useState({
+    nombre: '',
+    password: '',
+    salon_id: '',
+  });
+
   const [fichadasFilter, setFichadasFilter] = useState({
     djId: '',
     tipo: '',
@@ -168,6 +183,27 @@ export default function AdminDashboardPage() {
     setEditError('');
   };
 
+  const handleDeleteDj = async (dj) => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${dj.nombre}? Esta acción borrará TODO su historial en la empresa (eventos, fichadas).`)) {
+      return;
+    }
+
+    try {
+      await adminAPI.deleteDj(dj.id);
+      setData((prev) => ({
+        ...prev,
+        djs: prev.djs.filter((d) => d.id !== dj.id),
+      }));
+
+      if (editingDj && editingDj.id === dj.id) {
+        closeEditModal();
+      }
+    } catch (err) {
+      console.error('Error al eliminar DJ:', err);
+      alert(err.response?.data?.error || 'Ocurrió un error al intentar eliminar el DJ.');
+    }
+  };
+
   const handleEditChange = (field, value) => {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -213,6 +249,53 @@ export default function AdminDashboardPage() {
       setSavingEdit(false);
     }
   };
+
+  const openCreateModal = () => {
+    setCreateError('');
+    setCreateForm({
+      nombre: '',
+      password: '',
+      salon_id: '',
+    });
+    setCreatingDj(true);
+  };
+
+  const closeCreateModal = () => {
+    setCreatingDj(false);
+    setCreateError('');
+  };
+
+  const handleCreateChange = (field, value) => {
+    setCreateForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveCreate = async () => {
+    try {
+      setSavingCreate(true);
+      setCreateError('');
+
+      const payload = {
+        nombre: createForm.nombre.trim(),
+        password: createForm.password,
+        salon_id: parseInt(createForm.salon_id, 10),
+      };
+
+      // Calls the newly protected API route
+      await authAPI.register(payload);
+
+      // Reload dashboard data to show the new DJ
+      await loadDashboardData();
+      closeCreateModal();
+    } catch (err) {
+      console.error('Error al crear DJ:', err);
+      setCreateError(
+        err.response?.data?.error || 'No se pudo crear el DJ.'
+      );
+    } finally {
+      setSavingCreate(false);
+    }
+  };
+
 
   const handleLogout = () => {
     clearAuth();
@@ -447,42 +530,6 @@ export default function AdminDashboardPage() {
             </div>
           </header>
 
-          <section className={styles.filters}>
-            <div className={styles.filterGroup}>
-              <label>Año</label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.filterGroup}>
-              <label>Mes</label>
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              >
-                {months.map((month, index) => (
-                  <option key={month} value={index + 1}>
-                    {month}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              className={styles.refreshButton}
-              onClick={loadDashboardData}
-              disabled={loading}
-            >
-              {loading ? 'Actualizando...' : 'Actualizar'}
-            </button>
-          </section>
-
           {error && <div className={styles.error}>{error}</div>}
 
           {loading && !data ? (
@@ -491,7 +538,7 @@ export default function AdminDashboardPage() {
             data && (
               <>
                 {activeMenu === 'home' && (
-                  <section id="home" className={styles.homeSection}>
+                  <section id="home" className={`${styles.homeSection} ${styles.animatedSection}`}>
                     <div className={styles.homeHeader}>
                       <h2>Bienvenido, {user.nombre}</h2>
                       <p>Resumen general del sistema</p>
@@ -637,20 +684,30 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    <div className={styles.section} style={{ marginTop: '2rem' }}>
+                    <div className={`${styles.section} ${styles.animatedSection}`} style={{ marginTop: '2rem' }}>
                       <div className={styles.sectionHeader}>
                         <div>
                           <h2>DJs</h2>
                           <p>Actividad mensual por DJ</p>
                         </div>
-                        <button
-                          type="button"
-                          className={styles.exportButton}
-                          onClick={handleExportDJs}
-                          disabled={!data?.djs?.length}
-                        >
-                          Exportar CSV
-                        </button>
+                        <div className={styles.headerActionsGroup}>
+                          <button
+                            type="button"
+                            className={styles.primaryButton}
+                            onClick={openCreateModal}
+                            title="Crear un nuevo DJ"
+                          >
+                            + Crear DJ
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.exportButton}
+                            onClick={handleExportDJs}
+                            disabled={!data?.djs?.length}
+                          >
+                            Exportar CSV
+                          </button>
+                        </div>
                       </div>
                       <div className={styles.tableWrapper}>
                         <table className={styles.table}>
@@ -685,14 +742,27 @@ export default function AdminDashboardPage() {
                                       >
                                         {dj.nombre}
                                       </span>
-                                      <button
-                                        type="button"
-                                        className={styles.editButton}
-                                        onClick={() => openEditModal(dj)}
-                                        title={`Editar ${dj.nombre}`}
-                                      >
-                                        ✏️
-                                      </button>
+                                      <div className={styles.actionButtons}>
+                                        <button
+                                          type="button"
+                                          className={styles.editButton}
+                                          onClick={() => openEditModal(dj)}
+                                          title={`Editar ${dj.nombre}`}
+                                        >
+                                          ✏️
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={styles.deleteButton}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteDj(dj);
+                                          }}
+                                          title={`Eliminar ${dj.nombre}`}
+                                        >
+                                          🗑️
+                                        </button>
+                                      </div>
                                     </td>
                                     <td data-label="Rol">
                                       <span
@@ -727,7 +797,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 {activeMenu === 'salones' && (
-                  <section id="salones" className={styles.section}>
+                  <section id="salones" className={`${styles.section} ${styles.animatedSection}`}>
                     <div className={styles.sectionHeader}>
                       <div>
                         <h2>Salones</h2>
@@ -793,7 +863,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 {activeMenu === 'calendar' && (
-                  <section id="calendar" className={styles.section}>
+                  <section id="calendar" className={`${styles.section} ${styles.animatedSection}`}>
                     <div className={styles.sectionHeader}>
                       <div>
                         <h2>Calendario anual por DJ</h2>
@@ -865,13 +935,38 @@ export default function AdminDashboardPage() {
                         }
 
                         return (
-                          <Calendar
-                            salonId={selectedDj.salon_id}
-                            filterDjId={selectedDj.id}
-                            readOnly
-                            startDateFilter={calendarStartDate || undefined}
-                            endDateFilter={calendarEndDate || undefined}
-                          />
+                          <>
+                            <Calendar
+                              salonId={selectedDj.salon_id}
+                              filterDjId={selectedDj.id}
+                              readOnly
+                              adminMode={true}
+                              refreshTrigger={calendarRefreshKey}
+                              onDateClick={(date) => {
+                                setSelectedEventMarkerDate(date);
+                                setShowEventMarker(true);
+                              }}
+                              startDateFilter={calendarStartDate || undefined}
+                              endDateFilter={calendarEndDate || undefined}
+                            />
+                            {showEventMarker && selectedEventMarkerDate && (
+                              <EventMarker
+                                date={selectedEventMarkerDate}
+                                salonId={selectedDj.salon_id}
+                                djId={selectedDj.id}
+                                onEventCreated={() => {
+                                  setShowEventMarker(false);
+                                  setSelectedEventMarkerDate(null);
+                                  setCalendarRefreshKey((prev) => prev + 1);
+                                  loadDashboardData();
+                                }}
+                                onClose={() => {
+                                  setShowEventMarker(false);
+                                  setSelectedEventMarkerDate(null);
+                                }}
+                              />
+                            )}
+                          </>
                         );
                       })()
                     ) : (
@@ -881,7 +976,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 {activeMenu === 'fichadas' && data && (
-                  <section id="fichadas" className={styles.section}>
+                  <section id="fichadas" className={`${styles.section} ${styles.animatedSection}`}>
                     <div className={styles.sectionHeader}>
                       <div>
                         <h2>Fichadas</h2>
@@ -1060,31 +1155,31 @@ export default function AdminDashboardPage() {
                 )}
 
                 {activeMenu === 'contenido' && (
-                  <section id="contenido" className={styles.section}>
+                  <section id="contenido" className={`${styles.section} ${styles.animatedSection}`}>
                     <ContenidoPanel />
                   </section>
                 )}
 
                 {activeMenu === 'coordinaciones' && (
-                  <section id="coordinaciones" className={styles.section}>
+                  <section id="coordinaciones" className={`${styles.section} ${styles.animatedSection}`}>
                     <CoordinacionesAdminPanel />
                   </section>
                 )}
 
                 {activeMenu === 'anuncios' && (
-                  <section id="anuncios" className={styles.section}>
+                  <section id="anuncios" className={`${styles.section} ${styles.animatedSection}`}>
                     <AnunciosAdminPanel />
                   </section>
                 )}
 
                 {activeMenu === 'fechas-libres' && (
-                  <section id="fechas-libres" className={styles.section}>
+                  <section id="fechas-libres" className={`${styles.section} ${styles.animatedSection}`}>
                     <FechasLibresPanel />
                   </section>
                 )}
 
                 {activeMenu === 'check-in-tecnico' && (
-                  <section id="check-in-tecnico" className={styles.section}>
+                  <section id="check-in-tecnico" className={`${styles.section} ${styles.animatedSection}`}>
                     <CheckInTecnicoAdminPanel />
                   </section>
                 )}
@@ -1112,7 +1207,7 @@ export default function AdminDashboardPage() {
                         {editingDj.nombre} — {editingDj.salon_nombre || 'Sin salón'}
                       </p>
 
-                      {editError && <div className={styles.error}>{editError}</div>}
+                      {editError && <div className={styles.modalError}>{editError}</div>}
 
                       <div className={styles.modalForm}>
                         <label className={styles.modalLabel}>
@@ -1169,7 +1264,16 @@ export default function AdminDashboardPage() {
                       <div className={styles.modalActions}>
                         <button
                           type="button"
-                          className={styles.secondaryButton}
+                          className={styles.modalSecondaryButton}
+                          onClick={() => handleDeleteDj(editingDj)}
+                          disabled={savingEdit}
+                          style={{ marginRight: 'auto', background: 'rgba(244, 67, 54, 0.1)', color: '#ffcdd2', borderColor: 'rgba(244, 67, 54, 0.3)' }}
+                        >
+                          {savingEdit ? '...' : 'Eliminar DJ'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.modalSecondaryButton}
                           onClick={closeEditModal}
                           disabled={savingEdit}
                         >
@@ -1182,6 +1286,87 @@ export default function AdminDashboardPage() {
                           disabled={savingEdit || !editForm.nombre.trim()}
                         >
                           {savingEdit ? 'Guardando...' : 'Guardar cambios'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {creatingDj && (
+                  <div className={styles.modalOverlay}>
+                    <div
+                      className={styles.modalContent}
+                      onClick={(e) => e.stopPropagation()}
+                      role="dialog"
+                      aria-modal="true"
+                    >
+                      <h3 className={styles.modalTitle}>Crear Nuevo DJ</h3>
+                      <p className={styles.modalSubtitle}>
+                        Ingresa los datos para registrar un nuevo empleado en el sistema.
+                      </p>
+
+                      {createError && <div className={styles.modalError}>{createError}</div>}
+
+                      <div className={styles.modalForm}>
+                        <label className={styles.modalLabel}>
+                          Nombre
+                          <input
+                            type="text"
+                            value={createForm.nombre}
+                            onChange={(e) => handleCreateChange('nombre', e.target.value)}
+                            className={styles.modalInput}
+                            placeholder="Nombre del DJ"
+                            required
+                          />
+                        </label>
+
+                        <label className={styles.modalLabel}>
+                          Contraseña
+                          <input
+                            type="password"
+                            value={createForm.password}
+                            onChange={(e) => handleCreateChange('password', e.target.value)}
+                            className={styles.modalInput}
+                            placeholder="Mínimo 6 caracteres"
+                            minLength={6}
+                            required
+                          />
+                        </label>
+
+                        <label className={styles.modalLabel}>
+                          Salón Asignado
+                          <select
+                            value={createForm.salon_id}
+                            onChange={(e) => handleCreateChange('salon_id', e.target.value)}
+                            className={styles.modalSelect}
+                            required
+                          >
+                            <option value="">Seleccionar salón</option>
+                            {data.salones.map((salon) => (
+                              <option key={salon.id} value={salon.id}>
+                                {salon.nombre}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className={styles.modalActions}>
+                        <button
+                          type="button"
+                          className={styles.modalSecondaryButton}
+                          onClick={closeCreateModal}
+                          disabled={savingCreate}
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.primaryButton}
+                          onClick={handleSaveCreate}
+                          disabled={savingCreate || !createForm.nombre.trim() || !createForm.password.trim() || !createForm.salon_id}
+                        >
+                          {savingCreate ? 'Creando...' : 'Crear DJ'}
                         </button>
                       </div>
                     </div>

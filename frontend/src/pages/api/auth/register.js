@@ -1,5 +1,6 @@
 import { DJ } from '@/lib/models/DJ.js';
 import { registerSchema } from '@/utils/validation.js';
+import { authenticateToken } from '@/lib/auth.js';
 import * as Sentry from '@sentry/nextjs';
 
 export default async function handler(req, res) {
@@ -8,6 +9,18 @@ export default async function handler(req, res) {
   }
 
   try {
+    // 1. Autenticar y autorizar: solo admins pueden crear usuarios
+    const authResult = authenticateToken(req);
+    if (authResult.error) {
+      return res.status(authResult.status).json({ error: authResult.error });
+    }
+
+    const user = authResult.user;
+    if (user.rol !== 'admin') {
+      return res.status(403).json({ error: 'Acceso denegado: Solo los administradores pueden crear DJs' });
+    }
+
+    // 2. Validar datos
     const parsed = registerSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });

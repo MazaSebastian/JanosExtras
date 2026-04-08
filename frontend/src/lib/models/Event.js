@@ -3,7 +3,7 @@ import pool from '../database-config.js';
 const MAX_DJS_PER_EVENT = 3;
 
 export class Event {
-  static async create({ dj_id, salon_id, fecha_evento }) {
+  static async create({ dj_id, salon_id, fecha_evento, is_new_assignment = false }) {
     const normalizedDate = new Date(fecha_evento);
     const existingForSalon = await pool.query(
       `
@@ -26,11 +26,11 @@ export class Event {
 
     const fechaMarcado = new Date().toISOString();
     const query = `
-      INSERT INTO eventos (dj_id, salon_id, fecha_evento, confirmado, fecha_marcado)
-      VALUES ($1, $2, $3, true, $4)
+      INSERT INTO eventos (dj_id, salon_id, fecha_evento, confirmado, fecha_marcado, is_new_assignment)
+      VALUES ($1, $2, $3, true, $4, $5)
       RETURNING *
     `;
-    const result = await pool.query(query, [dj_id, salon_id, normalizedDate, fechaMarcado]);
+    const result = await pool.query(query, [dj_id, salon_id, normalizedDate, fechaMarcado, is_new_assignment]);
     return result.rows[0];
   }
 
@@ -180,7 +180,7 @@ export class Event {
     // Buscar todos los eventos de una fecha específica
     // fecha puede ser un string "YYYY-MM-DD" o un objeto Date
     let fechaParaQuery;
-    
+
     if (typeof fecha === 'string') {
       // Si es string, usarlo directamente (formato YYYY-MM-DD)
       fechaParaQuery = fecha;
@@ -225,6 +225,18 @@ export class Event {
     `;
     const result = await pool.query(query, [event_id, dj_id]);
     return result.rows[0];
+  }
+
+  static async countUnreadAssignments(dj_id) {
+    const query = `SELECT COUNT(*) FROM eventos WHERE dj_id = $1 AND is_new_assignment = true`;
+    const result = await pool.query(query, [dj_id]);
+    return parseInt(result.rows[0].count, 10);
+  }
+
+  static async markAssignmentsSeen(dj_id) {
+    const query = `UPDATE eventos SET is_new_assignment = false WHERE dj_id = $1 AND is_new_assignment = true RETURNING *`;
+    const result = await pool.query(query, [dj_id]);
+    return result.rows;
   }
 }
 

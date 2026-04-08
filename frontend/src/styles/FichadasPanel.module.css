@@ -1,8 +1,7 @@
 .panel {
-  background: white;
+  background: transparent;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -17,7 +16,7 @@
   gap: 1.5rem;
   flex-wrap: wrap;
   padding-bottom: 1.5rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .subtitle {
@@ -25,7 +24,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.75rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 600;
 }
 
@@ -33,11 +32,7 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #fff;
 }
 
 .actions {
@@ -70,14 +65,14 @@
 }
 
 .secondaryButton {
-  background: #f5f5f5;
-  color: #333;
-  border: 2px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .secondaryButton:hover:not(:disabled) {
-  background: #e8e8e8;
-  border-color: #d0d0d0;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .primaryButton:disabled,
@@ -88,16 +83,19 @@
 }
 
 .statusCard {
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e8ecf4;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .statusLabel {
   margin: 0;
   font-size: 0.85rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -107,23 +105,26 @@
   margin: 0.75rem 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
 }
 
 .statusDetail {
   margin: 0;
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .listContainer {
-  background: #fafafa;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  border: 1px solid #e8e8e8;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .listHeader {
@@ -133,17 +134,17 @@
   margin-bottom: 0.5rem;
 }
 
-.listHeader > h5 {
+.listHeader>h5 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
 }
 
 .toggleButton {
-  background: transparent;
-  border: 1px solid #772c87;
-  color: #772c87;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
   border-radius: 6px;
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -153,10 +154,10 @@
 }
 
 .toggleButton:hover {
-  background: #772c87;
-  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(119, 44, 135, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .listEmpty {
@@ -167,7 +168,7 @@
 }
 
 .dayBlock {
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1rem;
   margin-top: 0.5rem;
 }
@@ -182,7 +183,7 @@
   margin: 0 0 0.75rem 0;
   font-weight: 600;
   font-size: 1rem;
-  color: #333;
+  color: #fff;
   text-transform: capitalize;
 }
 
@@ -251,7 +252,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
 }
 
 .locationError {
@@ -267,7 +268,7 @@
   gap: 0.5rem;
 }
 
-.locationError > div {
+.locationError>div {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -318,5 +319,3 @@
     margin-top: 0.5rem;
   }
 }
-
-

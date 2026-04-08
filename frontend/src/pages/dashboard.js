@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getAuth } from '@/utils/auth';
-import { salonesAPI } from '@/services/api';
+import { salonesAPI, eventosAPI } from '@/services/api';
 import Loading from '@/components/Loading';
 import SalonSelector from '@/components/SalonSelector';
 import Calendar from '@/components/Calendar';
@@ -23,6 +23,16 @@ export default function DashboardPage() {
   const [eventToDelete, setEventToDelete] = useState(null);
   const [userSalonInfo, setUserSalonInfo] = useState(null);
   const [loadingSalonInfo, setLoadingSalonInfo] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnread = async () => {
+    try {
+      const res = await eventosAPI.getUnreadAssignments();
+      setUnreadCount(res.data.unread || 0);
+    } catch (error) {
+      console.error('Error fetching unread:', error);
+    }
+  };
 
   useEffect(() => {
     const auth = getAuth();
@@ -37,11 +47,22 @@ export default function DashboardPage() {
     }
 
     setUser(auth.user);
+    fetchUnread();
     if (auth.user.salon_id) {
       setSelectedSalon(auth.user.salon_id);
       fetchUserSalon(auth.user.salon_id);
     }
   }, [router]);
+
+  const handleMarkSeen = async () => {
+    try {
+      await eventosAPI.markAssignmentsSeen();
+      setUnreadCount(0);
+      document.querySelector(`.${styles.calendarSection}`)?.scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+      console.error('Error marcando leídos:', err);
+    }
+  };
 
   const fetchUserSalon = async (salonId) => {
     if (!salonId) return;
@@ -73,7 +94,7 @@ export default function DashboardPage() {
         if (scrollPosition > 0) {
           window.scrollTo(0, scrollPosition);
         }
-        
+
         // Restaurar scroll del contenedor si existe
         if (scrollContainer && containerScrollTop > 0) {
           scrollContainer.scrollTop = containerScrollTop;
@@ -100,7 +121,7 @@ export default function DashboardPage() {
       alert('Por favor, selecciona un salón primero');
       return;
     }
-    
+
     // Verificar si la fecha ya tiene un evento (esto se hace en el Calendar también, pero por seguridad)
     setSelectedDate(date);
     setShowEventMarker(true);
@@ -127,7 +148,20 @@ export default function DashboardPage() {
   return (
     <DJLayout user={user}>
       <div className={styles.container}>
-        <Dashboard 
+        {unreadCount > 0 && (
+          <div
+            className={styles.unreadBanner}
+            onClick={handleMarkSeen}
+            role="button"
+            tabIndex={0}
+          >
+            <span className={styles.bannerIcon}>🔔</span>
+            <span className={styles.bannerText}>
+              Gerencia te ha asignado {unreadCount === 1 ? 'un nuevo evento' : 'nuevos eventos'}. Click aca para ver.
+            </span>
+          </div>
+        )}
+        <Dashboard
           refreshTrigger={dashboardRefreshKey}
           onRefresh={setDashboardRefreshFn}
           salonInfo={userSalonInfo}

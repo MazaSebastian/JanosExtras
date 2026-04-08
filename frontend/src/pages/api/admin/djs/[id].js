@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/nextjs';
 export default async function handler(req, res) {
   const { id } = req.query;
 
-  if (req.method !== 'PATCH') {
+  if (req.method !== 'PATCH' && req.method !== 'DELETE') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
@@ -15,6 +15,21 @@ export default async function handler(req, res) {
     return res.status(auth.status).json({ error: auth.error });
   }
 
+  if (req.method === 'DELETE') {
+    try {
+      const targetDj = await DJ.findById(parseInt(id, 10));
+      if (!targetDj) {
+        return res.status(404).json({ error: 'DJ no encontrado' });
+      }
+
+      await DJ.deleteById(parseInt(id, 10));
+      return res.json({ message: 'DJ y todo su historial eliminado correctamente' });
+    } catch (error) {
+      Sentry.captureException(error);
+      console.error('Error al eliminar DJ:', error);
+      return res.status(500).json({ error: 'Error al eliminar DJ' });
+    }
+  }
   try {
     const parsed = updateDjSchema.safeParse({
       nombre: req.body?.nombre,

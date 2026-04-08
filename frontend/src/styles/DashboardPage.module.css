@@ -108,7 +108,7 @@
   }
 
   .calendarSection,
-  .content > * {
+  .content>* {
     padding: 20px;
   }
 }
@@ -137,3 +137,46 @@
   }
 }
 
+.unreadBanner {
+  background: linear-gradient(135deg, #FF6B6B 0%, #D32F2F 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: pulseLight 2s infinite;
+}
+
+.unreadBanner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+  animation: none;
+}
+
+.bannerIcon {
+  font-size: 24px;
+}
+
+.bannerText {
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+}
+
+@keyframes pulseLight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+  }
+}

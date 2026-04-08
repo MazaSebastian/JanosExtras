@@ -27,17 +27,20 @@
 }
 
 .filtersSection {
-  background: white;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   margin-bottom: 2rem;
 }
 
 .filtersSection h3 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: #fff;
   font-size: 1.2rem;
 }
 
@@ -56,23 +59,30 @@
 
 .filterGroup label {
   font-weight: 600;
-  color: #333;
+  color: #fff;
   font-size: 0.9rem;
 }
 
 .select,
 .input {
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
   font-size: 0.9rem;
+}
+
+.select option {
+  color: #333;
 }
 
 .select:focus,
 .input:focus {
   outline: none;
-  border-color: #772c87;
-  box-shadow: 0 0 0 2px rgba(119, 44, 135, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
 .filterActions {
@@ -83,10 +93,10 @@
 
 .resetButton {
   padding: 0.75rem 1.5rem;
-  background: #f5f5f5;
-  color: #666;
-  border: none;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -94,7 +104,7 @@
 }
 
 .resetButton:hover {
-  background: #e0e0e0;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .summary {
@@ -105,17 +115,21 @@
 }
 
 .summaryCard {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   text-align: center;
+  color: #fff;
 }
 
 .summaryLabel {
   display: block;
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 0.5rem;
 }
 
@@ -123,46 +137,50 @@
   display: block;
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
 }
 
 .checkInsTable {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   overflow-x: auto;
-  color: #1a1a1a !important;
+  color: #fff !important;
 }
 
 .checkInsTable table {
   width: 100%;
   border-collapse: collapse;
-  color: #1a1a1a !important;
+  color: #fff !important;
 }
 
 .checkInsTable th {
-  background: #772c87;
+  background: rgba(0, 0, 0, 0.2);
   color: white !important;
   padding: 1rem;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .checkInsTable td {
   padding: 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.9rem;
-  color: #1a1a1a !important;
-  background-color: white !important;
+  color: #fff !important;
+  background-color: transparent !important;
 }
 
 .checkInsTable td *:not(.estadoBadge):not(.viewButton) {
-  color: #1a1a1a !important;
+  color: #fff !important;
 }
 
 .checkInsTable tr:hover {
-  background: #f9f9f9 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .emptyState {
@@ -206,7 +224,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,14 +233,18 @@
 }
 
 .modalContent {
-  background: white;
+  background: rgba(30, 20, 60, 0.85);
+  /* Deep glassmorphic violet */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  color: #333;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  color: #fff;
 }
 
 .modalHeader {
@@ -230,12 +252,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .modalHeader h3 {
   margin: 0;
-  color: #333;
+  color: #fff;
   font-size: 1.5rem;
 }
 
@@ -243,7 +266,7 @@
   background: none;
   border: none;
   font-size: 2rem;
-  color: #666;
+  color: #fff;
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -251,26 +274,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.2s;
 }
 
 .closeButton:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 .modalBody {
   padding: 1.5rem;
-  color: #333;
-  background: white;
+  color: #fff;
+  background: transparent;
 }
 
 .detailRow {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  color: #1a1a1a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff !important;
 }
 
 .detailRow:last-child {
@@ -278,35 +301,35 @@
 }
 
 .detailRow strong {
-  color: #1a1a1a !important;
+  color: #fff !important;
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
 .detailRow span {
-  color: #1a1a1a !important;
+  color: #fff !important;
 }
 
-.detailRow > *:not(strong):not(span) {
-  color: #1a1a1a !important;
+.detailRow>*:not(strong):not(span) {
+  color: #fff !important;
 }
 
 .detailRow p {
   margin: 0.5rem 0 0 0;
-  color: #1a1a1a !important;
+  color: #fff !important;
   line-height: 1.5;
 }
 
 .equiposSection {
   margin-top: 1.5rem;
-  color: #1a1a1a;
+  color: #fff;
 }
 
 .equiposSection strong {
   display: block;
   margin-bottom: 1rem;
-  color: #1a1a1a;
+  color: #fff;
   font-weight: 600;
 }
 
@@ -317,11 +340,13 @@
 }
 
 .equipoItem {
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.05);
   padding: 1rem;
-  border-radius: 6px;
-  border-left: 4px solid #772c87;
-  color: #1a1a1a;
+  border-radius: 8px;
+  border-left: 4px solid #9a4da8;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left-width: 4px;
 }
 
 .equipoHeader {
@@ -333,20 +358,19 @@
 
 .equipoNombre {
   font-weight: 600;
-  color: #1a1a1a;
+  color: #fff;
 }
 
 .equipoObservaciones {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
 }
 
 .equipoObservaciones strong {
-  color: #1a1a1a;
+  color: #fff;
   font-weight: 600;
 }
-

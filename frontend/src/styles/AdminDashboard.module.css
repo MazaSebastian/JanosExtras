@@ -9,6 +9,22 @@
   position: relative;
 }
 
+@keyframes slideInLateral {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animatedSection {
+  animation: slideInLateral 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .sidebar {
   width: 260px;
   padding: 2rem 1.5rem;
@@ -393,6 +409,18 @@
   color: #ffe2e2;
 }
 
+.modalError {
+  background: rgba(255, 82, 82, 0.1);
+  color: #ffcdd2;
+  /* Light red for visibility on dark glassmorphism backdrops */
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
 .hamburgerButton {
   display: none;
   position: fixed;
@@ -511,9 +539,12 @@
 
   .container {
     padding: 1.5rem;
-    padding-top: 5.5rem; /* Espacio para el botón hamburguesa */
-    padding-left: 1.5rem; /* Padding simétrico */
-    padding-right: 1.5rem; /* Padding simétrico */
+    padding-top: 5.5rem;
+    /* Espacio para el botón hamburguesa */
+    padding-left: 1.5rem;
+    /* Padding simétrico */
+    padding-right: 1.5rem;
+    /* Padding simétrico */
     max-width: 100vw;
     width: 100%;
     box-sizing: border-box;
@@ -523,9 +554,10 @@
   }
 
   /* Contenedor interno para centrar el contenido */
-  .container > * {
+  .container>* {
     width: 100%;
-    max-width: calc(100vw - 4rem - 48px); /* Compensar botón hamburguesa */
+    max-width: calc(100vw - 4rem - 48px);
+    /* Compensar botón hamburguesa */
     margin-left: auto;
     margin-right: auto;
   }
@@ -656,10 +688,32 @@
   transform: scale(1.1);
 }
 
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.deleteButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #ff5252;
+  transition: transform 0.2s ease;
+}
+
+.deleteButton:hover {
+  transform: scale(1.1);
+}
+
 .modalOverlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -668,13 +722,16 @@
 }
 
 .modalContent {
-  background: #fff;
-  color: #333;
+  background: rgba(30, 20, 60, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
   border-radius: 20px;
   padding: 2rem;
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
@@ -705,7 +762,7 @@
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
-  color: #666;
+  color: #fff;
   padding: 0;
   width: 32px;
   height: 32px;
@@ -717,19 +774,19 @@
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #333;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 .modalTitle {
   margin: 0;
   font-size: 1.5rem;
-  color: #772c87;
+  color: #fff;
 }
 
 .modalSubtitle {
   margin: 0.25rem 0 1.25rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .modalForm {
@@ -743,13 +800,13 @@
   flex-direction: column;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #555;
+  color: #fff;
   gap: 0.4rem;
 }
 
 .fieldHint {
   font-size: 0.75rem;
-  color: #888;
+  color: rgba(255, 255, 255, 0.6);
   margin-top: 0.25rem;
 }
 
@@ -757,12 +814,19 @@
 .modalSelect {
   padding: 0.65rem 0.8rem;
   border-radius: 10px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
   font-size: 1rem;
 }
 
 .modalSelect {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  /* overridden by modalInput combo but safe to keep */
+}
+
+.modalSelect option {
+  color: #333;
 }
 
 .colorField {
@@ -786,7 +850,24 @@
   margin-top: 1.5rem;
 }
 
+.modalSecondaryButton {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.modalSecondaryButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 @media (max-width: 768px) {
+
   /* Modal desplegable desde abajo en móviles */
   .modalOverlay {
     align-items: flex-end;
@@ -847,6 +928,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -923,7 +1005,11 @@
   text-align: center;
   padding: 1rem;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 0.95rem;
 }
 
@@ -934,11 +1020,13 @@
 .eventsSummary {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: rgba(119, 44, 135, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: #772c87;
+  color: #fff;
   font-size: 1rem;
   text-align: center;
+  font-weight: 500;
 }
 
 .eventsTableWrapper {
@@ -1161,3 +1249,9 @@
   }
 }
 
+
+.headerActionsGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}

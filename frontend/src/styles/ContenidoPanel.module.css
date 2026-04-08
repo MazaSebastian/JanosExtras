@@ -1,8 +1,7 @@
 .panel {
-  background: white;
+  background: transparent;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -17,7 +16,7 @@
   gap: 1.5rem;
   flex-wrap: wrap;
   padding-bottom: 1.5rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .subtitle {
@@ -25,7 +24,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.75rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 600;
 }
 
@@ -33,11 +32,7 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #333;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #fff;
 }
 
 .addButton {
@@ -76,7 +71,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,21 +80,25 @@
 }
 
 .formContent {
-  background: white;
+  background: rgba(30, 20, 60, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   padding: 2rem;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  color: #fff;
 }
 
 .formContent h4 {
   margin: 0 0 1.5rem 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
 }
 
 .formGroup {
@@ -110,7 +109,7 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #333;
+  color: #fff;
   font-size: 0.9rem;
 }
 
@@ -118,16 +117,20 @@
 .formGroup textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #772c87;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
 .formActions {
@@ -153,9 +156,9 @@
 }
 
 .cancelButton {
-  background: #f5f5f5;
-  color: #333;
-  border: 2px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
@@ -164,8 +167,8 @@
 }
 
 .cancelButton:hover {
-  background: #e8e8e8;
-  border-color: #d0d0d0;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .filters {
@@ -182,20 +185,21 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 2px solid #e0e0e0;
-  background: white;
-  color: #666;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .filterActive {
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
-  color: white;
-  border-color: transparent;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .filterButton:hover {
-  border-color: #772c87;
-  color: #772c87;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .grid {
@@ -205,19 +209,23 @@
 }
 
 .card {
-  background: #fafafa;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e8e8e8;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .cardHeader {
@@ -231,7 +239,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
   flex: 1;
 }
 
@@ -263,7 +271,7 @@
 
 .description {
   margin: 0;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -300,30 +308,36 @@
 }
 
 .editButton {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .editButton:hover {
-  background: #e8e8e8;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .deleteButton {
-  background: #fff5f5;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
+  background: rgba(244, 67, 54, 0.1);
+  color: #ffcdd2;
+  border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
 .deleteButton:hover {
-  background: #ffebee;
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.5);
 }
 
 .loading,
 .empty {
   text-align: center;
   padding: 3rem;
-  color: #999;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
   font-size: 1.1rem;
 }
 
@@ -360,8 +374,8 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
 }
-

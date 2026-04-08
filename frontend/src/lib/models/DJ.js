@@ -63,5 +63,28 @@ export class DJ {
     const result = await pool.query(query, values);
     return result.rows[0];
   }
+
+  static async deleteById(id) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Cascade delete dependent records
+      await client.query('DELETE FROM google_calendar_tokens WHERE dj_id = $1', [id]);
+      await client.query('DELETE FROM eventos WHERE dj_id = $1', [id]);
+      await client.query('DELETE FROM fichadas WHERE dj_id = $1', [id]);
+
+      // Delete the DJ
+      const result = await client.query('DELETE FROM djs WHERE id = $1 RETURNING id', [id]);
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
 }
 
