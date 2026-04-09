@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { formatDateFromDB } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
 import { getAuth } from '@/utils/auth';
-import { eventosAPI, fichadasAPI, coordinacionesAPI } from '@/services/api';
+import { eventosAPI, fichadasAPI, coordinacionesAPI, salonesAPI } from '@/services/api';
 import DJLayout from '@/components/DJLayout';
 import AnunciosDisplay from '@/components/AnunciosDisplay';
 import Loading, { SkeletonCard } from '@/components/Loading';
@@ -17,6 +17,7 @@ export default function DJHomePage() {
   const [summary, setSummary] = useState(null);
   const [recentFichadas, setRecentFichadas] = useState([]);
   const [upcomingCoordinaciones, setUpcomingCoordinaciones] = useState([]);
+  const [salonNombre, setSalonNombre] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -42,6 +43,18 @@ export default function DJHomePage() {
       // Cargar resumen de eventos
       const summaryRes = await eventosAPI.getMonthlySummary(year, month);
       setSummary(summaryRes.data);
+
+      // Cargar info del salón si el DJ tiene uno
+      if (user.salon_id) {
+        try {
+          const salonRes = await salonesAPI.getById(user.salon_id);
+          if (salonRes.data?.nombre) {
+            setSalonNombre(salonRes.data.nombre);
+          }
+        } catch (e) {
+          console.warn('Error al cargar salón');
+        }
+      }
 
       // Cargar últimas fichadas (últimas 5)
       const fichadasRes = await fichadasAPI.list({ limit: 5 });
@@ -76,7 +89,9 @@ export default function DJHomePage() {
       <div className={styles.homeContainer}>
         <div className={styles.header}>
           <h1 className={styles.title}>Bienvenido, {user.nombre}</h1>
-          <p className={styles.subtitle}>Resumen de tus actividades</p>
+          <p className={styles.subtitle}>
+            {salonNombre ? `📍 ${salonNombre} • ` : ''}Resumen de tus actividades
+          </p>
         </div>
 
         <AnunciosDisplay />

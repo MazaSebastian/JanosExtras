@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { format } from 'date-fns';
 import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
@@ -23,16 +23,64 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
   const isRangeActive =
     Boolean(activeRange?.startDate) && Boolean(activeRange?.endDate);
 
+  const loadSummaryRef = useRef(null);
+
+  const loadSummary = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = isRangeActive
+        ? await eventosAPI.getSummaryByRange(
+          activeRange.startDate,
+          activeRange.endDate
+        )
+        : await eventosAPI.getMonthlySummary(selectedYear, selectedMonth);
+      const data = response.data || {};
+
+      const totalEventosHistoricos = parseInt(data.total_eventos, 10) || 0;
+      const eventosDelPeriodo =
+        parseInt(data.eventos_mes ?? data.total_eventos, 10) || 0;
+      const eventosExtras = isRangeActive
+        ? (data.eventos_extras ?? Math.max(0, eventosDelPeriodo - 8))
+        : 0;
+
+      const cotizacionExtra = data.cotizacion_extra || 47000;
+      const sueldoAdicional = eventosExtras * cotizacionExtra;
+
+      setSummary({
+        ...data,
+        total_eventos: isRangeActive ? eventosDelPeriodo : totalEventosHistoricos,
+        total_eventos_historicos: totalEventosHistoricos,
+        eventos_mes: eventosDelPeriodo,
+        eventos_extras: eventosExtras,
+        sueldo_adicional: sueldoAdicional,
+        cotizacion_extra: cotizacionExtra
+      });
+      setDetailVisible(false);
+      setDetailEvents([]);
+      setDetailError('');
+    } catch (err) {
+      console.error('Error al cargar resumen:', err);
+      setSummary(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear, selectedMonth, isRangeActive, activeRange]);
+
+  // Keep ref in sync so parent can call latest version
+  loadSummaryRef.current = loadSummary;
+
   useEffect(() => {
     loadSummary();
-  }, [selectedYear, selectedMonth, refreshTrigger, activeRange]);
+  }, [loadSummary, refreshTrigger]);
 
-  // Exponer función de recarga manual
+  // Expose refresh function to parent — runs ONCE on mount only.
+  // Uses a ref wrapper so the parent always calls the latest loadSummary.
   useEffect(() => {
     if (onRefresh) {
-      onRefresh(loadSummary);
+      onRefresh(() => { loadSummaryRef.current(); });
     }
-  }, [onRefresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const downloadCSV = (rows, filename) => {
     const csvContent = rows
@@ -167,59 +215,7 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
     }
   };
 
-  const loadSummary = async () => {
-    try {
-      setLoading(true);
-      const response = isRangeActive
-        ? await eventosAPI.getSummaryByRange(
-          activeRange.startDate,
-          activeRange.endDate
-        )
-        : await eventosAPI.getMonthlySummary(selectedYear, selectedMonth);
-      const data = response.data || {};
-
-      const totalEventosHistoricos = parseInt(data.total_eventos, 10) || 0;
-      const eventosDelPeriodo =
-        parseInt(data.eventos_mes ?? data.total_eventos, 10) || 0;
-      const eventosExtras = isRangeActive
-        ? (data.eventos_extras ?? Math.max(0, eventosDelPeriodo - 8))
-        : 0;
-
-      const cotizacionExtra = data.cotizacion_extra || 47000;
-      const sueldoAdicional = eventosExtras * cotizacionExtra;
-
-      // Logs de debug (remover en producción)
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📊 Resumen mensual cargado:', {
-          año: selectedYear,
-          mes: selectedMonth,
-          total_eventos: totalEventosHistoricos,
-          eventos_extras: eventosExtras,
-          sueldo_adicional: sueldoAdicional,
-          cotizacion_extra: cotizacionExtra,
-          raw_data: data
-        });
-      }
-
-      setSummary({
-        ...data,
-        total_eventos: isRangeActive ? eventosDelPeriodo : totalEventosHistoricos,
-        total_eventos_historicos: totalEventosHistoricos,
-        eventos_mes: eventosDelPeriodo,
-        eventos_extras: eventosExtras,
-        sueldo_adicional: sueldoAdicional,
-        cotizacion_extra: cotizacionExtra
-      });
-      setDetailVisible(false);
-      setDetailEvents([]);
-      setDetailError('');
-    } catch (err) {
-      console.error('Error al cargar resumen:', err);
-      setSummary(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // loadSummary is now defined above via useCallback
 
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',

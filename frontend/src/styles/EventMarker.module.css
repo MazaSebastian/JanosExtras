@@ -15,9 +15,41 @@
   background: white;
   border-radius: 16px;
   padding: 32px;
-  max-width: 400px;
+  max-width: 500px;
   width: 90%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #772c87;
 }
 
 .title {
@@ -92,6 +124,7 @@
 }
 
 @media (max-width: 768px) {
+
   /* Modal desplegable desde abajo en móviles */
   .overlay {
     align-items: flex-end;
@@ -131,8 +164,8 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
 }
-

@@ -38,6 +38,7 @@ export class Coordinacion {
         c.titulo,
         c.descripcion,
         c.nombre_cliente,
+        c.nombre_agasajado,
         c.telefono,
         c.tipo_evento,
         c.codigo_evento,
@@ -91,6 +92,7 @@ export class Coordinacion {
         c.titulo,
         c.descripcion,
         c.nombre_cliente,
+        c.nombre_agasajado,
         c.telefono,
         c.tipo_evento,
         c.codigo_evento,
@@ -129,7 +131,7 @@ export class Coordinacion {
     return result.rows[0] || null;
   }
 
-  static async create({ titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por }) {
+  static async create({ titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por }) {
     // Asegurar que fecha_evento sea un string YYYY-MM-DD o null
     // PostgreSQL DATE debe recibir el string directamente, no un objeto Date
     let fechaEventoParaDB = null;
@@ -148,22 +150,23 @@ export class Coordinacion {
         }
       }
     }
-    
+
     console.log('[Coordinacion.create] Fecha para DB:', {
       recibida: fecha_evento,
       procesada: fechaEventoParaDB,
       tipo: typeof fecha_evento
     });
-    
+
     const query = `
-      INSERT INTO coordinaciones (titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por)
-      VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8, $9, $10, $11, $12, $13, $14)
-      RETURNING id, titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion
+      INSERT INTO coordinaciones (titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::date, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING id, titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion
     `;
     const result = await pool.query(query, [
       titulo,
       descripcion || null,
       nombre_cliente || null,
+      nombre_agasajado || null,
       telefono || null,
       tipo_evento || null,
       codigo_evento || null,
@@ -176,13 +179,13 @@ export class Coordinacion {
       notas || null,
       creado_por,
     ]);
-    
+
     console.log('[Coordinacion.create] Fecha guardada en DB:', result.rows[0]?.fecha_evento);
-    
+
     return result.rows[0];
   }
 
-  static async update(id, { titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link }) {
+  static async update(id, { titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link }) {
     const updates = [];
     const values = [];
     let paramIndex = 1;
@@ -200,6 +203,11 @@ export class Coordinacion {
     if (nombre_cliente !== undefined) {
       updates.push(`nombre_cliente = $${paramIndex}`);
       values.push(nombre_cliente);
+      paramIndex++;
+    }
+    if (nombre_agasajado !== undefined) {
+      updates.push(`nombre_agasajado = $${paramIndex}`);
+      values.push(nombre_agasajado);
       paramIndex++;
     }
     if (telefono !== undefined) {
@@ -348,9 +356,9 @@ export class Coordinacion {
       UPDATE coordinaciones
       SET ${updates.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link
+      RETURNING id, titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, fecha_actualizacion, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link
     `;
-    
+
     try {
       const result = await pool.query(query, values);
       return result.rows[0] || null;

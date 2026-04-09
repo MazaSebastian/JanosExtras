@@ -10,14 +10,14 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const { activo, estado, dj_responsable_id, salon_id } = req.query;
-      
+
       // Si es DJ (no admin), filtrar automáticamente por su ID
       // Los admins pueden ver todas o filtrar manualmente
       let djFilterId = dj_responsable_id ? parseInt(dj_responsable_id, 10) : null;
       if (auth.user.rol !== 'admin' && !djFilterId) {
         djFilterId = auth.user.id;
       }
-      
+
       const coordinaciones = await Coordinacion.findAll({
         activo: activo === 'false' ? false : activo === 'true' ? true : null,
         estado: estado || null,
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { titulo, descripcion, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas } = req.body;
+      const { titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas } = req.body;
 
       // Generar título automáticamente si no se proporciona
       const tituloFinal = titulo || (nombre_cliente ? `${nombre_cliente} - ${tipo_evento || 'Evento'}` : 'Nueva Coordinación');
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
           fechaEventoNormalizada = `${year}-${month}-${day}`;
         }
       }
-      
+
       // Log para debugging (siempre activo para diagnosticar)
       console.log('[Coordinaciones API] Normalización de fecha:', {
         original: fecha_evento,
@@ -96,6 +96,7 @@ export default async function handler(req, res) {
         titulo: tituloFinal,
         descripcion: descripcion || null,
         nombre_cliente: nombre_cliente || null,
+        nombre_agasajado: nombre_agasajado || null,
         telefono: telefono || null,
         tipo_evento: tipo_evento || null,
         codigo_evento: codigo_evento || null,

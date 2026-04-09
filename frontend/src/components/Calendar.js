@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { eventosAPI } from '@/services/api';
+import { eventosAPI, coordinacionesAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
 import { getFeriadosMap, esFeriado } from '@/utils/feriados';
 import styles from '@/styles/Calendar.module.css';
@@ -22,6 +22,7 @@ export default function Calendar({
 }) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [rawEvents, setRawEvents] = useState([]);
+  const [rawCoords, setRawCoords] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Mapa de feriados para el año actual y años adyacentes (para meses que muestran días de otros años)
@@ -42,9 +43,12 @@ export default function Calendar({
 
     try {
       setLoading(true);
-      const response = await eventosAPI.getBySalon(salonId, currentYear);
-      const eventsData = response.data || [];
-      setRawEvents(eventsData);
+      const [eventsRes, coordsRes] = await Promise.all([
+        eventosAPI.getBySalon(salonId, currentYear),
+        coordinacionesAPI.getAll({ activo: true }).catch(() => ({ data: [] }))
+      ]);
+      setRawEvents(eventsRes.data || []);
+      setRawCoords(coordsRes.data || []);
     } catch (err) {
       console.error('Error al cargar eventos:', err);
     } finally {
@@ -96,6 +100,60 @@ export default function Calendar({
     if (!date) return [];
     const dateKey = format(date, 'yyyy-MM-dd');
     return eventsByDate.get(dateKey) || [];
+  };
+
+  // ── Coordination status map ──
+  const coordsByDate = useMemo(() => {
+    const map = new Map();
+    rawCoords.forEach((coord) => {
+      if (!coord.fecha_evento) return;
+      const key = coord.fecha_evento.split('T')[0];
+      if (!key) return;
+      // Store all coordinations for a given date (may be multiple salons)
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(coord);
+    });
+    return map;
+  }, [rawCoords]);
+
+  /**
+   * Returns { color: 'red'|'yellow'|'green'|null, label: string }
+   * RED    = coordination not started / pre-coord not sent
+   * YELLOW = pre-coord completed by client OR coordination has pending items (en_proceso)
+   * GREEN  = coordination fully completed
+   */
+  const getCoordStatus = (dateKey, salonIdTarget) => {
+    const coordsForDate = coordsByDate.get(dateKey) || [];
+    // Find the coordination that matches this salon
+    const coord = coordsForDate.find(c =>
+      c.salon_id === salonIdTarget || !salonIdTarget
+    );
+
+    if (!coord) {
+      return { color: 'red', label: 'Sin coordinación iniciada' };
+    }
+
+    const estado = (coord.estado || '').toLowerCase();
+    const preCoordCompleted = coord.pre_coordinacion_completado_por_cliente;
+    const preCoordSent = Boolean(coord.pre_coordinacion_url);
+
+    if (estado === 'completada' || estado === 'completado') {
+      return { color: 'green', label: 'Coordinación completada ✓' };
+    }
+
+    if (preCoordCompleted || estado === 'en_proceso') {
+      return {
+        color: 'yellow', label: preCoordCompleted
+          ? 'Pre-coordinación completada — Pendiente reunión'
+          : 'Coordinación en proceso — Items pendientes'
+      };
+    }
+
+    if (preCoordSent && !preCoordCompleted) {
+      return { color: 'yellow', label: 'Pre-coordinación enviada — Esperando respuesta del cliente' };
+    }
+
+    return { color: 'red', label: 'Coordinación pendiente de inicio' };
   };
 
   const getEventColor = (event) => {
@@ -249,18 +307,22 @@ export default function Calendar({
                 if (myEvent) dayClasses.push(styles.myEvent);
                 if (isFull && !myEvent) dayClasses.push(styles.full);
 
-                // Construir el tooltip
+                // Build tooltip with status info
                 let tooltipText = '';
+                const statusInfo = (myEvent) ? getCoordStatus(dateKey, salonId) : null;
+
                 if (isHoliday && feriadoInfo) {
                   tooltipText = feriadoInfo.name;
                   if (hasEventOnDate) {
                     tooltipText += ` | ${tooltipNames}`;
+                    if (statusInfo) tooltipText += ` — ${statusInfo.label}`;
                     if (isFull && !myEvent) {
                       tooltipText += ' — Cupo completo';
                     }
                   }
                 } else if (hasEventOnDate) {
                   tooltipText = tooltipNames;
+                  if (statusInfo) tooltipText += ` — ${statusInfo.label}`;
                   if (isFull && !myEvent) {
                     tooltipText += ' — Cupo completo';
                   }
@@ -268,10 +330,20 @@ export default function Calendar({
                   tooltipText = format(date, 'dd/MM/yyyy');
                 }
 
+                // Compute inline color for the day cell based on DJ assignments
+                const cellStyle = {};
+                if (hasEventOnDate && !isHoliday) {
+                  const primaryEvent = myEvent || eventsForDate[0];
+                  const djColor = getEventColor(primaryEvent);
+                  cellStyle.background = djColor;
+                  cellStyle.borderColor = djColor;
+                }
+
                 return (
                   <div
                     key={`${monthIndex}-${dayIndex}`}
                     className={dayClasses.join(' ')}
+                    style={cellStyle}
                     onClick={() => handleDateClick(date, month.monthDate)}
                     data-dj-name={
                       hasEventOnDate
@@ -288,9 +360,18 @@ export default function Calendar({
                     <span className={styles.dayNumber}>
                       {format(date, 'd')}
                     </span>
-                    {hasEventOnDate && (
+                    {hasEventOnDate && myEvent && (() => {
+                      const status = getCoordStatus(dateKey, salonId);
+                      return status ? (
+                        <span
+                          className={`${styles.statusDot} ${styles['statusDot_' + status.color]}`}
+                          title={status.label}
+                        />
+                      ) : null;
+                    })()}
+                    {hasEventOnDate && eventsForDate.length > 1 && (
                       <div className={styles.eventBadges}>
-                        {eventsForDate.slice(0, MAX_DJS_PER_DAY).map((event) => (
+                        {eventsForDate.slice(1, MAX_DJS_PER_DAY).map((event) => (
                           <span
                             key={event.id}
                             className={styles.eventBadge}

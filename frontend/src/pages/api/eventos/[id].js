@@ -13,10 +13,23 @@ export default async function handler(req, res) {
 
   try {
     const { id } = req.query;
-    const dj_id = auth.user.id;
 
-    const deletedEvent = await Event.delete(parseInt(id), dj_id);
-    
+    // Log the deletion attempt details
+    console.log('[DELETE EVENT API] Attempting to delete event:', { id, parsedId: parseInt(id), userRol: auth.user.rol, userId: auth.user.id });
+
+    let deletedEvent;
+
+    if (auth.user.rol === 'admin' || auth.user.rol === 'gerencia') {
+      // Admins can delete any event
+      deletedEvent = await Event.deleteAsAdmin(parseInt(id));
+    } else {
+      // DJs can only delete their own events
+      const dj_id = auth.user.id;
+      deletedEvent = await Event.delete(parseInt(id), dj_id);
+    }
+
+    console.log('[DELETE EVENT API] Result:', deletedEvent);
+
     if (!deletedEvent) {
       return res.status(404).json({ error: 'Evento no encontrado o no tienes permisos' });
     }

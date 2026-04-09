@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { getAuth } from '@/utils/auth';
 import { salonesAPI, eventosAPI } from '@/services/api';
@@ -6,13 +6,16 @@ import Loading from '@/components/Loading';
 import SalonSelector from '@/components/SalonSelector';
 import Calendar from '@/components/Calendar';
 import EventMarker from '@/components/EventMarker';
-import EventDeleteModal from '@/components/EventDeleteModal';
+import EventActionModal from '@/components/EventActionModal';
 import Dashboard from '@/components/Dashboard';
 import DJLayout from '@/components/DJLayout';
 import styles from '@/styles/DashboardPage.module.css';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const isMounted = useRef(true);
+  const refreshTimerRef = useRef(null);
+
   const [user, setUser] = useState(null);
   const [selectedSalon, setSelectedSalon] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -25,104 +28,78 @@ export default function DashboardPage() {
   const [loadingSalonInfo, setLoadingSalonInfo] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const fetchUnread = async () => {
-    try {
-      const res = await eventosAPI.getUnreadAssignments();
-      setUnreadCount(res.data.unread || 0);
-    } catch (error) {
-      console.error('Error fetching unread:', error);
-    }
-  };
-
+  // ── Mount-only initialization ──
+  // CRITICAL: dependency is [] (empty) — NOT [router].
+  // Using [router] caused the effect to re-fire during route transitions,
+  // triggering state updates that blocked Next.js from unmounting this page.
   useEffect(() => {
     const auth = getAuth();
     if (!auth.token || !auth.user) {
-      router.push('/login');
+      router.replace('/login');
       return;
     }
 
     if (auth.user.rol === 'admin') {
-      router.push('/admin');
+      router.replace('/admin');
       return;
     }
 
     setUser(auth.user);
-    fetchUnread();
+
+    // Fetch unread assignments (guarded)
+    eventosAPI.getUnreadAssignments()
+      .then(res => { if (isMounted.current) setUnreadCount(res.data.unread || 0); })
+      .catch(err => console.error('Error fetching unread:', err));
+
     if (auth.user.salon_id) {
       setSelectedSalon(auth.user.salon_id);
-      fetchUserSalon(auth.user.salon_id);
+      // Fetch salon info (guarded)
+      salonesAPI.getById(auth.user.salon_id)
+        .then(res => { if (isMounted.current) setUserSalonInfo(res.data); })
+        .catch(err => console.error('Error al cargar información del salón:', err));
     }
-  }, [router]);
+
+    // Cleanup: mark component as unmounted so no async callback touches state
+    return () => {
+      isMounted.current = false;
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleMarkSeen = async () => {
     try {
       await eventosAPI.markAssignmentsSeen();
-      setUnreadCount(0);
+      if (isMounted.current) setUnreadCount(0);
       document.querySelector(`.${styles.calendarSection}`)?.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
       console.error('Error marcando leídos:', err);
     }
   };
 
-  const fetchUserSalon = async (salonId) => {
-    if (!salonId) return;
-    try {
-      setLoadingSalonInfo(true);
-      const response = await salonesAPI.getById(salonId);
-      setUserSalonInfo(response.data);
-    } catch (error) {
-      console.error('Error al cargar información del salón:', error);
-    } finally {
-      setLoadingSalonInfo(false);
-    }
-  };
+  const triggerRefreshSequence = useCallback(() => {
+    if (!isMounted.current) return;
 
-  const triggerRefreshSequence = () => {
-    // Preservar la posición del scroll antes de actualizar
-    const scrollPosition = window.scrollY;
-    const scrollContainer = document.querySelector(`.${styles.container}`);
-    const containerScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
-
-    // Actualizar triggers sin re-montar completamente
     setRefreshKey((prev) => prev + 1);
     setDashboardRefreshKey((prev) => prev + 1);
 
-    // Usar requestAnimationFrame para restaurar el scroll después de que el DOM se actualice
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        // Restaurar scroll de la ventana
-        if (scrollPosition > 0) {
-          window.scrollTo(0, scrollPosition);
-        }
-
-        // Restaurar scroll del contenedor si existe
-        if (scrollContainer && containerScrollTop > 0) {
-          scrollContainer.scrollTop = containerScrollTop;
-        }
-      });
-    });
-
-    // Actualizar Dashboard de forma controlada
     if (dashboardRefreshFn) {
-      setTimeout(() => {
-        const beforeScroll = window.scrollY;
-        dashboardRefreshFn();
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            window.scrollTo(0, beforeScroll);
-          });
-        });
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        if (isMounted.current && dashboardRefreshFn) {
+          dashboardRefreshFn();
+        }
       }, 300);
     }
-  };
+  }, [dashboardRefreshFn]);
 
   const handleDateClick = (date) => {
     if (!selectedSalon) {
       alert('Por favor, selecciona un salón primero');
       return;
     }
-
-    // Verificar si la fecha ya tiene un evento (esto se hace en el Calendar también, pero por seguridad)
     setSelectedDate(date);
     setShowEventMarker(true);
   };
@@ -135,10 +112,6 @@ export default function DashboardPage() {
 
   const handleExistingEventClick = (event) => {
     setEventToDelete(event);
-  };
-
-  const handleEventDeleted = () => {
-    triggerRefreshSequence();
   };
 
   if (!user) {
@@ -163,7 +136,7 @@ export default function DashboardPage() {
         )}
         <Dashboard
           refreshTrigger={dashboardRefreshKey}
-          onRefresh={setDashboardRefreshFn}
+          onRefresh={(fn) => setDashboardRefreshFn(() => fn)}
           salonInfo={userSalonInfo}
           salonLoading={loadingSalonInfo}
         />
@@ -203,13 +176,12 @@ export default function DashboardPage() {
       )}
 
       {eventToDelete && (
-        <EventDeleteModal
+        <EventActionModal
           event={eventToDelete}
-          onEventDeleted={handleEventDeleted}
+          onRefresh={triggerRefreshSequence}
           onClose={() => setEventToDelete(null)}
         />
       )}
     </DJLayout>
   );
 }
-

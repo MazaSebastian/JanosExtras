@@ -4,16 +4,25 @@ const MAX_DJS_PER_EVENT = 3;
 
 export class Event {
   static async create({ dj_id, salon_id, fecha_evento, is_new_assignment = false }) {
-    const normalizedDate = new Date(fecha_evento);
+    let dateStr = fecha_evento;
+    if (fecha_evento instanceof Date) {
+      const y = fecha_evento.getUTCFullYear();
+      const m = String(fecha_evento.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(fecha_evento.getUTCDate()).padStart(2, '0');
+      dateStr = `${y}-${m}-${d}`;
+    } else if (typeof fecha_evento === 'string') {
+      dateStr = fecha_evento.split('T')[0];
+    }
+
     const existingForSalon = await pool.query(
       `
         SELECT id, dj_id
         FROM eventos
         WHERE salon_id = $1
-          AND fecha_evento = $2
+          AND DATE(fecha_evento) = $2
         ORDER BY fecha_marcado ASC
       `,
-      [salon_id, normalizedDate]
+      [salon_id, dateStr]
     );
 
     if (existingForSalon.rows.some((event) => event.dj_id === dj_id)) {
@@ -30,7 +39,7 @@ export class Event {
       VALUES ($1, $2, $3, true, $4, $5)
       RETURNING *
     `;
-    const result = await pool.query(query, [dj_id, salon_id, normalizedDate, fechaMarcado, is_new_assignment]);
+    const result = await pool.query(query, [dj_id, salon_id, dateStr, fechaMarcado, is_new_assignment]);
     return result.rows[0];
   }
 
@@ -224,6 +233,16 @@ export class Event {
       RETURNING *
     `;
     const result = await pool.query(query, [event_id, dj_id]);
+    return result.rows[0];
+  }
+
+  static async deleteAsAdmin(event_id) {
+    const query = `
+      DELETE FROM eventos 
+      WHERE id = $1
+      RETURNING *
+    `;
+    const result = await pool.query(query, [event_id]);
     return result.rows[0];
   }
 

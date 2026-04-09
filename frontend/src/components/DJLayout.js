@@ -2,12 +2,24 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { clearAuth } from '@/utils/auth';
+import { salonesAPI } from '@/services/api';
 import styles from '@/styles/DJLayout.module.css';
 
 export default function DJLayout({ user, children }) {
   const router = useRouter();
   const currentPath = router.pathname;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [salonNombre, setSalonNombre] = useState('');
+
+  useEffect(() => {
+    if (user?.salon_id) {
+      salonesAPI.getById(user.salon_id)
+        .then(res => {
+          if (res.data?.nombre) setSalonNombre(res.data.nombre);
+        })
+        .catch(err => console.warn('Error cargando salón'));
+    }
+  }, [user]);
 
   const handleLogout = () => {
     clearAuth();
@@ -63,49 +75,54 @@ export default function DJLayout({ user, children }) {
       </Head>
       <div className={styles.layout}>
         <button
-        className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
-      >
-        <span className={styles.hamburgerIcon}>
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-        </span>
-      </button>
-      <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
-        <div className={styles.brand}>
-          <h2 className={styles.brandTitle}>Sistema DJs</h2>
-          <p className={styles.brandSubtitle}>{user?.nombre || 'DJ'}</p>
-        </div>
-        <nav className={styles.menu}>
-          {menuItems.map((item) => (
-            <button
-              key={item.path || item.label}
-              className={`${styles.menuItem} ${
-                currentPath === item.path ? styles.menuItemActive : ''
-              } ${item.inDevelopment ? styles.menuItemInDevelopment : ''}`}
-              onClick={() => !item.inDevelopment && handleMenuClick(item.path)}
-              disabled={item.inDevelopment}
-              title={item.inDevelopment ? 'En desarrollo' : ''}
-            >
-              <span className={styles.menuIcon}>{item.icon}</span>
-              <span className={styles.menuLabel}>{item.label}</span>
-              {item.inDevelopment && (
-                <span className={styles.developmentBadge}>Próximamente</span>
-              )}
+          className={`${styles.hamburgerButton} ${menuOpen ? styles.hamburgerButtonOpen : ''}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className={styles.hamburgerIcon}>
+            <span className={styles.hamburgerLine}></span>
+            <span className={styles.hamburgerLine}></span>
+            <span className={styles.hamburgerLine}></span>
+          </span>
+        </button>
+        <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
+          <div className={styles.brand}>
+            <h2 className={styles.brandTitle}>Sistema DJs</h2>
+            <p className={styles.brandSubtitle}>{user?.nombre || 'DJ'}</p>
+            {salonNombre && (
+              <div className={styles.salonBadge}>
+                <span className={styles.salonIcon}>📍</span>
+                {salonNombre}
+              </div>
+            )}
+          </div>
+          <nav className={styles.menu}>
+            {menuItems.map((item) => (
+              <button
+                key={item.path || item.label}
+                className={`${styles.menuItem} ${currentPath === item.path ? styles.menuItemActive : ''
+                  } ${item.inDevelopment ? styles.menuItemInDevelopment : ''}`}
+                onClick={() => !item.inDevelopment && handleMenuClick(item.path)}
+                disabled={item.inDevelopment}
+                title={item.inDevelopment ? 'En desarrollo' : ''}
+              >
+                <span className={styles.menuIcon}>{item.icon}</span>
+                <span className={styles.menuLabel}>{item.label}</span>
+                {item.inDevelopment && (
+                  <span className={styles.developmentBadge}>Próximamente</span>
+                )}
+              </button>
+            ))}
+          </nav>
+          <div className={styles.sidebarFooter}>
+            <button onClick={handleLogout} className={styles.logoutButton}>
+              Cerrar Sesión
             </button>
-          ))}
-        </nav>
-        <div className={styles.sidebarFooter}>
-          <button onClick={handleLogout} className={styles.logoutButton}>
-            Cerrar Sesión
-          </button>
-        </div>
-      </aside>
-      {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
-      <main className={styles.content}>{children}</main>
-    </div>
+          </div>
+        </aside>
+        {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
+        <main className={styles.content}>{children}</main>
+      </div>
     </>
   );
 }

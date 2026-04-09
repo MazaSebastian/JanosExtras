@@ -1,0 +1,205 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.header {
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.title {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: white;
+}
+
+.statusPendiente {
+    background-color: #ff9800;
+}
+
+.statusProceso {
+    background-color: #2196f3;
+}
+
+.statusVerde {
+    background-color: #4caf50;
+}
+
+.statusRoja {
+    background-color: #f44336;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #555;
+    font-size: 15px;
+}
+
+.infoItem strong {
+    color: #333;
+    margin-left: 4px;
+}
+
+.actionsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.actionButton {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.actionButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+.actionIcon {
+    font-size: 20px;
+}
+
+.primaryAction {
+    background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+    color: white;
+}
+
+.primaryAction:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(119, 44, 135, 0.3);
+}
+
+.whatsappAction {
+    color: #25d366;
+    border: 1px solid rgba(37, 211, 102, 0.2);
+}
+
+.whatsappAction:hover {
+    background: #e8f5e9;
+    border-color: #25d366;
+}
+
+.pdfAction {
+    color: #e53935;
+    border: 1px solid rgba(229, 57, 53, 0.2);
+}
+
+.pdfAction:hover {
+    background: #ffebee;
+    border-color: #e53935;
+}
+
+.deleteAction {
+    background: #fff5f5;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.deleteAction:hover {
+    background: #ffebee;
+}
+
+.cancelButton {
+    width: 100%;
+    padding: 14px;
+    background: #e0e0e0;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 16px;
+}
+
+.cancelButton:hover {
+    background: #d0d0d0;
+}
+
+.loader {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(119, 44, 135, 0.2);
+    border-radius: 50%;
+    border-top-color: #772c87;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.hiddenReport {
+    display: none;
+}

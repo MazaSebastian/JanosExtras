@@ -76,18 +76,19 @@
 }
 
 .calendarSection {
-  background: white;
+  background: linear-gradient(135deg, #3a1c4a 0%, #1e0b2e 100%);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  color: #fff;
 }
 
 .placeholder {
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 18px;
-  background: #f5f5f5;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
 }
 

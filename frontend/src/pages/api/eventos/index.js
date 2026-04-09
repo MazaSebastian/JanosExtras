@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Fecha inválida' });
       }
 
-      const event = await Event.create({ dj_id, salon_id, fecha_evento: fecha, is_new_assignment });
+      const event = await Event.create({ dj_id, salon_id, fecha_evento, is_new_assignment });
       res.status(201).json(event);
     } catch (error) {
       const knownConflicts = [
