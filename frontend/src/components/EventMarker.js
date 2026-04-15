@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { eventosAPI, coordinacionesAPI } from '@/services/api';
+import CustomSelect from '@/components/CustomSelect';
 import { LoadingButton } from '@/components/Loading';
 import styles from '@/styles/EventMarker.module.css';
 
@@ -10,6 +11,7 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     nombre_cliente: '',
+    apellido_cliente: '',
     nombre_agasajado: '',
     telefono: '',
     tipo_evento: '',
@@ -40,9 +42,11 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
       await eventosAPI.create(eventPayload);
 
       // 2. Automáticamente orquestar la Coordinación (Fase 2)
+      const nombreCompleto = `${formData.nombre_cliente} ${formData.apellido_cliente}`.trim();
       const coordPayload = {
-        titulo: `${formData.tipo_evento} - ${formData.nombre_cliente}`,
+        titulo: `${formData.tipo_evento} - ${nombreCompleto}`,
         nombre_cliente: formData.nombre_cliente,
+        apellido_cliente: formData.apellido_cliente,
         nombre_agasajado: formData.tipo_evento !== 'Corporativo' ? formData.nombre_agasajado : null,
         telefono: formData.telefono,
         fecha_evento: format(date, 'yyyy-MM-dd'),
@@ -98,13 +102,24 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label>Nombre del Cliente *</label>
+            <label>Nombre *</label>
             <input
               type="text"
               value={formData.nombre_cliente}
               onChange={(e) => setFormData({ ...formData, nombre_cliente: e.target.value })}
               required
-              placeholder="Ingrese el nombre del cliente"
+              placeholder="Nombre del cliente"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Apellido *</label>
+            <input
+              type="text"
+              value={formData.apellido_cliente}
+              onChange={(e) => setFormData({ ...formData, apellido_cliente: e.target.value })}
+              required
+              placeholder="Apellido del cliente"
             />
           </div>
 
@@ -120,18 +135,13 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
 
           <div className={styles.formGroup}>
             <label>Tipo de Evento *</label>
-            <select
+            <CustomSelect
               value={formData.tipo_evento}
-              onChange={(e) => setFormData({ ...formData, tipo_evento: e.target.value })}
+              options={['XV', 'Casamiento', 'Corporativo', 'Religioso', 'Cumpleaños']}
+              onChange={(val) => setFormData({ ...formData, tipo_evento: val })}
               required
-            >
-              <option value="">Seleccionar tipo de evento</option>
-              <option value="XV">XV</option>
-              <option value="Casamiento">Casamiento</option>
-              <option value="Corporativo">Corporativo</option>
-              <option value="Religioso">Religioso</option>
-              <option value="Cumpleaños">Cumpleaños</option>
-            </select>
+              placeholder="Seleccionar tipo de evento"
+            />
           </div>
 
           {formData.tipo_evento !== 'Corporativo' && (

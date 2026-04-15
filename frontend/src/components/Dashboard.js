@@ -4,6 +4,7 @@ import { eventosAPI } from '@/services/api';
 import { getSalonColor } from '@/utils/colors';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import Loading, { LoadingButton, SkeletonCard, Skeleton } from '@/components/Loading';
+import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/Dashboard.module.css';
 
 export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonLoading }) {
@@ -260,34 +261,22 @@ export default function Dashboard({ refreshTrigger, onRefresh, salonInfo, salonL
       <div className={styles.filters}>
         <div className={styles.filterGroup}>
           <label>Año:</label>
-          <select
+          <CustomSelect
             value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className={styles.select}
+            onChange={(val) => setSelectedYear(parseInt(val))}
             disabled={isRangeActive}
-          >
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+            options={years.map(year => ({ label: year.toString(), value: year }))}
+          />
         </div>
 
         <div className={styles.filterGroup}>
           <label>Mes:</label>
-          <select
+          <CustomSelect
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            className={styles.select}
+            onChange={(val) => setSelectedMonth(parseInt(val))}
             disabled={isRangeActive}
-          >
-            {months.map((month, index) => (
-              <option key={index} value={index + 1}>
-                {month}
-              </option>
-            ))}
-          </select>
+            options={months.map((month, index) => ({ label: month, value: index + 1 }))}
+          />
         </div>
 
         <div className={styles.rangeFilters}>

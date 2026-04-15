@@ -200,6 +200,76 @@
     }
 }
 
+.notasContainer {
+    margin-bottom: 24px;
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.notasLabel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.notasInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: inherit;
+    min-height: 80px;
+    outline: none;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.notasInput:focus {
+    border-color: #772c87;
+    box-shadow: 0 0 0 3px rgba(119, 44, 135, 0.1);
+}
+
+.notasInput::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+.savingIndicator {
+    font-size: 12px;
+    color: #772c87;
+    font-weight: 600;
+    font-style: italic;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
 .hiddenReport {
     display: none;
 }

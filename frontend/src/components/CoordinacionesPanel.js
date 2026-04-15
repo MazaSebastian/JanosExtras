@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { coordinacionesAPI, salonesAPI, authAPI } from '@/services/api';
 import { getAuth } from '@/utils/auth';
 import { SkeletonCard } from '@/components/Loading';
+import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/CoordinacionesPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
@@ -25,6 +26,7 @@ export default function CoordinacionesPanel() {
   const [formData, setFormData] = useState({
     titulo: '',
     nombre_cliente: '',
+    apellido_cliente: '',
     telefono: '',
     tipo_evento: '',
     codigo_evento: '',
@@ -104,8 +106,8 @@ export default function CoordinacionesPanel() {
           return;
         }
         // En desktop, cerrar si se hace clic fuera del contenedor
-        if (!event.target.closest(`.${styles.playMenuContainer}`) && 
-            !event.target.closest(`.${styles.playMenu}`)) {
+        if (!event.target.closest(`.${styles.playMenuContainer}`) &&
+          !event.target.closest(`.${styles.playMenu}`)) {
           setPlayMenuOpen(null);
         }
       }
@@ -133,7 +135,7 @@ export default function CoordinacionesPanel() {
         document.body.style.top = `-${scrollY}px`;
         document.body.style.width = '100%';
         document.body.style.overflow = 'hidden';
-        
+
         return () => {
           // Restaurar scroll al cerrar
           document.body.style.position = '';
@@ -190,12 +192,13 @@ export default function CoordinacionesPanel() {
     e.preventDefault();
     try {
       setError('');
-      
+
       if (editingId) {
         // Para edición: solo enviar los campos que están en el formulario
-      const data = {
+        const data = {
           titulo: formData.titulo || null,
           nombre_cliente: formData.nombre_cliente || null,
+          apellido_cliente: formData.apellido_cliente || null,
           telefono: formData.telefono || null,
           tipo_evento: formData.tipo_evento || null,
           codigo_evento: formData.codigo_evento || null,
@@ -203,12 +206,12 @@ export default function CoordinacionesPanel() {
           estado: formData.estado || 'pendiente',
           notas: formData.notas || null,
         };
-        
+
         // Solo incluir dj_responsable_id si el usuario es admin
         if (user?.rol === 'admin' && formData.dj_responsable_id) {
           data.dj_responsable_id = formData.dj_responsable_id || null;
         }
-        
+
         await coordinacionesAPI.update(editingId, data);
       } else {
         // Para creación: enviar todos los campos necesarios
@@ -217,12 +220,12 @@ export default function CoordinacionesPanel() {
           titulo: formData.titulo || null,
           salon_id: formData.salon_id || null,
         };
-        
+
         // Solo incluir dj_responsable_id si el usuario es admin
         if (user?.rol === 'admin' && formData.dj_responsable_id) {
           data.dj_responsable_id = formData.dj_responsable_id || null;
         }
-        
+
         await coordinacionesAPI.create(data);
       }
       setShowForm(false);
@@ -230,6 +233,7 @@ export default function CoordinacionesPanel() {
       setFormData({
         titulo: '',
         nombre_cliente: '',
+        apellido_cliente: '',
         tipo_evento: '',
         codigo_evento: '',
         fecha_evento: '',
@@ -251,6 +255,7 @@ export default function CoordinacionesPanel() {
     setFormData({
       titulo: item.titulo,
       nombre_cliente: item.nombre_cliente || '',
+      apellido_cliente: item.apellido_cliente || '',
       telefono: item.telefono || '',
       tipo_evento: item.tipo_evento || '',
       codigo_evento: item.codigo_evento || '',
@@ -287,14 +292,14 @@ export default function CoordinacionesPanel() {
     try {
       // Buscar la coordinación para obtener el tipo de evento
       const coordinacion = coordinaciones.find(c => c.id === id);
-      
+
       // Verificar si la coordinación está completada
       if (coordinacion.estado === 'completado' || coordinacion.estado === 'completada') {
         setError('No se puede iniciar una coordinación que ya está completada.');
         setPlayMenuOpen(null);
         return;
       }
-      
+
       if (!coordinacion || !coordinacion.tipo_evento) {
         setError('La coordinación debe tener un tipo de evento definido.');
         setPlayMenuOpen(null);
@@ -304,7 +309,7 @@ export default function CoordinacionesPanel() {
       // Actualizar estado a "en_proceso"
       await coordinacionesAPI.update(id, { estado: 'en_proceso' });
       setPlayMenuOpen(null);
-      
+
       // Redirigir a la página del flujo de coordinación
       router.push(`/dashboard/coordinaciones/${id}/iniciar`);
     } catch (err) {
@@ -320,11 +325,11 @@ export default function CoordinacionesPanel() {
       setPlayMenuOpen(null);
 
       const response = await coordinacionesAPI.generarPreCoordinacion(id);
-      
+
       if (response.data.success) {
         setPreCoordinacionUrl(response.data.url);
         setShowPreCoordinacionModal(true);
-        
+
         // Recargar coordinaciones para actualizar el estado
         loadCoordinaciones();
       }
@@ -358,7 +363,7 @@ export default function CoordinacionesPanel() {
     try {
       setLoadingResumen(true);
       setViewingResumen(coordinacion.id);
-      
+
       // Cargar el flujo de coordinación si existe
       let flujo = null;
       try {
@@ -376,7 +381,7 @@ export default function CoordinacionesPanel() {
         console.log('No se encontró flujo de coordinación para esta coordinación');
         console.error('Error al cargar flujo:', err);
       }
-      
+
       setResumenData({
         coordinacion,
         flujo,
@@ -416,9 +421,9 @@ export default function CoordinacionesPanel() {
       return;
     }
 
-    // Abrir WhatsApp Web con el número
+    // Abrir WhatsApp Web con el número usando la API limpia
     const phoneNumber = coordinacion.telefono.replace(/[\s\-\(\)]/g, '');
-    const whatsappUrl = `https://wa.me/${phoneNumber}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -468,16 +473,16 @@ export default function CoordinacionesPanel() {
       // Cargar el flujo de la coordinación
       const flujoResponse = await coordinacionesAPI.getFlujo(coordinacion.id);
       const flujo = flujoResponse.data || flujoResponse;
-      
+
       if (!flujo || !flujo.respuestas) {
         return { items: [], count: 0 };
       }
 
       const tipoEvento = coordinacion.tipo_evento?.trim();
       const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
-      
+
       let respuestas = flujo.respuestas;
-      
+
       // Parsear respuestas si es string
       if (typeof respuestas === 'string') {
         try {
@@ -492,11 +497,11 @@ export default function CoordinacionesPanel() {
       pasos.forEach((paso) => {
         paso.preguntas.forEach((pregunta) => {
           const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-          const debeMostrar = !esCondicional || 
+          const debeMostrar = !esCondicional ||
             (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
-          
+
           if (!debeMostrar) return;
-          
+
           const valor = respuestas[pregunta.id];
           if (esPendiente(valor)) {
             itemsPendientes.push({
@@ -555,6 +560,7 @@ export default function CoordinacionesPanel() {
             setFormData({
               titulo: '',
               nombre_cliente: '',
+              apellido_cliente: '',
               telefono: '',
               tipo_evento: '',
               codigo_evento: '',
@@ -593,13 +599,22 @@ export default function CoordinacionesPanel() {
             <h4>{editingId ? 'Editar Coordinación' : 'Nueva Coordinación'}</h4>
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
-                <label>Nombre del Cliente *</label>
+                <label>Nombre *</label>
                 <input
                   type="text"
                   value={formData.nombre_cliente}
                   onChange={(e) => setFormData({ ...formData, nombre_cliente: e.target.value })}
                   required
-                  placeholder="Ingrese el nombre del cliente"
+                  placeholder="Nombre del cliente"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Apellido</label>
+                <input
+                  type="text"
+                  value={formData.apellido_cliente}
+                  onChange={(e) => setFormData({ ...formData, apellido_cliente: e.target.value })}
+                  placeholder="Apellido del cliente"
                 />
               </div>
               <div className={styles.formGroup}>
@@ -622,18 +637,13 @@ export default function CoordinacionesPanel() {
               </div>
               <div className={styles.formGroup}>
                 <label>Tipo de Evento *</label>
-                <select
+                <CustomSelect
                   value={formData.tipo_evento}
-                  onChange={(e) => setFormData({ ...formData, tipo_evento: e.target.value })}
+                  options={['XV', 'Casamiento', 'Corporativo', 'Religioso', 'Cumpleaños']}
+                  onChange={(val) => setFormData({ ...formData, tipo_evento: val })}
                   required
-                >
-                  <option value="">Seleccionar tipo de evento</option>
-                  <option value="XV">XV</option>
-                  <option value="Casamiento">Casamiento</option>
-                  <option value="Corporativo">Corporativo</option>
-                  <option value="Religioso">Religioso</option>
-                  <option value="Cumpleaños">Cumpleaños</option>
-                </select>
+                  placeholder="Seleccionar tipo de evento"
+                />
               </div>
               <div className={styles.formGroup}>
                 <label>Código de Evento</label>
@@ -658,27 +668,29 @@ export default function CoordinacionesPanel() {
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
                       <label>Estado</label>
-                      <select
+                      <CustomSelect
                         value={formData.estado}
-                        onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                      >
-                        <option value="pendiente">Pendiente</option>
-                        <option value="en_proceso">En Proceso</option>
-                        <option value="completado">Completada</option>
-                        <option value="cancelada">Cancelada</option>
-                      </select>
+                        options={[
+                          { label: 'Pendiente', value: 'pendiente' },
+                          { label: 'En Proceso', value: 'en_proceso' },
+                          { label: 'Completada', value: 'completado' },
+                          { label: 'Cancelada', value: 'cancelada' }
+                        ]}
+                        onChange={(val) => setFormData({ ...formData, estado: val })}
+                        placeholder="Pendiente"
+                      />
                     </div>
-                    </div>
-                  {user?.rol === 'admin' && (
-                  <div className={styles.formGroup}>
-                    <label>DJ Responsable</label>
-                    <input
-                      type="text"
-                      value={formData.dj_responsable_id}
-                      onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
-                        placeholder="ID del DJ (opcional, se asignará automáticamente si se deja vacío)"
-                    />
                   </div>
+                  {user?.rol === 'admin' && (
+                    <div className={styles.formGroup}>
+                      <label>DJ Responsable</label>
+                      <input
+                        type="text"
+                        value={formData.dj_responsable_id}
+                        onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
+                        placeholder="ID del DJ (opcional, se asignará automáticamente si se deja vacío)"
+                      />
+                    </div>
                   )}
                   <div className={styles.formGroup}>
                     <label>Notas</label>
@@ -704,6 +716,7 @@ export default function CoordinacionesPanel() {
                     setFormData({
                       titulo: '',
                       nombre_cliente: '',
+                      apellido_cliente: '',
                       telefono: '',
                       tipo_evento: '',
                       codigo_evento: '',
@@ -756,17 +769,20 @@ export default function CoordinacionesPanel() {
           Completadas
         </button>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
-          <select
-            value={filterPrioridad}
-            onChange={(e) => setFilterPrioridad(e.target.value)}
-            className={styles.priorityFilter}
-          >
-            <option value="">Todas las Prioridades</option>
-            <option value="urgente">Urgente</option>
-            <option value="alta">Alta</option>
-            <option value="normal">Normal</option>
-            <option value="baja">Baja</option>
-          </select>
+          <div style={{ width: '200px' }}>
+            <CustomSelect
+              value={filterPrioridad}
+              options={[
+                { label: 'Todas las Prioridades', value: '' },
+                { label: 'Urgente', value: 'urgente' },
+                { label: 'Alta', value: 'alta' },
+                { label: 'Normal', value: 'normal' },
+                { label: 'Baja', value: 'baja' }
+              ]}
+              onChange={(val) => setFilterPrioridad(val)}
+              placeholder="Todas las Prioridades"
+            />
+          </div>
         </div>
       </div>
 
@@ -798,7 +814,7 @@ export default function CoordinacionesPanel() {
                     </div>
                   </div>
                   <div className={styles.badges}>
-                    <PendientesBadge 
+                    <PendientesBadge
                       coordinacion={item}
                       obtenerItemsPendientes={obtenerItemsPendientes}
                       getEstadoColor={getEstadoColor}
@@ -815,14 +831,25 @@ export default function CoordinacionesPanel() {
                         setTooltipData({ show: false, items: [], x: 0, y: 0 });
                       }}
                     />
-                    {item.prioridad && item.prioridad !== 'normal' && (
-                      <span
-                        className={styles.badge}
-                        style={{ backgroundColor: getPrioridadColor(item.prioridad) }}
-                      >
-                        {item.prioridad.toUpperCase()}
+                    {item.contactado ? (
+                      <span className={`${styles.badge} ${styles.contactadoBadge}`} title="Primer contacto realizado">
+                        ✅ Contactado
+                      </span>
+                    ) : (
+                      <span className={`${styles.badge} ${styles.noContactadoBadge}`} title="Pendiente de contacto inicial">
+                        ⚠️ Pendiente Contacto
                       </span>
                     )}
+                    {
+                      item.prioridad && item.prioridad !== 'normal' && (
+                        <span
+                          className={styles.badge}
+                          style={{ backgroundColor: getPrioridadColor(item.prioridad) }}
+                        >
+                          {item.prioridad.toUpperCase()}
+                        </span>
+                      )
+                    }
                   </div>
                 </div>
                 <div className={styles.cardActions}>
@@ -843,7 +870,7 @@ export default function CoordinacionesPanel() {
                     </button>
                     {playMenuOpen === item.id && (
                       <>
-                        <div 
+                        <div
                           className={styles.playMenuOverlay}
                           onClick={(e) => {
                             e.preventDefault();
@@ -860,7 +887,7 @@ export default function CoordinacionesPanel() {
                             e.stopPropagation();
                           }}
                         />
-                        <div 
+                        <div
                           className={styles.playMenu}
                           onClick={(e) => {
                             // Prevenir que clicks dentro del menú cierren el overlay
@@ -1030,21 +1057,21 @@ export default function CoordinacionesPanel() {
         </div>
       )}
 
-        {/* Modal de Agendar Videollamada */}
-        {showAgendarVideollamada && coordinacionParaVideollamada && (
-          <AgendarVideollamadaModal
-            coordinacion={coordinacionParaVideollamada}
-            isOpen={showAgendarVideollamada}
-            onClose={() => {
-              setShowAgendarVideollamada(false);
-              setCoordinacionParaVideollamada(null);
-            }}
-            onSuccess={handleVideollamadaAgendada}
-          />
-        )}
+      {/* Modal de Agendar Videollamada */}
+      {showAgendarVideollamada && coordinacionParaVideollamada && (
+        <AgendarVideollamadaModal
+          coordinacion={coordinacionParaVideollamada}
+          isOpen={showAgendarVideollamada}
+          onClose={() => {
+            setShowAgendarVideollamada(false);
+            setCoordinacionParaVideollamada(null);
+          }}
+          onSuccess={handleVideollamadaAgendada}
+        />
+      )}
 
-        {/* Modal de Pre-Coordinación */}
-        {showPreCoordinacionModal && (
+      {/* Modal de Pre-Coordinación */}
+      {showPreCoordinacionModal && (
         <div className={styles.modalOverlay} onClick={() => setShowPreCoordinacionModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
@@ -1061,9 +1088,9 @@ export default function CoordinacionesPanel() {
               <p style={{ marginBottom: '1rem', color: '#666' }}>
                 Comparte este link con tu cliente para que complete la información del evento antes de la reunión.
               </p>
-              <div style={{ 
-                display: 'flex', 
-                gap: '0.5rem', 
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
                 marginBottom: '1rem',
                 padding: '1rem',
                 background: '#f5f5f5',
@@ -1092,9 +1119,9 @@ export default function CoordinacionesPanel() {
                 </button>
               </div>
               {preCoordinacionUrl && (
-                <div style={{ 
-                  padding: '1rem', 
-                  background: '#e8f5e9', 
+                <div style={{
+                  padding: '1rem',
+                  background: '#e8f5e9',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
                   color: '#2e7d32'
@@ -1133,7 +1160,7 @@ export default function CoordinacionesPanel() {
                     <div className={styles.resumenCampo}>
                       <span className={styles.resumenLabel}>Cliente:</span>
                       <span className={styles.resumenValor}>
-                        {resumenData.coordinacion?.nombre_cliente || 'N/A'}
+                        {resumenData.coordinacion?.nombre_cliente ? `${resumenData.coordinacion.nombre_cliente} ${resumenData.coordinacion.apellido_cliente || ''}`.trim() : 'N/A'}
                       </span>
                     </div>
                     {resumenData.coordinacion?.telefono && (
@@ -1178,9 +1205,9 @@ export default function CoordinacionesPanel() {
 
                   {/* Sección de Pre-Coordinación Completada */}
                   {resumenData.coordinacion?.pre_coordinacion_completado_por_cliente && (
-                    <div className={styles.resumenSeccion} style={{ 
-                      background: '#e8f5e9', 
-                      padding: '1rem', 
+                    <div className={styles.resumenSeccion} style={{
+                      background: '#e8f5e9',
+                      padding: '1rem',
                       borderRadius: '8px',
                       marginBottom: '1.5rem',
                       border: '2px solid #4caf50'
@@ -1203,15 +1230,15 @@ export default function CoordinacionesPanel() {
                             const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                             // Usar el flujo del cliente ya que las respuestas fueron guardadas con ese flujo
                             const pasos = tipoEvento ? CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [] : [];
-                            
+
                             // Parsear respuestas correctamente
                             let respuestas = resumenData.flujo.respuestas;
-                            
+
                             // Si respuestas es null o undefined, intentar obtenerlas de otra forma
                             if (!respuestas && resumenData.flujo) {
                               respuestas = resumenData.flujo.respuestas || {};
                             }
-                            
+
                             if (typeof respuestas === 'string') {
                               try {
                                 respuestas = JSON.parse(respuestas);
@@ -1221,14 +1248,14 @@ export default function CoordinacionesPanel() {
                                 respuestas = {};
                               }
                             }
-                            
+
                             // Asegurar que velas sea siempre un array válido
                             console.log('🔍 Parseando respuestas del cliente:', {
                               tieneVelas: !!respuestas.velas,
                               tipoVelas: typeof respuestas.velas,
                               valorVelas: respuestas.velas
                             });
-                            
+
                             if (respuestas.velas) {
                               if (typeof respuestas.velas === 'string') {
                                 try {
@@ -1259,34 +1286,34 @@ export default function CoordinacionesPanel() {
                               console.warn('⚠️ No hay campo velas en respuestas');
                               respuestas.velas = [];
                             }
-                            
+
                             // Si respuestas sigue siendo null/undefined, usar objeto vacío
                             if (!respuestas || typeof respuestas !== 'object') {
                               console.warn('Respuestas no válidas, usando objeto vacío:', respuestas);
                               respuestas = {};
                             }
-                            
+
                             console.log('Tipo evento:', tipoEvento);
                             console.log('Pasos disponibles:', pasos.length);
                             console.log('Respuestas RAW:', resumenData.flujo?.respuestas);
                             console.log('Respuestas parseadas:', respuestas);
                             console.log('Total de respuestas:', Object.keys(respuestas).length);
                             console.log('Keys de respuestas:', Object.keys(respuestas));
-                            
+
                             if (!respuestas || Object.keys(respuestas).length === 0) {
                               return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
                             }
-                            
+
                             // Replicar exactamente la lógica del cliente - mostrar todos los pasos con respuestas
                             return pasos.map((paso) => {
                               const preguntasRespondidas = paso.preguntas.filter(p => {
                                 const esCondicional = p.condicional && p.condicional.pregunta;
                                 let debeMostrar = true;
-                                
+
                                 if (esCondicional) {
                                   const valorCondicional = respuestas[p.condicional.pregunta];
                                   const valorEsperado = p.condicional.valor;
-                                  
+
                                   // Manejar tanto valores string como arrays (para botones)
                                   if (Array.isArray(valorCondicional)) {
                                     debeMostrar = valorCondicional.includes(valorEsperado);
@@ -1296,9 +1323,9 @@ export default function CoordinacionesPanel() {
                                     debeMostrar = false;
                                   }
                                 }
-                                
+
                                 if (!debeMostrar) return false;
-                                
+
                                 const valor = respuestas[p.id];
                                 if (p.tipo === 'velas') {
                                   return Array.isArray(valor) && valor.length > 0;
@@ -1317,9 +1344,9 @@ export default function CoordinacionesPanel() {
 
                               return (
                                 <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
-                                  <h5 style={{ 
-                                    color: '#2e7d32', 
-                                    fontSize: '0.95rem', 
+                                  <h5 style={{
+                                    color: '#2e7d32',
+                                    fontSize: '0.95rem',
                                     fontWeight: 600,
                                     marginBottom: '0.5rem',
                                     paddingBottom: '0.5rem',
@@ -1330,26 +1357,26 @@ export default function CoordinacionesPanel() {
                                   {paso.preguntas.map((pregunta) => {
                                     const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
                                     let debeMostrar = true;
-                                    
+
                                     if (esCondicional) {
                                       const valorCondicional = respuestas[pregunta.condicional.pregunta];
                                       const valorEsperado = pregunta.condicional.valor;
-                                      
+
                                       // Manejar tanto valores string como arrays (para botones)
                                       if (Array.isArray(valorCondicional)) {
                                         debeMostrar = valorCondicional.includes(valorEsperado);
                                       } else if (typeof valorCondicional === 'string') {
-                                        debeMostrar = valorCondicional === valorEsperado || 
-                                                     valorCondicional.includes(valorEsperado);
+                                        debeMostrar = valorCondicional === valorEsperado ||
+                                          valorCondicional.includes(valorEsperado);
                                       } else {
                                         debeMostrar = false;
                                       }
                                     }
-                                    
+
                                     if (!debeMostrar) return null;
 
                                     const valor = respuestas[pregunta.id];
-                                    
+
                                     // Manejar velas específicamente - verificar tanto por tipo como por id
                                     // IMPORTANTE: Verificar velas ANTES de la validación genérica
                                     if ((pregunta.tipo === 'velas' || pregunta.id === 'velas')) {
@@ -1363,7 +1390,7 @@ export default function CoordinacionesPanel() {
                                         esArray: Array.isArray(valor),
                                         tipoValor: typeof valor
                                       });
-                                      
+
                                       // Si el valor es un string, intentar parsearlo
                                       let valorVelas = valor;
                                       if (typeof valor === 'string') {
@@ -1374,11 +1401,11 @@ export default function CoordinacionesPanel() {
                                           return null;
                                         }
                                       }
-                                      
+
                                       // Verificar que sea un array
                                       if (Array.isArray(valorVelas)) {
                                         console.log('✅ valorVelas es un array con', valorVelas.length, 'elementos:', valorVelas);
-                                        
+
                                         // Asegurar que cada elemento del array sea un objeto válido
                                         const velasValidas = valorVelas.filter(v => {
                                           const esValido = v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion);
@@ -1387,16 +1414,16 @@ export default function CoordinacionesPanel() {
                                           }
                                           return esValido;
                                         });
-                                        
+
                                         console.log('✅ Velas válidas encontradas para renderizar:', velasValidas.length, velasValidas);
-                                        
+
                                         if (velasValidas.length > 0) {
                                           return (
                                             <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
                                               <span className={styles.resumenLabel}>{pregunta.label}:</span>
                                               <div className={styles.resumenValor}>
                                                 {velasValidas.map((vela, idx) => (
-                                                  <div key={vela.id || idx} style={{ 
+                                                  <div key={vela.id || idx} style={{
                                                     marginBottom: '0.5rem',
                                                     padding: '0.5rem',
                                                     background: '#f1f8f4',
@@ -1417,7 +1444,7 @@ export default function CoordinacionesPanel() {
                                         return null;
                                       }
                                     }
-                                    
+
                                     // Si llegamos aquí y es tipo velas pero no se renderizó, no mostrar nada más
                                     if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
                                       return null;
@@ -1475,13 +1502,13 @@ export default function CoordinacionesPanel() {
                       const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                       const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
                       let respuestas = resumenData.flujo.respuestas;
-                      
+
                       // Constante para identificar respuestas pendientes
                       const VALOR_PENDIENTE = '__PENDIENTE__';
                       const esPendiente = (valor) => {
                         return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
                       };
-                      
+
                       // Parsear respuestas si es string
                       if (typeof respuestas === 'string') {
                         try {
@@ -1491,17 +1518,17 @@ export default function CoordinacionesPanel() {
                           respuestas = {};
                         }
                       }
-                      
+
                       // Recopilar items pendientes
                       const itemsPendientes = [];
                       pasos.forEach((paso) => {
                         paso.preguntas.forEach((pregunta) => {
                           const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-                          const debeMostrar = !esCondicional || 
+                          const debeMostrar = !esCondicional ||
                             (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
-                          
+
                           if (!debeMostrar) return;
-                          
+
                           const valor = respuestas[pregunta.id];
                           if (esPendiente(valor)) {
                             itemsPendientes.push({
@@ -1511,7 +1538,7 @@ export default function CoordinacionesPanel() {
                           }
                         });
                       });
-                      
+
                       // Asegurar que velas sea siempre un array válido
                       if (respuestas.velas) {
                         if (typeof respuestas.velas === 'string') {
@@ -1527,7 +1554,7 @@ export default function CoordinacionesPanel() {
                           respuestas.velas = [];
                         }
                         // Filtrar solo objetos válidos
-                        respuestas.velas = respuestas.velas.filter(v => 
+                        respuestas.velas = respuestas.velas.filter(v =>
                           v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
                         );
                       } else {
@@ -1560,131 +1587,131 @@ export default function CoordinacionesPanel() {
                               </ul>
                             </div>
                           )}
-                          
+
                           {pasos.map((paso) => {
-                        const tieneRespuestas = paso.preguntas.some((p) => {
-                          const esCondicional = p.condicional && p.condicional.pregunta;
-                          const debeMostrar =
-                            !esCondicional ||
-                            respuestas[p.condicional.pregunta] === p.condicional.valor;
-                          if (!debeMostrar) return false;
-                          const valor = respuestas[p.id];
-                          // Incluir pendientes en la verificación
-                          return (
-                            (valor !== undefined && valor !== null && valor !== '') || esPendiente(valor)
-                          ) && (
-                            p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0) || esPendiente(valor)
-                          );
-                        });
-
-                        if (!tieneRespuestas) return null;
-
-                        return (
-                          <div key={paso.id} className={styles.resumenSeccion}>
-                            <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
-                            {paso.preguntas.map((pregunta) => {
-                              const esCondicional =
-                                pregunta.condicional && pregunta.condicional.pregunta;
+                            const tieneRespuestas = paso.preguntas.some((p) => {
+                              const esCondicional = p.condicional && p.condicional.pregunta;
                               const debeMostrar =
                                 !esCondicional ||
-                                respuestas[pregunta.condicional.pregunta] ===
-                                  pregunta.condicional.valor;
-
-                              if (!debeMostrar) return null;
-
-                              const valor = respuestas[pregunta.id];
-                              
-                              // Si está pendiente, mostrar como pendiente
-                              if (esPendiente(valor)) {
-                                return (
-                                  <div key={pregunta.id} className={styles.resumenCampo} style={{
-                                    background: '#fff3e0',
-                                    padding: '0.75rem',
-                                    borderRadius: '6px',
-                                    border: '1px solid #ff9800',
-                                    marginBottom: '0.5rem'
-                                  }}>
-                                    <span className={styles.resumenLabel} style={{ color: '#e65100', fontWeight: 600 }}>
-                                      {pregunta.label}: <span style={{ fontSize: '0.9rem' }}>⏳ PENDIENTE</span>
-                                    </span>
-                                  </div>
+                                respuestas[p.condicional.pregunta] === p.condicional.valor;
+                              if (!debeMostrar) return false;
+                              const valor = respuestas[p.id];
+                              // Incluir pendientes en la verificación
+                              return (
+                                (valor !== undefined && valor !== null && valor !== '') || esPendiente(valor)
+                              ) && (
+                                  p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0) || esPendiente(valor)
                                 );
-                              }
+                            });
 
-                              // Manejar velas específicamente
-                              if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
-                                let valorVelas = valor;
-                                
-                                // Si el valor es un string, intentar parsearlo
-                                if (typeof valorVelas === 'string') {
-                                  try {
-                                    valorVelas = JSON.parse(valorVelas);
-                                  } catch (e) {
-                                    console.error('Error al parsear velas desde string en flujo DJ:', e);
+                            if (!tieneRespuestas) return null;
+
+                            return (
+                              <div key={paso.id} className={styles.resumenSeccion}>
+                                <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
+                                {paso.preguntas.map((pregunta) => {
+                                  const esCondicional =
+                                    pregunta.condicional && pregunta.condicional.pregunta;
+                                  const debeMostrar =
+                                    !esCondicional ||
+                                    respuestas[pregunta.condicional.pregunta] ===
+                                    pregunta.condicional.valor;
+
+                                  if (!debeMostrar) return null;
+
+                                  const valor = respuestas[pregunta.id];
+
+                                  // Si está pendiente, mostrar como pendiente
+                                  if (esPendiente(valor)) {
+                                    return (
+                                      <div key={pregunta.id} className={styles.resumenCampo} style={{
+                                        background: '#fff3e0',
+                                        padding: '0.75rem',
+                                        borderRadius: '6px',
+                                        border: '1px solid #ff9800',
+                                        marginBottom: '0.5rem'
+                                      }}>
+                                        <span className={styles.resumenLabel} style={{ color: '#e65100', fontWeight: 600 }}>
+                                          {pregunta.label}: <span style={{ fontSize: '0.9rem' }}>⏳ PENDIENTE</span>
+                                        </span>
+                                      </div>
+                                    );
+                                  }
+
+                                  // Manejar velas específicamente
+                                  if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
+                                    let valorVelas = valor;
+
+                                    // Si el valor es un string, intentar parsearlo
+                                    if (typeof valorVelas === 'string') {
+                                      try {
+                                        valorVelas = JSON.parse(valorVelas);
+                                      } catch (e) {
+                                        console.error('Error al parsear velas desde string en flujo DJ:', e);
+                                        return null;
+                                      }
+                                    }
+
+                                    // Verificar que sea un array válido
+                                    if (Array.isArray(valorVelas) && valorVelas.length > 0) {
+                                      // Filtrar solo objetos válidos
+                                      const velasValidas = valorVelas.filter(v =>
+                                        v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
+                                      );
+
+                                      if (velasValidas.length > 0) {
+                                        return (
+                                          <div key={pregunta.id} className={styles.resumenCampo}>
+                                            <span className={styles.resumenLabel}>
+                                              {pregunta.label}:
+                                            </span>
+                                            <div className={styles.resumenVelas}>
+                                              {velasValidas.map((vela, idx) => (
+                                                <div key={vela.id || idx} className={styles.resumenVelaItem}>
+                                                  <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
+                                                  <div className={styles.resumenVelaCancion}>
+                                                    🎵 {vela.cancion || 'Sin canción'}
+                                                  </div>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                    }
                                     return null;
                                   }
-                                }
-                                
-                                // Verificar que sea un array válido
-                                if (Array.isArray(valorVelas) && valorVelas.length > 0) {
-                                  // Filtrar solo objetos válidos
-                                  const velasValidas = valorVelas.filter(v => 
-                                    v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
-                                  );
-                                  
-                                  if (velasValidas.length > 0) {
+
+                                  // Si el valor es un array pero no es velas, no renderizarlo como string
+                                  if (Array.isArray(valor)) {
+                                    return null;
+                                  }
+
+                                  if (valor !== undefined && valor !== null && valor !== '') {
                                     return (
                                       <div key={pregunta.id} className={styles.resumenCampo}>
                                         <span className={styles.resumenLabel}>
                                           {pregunta.label}:
                                         </span>
-                                        <div className={styles.resumenVelas}>
-                                          {velasValidas.map((vela, idx) => (
-                                            <div key={vela.id || idx} className={styles.resumenVelaItem}>
-                                              <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
-                                              <div className={styles.resumenVelaCancion}>
-                                                🎵 {vela.cancion || 'Sin canción'}
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
+                                        <span className={styles.resumenValor}>
+                                          {String(valor)
+                                            .split('\n')
+                                            .map((line, i) => (
+                                              <span key={i}>
+                                                {line}
+                                                <br />
+                                              </span>
+                                            ))}
+                                        </span>
                                       </div>
                                     );
                                   }
-                                }
-                                return null;
-                              }
 
-                              // Si el valor es un array pero no es velas, no renderizarlo como string
-                              if (Array.isArray(valor)) {
-                                return null;
-                              }
-
-                              if (valor !== undefined && valor !== null && valor !== '') {
-                                return (
-                                  <div key={pregunta.id} className={styles.resumenCampo}>
-                                    <span className={styles.resumenLabel}>
-                                      {pregunta.label}:
-                                    </span>
-                                    <span className={styles.resumenValor}>
-                                      {String(valor)
-                                        .split('\n')
-                                        .map((line, i) => (
-                                          <span key={i}>
-                                            {line}
-                                            <br />
-                                          </span>
-                                        ))}
-                                    </span>
-                                  </div>
-                                );
-                              }
-
-                              return null;
-                            })}
-                          </div>
-                        );
-                      })}
+                                  return null;
+                                })}
+                              </div>
+                            );
+                          })}
                         </>
                       );
                     })()
@@ -1772,7 +1799,7 @@ function PendientesBadge({ coordinacion, obtenerItemsPendientes, getEstadoColor,
   return (
     <span
       className={styles.badge}
-      style={{ 
+      style={{
         backgroundColor: getEstadoColor(coordinacion.estado),
         position: 'relative'
       }}

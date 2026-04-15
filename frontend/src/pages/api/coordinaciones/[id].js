@@ -15,12 +15,12 @@ export default async function handler(req, res) {
       if (!coordinacion) {
         return res.status(404).json({ error: 'Coordinación no encontrada' });
       }
-      
+
       // Si es DJ (no admin), solo puede ver sus propias coordinaciones
       if (auth.user.rol !== 'admin' && coordinacion.dj_responsable_id !== auth.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para ver esta coordinación' });
       }
-      
+
       return res.json(coordinacion);
     } catch (error) {
       console.error('Error al obtener coordinación:', error);
@@ -35,21 +35,21 @@ export default async function handler(req, res) {
       if (!coordinacionExistente) {
         return res.status(404).json({ error: 'Coordinación no encontrada' });
       }
-      
+
       // Si es DJ (no admin), solo puede editar sus propias coordinaciones
       if (auth.user.rol !== 'admin' && coordinacionExistente.dj_responsable_id !== auth.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para editar esta coordinación' });
       }
-      
-      const { titulo, nombre_cliente, telefono, tipo_evento, codigo_evento, fecha_evento, dj_responsable_id, estado, notas } = req.body;
-      
+
+      const { titulo, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, dj_responsable_id, estado, notas, contactado } = req.body;
+
       // Si es DJ (no admin), no puede cambiar el dj_responsable_id
       let djResponsableIdUpdate = dj_responsable_id ? parseInt(dj_responsable_id, 10) : undefined;
       if (auth.user.rol !== 'admin') {
         // Los DJs no pueden cambiar el responsable, siempre debe ser ellos
         djResponsableIdUpdate = undefined; // No permitir cambio
       }
-      
+
       // Normalizar fecha_evento para evitar problemas de zona horaria
       // IMPORTANTE: Los inputs type="date" envían "YYYY-MM-DD" que debemos usar directamente
       // NO crear objetos Date porque JavaScript los interpreta como UTC y puede restar un día
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
           fechaEventoNormalizada = `${year}-${month}-${day}`;
         }
       }
-      
+
       // Log para debugging (solo en desarrollo)
       if (process.env.NODE_ENV === 'development' && fecha_evento !== undefined) {
         console.log('[Coordinaciones API Update] Normalización de fecha:', {
@@ -95,10 +95,12 @@ export default async function handler(req, res) {
           tipo: typeof fecha_evento
         });
       }
-      
+
       const coordinacion = await Coordinacion.update(parseInt(id, 10), {
         titulo,
         nombre_cliente,
+        apellido_cliente,
+        nombre_agasajado,
         telefono,
         tipo_evento,
         codigo_evento,
@@ -106,6 +108,7 @@ export default async function handler(req, res) {
         dj_responsable_id: djResponsableIdUpdate,
         estado,
         notas,
+        contactado,
       });
 
       if (!coordinacion) {
@@ -120,7 +123,7 @@ export default async function handler(req, res) {
         stack: error.stack,
         body: req.body
       });
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Error al actualizar coordinación',
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
@@ -134,12 +137,12 @@ export default async function handler(req, res) {
       if (!coordinacion) {
         return res.status(404).json({ error: 'Coordinación no encontrada' });
       }
-      
+
       // Si es DJ (no admin), solo puede eliminar sus propias coordinaciones
       if (auth.user.rol !== 'admin' && coordinacion.dj_responsable_id !== auth.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para eliminar esta coordinación' });
       }
-      
+
       const resultado = await Coordinacion.delete(parseInt(id, 10));
       if (!resultado) {
         return res.status(404).json({ error: 'Coordinación no encontrada' });

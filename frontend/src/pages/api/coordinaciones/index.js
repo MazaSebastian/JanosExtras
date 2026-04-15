@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { titulo, descripcion, nombre_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas } = req.body;
+      const { titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas } = req.body;
 
       // Generar título automáticamente si no se proporciona
       const tituloFinal = titulo || (nombre_cliente ? `${nombre_cliente} - ${tipo_evento || 'Evento'}` : 'Nueva Coordinación');
@@ -96,6 +96,7 @@ export default async function handler(req, res) {
         titulo: tituloFinal,
         descripcion: descripcion || null,
         nombre_cliente: nombre_cliente || null,
+        apellido_cliente: apellido_cliente || null,
         nombre_agasajado: nombre_agasajado || null,
         telefono: telefono || null,
         tipo_evento: tipo_evento || null,

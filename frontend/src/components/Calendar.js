@@ -6,7 +6,7 @@ import { getSalonColor } from '@/utils/colors';
 import { getFeriadosMap, esFeriado } from '@/utils/feriados';
 import styles from '@/styles/Calendar.module.css';
 
-const MAX_DJS_PER_DAY = 3;
+const MAX_DJS_PER_DAY = 1;
 
 export default function Calendar({
   salonId,
@@ -362,25 +362,28 @@ export default function Calendar({
                     </span>
                     {hasEventOnDate && myEvent && (() => {
                       const status = getCoordStatus(dateKey, salonId);
-                      return status ? (
-                        <span
-                          className={`${styles.statusDot} ${styles['statusDot_' + status.color]}`}
-                          title={status.label}
-                        />
-                      ) : null;
+                      const coordsForDate = coordsByDate.get(dateKey) || [];
+                      const coord = coordsForDate.find(c => String(c.salon_id) === String(salonId) || !salonId);
+
+                      return (
+                        <>
+                          {status && (
+                            <span
+                              className={`${styles.statusDot} ${styles['statusDot_' + status.color]}`}
+                              title={status.label}
+                            />
+                          )}
+                          {coord?.contactado && (
+                            <span
+                              className={styles.contactadoIndicator}
+                              title="Cliente Contactado"
+                            >
+                              💬
+                            </span>
+                          )}
+                        </>
+                      );
                     })()}
-                    {hasEventOnDate && eventsForDate.length > 1 && (
-                      <div className={styles.eventBadges}>
-                        {eventsForDate.slice(1, MAX_DJS_PER_DAY).map((event) => (
-                          <span
-                            key={event.id}
-                            className={styles.eventBadge}
-                            style={{ backgroundColor: getEventColor(event) }}
-                            title={event.dj_nombre || 'Evento'}
-                          />
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -388,7 +391,43 @@ export default function Calendar({
           </div>
         ))}
       </div>
-    </div>
+
+      {/* --- LEYENDA VISUAL DINÁMICA --- */}
+      <div className={styles.calendarLegend}>
+        <h4>Leyenda de Estados y Colores</h4>
+        <div className={styles.legendGrid}>
+          <div className={styles.legendItem}>
+            <div className={styles.legendColorBox} style={{ background: '#772c87', border: '2px solid rgba(255,255,255,0.4)', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}></div>
+            <span>Fiesta Asignada (Tu Color)</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendColorBox} style={{ background: 'linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%)', border: '1px solid #ff9800' }}></div>
+            <span>Feriado Nacional</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendColorBox} style={{ background: 'rgba(255, 112, 67, 0.08)', border: '1px solid #ff7043' }}></div>
+            <span>Día Ocupado (Otro DJ)</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={`${styles.statusDot} ${styles.statusDot_red}`} style={{ position: 'static', transform: 'scale(1.2)' }}></span>
+            <span>Coordinación NO iniciada</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={`${styles.statusDot} ${styles.statusDot_yellow}`} style={{ position: 'static', transform: 'scale(1.2)' }}></span>
+            <span>Coordinación En Proceso / Cuestionario</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={`${styles.statusDot} ${styles.statusDot_green}`} style={{ position: 'static', transform: 'scale(1.2)' }}></span>
+            <span>Coordinación 100% Completada</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span style={{ fontSize: '13px', lineHeight: 1 }}>💬</span>
+            <span>Cliente Contactado por WhatsApp</span>
+          </div>
+        </div>
+      </div>
+
+    </div >
   );
 }
 

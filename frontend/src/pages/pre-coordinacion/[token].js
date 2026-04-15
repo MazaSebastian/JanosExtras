@@ -36,20 +36,20 @@ export default function PreCoordinacionPage() {
       setError('');
       const response = await preCoordinacionAPI.getByToken(token);
       const data = response.data;
-      
+
       setCoordinacion(data.coordinacion);
       const respuestas = data.respuestasCliente || {};
-      
+
       console.log('=== CARGANDO PRE-COORDINACIÓN ===');
       console.log('Respuestas recibidas del servidor:', respuestas);
       console.log('Total de respuestas recibidas:', Object.keys(respuestas).length);
       console.log('Keys recibidas:', Object.keys(respuestas));
-      
+
       // Convertir respuestas guardadas (strings) de vuelta a arrays para botones
       const respuestasConvertidas = { ...respuestas };
       const tipoEvento = data.coordinacion.tipo_evento?.trim();
       const pasos = CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [];
-      
+
       pasos.forEach(paso => {
         paso.preguntas.forEach(pregunta => {
           if (pregunta.tipo === 'buttons' && respuestasConvertidas[pregunta.id]) {
@@ -67,18 +67,18 @@ export default function PreCoordinacionPage() {
           }
         });
       });
-      
+
       console.log('Respuestas convertidas después de procesamiento:', respuestasConvertidas);
       console.log('Total de respuestas convertidas:', Object.keys(respuestasConvertidas).length);
       console.log('Keys convertidas:', Object.keys(respuestasConvertidas));
-      
+
       setRespuestasCliente(respuestasConvertidas);
-      
+
       // Si ya hay respuestas, no mostrar bienvenida (ya comenzó el proceso)
       if (respuestas && Object.keys(respuestas).length > 0) {
         setMostrarBienvenida(false);
       }
-      
+
       // Si ya hay respuestas, comenzar desde el primer paso no completado
       if (respuestas && Object.keys(respuestas).length > 0) {
         // Determinar desde qué paso continuar
@@ -92,14 +92,14 @@ export default function PreCoordinacionPage() {
               const valorCondicional = respuestas[p.condicional.pregunta];
               const valorEsperado = p.condicional.valor;
               let condicionCumplida = false;
-              
+
               // Manejar tanto valores string como arrays (para botones)
               if (Array.isArray(valorCondicional)) {
                 condicionCumplida = valorCondicional.includes(valorEsperado);
               } else if (typeof valorCondicional === 'string') {
                 condicionCumplida = valorCondicional === valorEsperado;
               }
-              
+
               if (!condicionCumplida) return true; // Si no cumple condición, no es requerida
             }
             if (!p.requerido) return true; // Si no es requerida, se considera respondida
@@ -140,18 +140,18 @@ export default function PreCoordinacionPage() {
     const valorActual = respuestasCliente[preguntaId] || [];
     const esArray = Array.isArray(valorActual);
     const valores = esArray ? valorActual : (valorActual ? [valorActual] : []);
-    
+
     // Si no es múltiple, reemplazar directamente
     if (!multiple) {
       // Si ya está seleccionado, deseleccionar (permitir deselección)
       const yaSeleccionado = valores.includes(opcion);
       const nuevoValor = yaSeleccionado ? [] : [opcion];
-      
+
       setRespuestasCliente({
         ...respuestasCliente,
         [preguntaId]: nuevoValor,
       });
-      
+
       // Si es el último paso y la respuesta es "No", finalizar automáticamente
       if (pasoActual === totalPasos && preguntaId === 'realiza_ingreso_carioca' && opcion === 'No' && !yaSeleccionado) {
         // Esperar un momento para que el estado se actualice
@@ -161,7 +161,7 @@ export default function PreCoordinacionPage() {
             ...respuestasCliente,
             [preguntaId]: nuevoValor,
           };
-          
+
           // Convertir respuestas para guardar
           const respuestasParaGuardar = { ...respuestasActualizadas };
           Object.keys(respuestasParaGuardar).forEach(key => {
@@ -188,10 +188,10 @@ export default function PreCoordinacionPage() {
               }
             }
           });
-          
+
           // Marcar como finalizado porque se está completando la pre-coordinación
           await preCoordinacionAPI.guardarRespuestas(token, respuestasParaGuardar, true);
-          
+
           // Actualizar estado local y mostrar resumen para confirmar
           setRespuestasCliente(respuestasActualizadas);
           setMostrarConfirmacion(true);
@@ -199,7 +199,7 @@ export default function PreCoordinacionPage() {
       }
       return;
     }
-    
+
     // Si es "Otro", manejar de forma especial
     if (opcion.includes('Otro')) {
       const tieneOtro = valores.some(v => typeof v === 'object' && v.tipo === 'otro');
@@ -239,13 +239,13 @@ export default function PreCoordinacionPage() {
     const valorActual = respuestasCliente[preguntaId] || [];
     const valores = Array.isArray(valorActual) ? valorActual : (valorActual ? [valorActual] : []);
     const otroIndex = valores.findIndex(v => typeof v === 'object' && v.tipo === 'otro');
-    
+
     if (otroIndex >= 0) {
       valores[otroIndex] = { tipo: 'otro', valor };
     } else {
       valores.push({ tipo: 'otro', valor });
     }
-    
+
     setRespuestasCliente({
       ...respuestasCliente,
       [preguntaId]: valores,
@@ -255,11 +255,11 @@ export default function PreCoordinacionPage() {
   const isButtonSelected = (preguntaId, opcion) => {
     const valorActual = respuestasCliente[preguntaId] || [];
     const valores = Array.isArray(valorActual) ? valorActual : (valorActual ? [valorActual] : []);
-    
+
     if (opcion.includes('Otro')) {
       return valores.some(v => typeof v === 'object' && v.tipo === 'otro');
     }
-    
+
     return valores.includes(opcion);
   };
 
@@ -314,7 +314,7 @@ export default function PreCoordinacionPage() {
       if (p.condicional) {
         const valorCondicional = respuestasCliente[p.condicional.pregunta];
         const valorEsperado = p.condicional.valor;
-        
+
         // Manejar tanto valores string como arrays (para botones)
         if (Array.isArray(valorCondicional)) {
           return valorCondicional.includes(valorEsperado);
@@ -394,9 +394,9 @@ export default function PreCoordinacionPage() {
   const handleFinalizar = async () => {
     setGuardando(true);
     setError('');
-    
+
     let respuestasParaGuardar = {};
-    
+
     try {
       // Log antes de la conversión
       console.log('=== FINALIZANDO PRE-COORDINACIÓN ===');
@@ -404,11 +404,11 @@ export default function PreCoordinacionPage() {
       console.log('Total de respuestas ANTES de conversión:', Object.keys(respuestasCliente).length);
       console.log('Keys ANTES de conversión:', Object.keys(respuestasCliente));
       console.log('Valor completo de respuestasCliente:', JSON.stringify(respuestasCliente, null, 2));
-      
+
       // Asegurarse de que tenemos todas las respuestas
       // Si solo hay tematica_evento, puede ser que las respuestas no se hayan cargado correctamente
-      if (Object.keys(respuestasCliente).length === 0 || 
-          (Object.keys(respuestasCliente).length === 1 && Object.keys(respuestasCliente)[0] === 'tematica_evento')) {
+      if (Object.keys(respuestasCliente).length === 0 ||
+        (Object.keys(respuestasCliente).length === 1 && Object.keys(respuestasCliente)[0] === 'tematica_evento')) {
         console.warn('⚠️ ADVERTENCIA: Parece que solo hay una respuesta. Recargando desde el servidor...');
         // Intentar recargar las respuestas del servidor
         try {
@@ -417,7 +417,7 @@ export default function PreCoordinacionPage() {
           const respuestasServidor = data.respuestasCliente || {};
           console.log('Respuestas recargadas del servidor:', respuestasServidor);
           console.log('Total de respuestas del servidor:', Object.keys(respuestasServidor).length);
-          
+
           // Si hay más respuestas en el servidor, usarlas
           if (Object.keys(respuestasServidor).length > Object.keys(respuestasCliente).length) {
             console.log('Usando respuestas del servidor en lugar del estado local');
@@ -425,7 +425,7 @@ export default function PreCoordinacionPage() {
             const respuestasServidorConvertidas = { ...respuestasServidor };
             const tipoEvento = data.coordinacion.tipo_evento?.trim();
             const pasos = CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [];
-            
+
             pasos.forEach(paso => {
               paso.preguntas.forEach(pregunta => {
                 if (pregunta.tipo === 'buttons' && respuestasServidorConvertidas[pregunta.id]) {
@@ -441,7 +441,7 @@ export default function PreCoordinacionPage() {
                 }
               });
             });
-            
+
             // Combinar respuestas del servidor con las locales (las locales tienen prioridad)
             const respuestasCombinadas = {
               ...respuestasServidorConvertidas,
@@ -449,10 +449,10 @@ export default function PreCoordinacionPage() {
             };
             console.log('Respuestas combinadas (servidor + local):', respuestasCombinadas);
             console.log('Total de respuestas combinadas:', Object.keys(respuestasCombinadas).length);
-            
+
             // Actualizar el estado con las respuestas combinadas
             setRespuestasCliente(respuestasCombinadas);
-            
+
             // Usar las respuestas combinadas para guardar
             respuestasParaGuardar = { ...respuestasCombinadas };
           } else {
@@ -468,7 +468,7 @@ export default function PreCoordinacionPage() {
         // Si hay suficientes respuestas, usar las locales directamente
         respuestasParaGuardar = { ...respuestasCliente };
       }
-      
+
       // Si respuestasParaGuardar aún no está definido, usar respuestasCliente
       if (!respuestasParaGuardar || Object.keys(respuestasParaGuardar).length === 0) {
         respuestasParaGuardar = { ...respuestasCliente };
@@ -497,12 +497,12 @@ export default function PreCoordinacionPage() {
           }
         }
       });
-      
+
       // Log después de la conversión
       console.log('RespuestasParaGuardar DESPUÉS de conversión:', respuestasParaGuardar);
       console.log('Total de respuestas DESPUÉS de conversión:', Object.keys(respuestasParaGuardar).length);
       console.log('Keys DESPUÉS de conversión:', Object.keys(respuestasParaGuardar));
-      
+
       // Guardar respuestas en el servidor (no bloquear si falla)
       // Marcar como finalizado = true porque el cliente está completando la pre-coordinación
       try {
@@ -514,10 +514,10 @@ export default function PreCoordinacionPage() {
         console.error('Error en la llamada API (continuando de todas formas):', apiError);
         console.error('Detalles del error:', apiError.response?.data);
       }
-      
+
       // Actualizar estado local con formato convertido
       setRespuestasCliente(respuestasParaGuardar);
-      
+
     } catch (err) {
       console.error('Error al procesar respuestas:', err);
     } finally {
@@ -526,9 +526,9 @@ export default function PreCoordinacionPage() {
       setMostrarConfirmacion(false);
       setGuardando(false);
       setPreCoordinacionEnviada(true);
-      
+
       console.log('Estados actualizados para mostrar mensaje de cierre');
-      
+
       // Scroll al inicio para mostrar el mensaje de cierre
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -600,7 +600,7 @@ export default function PreCoordinacionPage() {
             <p className={styles.bienvenidaSubtitulo}>
               Estamos muy contentos de acompañarte en la organización de tu evento
             </p>
-            
+
             <div className={styles.bienvenidaInfo}>
               <div className={styles.bienvenidaInfoItem}>
                 <span className={styles.bienvenidaInfoLabel}>🎉 Tipo de Evento:</span>
@@ -621,16 +621,8 @@ export default function PreCoordinacionPage() {
                 Para asegurarnos de que tu evento sea perfecto, necesitamos conocer algunos detalles sobre tus preferencias.
               </p>
               <p>
-                El proceso es simple y te guiaremos paso a paso. No te preocupes si no tienes todas las respuestas ahora mismo, 
+                El proceso es simple y te guiaremos paso a paso. No te preocupes si no tienes todas las respuestas ahora mismo,
                 puedes completar lo que sepas y continuar más tarde.
-              </p>
-            </div>
-
-            <div className={styles.bienvenidaChatbot}>
-              <div className={styles.bienvenidaChatbotIcono}>💬</div>
-              <p className={styles.bienvenidaChatbotTexto}>
-                <strong>¿Tienes dudas?</strong> No te preocupes, tenemos un asistente virtual disponible 
-                que puede ayudarte en cualquier momento. Solo haz clic en el botón de ayuda cuando lo necesites.
               </p>
             </div>
 
@@ -658,10 +650,10 @@ export default function PreCoordinacionPage() {
               Por favor, revisa que toda la información sea correcta antes de enviar.
             </p>
           </div>
-          
+
           <div className={styles.resumenContent}>
             <h2 className={styles.resumenTitulo}>Resumen de tu Pre-Coordinación</h2>
-            
+
             <div className={styles.resumenInfoGeneral}>
               <div className={styles.resumenInfoItem}>
                 <strong>Cliente:</strong> {coordinacion.nombre_cliente || coordinacion.titulo}
@@ -685,11 +677,11 @@ export default function PreCoordinacionPage() {
               const preguntasRespondidas = paso.preguntas.filter(p => {
                 const esCondicional = p.condicional && p.condicional.pregunta;
                 let debeMostrar = true;
-                
+
                 if (esCondicional) {
                   const valorCondicional = respuestasCliente[p.condicional.pregunta];
                   const valorEsperado = p.condicional.valor;
-                  
+
                   // Manejar tanto valores string como arrays (para botones)
                   if (Array.isArray(valorCondicional)) {
                     debeMostrar = valorCondicional.includes(valorEsperado);
@@ -699,9 +691,9 @@ export default function PreCoordinacionPage() {
                     debeMostrar = false;
                   }
                 }
-                
+
                 if (!debeMostrar) return false;
-                
+
                 const valor = respuestasCliente[p.id];
                 if (p.tipo === 'velas') {
                   return Array.isArray(valor) && valor.length > 0;
@@ -720,11 +712,11 @@ export default function PreCoordinacionPage() {
                   {paso.preguntas.map((pregunta) => {
                     const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
                     let debeMostrar = true;
-                    
+
                     if (esCondicional) {
                       const valorCondicional = respuestasCliente[pregunta.condicional.pregunta];
                       const valorEsperado = pregunta.condicional.valor;
-                      
+
                       // Manejar tanto valores string como arrays (para botones)
                       if (Array.isArray(valorCondicional)) {
                         debeMostrar = valorCondicional.includes(valorEsperado);
@@ -734,7 +726,7 @@ export default function PreCoordinacionPage() {
                         debeMostrar = false;
                       }
                     }
-                    
+
                     if (!debeMostrar) return null;
 
                     const valor = respuestasCliente[pregunta.id];
@@ -840,8 +832,8 @@ export default function PreCoordinacionPage() {
       </header>
 
       <div className={styles.progressBar}>
-        <div 
-          className={styles.progressFill} 
+        <div
+          className={styles.progressFill}
           style={{ width: `${(pasoActual / totalPasos) * 100}%` }}
         />
         <span className={styles.progressText}>
@@ -861,17 +853,17 @@ export default function PreCoordinacionPage() {
         {paso.descripcion && (
           <p className={styles.pasoDescripcion}>{paso.descripcion}</p>
         )}
-        
+
         <div className={styles.preguntas}>
           {paso.preguntas.map((pregunta) => {
             // Verificar si la pregunta condicional se cumple
             const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
             let debeMostrar = true;
-            
+
             if (esCondicional) {
               const valorCondicional = respuestasCliente[pregunta.condicional.pregunta];
               const valorEsperado = pregunta.condicional.valor;
-              
+
               // Manejar tanto valores string como arrays (para botones)
               if (Array.isArray(valorCondicional)) {
                 debeMostrar = valorCondicional.includes(valorEsperado);
@@ -881,7 +873,7 @@ export default function PreCoordinacionPage() {
                 debeMostrar = false;
               }
             }
-            
+
             if (!debeMostrar) return null;
 
             return (
@@ -890,7 +882,7 @@ export default function PreCoordinacionPage() {
                   {pregunta.label}
                   {pregunta.requerido && <span className={styles.required}> *</span>}
                 </label>
-                
+
                 {pregunta.tipo === 'select' && (
                   <select
                     value={respuestasCliente[pregunta.id] || ''}
@@ -948,7 +940,7 @@ export default function PreCoordinacionPage() {
                       {pregunta.opciones.map((opcion) => {
                         const isSelected = isButtonSelected(pregunta.id, opcion);
                         const isOtro = opcion.includes('Otro');
-                        
+
                         return (
                           <div key={opcion} className={styles.buttonWrapper}>
                             <button

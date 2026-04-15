@@ -5,6 +5,7 @@ import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI, salonesAPI, adminAPI } from '@/services/api';
 import { SkeletonCard } from '@/components/Loading';
+import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/CoordinacionesAdminPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
@@ -30,6 +31,7 @@ export default function CoordinacionesAdminPanel() {
   const [formData, setFormData] = useState({
     titulo: '',
     nombre_cliente: '',
+    apellido_cliente: '',
     telefono: '',
     tipo_evento: '',
     codigo_evento: '',
@@ -180,6 +182,7 @@ export default function CoordinacionesAdminPanel() {
     setFormData({
       titulo: coordinacion.titulo || '',
       nombre_cliente: coordinacion.nombre_cliente || '',
+      apellido_cliente: coordinacion.apellido_cliente || '',
       telefono: coordinacion.telefono || '',
       tipo_evento: coordinacion.tipo_evento || '',
       codigo_evento: coordinacion.codigo_evento || '',
@@ -216,6 +219,7 @@ export default function CoordinacionesAdminPanel() {
       setFormData({
         titulo: '',
         nombre_cliente: '',
+        apellido_cliente: '',
         telefono: '',
         tipo_evento: '',
         codigo_evento: '',
@@ -282,56 +286,53 @@ export default function CoordinacionesAdminPanel() {
       <div className={styles.filters}>
         <div className={styles.filterGroup}>
           <label>DJ Responsable:</label>
-          <select
+          <CustomSelect
             value={filters.djId}
-            onChange={(e) => setFilters({ ...filters, djId: e.target.value })}
-          >
-            <option value="">Todos los DJs</option>
-            {djs.map(dj => (
-              <option key={dj.id} value={dj.id}>{dj.nombre}</option>
-            ))}
-          </select>
+            onChange={(val) => setFilters({ ...filters, djId: val })}
+            options={[
+              { label: 'Todos los DJs', value: '' },
+              ...djs.map(dj => ({ label: dj.nombre, value: dj.id }))
+            ]}
+          />
         </div>
 
         <div className={styles.filterGroup}>
           <label>Estado:</label>
-          <select
+          <CustomSelect
             value={filters.estado}
-            onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-          >
-            <option value="">Todos</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="en_proceso">En Proceso</option>
-            <option value="completada">Completada</option>
-            <option value="cancelada">Cancelada</option>
-          </select>
+            onChange={(val) => setFilters({ ...filters, estado: val })}
+            options={[
+              { label: 'Todos', value: '' },
+              { label: 'Pendiente', value: 'pendiente' },
+              { label: 'En Proceso', value: 'en_proceso' },
+              { label: 'Completada', value: 'completada' },
+              { label: 'Cancelada', value: 'cancelada' }
+            ]}
+          />
         </div>
 
         <div className={styles.filterGroup}>
           <label>Tipo de Evento:</label>
-          <select
+          <CustomSelect
             value={filters.tipoEvento}
-            onChange={(e) => setFilters({ ...filters, tipoEvento: e.target.value })}
-          >
-            <option value="">Todos</option>
-            <option value="XV">XV</option>
-            <option value="Casamiento">Casamiento</option>
-            <option value="Corporativo">Corporativo</option>
-            <option value="Cumpleaños">Cumpleaños</option>
-          </select>
+            onChange={(val) => setFilters({ ...filters, tipoEvento: val })}
+            options={[
+              { label: 'Todos', value: '' },
+              'XV', 'Casamiento', 'Corporativo', 'Cumpleaños'
+            ]}
+          />
         </div>
 
         <div className={styles.filterGroup}>
           <label>Salón:</label>
-          <select
+          <CustomSelect
             value={filters.salonId}
-            onChange={(e) => setFilters({ ...filters, salonId: e.target.value })}
-          >
-            <option value="">Todos</option>
-            {salones.map(salon => (
-              <option key={salon.id} value={salon.id}>{salon.nombre}</option>
-            ))}
-          </select>
+            onChange={(val) => setFilters({ ...filters, salonId: val })}
+            options={[
+              { label: 'Todos', value: '' },
+              ...salones.map(salon => ({ label: salon.nombre, value: salon.id }))
+            ]}
+          />
         </div>
 
         <div className={styles.filterGroup}>
@@ -391,6 +392,7 @@ export default function CoordinacionesAdminPanel() {
                 <th>Fecha</th>
                 <th>Salón</th>
                 <th>Estado</th>
+                <th>Contacto</th>
                 <th>Pre-Coord.</th>
                 <th>Acciones</th>
               </tr>
@@ -399,7 +401,7 @@ export default function CoordinacionesAdminPanel() {
               {coordinaciones.map((coordinacion) => (
                 <tr key={coordinacion.id}>
                   <td>{coordinacion.id}</td>
-                  <td>{coordinacion.nombre_cliente || 'N/A'}</td>
+                  <td>{coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'N/A'}</td>
                   <td>{getDjName(coordinacion.dj_responsable_id)}</td>
                   <td>{coordinacion.tipo_evento || 'N/A'}</td>
                   <td>
@@ -412,6 +414,17 @@ export default function CoordinacionesAdminPanel() {
                     <span className={`${styles.badge} ${styles[`badge_${coordinacion.estado}`]}`}>
                       {coordinacion.estado || 'pendiente'}
                     </span>
+                  </td>
+                  <td>
+                    {coordinacion.contactado ? (
+                      <span className={styles.badge + ' ' + styles.badge_success} title="Primer contacto realizado">
+                        ✅ Sí
+                      </span>
+                    ) : (
+                      <span className={styles.badge + ' ' + styles.badge_danger} title="Pendiente de contacto">
+                        ❌ No
+                      </span>
+                    )}
                   </td>
                   <td>
                     {coordinacion.pre_coordinacion_completado_por_cliente ? (
@@ -484,12 +497,21 @@ export default function CoordinacionesAdminPanel() {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Cliente:</label>
+                  <label>Nombre:</label>
                   <input
                     type="text"
                     value={formData.nombre_cliente}
                     onChange={(e) => setFormData({ ...formData, nombre_cliente: e.target.value })}
                     required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Apellido:</label>
+                  <input
+                    type="text"
+                    value={formData.apellido_cliente}
+                    onChange={(e) => setFormData({ ...formData, apellido_cliente: e.target.value })}
                   />
                 </div>
 
@@ -504,17 +526,13 @@ export default function CoordinacionesAdminPanel() {
 
                 <div className={styles.formGroup}>
                   <label>Tipo de Evento:</label>
-                  <select
+                  <CustomSelect
                     value={formData.tipo_evento}
-                    onChange={(e) => setFormData({ ...formData, tipo_evento: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, tipo_evento: val })}
+                    options={['XV', 'Casamiento', 'Corporativo', 'Cumpleaños']}
                     required
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="XV">XV</option>
-                    <option value="Casamiento">Casamiento</option>
-                    <option value="Corporativo">Corporativo</option>
-                    <option value="Cumpleaños">Cumpleaños</option>
-                  </select>
+                    placeholder="Seleccionar..."
+                  />
                 </div>
 
                 <div className={styles.formGroup}>
@@ -538,30 +556,30 @@ export default function CoordinacionesAdminPanel() {
 
                 <div className={styles.formGroup}>
                   <label>DJ Responsable:</label>
-                  <select
+                  <CustomSelect
                     value={formData.dj_responsable_id}
-                    onChange={(e) => setFormData({ ...formData, dj_responsable_id: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, dj_responsable_id: val })}
+                    options={[
+                      { label: 'Seleccionar DJ...', value: '' },
+                      ...djs.map(dj => ({ label: dj.nombre, value: dj.id }))
+                    ]}
                     required
-                  >
-                    <option value="">Seleccionar DJ...</option>
-                    {djs.map(dj => (
-                      <option key={dj.id} value={dj.id}>{dj.nombre}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div className={styles.formGroup}>
                   <label>Estado:</label>
-                  <select
+                  <CustomSelect
                     value={formData.estado}
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, estado: val })}
+                    options={[
+                      { label: 'Pendiente', value: 'pendiente' },
+                      { label: 'En Proceso', value: 'en_proceso' },
+                      { label: 'Completada', value: 'completada' },
+                      { label: 'Cancelada', value: 'cancelada' }
+                    ]}
                     required
-                  >
-                    <option value="pendiente">Pendiente</option>
-                    <option value="en_proceso">En Proceso</option>
-                    <option value="completada">Completada</option>
-                    <option value="cancelada">Cancelada</option>
-                  </select>
+                  />
                 </div>
 
                 <div className={styles.formGroup}>
@@ -618,7 +636,7 @@ export default function CoordinacionesAdminPanel() {
                     <div className={styles.resumenCampo}>
                       <span className={styles.resumenLabel}>Cliente:</span>
                       <span className={styles.resumenValor}>
-                        {resumenData.coordinacion?.nombre_cliente || 'N/A'}
+                        {resumenData.coordinacion?.nombre_cliente ? `${resumenData.coordinacion.nombre_cliente} ${resumenData.coordinacion.apellido_cliente || ''}`.trim() : 'N/A'}
                       </span>
                     </div>
                     {resumenData.coordinacion?.telefono && (

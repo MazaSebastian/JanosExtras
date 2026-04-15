@@ -6,11 +6,11 @@ import styles from '@/styles/AgendarVideollamadaModal.module.css';
 /**
  * Modal para agendar una videollamada en Google Calendar desde una coordinación
  */
-export default function AgendarVideollamadaModal({ 
-  coordinacion, 
-  isOpen, 
-  onClose, 
-  onSuccess 
+export default function AgendarVideollamadaModal({
+  coordinacion,
+  isOpen,
+  onClose,
+  onSuccess
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,14 +34,14 @@ export default function AgendarVideollamadaModal({
           fechaEvento = formatDateFromDB(coordinacion.fecha_evento).split('/').reverse().join('-'); // DD/MM/YYYY -> YYYY-MM-DD
         }
       }
-      
+
       setFormData({
         fecha: fechaEvento,
         hora: '15:00', // Hora por defecto
         duracion: coordinacion.videollamada_duracion || 60,
-        descripcion: coordinacion.videollamada_agendada 
+        descripcion: coordinacion.videollamada_agendada
           ? coordinacion.descripcion || ''
-          : `Coordinación para ${coordinacion.tipo_evento || 'evento'} de ${coordinacion.nombre_cliente || 'cliente'}`
+          : `Coordinación para ${coordinacion.tipo_evento || 'evento'} de ${coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'cliente'}`
       });
       setError('');
     }
@@ -49,7 +49,7 @@ export default function AgendarVideollamadaModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.fecha || !formData.hora) {
       setError('Por favor, completa la fecha y hora');
       return;

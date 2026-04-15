@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI, eventosAPI } from '@/services/api';
+import WhatsAppTemplateModal from '@/components/WhatsAppTemplateModal';
+import EditCoordinationModal from '@/components/EditCoordinationModal';
 import styles from '@/styles/EventActionModal.module.css';
 
 export default function EventActionModal({ event, onClose, onRefresh }) {
@@ -11,6 +13,12 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showWhatsAppTemplates, setShowWhatsAppTemplates] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [notas, setNotas] = useState('');
+    const [savingNotas, setSavingNotas] = useState(false);
+    const [contactado, setContactado] = useState(false);
+    const [savingContactado, setSavingContactado] = useState(false);
 
     useEffect(() => {
         const fetchCoordination = async () => {
@@ -29,6 +37,8 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
 
                 if (matching) {
                     setCoordinacion(matching);
+                    setNotas(matching.notas || '');
+                    setContactado(matching.contactado || false);
                 }
             } catch (err) {
                 console.error('Error fetching coordination:', err);
@@ -42,6 +52,37 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
             fetchCoordination();
         }
     }, [event]);
+
+    const handleToggleContacto = async () => {
+        const newValue = !contactado;
+        setContactado(newValue);
+        setSavingContactado(true);
+        try {
+            await coordinacionesAPI.update(coordinacion.id, { contactado: newValue });
+            setCoordinacion(prev => ({ ...prev, contactado: newValue }));
+            if (onRefresh) onRefresh();
+        } catch (e) {
+            console.error('Error actualizando contacto:', e);
+            alert('Error al guardar estado de contacto.');
+            setContactado(!newValue);
+        } finally {
+            setSavingContactado(false);
+        }
+    };
+
+    const handleSaveNotas = async () => {
+        if (!coordinacion || notas === (coordinacion.notas || '')) return;
+        try {
+            setSavingNotas(true);
+            await coordinacionesAPI.update(coordinacion.id, { notas });
+            setCoordinacion(prev => ({ ...prev, notas }));
+        } catch (e) {
+            console.error('Error guardando notas:', e);
+            alert('Error al guardar las notas. Intenta de nuevo.');
+        } finally {
+            setSavingNotas(false);
+        }
+    };
 
     const handleDelete = async () => {
         if (!confirm('¿Estás seguro de que deseas eliminar este evento y liberar la fecha? Esta acción es irreversible.')) {
@@ -88,7 +129,7 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
         <div style="margin-bottom: 30px; line-height: 1.8; font-size: 16px;">
           <h2 style="font-size: 20px; color: #444; border-bottom: 1px solid #eee; padding-bottom: 8px;">Información General</h2>
           <p><strong>Evento:</strong> ${coordinacion.titulo || 'Sin título'} </p>
-          <p><strong>Cliente:</strong> ${coordinacion.nombre_cliente || 'N/A'}</p>
+          <p><strong>Cliente:</strong> ${coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'N/A'}</p>
           <p><strong>Teléfono:</strong> ${coordinacion.telefono || 'N/A'}</p>
           <p><strong>Tipo:</strong> ${coordinacion.tipo_evento || 'N/A'}</p>
           <p><strong>Código:</strong> ${coordinacion.codigo_evento || 'N/A'}</p>
@@ -106,7 +147,7 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
 
             const opt = {
                 margin: 15,
-                filename: `Coordinacion_${coordinacion.nombre_cliente || 'Evento'}_${coordinacion.codigo_evento || ''}.pdf`,
+                filename: `Coordinacion_${(coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'Evento').replace(/[^a-z0-9]/gi, '_')}_${coordinacion.codigo_evento || ''}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -191,7 +232,7 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
 
                 <div className={styles.infoGrid}>
                     <div className={styles.infoItem}>
-                        👤 <strong>Cliente:</strong> {coordinacion.nombre_cliente || 'N/A'}
+                        👤 <strong>Cliente:</strong> {coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'N/A'}
                     </div>
                     <div className={styles.infoItem}>
                         📅 <strong>Fecha:</strong> {event.fecha_evento ? format(new Date(event.fecha_evento.split('T')[0] + 'T00:00:00'), 'dd/MM/yyyy') : 'N/A'}
@@ -205,6 +246,49 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     <div className={styles.infoItem}>
                         🎉 <strong>Tipo:</strong> {coordinacion.tipo_evento || 'N/A'}
                     </div>
+                    {coordinacion.nombre_agasajado && (
+                        <div className={styles.infoItem}>
+                            👑 <strong>Agasajado/a:</strong> {coordinacion.nombre_agasajado}
+                        </div>
+                    )}
+                    <div className={styles.infoItem} style={{ gridColumn: '1 / -1', marginTop: '8px', padding: '12px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #eee' }}>
+                        💬 <strong style={{ marginRight: '12px' }}>Primer Contacto Realizado:</strong>
+                        <button
+                            className={styles.contactToggleButton}
+                            onClick={handleToggleContacto}
+                            disabled={savingContactado}
+                            style={{
+                                padding: '6px 16px',
+                                borderRadius: '20px',
+                                border: 'none',
+                                fontWeight: 'bold',
+                                cursor: savingContactado ? 'wait' : 'pointer',
+                                opacity: savingContactado ? 0.7 : 1,
+                                transition: 'all 0.2s',
+                                backgroundColor: contactado ? '#e8f5e9' : '#ffebee',
+                                color: contactado ? '#2e7d32' : '#c62828',
+                                border: `1px solid ${contactado ? '#c8e6c9' : '#ffcdd2'}`
+                            }}
+                        >
+                            {contactado ? '✅ SÍ, CONTACTADO' : '❌ NO, PENDIENTE'}
+                        </button>
+                        {savingContactado && <span style={{ marginLeft: '10px', fontSize: '12px', color: '#772c87', fontWeight: 'bold', fontStyle: 'italic' }}>Guardando...</span>}
+                    </div>
+                </div>
+
+                <div className={styles.notasContainer}>
+                    <div className={styles.notasLabel}>
+                        <label>📝 Notas Generales</label>
+                        {savingNotas && <span className={styles.savingIndicator}>Guardando...</span>}
+                    </div>
+                    <textarea
+                        className={styles.notasInput}
+                        value={notas}
+                        onChange={(e) => setNotas(e.target.value)}
+                        onBlur={handleSaveNotas}
+                        placeholder="Ingresá información específica de este evento aquí... (Se guarda automáticamente al hacer click afuera)"
+                        rows={3}
+                    />
                 </div>
 
                 <div className={styles.actionsContainer}>
@@ -242,8 +326,7 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                                 alert('Este evento no tiene número de teléfono asignado.');
                                 return;
                             }
-                            const cleanPh = coordinacion.telefono.replace(/[\s\-\(\)]/g, '');
-                            window.open(`https://wa.me/${cleanPh}`, '_blank');
+                            setShowWhatsAppTemplates(true);
                         }}
                     >
                         <span className={styles.actionIcon}>💬</span>
@@ -260,10 +343,7 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
 
                     <button
                         className={styles.actionButton}
-                        onClick={() => {
-                            alert("Por favor dirígete a la pestaña 'Coordinaciones' para modificar este registro.");
-                            onClose();
-                        }}
+                        onClick={() => setShowEditModal(true)}
                     >
                         <span className={styles.actionIcon}>✏️</span>
                         Editar Datos
@@ -291,6 +371,26 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     Cerrar Pantalla
                 </button>
             </div>
+
+            {showWhatsAppTemplates && (
+                <WhatsAppTemplateModal
+                    coordinacion={coordinacion}
+                    event={event}
+                    onClose={() => setShowWhatsAppTemplates(false)}
+                />
+            )}
+
+            {showEditModal && (
+                <EditCoordinationModal
+                    coordinacion={coordinacion}
+                    onClose={() => setShowEditModal(false)}
+                    onSave={() => {
+                        setShowEditModal(false);
+                        onClose(); // Close the main modal to reflect changes from parent fetch
+                        if (onRefresh) onRefresh();
+                    }}
+                />
+            )}
         </div>
     );
 }

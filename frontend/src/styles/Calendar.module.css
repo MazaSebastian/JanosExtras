@@ -110,8 +110,8 @@
 }
 
 .day.otherMonth {
-  opacity: 0.25;
-  cursor: not-allowed;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .day.hasEvent {
@@ -217,8 +217,10 @@
   }
 }
 
+/* Ocultar feriados que caen fuera del mes corriente */
 .day.holiday.otherMonth {
-  opacity: 0.4;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .holidayBadge {
@@ -417,4 +419,57 @@
     min-height: 32px;
     padding: 4px;
   }
+}
+
+.contactadoIndicator {
+  position: absolute;
+  bottom: 0px;
+  left: 14px;
+  font-size: 11px;
+  line-height: 1;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+}
+
+/* --- LEYENDA VISUAL DINÁMICA --- */
+.calendarLegend {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.calendarLegend h4 {
+  margin: 0 0 1.2rem 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.legendGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.legendColorBox {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
 }

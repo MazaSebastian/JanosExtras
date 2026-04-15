@@ -33,6 +33,7 @@ export default function DashboardPage() {
   // Using [router] caused the effect to re-fire during route transitions,
   // triggering state updates that blocked Next.js from unmounting this page.
   useEffect(() => {
+    isMounted.current = true; // React 18 StrictMode safe-reset
     const auth = getAuth();
     if (!auth.token || !auth.user) {
       router.replace('/login');
@@ -53,10 +54,6 @@ export default function DashboardPage() {
 
     if (auth.user.salon_id) {
       setSelectedSalon(auth.user.salon_id);
-      // Fetch salon info (guarded)
-      salonesAPI.getById(auth.user.salon_id)
-        .then(res => { if (isMounted.current) setUserSalonInfo(res.data); })
-        .catch(err => console.error('Error al cargar información del salón:', err));
     }
 
     // Cleanup: mark component as unmounted so no async callback touches state
@@ -78,6 +75,19 @@ export default function DashboardPage() {
       console.error('Error marcando leídos:', err);
     }
   };
+
+  // Reactive effect to keep top-right Dashboard Header in sync automatically
+  useEffect(() => {
+    if (!selectedSalon) {
+      if (isMounted.current) setUserSalonInfo(null);
+      return;
+    }
+    setLoadingSalonInfo(true);
+    salonesAPI.getById(selectedSalon)
+      .then(res => { if (isMounted.current) setUserSalonInfo(res.data); })
+      .catch(err => console.error('Error al cargar información del salón dinámico:', err))
+      .finally(() => { if (isMounted.current) setLoadingSalonInfo(false); });
+  }, [selectedSalon]);
 
   const triggerRefreshSequence = useCallback(() => {
     if (!isMounted.current) return;
