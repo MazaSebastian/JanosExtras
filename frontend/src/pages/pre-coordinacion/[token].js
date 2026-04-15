@@ -851,7 +851,9 @@ export default function PreCoordinacionPage() {
       <div className={styles.pasoContainer}>
         <h2 className={styles.pasoTitulo}>{paso.titulo}</h2>
         {paso.descripcion && (
-          <p className={styles.pasoDescripcion}>{paso.descripcion}</p>
+          <p className={styles.pasoDescripcion}>
+            {paso.descripcion.replace(/\[nombre de agasajada\/o\]/g, coordinacion?.nombre_agasajado || 'el/la agasajado/a')}
+          </p>
         )}
 
         <div className={styles.preguntas}>

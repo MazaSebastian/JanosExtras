@@ -59,38 +59,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         },
       ],
     },
-    {
-      id: 3,
-      titulo: '🎵 Música de Recepción y Cena',
-      descripcion: 'Selecciona el tipo de música para la recepción y cena',
-      preguntas: [
-        {
-          id: 'musica_recepcion_cena',
-          label: '¿Qué tipo de música te gustaría durante la recepción y cena?',
-          tipo: 'buttons',
-          requerido: true,
-          opciones: [
-            'Música Chill',
-            'Acústicos',
-            'Bossa N Nova',
-            'Rock Nacional',
-            'Pop Funcional',
-            'Deep House',
-            'Música Comercial',
-            'Jazz',
-            'Música Clásica',
-            'Lounge',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-      ],
-    },
+
     {
       id: 4,
       titulo: '🚪 Ingreso al Salón',
-      descripcion: 'El momento central al entrar al salón',
+      descripcion: 'Esta es la cancion que usara [nombre de agasajada/o] para realizar su ingreso oficial al salón',
       preguntas: [
         {
           id: 'realiza_ingreso_salon',
@@ -295,34 +268,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         },
       ],
     },
-    {
-      id: 3,
-      titulo: '🎵 Música de Recepción y Cena',
-      descripcion: 'Selecciona el tipo de música para la recepción y cena',
-      preguntas: [
-        {
-          id: 'musica_recepcion_cena',
-          label: '¿Qué tipo de música te gustaría durante la recepción y cena?',
-          tipo: 'buttons',
-          requerido: true,
-          opciones: [
-            'Música Chill',
-            'Acústicos',
-            'Bossa N Nova',
-            'Rock Nacional',
-            'Pop Funcional',
-            'Deep House',
-            'Música Comercial',
-            'Jazz',
-            'Música Clásica',
-            'Lounge',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-      ],
-    },
+
     {
       id: 4,
       titulo: '🚪 Momentos Especiales',
@@ -390,7 +336,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     {
       id: 6,
       titulo: '🚪 Ingreso al Salón',
-      descripcion: 'El momento de la fiesta',
+      descripcion: 'Esta es la cancion que usara [nombre de agasajada/o] para realizar su ingreso oficial al salón',
       preguntas: [
         {
           id: 'realizan_ingreso_salon',
@@ -560,34 +506,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         },
       ],
     },
-    {
-      id: 3,
-      titulo: '🎵 Música de Recepción y Cena',
-      descripcion: 'Selecciona el tipo de música para la recepción y cena',
-      preguntas: [
-        {
-          id: 'musica_recepcion_cena',
-          label: '¿Qué tipo de música te gustaría durante la recepción y cena?',
-          tipo: 'buttons',
-          requerido: true,
-          opciones: [
-            'Música Chill',
-            'Acústicos',
-            'Bossa N Nova',
-            'Rock Nacional',
-            'Pop Funcional',
-            'Deep House',
-            'Música Comercial',
-            'Jazz',
-            'Música Clásica',
-            'Lounge',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-      ],
-    },
+
     {
       id: 4,
       titulo: '🎤 Equipamiento',
@@ -863,38 +782,11 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         },
       ],
     },
-    {
-      id: 3,
-      titulo: '🎵 Música de Recepción y Cena',
-      descripcion: 'Selecciona el tipo de música para la recepción y cena',
-      preguntas: [
-        {
-          id: 'musica_recepcion_cena',
-          label: '¿Qué tipo de música te gustaría durante la recepción y cena?',
-          tipo: 'buttons',
-          requerido: true,
-          opciones: [
-            'Música Chill',
-            'Acústicos',
-            'Bossa N Nova',
-            'Rock Nacional',
-            'Pop Funcional',
-            'Deep House',
-            'Música Comercial',
-            'Jazz',
-            'Música Clásica',
-            'Lounge',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-      ],
-    },
+
     {
       id: 4,
       titulo: '🚪 Ingreso al Salón',
-      descripcion: 'Tu momento especial',
+      descripcion: 'Esta es la cancion que usara [nombre de agasajada/o] para realizar su ingreso oficial al salón',
       preguntas: [
         {
           id: 'realiza_ingreso_salon',
