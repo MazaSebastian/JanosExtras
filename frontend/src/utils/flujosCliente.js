@@ -3,30 +3,7 @@
 
 export const CLIENTE_FLUJOS_POR_TIPO = {
   XV: [
-    {
-      id: 1,
-      titulo: '🚪 Ingreso a Recepción',
-      descripcion: 'El primer momento especial de tu fiesta',
-      preguntas: [
-        {
-          id: 'realiza_ingreso_recepcion',
-          label: '¿Harás un ingreso especial a la recepción?',
-          tipo: 'buttons',
-          opciones: ['Sí', 'No'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
-          id: 'cancion_ingreso_recepcion',
-          label: '¿Qué canción te gustaría para tu ingreso a la recepción?',
-          tipo: 'textarea',
-          requerido: false,
-          condicional: { pregunta: 'realiza_ingreso_recepcion', valor: 'Sí' },
-          placeholder: 'Nombre de la canción y artista'
-        },
-      ],
-    },
+
     {
       id: 2,
       titulo: '🎵 Música de recepción y/o momentos que NO son tandas de baile',
@@ -269,30 +246,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
 
-    {
-      id: 4,
-      titulo: '🚪 Momentos Especiales',
-      descripcion: 'Los momentos más importantes de tu celebración',
-      preguntas: [
-        {
-          id: 'realizan_ingreso_recepcion',
-          label: '¿Harán un ingreso especial a la recepción?',
-          tipo: 'buttons',
-          opciones: ['Sí', 'No'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
-          id: 'cancion_ingreso_recepcion',
-          label: '¿Qué canción les gustaría para el ingreso a la recepción?',
-          tipo: 'textarea',
-          requerido: false,
-          condicional: { pregunta: 'realizan_ingreso_recepcion', valor: 'Sí' },
-          placeholder: 'Nombre de la canción y artista'
-        },
-      ],
-    },
+
     {
       id: 5,
       titulo: '💒 Ceremonia',

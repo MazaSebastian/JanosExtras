@@ -126,7 +126,7 @@ export default function PreCoordinacionPage() {
   }, [coordinacion?.tipo_evento]);
 
   const pasos = tipoEventoNormalizado ? CLIENTE_FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
-  const paso = pasos.find(p => p.id === pasoActual);
+  const paso = pasos[pasoActual - 1];
   const totalPasos = pasos.length;
 
   const handleInputChange = (preguntaId, value) => {
