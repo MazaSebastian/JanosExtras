@@ -12,6 +12,7 @@ import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import AgendarVideollamadaModal from '@/components/AgendarVideollamadaModal';
 import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
+import WhatsAppTemplateModal from '@/components/WhatsAppTemplateModal';
 import { exportarCoordinacionPDF } from '@/utils/pdfExport';
 
 export default function CoordinacionesPanel() {
@@ -56,6 +57,9 @@ export default function CoordinacionesPanel() {
   const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
   const [exportingPdfId, setExportingPdfId] = useState(null);
   const [tooltipData, setTooltipData] = useState({ show: false, items: [], x: 0, y: 0 });
+  const [whatsappMenuOpen, setWhatsappMenuOpen] = useState(null);
+  const [showWhatsAppTemplates, setShowWhatsAppTemplates] = useState(false);
+  const [selectedCoordForWhatsApp, setSelectedCoordForWhatsApp] = useState(null);
 
   // El componente GoogleCalendarConnect manejará la verificación del estado
   // No necesitamos verificarlo aquí, solo mostramos el componente si hay user
@@ -363,6 +367,12 @@ export default function CoordinacionesPanel() {
 
   const togglePlayMenu = (id) => {
     setPlayMenuOpen(playMenuOpen === id ? null : id);
+    setWhatsappMenuOpen(null);
+  };
+
+  const toggleWhatsappMenu = (id) => {
+    setWhatsappMenuOpen(whatsappMenuOpen === id ? null : id);
+    setPlayMenuOpen(null);
   };
 
   const handleVerResumen = async (coordinacion) => {
@@ -452,12 +462,15 @@ export default function CoordinacionesPanel() {
       if (playMenuOpen && !event.target.closest(`.${styles.playMenuContainer}`)) {
         setPlayMenuOpen(null);
       }
+      if (whatsappMenuOpen && !event.target.closest(`.${styles.playMenuContainer}`)) {
+        setWhatsappMenuOpen(null);
+      }
     };
-    if (playMenuOpen) {
+    if (playMenuOpen || whatsappMenuOpen) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [playMenuOpen]);
+  }, [playMenuOpen, whatsappMenuOpen]);
 
   const getEstadoColor = (estado) => {
     const colors = {
@@ -971,16 +984,112 @@ export default function CoordinacionesPanel() {
                         </>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      className={styles.whatsappButton}
-                      onClick={() => handleWhatsApp(item)}
-                      title={item.telefono ? `Enviar WhatsApp a ${item.telefono}` : 'Agregar teléfono para enviar WhatsApp'}
-                      disabled={!item.telefono}
-                      style={!item.telefono ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                    >
-                      💬
-                    </button>
+                    <div className={styles.playMenuContainer}>
+                      <button
+                        type="button"
+                        className={styles.whatsappButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!item.telefono) return;
+                          toggleWhatsappMenu(item.id);
+                        }}
+                        title={item.telefono ? `Opciones de WhatsApp para ${item.telefono}` : 'Agregar teléfono para enviar WhatsApp'}
+                        disabled={!item.telefono}
+                        style={!item.telefono ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                      >
+                        💬
+                      </button>
+                      {whatsappMenuOpen === item.id && (
+                        <>
+                          <div
+                            className={styles.playMenuOverlay}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setWhatsappMenuOpen(null);
+                            }}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setWhatsappMenuOpen(null);
+                            }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                            }}
+                          />
+                          <div
+                            className={styles.playMenu}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            onTouchEnd={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className={styles.playMenuItem}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedCoordForWhatsApp(item);
+                                setShowWhatsAppTemplates(true);
+                                setWhatsappMenuOpen(null);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedCoordForWhatsApp(item);
+                                setShowWhatsAppTemplates(true);
+                                setWhatsappMenuOpen(null);
+                              }}
+                            >
+                              Plantillas WhatsApp
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.playMenuItem}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleWhatsApp(item);
+                                setWhatsappMenuOpen(null);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleWhatsApp(item);
+                                setWhatsappMenuOpen(null);
+                              }}
+                            >
+                              Ir al chat
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.playMenuItem}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const url = `${window.location.origin}/encuesta/${item.id}`;
+                                const text = `¡Hola ${item.nombre_cliente}! Ojalá hayas pasado una fiesta increíble. 🥳 Me encantaría que me dejes tu opinión sobre el evento midiendo nuestro desempeño en este link cortito (te lleva 1 minuto): ${url}`;
+                                window.open(`https://wa.me/${(item.telefono || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+                                setWhatsappMenuOpen(null);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const url = `${window.location.origin}/encuesta/${item.id}`;
+                                const text = `¡Hola ${item.nombre_cliente}! Ojalá hayas pasado una fiesta increíble. 🥳 Me encantaría que me dejes tu opinión sobre el evento midiendo nuestro desempeño en este link cortito (te lleva 1 minuto): ${url}`;
+                                window.open(`https://wa.me/${(item.telefono || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+                                setWhatsappMenuOpen(null);
+                              }}
+                            >
+                              Enviar Encuesta
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                     {googleCalendarConnected && (
                       <button
                         type="button"
@@ -1808,6 +1917,17 @@ export default function CoordinacionesPanel() {
           </ul>
           <div className={styles.tooltipArrow}></div>
         </div>
+      )}
+
+      {showWhatsAppTemplates && selectedCoordForWhatsApp && (
+        <WhatsAppTemplateModal
+          coordinacion={selectedCoordForWhatsApp}
+          event={selectedCoordForWhatsApp}
+          onClose={() => {
+            setShowWhatsAppTemplates(false);
+            setSelectedCoordForWhatsApp(null);
+          }}
+        />
       )}
 
     </section>

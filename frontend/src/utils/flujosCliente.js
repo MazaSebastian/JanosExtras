@@ -177,20 +177,10 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Compartinos la música que no puede faltar en tu evento',
       preguntas: [
         {
-          id: 'playlist_pendiente',
-          label: '¿Ya tenés armada una playlist de referencia (Spotify/YouTube)?',
-          tipo: 'buttons',
-          opciones: ['Sí, ya la tengo', 'No, la envío después (Pendiente)'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
           requerido: false,
-          condicional: { pregunta: 'playlist_pendiente', valor: 'Sí, ya la tengo' },
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],
@@ -410,20 +400,10 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Compartinos la música que no puede faltar en tu evento',
       preguntas: [
         {
-          id: 'playlist_pendiente',
-          label: '¿Ya tenés armada una playlist de referencia (Spotify/YouTube)?',
-          tipo: 'buttons',
-          opciones: ['Sí, ya la tengo', 'No, la envío después (Pendiente)'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
           requerido: false,
-          condicional: { pregunta: 'playlist_pendiente', valor: 'Sí, ya la tengo' },
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],
@@ -668,20 +648,10 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Compartinos la música que no puede faltar en tu evento',
       preguntas: [
         {
-          id: 'playlist_pendiente',
-          label: '¿Ya tenés armada una playlist de referencia (Spotify/YouTube)?',
-          tipo: 'buttons',
-          opciones: ['Sí, ya la tengo', 'No, la envío después (Pendiente)'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
           requerido: false,
-          condicional: { pregunta: 'playlist_pendiente', valor: 'Sí, ya la tengo' },
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],
@@ -829,20 +799,10 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Compartinos la música que no puede faltar en tu evento',
       preguntas: [
         {
-          id: 'playlist_pendiente',
-          label: '¿Ya tenés armada una playlist de referencia (Spotify/YouTube)?',
-          tipo: 'buttons',
-          opciones: ['Sí, ya la tengo', 'No, la envío después (Pendiente)'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
           requerido: false,
-          condicional: { pregunta: 'playlist_pendiente', valor: 'Sí, ya la tengo' },
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],

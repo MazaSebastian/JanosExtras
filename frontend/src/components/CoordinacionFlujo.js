@@ -87,8 +87,7 @@ export const FLUJOS_POR_TIPO = {
       id: 99,
       titulo: 'Playlist',
       preguntas: [
-        { id: 'playlist_pendiente', label: '¿Playlist pendiente?', tipo: 'select', opciones: ['No (Ya entregada)', 'Sí (Pendiente)'], requerido: true },
-        { id: 'link_playlist', label: 'Link de la playlist (si la hay)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'playlist_pendiente', valor: 'No (Ya entregada)' } },
+        { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
     },
   ],
@@ -180,8 +179,7 @@ export const FLUJOS_POR_TIPO = {
       id: 99,
       titulo: 'Playlist',
       preguntas: [
-        { id: 'playlist_pendiente', label: '¿Playlist pendiente?', tipo: 'select', opciones: ['No (Ya entregada)', 'Sí (Pendiente)'], requerido: true },
-        { id: 'link_playlist', label: 'Link de la playlist (si la hay)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'playlist_pendiente', valor: 'No (Ya entregada)' } },
+        { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
     },
   ],
@@ -245,8 +243,7 @@ export const FLUJOS_POR_TIPO = {
       id: 99,
       titulo: 'Playlist',
       preguntas: [
-        { id: 'playlist_pendiente', label: '¿Playlist pendiente?', tipo: 'select', opciones: ['No (Ya entregada)', 'Sí (Pendiente)'], requerido: true },
-        { id: 'link_playlist', label: 'Link de la playlist (si la hay)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'playlist_pendiente', valor: 'No (Ya entregada)' } },
+        { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
     },
   ],
@@ -283,8 +280,7 @@ export const FLUJOS_POR_TIPO = {
       id: 99,
       titulo: 'Playlist',
       preguntas: [
-        { id: 'playlist_pendiente', label: '¿Playlist pendiente?', tipo: 'select', opciones: ['No (Ya entregada)', 'Sí (Pendiente)'], requerido: true },
-        { id: 'link_playlist', label: 'Link de la playlist (si la hay)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'playlist_pendiente', valor: 'No (Ya entregada)' } },
+        { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
     },
   ],
@@ -349,8 +345,7 @@ export const FLUJOS_POR_TIPO = {
       id: 99,
       titulo: 'Playlist',
       preguntas: [
-        { id: 'playlist_pendiente', label: '¿Playlist pendiente?', tipo: 'select', opciones: ['No (Ya entregada)', 'Sí (Pendiente)'], requerido: true },
-        { id: 'link_playlist', label: 'Link de la playlist (si la hay)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'playlist_pendiente', valor: 'No (Ya entregada)' } },
+        { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
     },
   ],
