@@ -12,6 +12,30 @@ import { formatDateFromDB } from '@/utils/dateFormat';
 export const FLUJOS_POR_TIPO = {
   XV: [
     {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
+    {
       id: 1,
       titulo: 'Ingreso a Recepción',
       preguntas: [
@@ -92,6 +116,30 @@ export const FLUJOS_POR_TIPO = {
     },
   ],
   Casamiento: [
+    {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 1,
       titulo: 'Música de recepción y/o momentos que NO son tandas de baile',
@@ -184,6 +232,30 @@ export const FLUJOS_POR_TIPO = {
     },
   ],
   Corporativo: [
+    {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 1,
       titulo: 'Temática del Evento',
@@ -285,6 +357,30 @@ export const FLUJOS_POR_TIPO = {
     },
   ],
   Cumpleaños: [
+    {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 1,
       titulo: 'Temática del Evento',
