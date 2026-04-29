@@ -45,7 +45,7 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
     };
 
     return (
-        <div className={styles.overlay}>
+        <div className={styles.overlay} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <h3 className={styles.title}>✏️ Editar Datos</h3>
                 <p className={styles.subtitle}>Modificá la información de la coordinación actual</p>

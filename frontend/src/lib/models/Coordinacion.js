@@ -62,8 +62,11 @@ export class Coordinacion {
         c.google_calendar_event_id,
         c.videollamada_agendada,
         c.videollamada_fecha,
+        c.videollamada_completada,
         c.videollamada_duracion,
         c.videollamada_meet_link,
+        c.encuesta_completada,
+        c.encuesta_respuestas,
         d.nombre AS dj_responsable_nombre,
         d.color_hex AS dj_responsable_color,
         s.nombre AS salon_nombre,
@@ -118,8 +121,11 @@ export class Coordinacion {
         c.google_calendar_event_id,
         c.videollamada_agendada,
         c.videollamada_fecha,
+        c.videollamada_completada,
         c.videollamada_duracion,
         c.videollamada_meet_link,
+        c.encuesta_completada,
+        c.encuesta_respuestas,
         d.nombre AS dj_responsable_nombre,
         d.color_hex AS dj_responsable_color,
         s.nombre AS salon_nombre,
@@ -134,7 +140,7 @@ export class Coordinacion {
     return result.rows[0] || null;
   }
 
-  static async create({ titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por }) {
+  static async create({ titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por, videollamada_agendada, videollamada_fecha }) {
     // Asegurar que fecha_evento sea un string YYYY-MM-DD o null
     // PostgreSQL DATE debe recibir el string directamente, no un objeto Date
     let fechaEventoParaDB = null;
@@ -161,9 +167,9 @@ export class Coordinacion {
     });
 
     const query = `
-      INSERT INTO coordinaciones (titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10, $11, $12, $13, $14, $15, $16)
-      RETURNING id, titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion
+      INSERT INTO coordinaciones (titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, creado_por, videollamada_agendada, videollamada_fecha, videollamada_completada)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10, $11, $12, $13, $14, $15, $16, $17, $18, false)
+      RETURNING id, titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, activo, fecha_creacion, videollamada_agendada, videollamada_fecha, videollamada_completada
     `;
     const result = await pool.query(query, [
       titulo,
@@ -182,6 +188,8 @@ export class Coordinacion {
       prioridad || 'normal',
       notas || null,
       creado_por,
+      videollamada_agendada || false,
+      videollamada_fecha || null,
     ]);
 
     console.log('[Coordinacion.create] Fecha guardada en DB:', result.rows[0]?.fecha_evento);
@@ -189,7 +197,7 @@ export class Coordinacion {
     return result.rows[0];
   }
 
-  static async update(id, { titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, contactado, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_duracion, videollamada_meet_link }) {
+  static async update(id, { titulo, descripcion, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, hora_evento, salon_id, dj_responsable_id, estado, prioridad, notas, contactado, activo, pre_coordinacion_token, pre_coordinacion_url, pre_coordinacion_fecha_creacion, pre_coordinacion_completado_por_cliente, pre_coordinacion_fecha_completado, google_calendar_event_id, videollamada_agendada, videollamada_fecha, videollamada_completada, videollamada_duracion, videollamada_meet_link, encuesta_completada, encuesta_respuestas }) {
     const updates = [];
     const values = [];
     let paramIndex = 1;
@@ -252,6 +260,17 @@ export class Coordinacion {
       }
       updates.push(`fecha_evento = $${paramIndex}::date`);
       values.push(fechaEventoParaDB);
+      paramIndex++;
+    }
+
+    if (encuesta_completada !== undefined) {
+      updates.push(`encuesta_completada = $${paramIndex}`);
+      values.push(encuesta_completada);
+      paramIndex++;
+    }
+    if (encuesta_respuestas !== undefined) {
+      updates.push(`encuesta_respuestas = $${paramIndex}`);
+      values.push(encuesta_respuestas);
       paramIndex++;
     }
     if (hora_evento !== undefined) {
@@ -342,7 +361,11 @@ export class Coordinacion {
       values.push(videollamada_fecha);
       paramIndex++;
     }
-
+    if (videollamada_completada !== undefined) {
+      updates.push(`videollamada_completada = $${paramIndex}`);
+      values.push(videollamada_completada);
+      paramIndex++;
+    }
     if (videollamada_duracion !== undefined) {
       updates.push(`videollamada_duracion = $${paramIndex}`);
       values.push(videollamada_duracion);

@@ -95,13 +95,6 @@ export const FLUJOS_POR_TIPO = {
   Casamiento: [
     {
       id: 1,
-      titulo: 'Estilo de tu Casamiento',
-      preguntas: [
-        { id: 'estilo_casamiento', label: 'Selecciona el estilo de tu casamiento', tipo: 'select', opciones: ['Ceremonial', 'Formal y Elegante', 'Descontracturado'], requerido: true },
-      ],
-    },
-    {
-      id: 2,
       titulo: 'Música de recepción y/o momentos que NO son tandas de baile',
       preguntas: [
         { id: 'musica_recepcion', label: 'Descripción de la música de recepción', tipo: 'textarea', requerido: true },
@@ -109,7 +102,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 3,
+      id: 2,
       titulo: 'Ingreso a Recepción',
       preguntas: [
         { id: 'realizan_ingreso_recepcion', label: '¿Realizan ingreso a recepción?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -117,7 +110,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 3,
       titulo: 'Ceremonia',
       preguntas: [
         { id: 'realizan_ceremonia_salon', label: '¿Realizan ceremonia en el salón?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -127,7 +120,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 4,
       titulo: 'Ingreso al Salón',
       preguntas: [
         { id: 'realizan_ingreso_salon', label: '¿Realizan ingreso al salón?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -135,7 +128,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 5,
       titulo: 'Vals',
       preguntas: [
         { id: 'bailan_vals', label: '¿Van a bailar el vals?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -143,7 +136,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 7,
+      id: 6,
       titulo: 'Coreografías',
       preguntas: [
         { id: 'realizan_coreografia', label: '¿Realizan alguna coreografía?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -151,11 +144,18 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 8,
+      id: 7,
       titulo: 'Canción para Ramo (novia) / Whisky (novio)',
       preguntas: [
         { id: 'cancion_ramo_novia', label: 'Canción para Ramo (novia)', tipo: 'textarea', requerido: true },
         { id: 'cancion_whisky_novio', label: 'Canción para Whisky (novio)', tipo: 'textarea', requerido: true },
+      ],
+    },
+    {
+      id: 8,
+      titulo: 'Brindis',
+      preguntas: [
+        { id: 'cancion_brindis', label: 'Canción para el brindis', tipo: 'textarea', requerido: true },
       ],
     },
     {
@@ -356,9 +356,10 @@ export const FLUJOS_POR_TIPO = {
   ],
 };
 
-export default function CoordinacionFlujo({ coordinacionId }) {
+export default function CoordinacionFlujo({ coordinacionId, soloPendientes = false }) {
   const router = useRouter();
   const [coordinacion, setCoordinacion] = useState(null);
+  const [preguntasPendientesIniciales, setPreguntasPendientesIniciales] = useState(null);
   const [pasoActual, setPasoActual] = useState(1);
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(true);
@@ -601,6 +602,22 @@ export default function CoordinacionFlujo({ coordinacionId }) {
           if (flujoData.estado === 'completado_por_cliente' || data.pre_coordinacion_completado_por_cliente) {
             console.log('✅ Esta coordinación ya fue completada por el cliente. Puedes revisar y editar las respuestas.');
           }
+
+          // Si estamos en modo soloPendientes, calcular las iniciales
+          if (soloPendientes && data.tipo_evento) {
+            const tipoEvent = data.tipo_evento.trim();
+            const flujos = FLUJOS_POR_TIPO[tipoEvent] || [];
+            const pendientesIds = new Set();
+            flujos.forEach(pasoIter => {
+               pasoIter.preguntas.forEach(p => {
+                  const valor = respuestasExistentes[p.id];
+                  if (valor === '__PENDIENTE__') {
+                     pendientesIds.add(p.id);
+                  }
+               });
+            });
+            setPreguntasPendientesIniciales(pendientesIds);
+          }
         }
       } catch (err) {
         // No es un error crítico si no hay flujo aún
@@ -621,7 +638,29 @@ export default function CoordinacionFlujo({ coordinacionId }) {
     return coordinacion.tipo_evento.trim();
   }, [coordinacion?.tipo_evento]);
 
-  const pasos = tipoEventoNormalizado ? FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
+  const pasos = useMemo(() => {
+    const flujosOriginales = tipoEventoNormalizado ? FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
+    if (!soloPendientes || !preguntasPendientesIniciales) return flujosOriginales;
+    
+    return flujosOriginales.map(pasoIter => {
+      const preguntasFiltradas = pasoIter.preguntas.filter(p => preguntasPendientesIniciales.has(p.id));
+      if (preguntasFiltradas.length > 0) {
+        return { ...pasoIter, preguntas: preguntasFiltradas };
+      }
+      return null;
+    }).filter(Boolean);
+  }, [tipoEventoNormalizado, soloPendientes, preguntasPendientesIniciales]);
+
+  // Asegurarnos de que el pasoActual apunte a un paso válido en modo filtrado
+  useEffect(() => {
+    if (soloPendientes && pasos.length > 0) {
+      const pasoExiste = pasos.find(p => p.id === pasoActual);
+      if (!pasoExiste) {
+        setPasoActual(pasos[0].id);
+      }
+    }
+  }, [pasos, soloPendientes, pasoActual]);
+
   const paso = pasos.find(p => p.id === pasoActual);
   const totalPasos = pasos.length;
 
@@ -717,8 +756,9 @@ export default function CoordinacionFlujo({ coordinacionId }) {
 
     setError('');
 
-    if (pasoActual < totalPasos) {
-      setPasoActual(pasoActual + 1);
+    const currentIndex = pasos.findIndex(p => p.id === pasoActual);
+    if (currentIndex >= 0 && currentIndex < pasos.length - 1) {
+      setPasoActual(pasos[currentIndex + 1].id);
     } else {
       // Último paso - completar flujo
       await completarFlujo();
@@ -726,8 +766,9 @@ export default function CoordinacionFlujo({ coordinacionId }) {
   };
 
   const handleAnterior = () => {
-    if (pasoActual > 1) {
-      setPasoActual(pasoActual - 1);
+    const currentIndex = pasos.findIndex(p => p.id === pasoActual);
+    if (currentIndex > 0) {
+      setPasoActual(pasos[currentIndex - 1].id);
       setError('');
     }
   };
@@ -954,22 +995,41 @@ export default function CoordinacionFlujo({ coordinacionId }) {
         )}
       </div>
 
-      <div className={styles.progressBar}>
-        {pasos.map((paso, index) => (
-          <div
-            key={paso.id}
-            className={`${styles.progressStep} ${(index + 1) < pasoActual ? styles.completed :
-              (index + 1) === pasoActual ? styles.active :
-                styles.pending
-              }`}
+      {pasos.length === 0 && soloPendientes && !mostrarResumen && (
+        <div className={styles.resumenContainer} style={{ textAlign: 'center', padding: '3rem' }}>
+          <h2 style={{ color: '#4caf50', marginBottom: '1rem' }}>¡Todo al día!</h2>
+          <p>Esta coordinación no tiene información pendiente para completar.</p>
+          <button
+            className={styles.buttonPrimary}
+            style={{ marginTop: '2rem' }}
+            onClick={() => router.push('/dashboard/coordinaciones')}
           >
-            <div className={styles.stepNumber}>
-              {(index + 1) < pasoActual ? '✓' : (index + 1)}
+            Volver a Coordinaciones
+          </button>
+        </div>
+      )}
+
+      {pasos.length > 0 && (
+        <div className={styles.progressBar}>
+        {pasos.map((pasoIter, index) => {
+          const currentIndex = pasos.findIndex(p => p.id === pasoActual);
+          return (
+            <div
+              key={pasoIter.id}
+              className={`${styles.progressStep} ${index < currentIndex ? styles.completed :
+                index === currentIndex ? styles.active :
+                  soloPendientes ? styles.warning : styles.pending
+                }`}
+            >
+              <div className={styles.stepNumber}>
+                {index < currentIndex ? '✓' : (soloPendientes && index > currentIndex ? '!' : (index + 1))}
+              </div>
+              <div className={styles.stepLabel}>{pasoIter.titulo}</div>
             </div>
-            <div className={styles.stepLabel}>{paso.titulo}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+      )}
 
       {error && (
         <div className={styles.errorMessage}>
@@ -1449,29 +1509,31 @@ export default function CoordinacionFlujo({ coordinacionId }) {
         </div>
       )}
 
-      <div className={styles.actions}>
-        <button
-          className={styles.buttonSecondary}
-          onClick={handleAnterior}
-          disabled={pasoActual === 1 || guardando}
-        >
-          ← Anterior
-        </button>
-        <button
-          className={styles.buttonSecondary}
-          onClick={guardarProgreso}
-          disabled={guardando}
-        >
-          {guardando ? 'Guardando...' : '💾 Guardar Progreso'}
-        </button>
-        <button
-          className={styles.buttonPrimary}
-          onClick={pasoActual < totalPasos ? handleSiguiente : completarFlujo}
-          disabled={guardando}
-        >
-          {pasoActual < totalPasos ? 'Siguiente →' : '✓ Ver Resumen'}
-        </button>
-      </div>
+      {pasos.length > 0 && !mostrarResumen && (
+        <div className={styles.actions}>
+          <button
+            className={styles.buttonSecondary}
+            onClick={handleAnterior}
+            disabled={pasos.findIndex(p => p.id === pasoActual) === 0 || guardando}
+          >
+            ← Anterior
+          </button>
+          <button
+            className={styles.buttonSecondary}
+            onClick={guardarProgreso}
+            disabled={guardando}
+          >
+            {guardando ? 'Guardando...' : '💾 Guardar Progreso'}
+          </button>
+          <button
+            className={styles.buttonPrimary}
+            onClick={pasos.findIndex(p => p.id === pasoActual) < pasos.length - 1 ? handleSiguiente : completarFlujo}
+            disabled={guardando}
+          >
+            {pasos.findIndex(p => p.id === pasoActual) < pasos.length - 1 ? 'Siguiente →' : '✓ Ver Resumen'}
+          </button>
+        </div>
+      )}
 
       {/* Modal para agregar vela */}
       {showVelaModal && (

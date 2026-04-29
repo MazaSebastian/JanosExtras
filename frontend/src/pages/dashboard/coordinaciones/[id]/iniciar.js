@@ -6,7 +6,7 @@ import styles from '@/styles/CoordinacionFlujo.module.css';
 
 export default function IniciarCoordinacionPage() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id, soloPendientes } = router.query;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -44,7 +44,7 @@ export default function IniciarCoordinacionPage() {
             <span>{error}</span>
           </div>
         )}
-        <CoordinacionFlujo coordinacionId={parseInt(id, 10)} />
+        <CoordinacionFlujo coordinacionId={parseInt(id, 10)} soloPendientes={soloPendientes === 'true'} />
       </div>
     </DJLayout>
   );

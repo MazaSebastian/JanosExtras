@@ -102,6 +102,26 @@ export default function Calendar({
     return eventsByDate.get(dateKey) || [];
   };
 
+  // ── Videocalls map ──
+  const videocallsByDate = useMemo(() => {
+    const map = new Map();
+    rawCoords.forEach((coord) => {
+      if (coord.videollamada_agendada && coord.videollamada_fecha) {
+        try {
+          const localDate = new Date(coord.videollamada_fecha);
+          const key = format(localDate, 'yyyy-MM-dd');
+          if (key) {
+            if (!map.has(key)) map.set(key, []);
+            map.get(key).push(coord);
+          }
+        } catch (e) {
+          console.error("Invalid date", coord.videollamada_fecha);
+        }
+      }
+    });
+    return map;
+  }, [rawCoords]);
+
   // ── Coordination status map ──
   const coordsByDate = useMemo(() => {
     const map = new Map();
@@ -218,12 +238,23 @@ export default function Calendar({
     }
 
     const eventsForDate = getEventsForDate(date);
+    // If adminMode is true, we respect all events for the date. Otherwise just currentUserId.
+    const allEventsToShow = adminMode ? eventsForDate : eventsForDate.filter(e => e.dj_id === currentUserId);
     const myEvent = eventsForDate.find((event) => event.dj_id === currentUserId);
     const isFull = eventsForDate.length >= MAX_DJS_PER_DAY;
 
-    if (myEvent) {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    const videocallsOnDate = videocallsByDate.get(dateKey) || [];
+    const videocallsFiltered = videocallsOnDate.filter(c => !salonId || String(c.salon_id) === String(salonId) || (currentUserId && String(c.dj_responsable_id) === String(currentUserId)));
+
+    if (allEventsToShow.length > 0 || videocallsFiltered.length > 0) {
       if (typeof onExistingEventClick === 'function') {
-        onExistingEventClick(myEvent);
+        onExistingEventClick({
+          isAgenda: true,
+          date: date,
+          events: allEventsToShow,
+          videocalls: videocallsFiltered
+        });
       }
       return;
     }
@@ -245,7 +276,7 @@ export default function Calendar({
     setCurrentYear(currentYear + 1);
   };
 
-  const weekDays = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+  const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
   return (
     <div className={styles.calendar}>
@@ -299,6 +330,11 @@ export default function Calendar({
                 const feriadoInfo = feriadosMap.get(dateKey);
                 const isHoliday = Boolean(feriadoInfo);
 
+                // Check for videocalls specifically on this day
+                const videocallsOnDate = videocallsByDate.get(dateKey) || [];
+                const activeVideocalls = videocallsOnDate.filter(c => !c.videollamada_completada && (!salonId || String(c.salon_id) === String(salonId) || String(c.dj_responsable_id) === String(currentUserId)));
+                const hasActiveVideocall = activeVideocalls.length > 0;
+
                 const dayClasses = [styles.day];
                 if (!isCurrentMonth) dayClasses.push(styles.otherMonth);
                 if (isHoliday) dayClasses.push(styles.holiday);
@@ -306,6 +342,7 @@ export default function Calendar({
                 if (isBlocked) dayClasses.push(styles.blocked);
                 if (myEvent) dayClasses.push(styles.myEvent);
                 if (isFull && !myEvent) dayClasses.push(styles.full);
+                if (hasActiveVideocall) dayClasses.push(styles.hasVideocall);
 
                 // Build tooltip with status info
                 let tooltipText = '';
@@ -326,8 +363,28 @@ export default function Calendar({
                   if (isFull && !myEvent) {
                     tooltipText += ' — Cupo completo';
                   }
+                } else if (hasActiveVideocall) {
+                  tooltipText = activeVideocalls
+                    .map(c => {
+                      let timeStr = '';
+                      if (c.videollamada_fecha) {
+                        try {
+                          timeStr = format(new Date(c.videollamada_fecha), 'HH:mm');
+                        } catch (e) { }
+                      }
+                      return `Reunión: ${c.nombre_cliente || c.titulo}${timeStr ? ` a las ${timeStr}hs` : ''}`;
+                    })
+                    .join(' | ');
                 } else {
                   tooltipText = format(date, 'dd/MM/yyyy');
+                }
+
+                // If it has both event and videocall, append videocall info to tooltip
+                if (hasEventOnDate && hasActiveVideocall) {
+                  const vText = activeVideocalls
+                    .map(c => `Reunión: ${c.nombre_cliente || c.titulo}`)
+                    .join(', ');
+                  tooltipText += ` | ${vText}`;
                 }
 
                 // Compute inline color for the day cell based on DJ assignments
@@ -350,6 +407,11 @@ export default function Calendar({
                         ? tooltipNames
                         : undefined
                     }
+                    data-videocall-name={
+                      hasActiveVideocall && !hasEventOnDate
+                        ? tooltipText
+                        : undefined
+                    }
                     data-feriado-name={
                       isHoliday && feriadoInfo
                         ? feriadoInfo.name
@@ -360,7 +422,7 @@ export default function Calendar({
                     <span className={styles.dayNumber}>
                       {format(date, 'd')}
                     </span>
-                    {hasEventOnDate && myEvent && (() => {
+                    {(hasEventOnDate && myEvent) && (() => {
                       const status = getCoordStatus(dateKey, salonId);
                       const coordsForDate = coordsByDate.get(dateKey) || [];
                       const coord = coordsForDate.find(c => String(c.salon_id) === String(salonId) || !salonId);
@@ -380,6 +442,12 @@ export default function Calendar({
                             >
                               💬
                             </span>
+                          )}
+                          {(coord?.videollamada_agendada && !coord?.videollamada_completada) && (
+                            <span
+                              className={styles.videocallMixedDot}
+                              title="Reunión/Videollamada Pendiente"
+                            />
                           )}
                         </>
                       );
@@ -419,6 +487,14 @@ export default function Calendar({
           <div className={styles.legendItem}>
             <span className={`${styles.statusDot} ${styles.statusDot_green}`} style={{ position: 'static', transform: 'scale(1.2)' }}></span>
             <span>Coordinación 100% Completada</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendColorBox} style={{ background: '#4285F4', border: '2px solid #3367D6' }}></div>
+            <span>Reunión Agendada (Día Libre)</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={styles.videocallMixedDot} style={{ position: 'relative', top: 'auto', left: 'auto', transform: 'scale(1.2)' }}></span>
+            <span>Reunión + Evento Confirmado</span>
           </div>
           <div className={styles.legendItem}>
             <span style={{ fontSize: '13px', lineHeight: 1 }}>💬</span>

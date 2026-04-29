@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'No tienes permiso para editar esta coordinación' });
       }
 
-      const { titulo, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, dj_responsable_id, estado, notas, contactado } = req.body;
+      const { titulo, nombre_cliente, apellido_cliente, nombre_agasajado, telefono, tipo_evento, codigo_evento, fecha_evento, dj_responsable_id, estado, notas, contactado, videollamada_agendada, videollamada_fecha, videollamada_completada, videollamada_duracion, videollamada_meet_link, encuesta_completada, encuesta_respuestas } = req.body;
 
       // Si es DJ (no admin), no puede cambiar el dj_responsable_id
       let djResponsableIdUpdate = dj_responsable_id ? parseInt(dj_responsable_id, 10) : undefined;
@@ -109,6 +109,13 @@ export default async function handler(req, res) {
         estado,
         notas,
         contactado,
+        videollamada_agendada,
+        videollamada_fecha,
+        videollamada_completada,
+        videollamada_duracion,
+        videollamada_meet_link,
+        encuesta_completada,
+        encuesta_respuestas,
       });
 
       if (!coordinacion) {

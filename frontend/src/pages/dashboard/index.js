@@ -6,7 +6,10 @@ import Loading from '@/components/Loading';
 import SalonSelector from '@/components/SalonSelector';
 import Calendar from '@/components/Calendar';
 import EventMarker from '@/components/EventMarker';
+import ReunionMarker from '@/components/ReunionMarker';
+import TypeSelectorModal from '@/components/TypeSelectorModal';
 import EventActionModal from '@/components/EventActionModal';
+import DayAgendaModal from '@/components/DayAgendaModal';
 import Dashboard from '@/components/Dashboard';
 import DJLayout from '@/components/DJLayout';
 import styles from '@/styles/DashboardPage.module.css';
@@ -19,7 +22,11 @@ export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const [selectedSalon, setSelectedSalon] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [showEventMarker, setShowEventMarker] = useState(false);
+  const [showReunionMarker, setShowReunionMarker] = useState(false);
+  const [showDayAgenda, setShowDayAgenda] = useState(false);
+  const [agendaData, setAgendaData] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0);
   const [dashboardRefreshFn, setDashboardRefreshFn] = useState(null);
@@ -111,17 +118,32 @@ export default function DashboardPage() {
       return;
     }
     setSelectedDate(date);
-    setShowEventMarker(true);
+    setShowTypeSelector(true);
+  };
+
+  const handleTypeSelect = (type) => {
+    setShowTypeSelector(false);
+    if (type === 'coordinacion') {
+      setShowEventMarker(true);
+    } else if (type === 'reunion') {
+      setShowReunionMarker(true);
+    }
   };
 
   const handleEventCreated = () => {
     setShowEventMarker(false);
+    setShowReunionMarker(false);
     setSelectedDate(null);
     triggerRefreshSequence();
   };
 
   const handleExistingEventClick = (event) => {
-    setEventToDelete(event);
+    if (event && event.isAgenda) {
+      setAgendaData(event);
+      setShowDayAgenda(true);
+    } else {
+      setEventToDelete(event);
+    }
   };
 
   if (!user) {
@@ -173,15 +195,60 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {showTypeSelector && selectedDate && (
+        <TypeSelectorModal
+          onSelect={handleTypeSelect}
+          onClose={() => {
+            setShowTypeSelector(false);
+            setSelectedDate(null);
+          }}
+        />
+      )}
+
       {showEventMarker && selectedDate && (
         <EventMarker
           date={selectedDate}
           salonId={selectedSalon}
+          djId={user?.id}
           onEventCreated={handleEventCreated}
           onClose={() => {
             setShowEventMarker(false);
             setSelectedDate(null);
           }}
+        />
+      )}
+
+      {showReunionMarker && selectedDate && (
+        <ReunionMarker
+          date={selectedDate}
+          salonId={selectedSalon}
+          djId={user?.id}
+          onEventCreated={handleEventCreated}
+          onClose={() => {
+            setShowReunionMarker(false);
+            setSelectedDate(null);
+          }}
+        />
+      )}
+
+      {showDayAgenda && agendaData && (
+        <DayAgendaModal
+          date={agendaData.date}
+          events={agendaData.events || []}
+          videocalls={agendaData.videocalls || []}
+          onClose={() => {
+            setShowDayAgenda(false);
+            setSelectedDate(null);
+          }}
+          onAddClick={() => {
+            setShowTypeSelector(true);
+            setSelectedDate(agendaData.date);
+          }}
+          onEventClick={(ev) => {
+            setShowDayAgenda(false);
+            setEventToDelete(ev);
+          }}
+          onRefresh={triggerRefreshSequence}
         />
       )}
 

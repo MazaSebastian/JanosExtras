@@ -8,6 +8,9 @@ import { getAuth, clearAuth } from '@/utils/auth';
 import { getSalonColor } from '@/utils/colors';
 import Calendar from '@/components/Calendar';
 import EventMarker from '@/components/EventMarker';
+import ReunionMarker from '@/components/ReunionMarker';
+import TypeSelectorModal from '@/components/TypeSelectorModal';
+import DayAgendaModal from '@/components/DayAgendaModal';
 import SalonCoordinatesEditor from '@/components/SalonCoordinatesEditor';
 import ContenidoPanel from '@/components/ContenidoPanel';
 import CoordinacionesAdminPanel from '@/components/CoordinacionesAdminPanel';
@@ -54,8 +57,13 @@ export default function AdminDashboardPage() {
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [fichadas, setFichadas] = useState([]);
   const [loadingFichadas, setLoadingFichadas] = useState(false);
+  const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [showEventMarker, setShowEventMarker] = useState(false);
+  const [showReunionMarker, setShowReunionMarker] = useState(false);
+  const [showDayAgenda, setShowDayAgenda] = useState(false);
+  const [agendaData, setAgendaData] = useState(null);
   const [selectedEventMarkerDate, setSelectedEventMarkerDate] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
 
   // New State for Creating DJs
@@ -939,16 +947,38 @@ export default function AdminDashboardPage() {
                             <Calendar
                               salonId={selectedDj.salon_id}
                               filterDjId={selectedDj.id}
+                              currentUserId={selectedDj.id}
                               readOnly
                               adminMode={true}
                               refreshTrigger={calendarRefreshKey}
                               onDateClick={(date) => {
                                 setSelectedEventMarkerDate(date);
-                                setShowEventMarker(true);
+                                setShowTypeSelector(true);
+                              }}
+                              onExistingEventClick={(ev) => {
+                                if (ev && ev.isAgenda) {
+                                  setAgendaData(ev);
+                                  setShowDayAgenda(true);
+                                } else {
+                                  setEventToDelete(ev);
+                                }
                               }}
                               startDateFilter={calendarStartDate || undefined}
                               endDateFilter={calendarEndDate || undefined}
                             />
+                            {showTypeSelector && selectedEventMarkerDate && (
+                              <TypeSelectorModal
+                                onSelect={(type) => {
+                                  setShowTypeSelector(false);
+                                  if (type === 'coordinacion') setShowEventMarker(true);
+                                  if (type === 'reunion') setShowReunionMarker(true);
+                                }}
+                                onClose={() => {
+                                  setShowTypeSelector(false);
+                                  setSelectedEventMarkerDate(null);
+                                }}
+                              />
+                            )}
                             {showEventMarker && selectedEventMarkerDate && (
                               <EventMarker
                                 date={selectedEventMarkerDate}
@@ -963,6 +993,43 @@ export default function AdminDashboardPage() {
                                 onClose={() => {
                                   setShowEventMarker(false);
                                   setSelectedEventMarkerDate(null);
+                                }}
+                              />
+                            )}
+                            {showReunionMarker && selectedEventMarkerDate && (
+                              <ReunionMarker
+                                date={selectedEventMarkerDate}
+                                salonId={selectedDj.salon_id}
+                                djId={selectedDj.id}
+                                onEventCreated={() => {
+                                  setShowReunionMarker(false);
+                                  setSelectedEventMarkerDate(null);
+                                  setCalendarRefreshKey((prev) => prev + 1);
+                                  loadDashboardData();
+                                }}
+                                onClose={() => {
+                                  setShowReunionMarker(false);
+                                  setSelectedEventMarkerDate(null);
+                                }}
+                              />
+                            )}
+                            {showDayAgenda && agendaData && (
+                              <DayAgendaModal
+                                date={agendaData.date}
+                                events={agendaData.events || []}
+                                videocalls={agendaData.videocalls || []}
+                                onClose={() => setShowDayAgenda(false)}
+                                onAddClick={() => {
+                                  setSelectedEventMarkerDate(agendaData.date);
+                                  setShowTypeSelector(true);
+                                }}
+                                onEventClick={(ev) => {
+                                  setShowDayAgenda(false);
+                                  setEventToDelete(ev);
+                                }}
+                                onRefresh={() => {
+                                  setCalendarRefreshKey((prev) => prev + 1);
+                                  loadDashboardData();
                                 }}
                               />
                             )}

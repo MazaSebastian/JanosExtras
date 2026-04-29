@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -12,6 +12,7 @@ import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
 import AgendarVideollamadaModal from '@/components/AgendarVideollamadaModal';
 import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
+import { exportarCoordinacionPDF } from '@/utils/pdfExport';
 
 export default function CoordinacionesPanel() {
   const router = useRouter();
@@ -53,6 +54,7 @@ export default function CoordinacionesPanel() {
   const [coordinacionParaVideollamada, setCoordinacionParaVideollamada] = useState(null);
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
   const [flujosCache, setFlujosCache] = useState({}); // Cache de flujos para detectar pendientes
+  const [exportingPdfId, setExportingPdfId] = useState(null);
   const [tooltipData, setTooltipData] = useState({ show: false, items: [], x: 0, y: 0 });
 
   // El componente GoogleCalendarConnect manejará la verificación del estado
@@ -318,6 +320,10 @@ export default function CoordinacionesPanel() {
     }
   };
 
+  const handleCompletarInformacion = (id) => {
+    router.push(`/dashboard/coordinaciones/${id}/iniciar?soloPendientes=true`);
+  };
+
   const handleGenerarPreCoordinacion = async (id) => {
     try {
       setGenerandoPreCoordinacion(true);
@@ -425,6 +431,19 @@ export default function CoordinacionesPanel() {
     const phoneNumber = coordinacion.telefono.replace(/[\s\-\(\)]/g, '');
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleExportPDF = async (coordinacion) => {
+    if (exportingPdfId) return;
+    setExportingPdfId(coordinacion.id);
+    try {
+      await exportarCoordinacionPDF(coordinacion, coordinacionesAPI, FLUJOS_POR_TIPO);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Hubo un error al generar el PDF. Por favor intentarlo nuevamente.');
+    } finally {
+      setExportingPdfId(null);
+    }
   };
 
   // Cerrar menú al hacer clic fuera
@@ -794,266 +813,290 @@ export default function CoordinacionesPanel() {
         </div>
       ) : (
         <div className={styles.list}>
-          {coordinaciones.map((item) => (
-            <div key={item.id} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <div className={styles.cardHeaderLeft}>
-                  <div className={styles.cardTitleRow}>
-                    <h4>{item.titulo}</h4>
-                    <div className={styles.cardMetaInfo}>
-                      {item.fecha_evento && (
-                        <span className={styles.metaItem}>
-                          📅 Fecha del Evento: {formatDateFromDB(item.fecha_evento)}
+          {coordinaciones.map((item) => {
+            return (
+              <div key={item.id} className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.cardHeaderLeft}>
+                    <div className={styles.cardTitleRow}>
+                      <h4>{item.titulo}</h4>
+                      <div className={styles.cardMetaInfo}>
+                        {item.fecha_evento && (
+                          <span className={styles.metaItem}>
+                            📅 Fecha del Evento: {formatDateFromDB(item.fecha_evento)}
+                          </span>
+                        )}
+                        {item.tipo_evento && (
+                          <span className={styles.metaItem}>
+                            🎉 Tipo: {item.tipo_evento}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className={styles.badges}>
+                      <PendientesBadge
+                        coordinacion={item}
+                        obtenerItemsPendientes={obtenerItemsPendientes}
+                        getEstadoColor={getEstadoColor}
+                        onShowTooltip={(items, e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltipData({
+                            show: true,
+                            items: items,
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          });
+                        }}
+                        onHideTooltip={() => {
+                          setTooltipData({ show: false, items: [], x: 0, y: 0 });
+                        }}
+                      />
+                      {item.contactado ? (
+                        <span className={`${styles.badge} ${styles.contactadoBadge}`} title="Primer contacto realizado">
+                          ✅ Contactado
+                        </span>
+                      ) : (
+                        <span className={`${styles.badge} ${styles.noContactadoBadge}`} title="Pendiente de contacto inicial">
+                          ⚠️ Pendiente Contacto
                         </span>
                       )}
-                      {item.tipo_evento && (
-                        <span className={styles.metaItem}>
-                          🎉 Tipo: {item.tipo_evento}
-                        </span>
-                      )}
+                      {
+                        item.prioridad && item.prioridad !== 'normal' && (
+                          <span
+                            className={styles.badge}
+                            style={{ backgroundColor: getPrioridadColor(item.prioridad) }}
+                          >
+                            {item.prioridad.toUpperCase()}
+                          </span>
+                        )
+                      }
                     </div>
                   </div>
-                  <div className={styles.badges}>
-                    <PendientesBadge
-                      coordinacion={item}
-                      obtenerItemsPendientes={obtenerItemsPendientes}
-                      getEstadoColor={getEstadoColor}
-                      onShowTooltip={(items, e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setTooltipData({
-                          show: true,
-                          items: items,
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 10
-                        });
-                      }}
-                      onHideTooltip={() => {
-                        setTooltipData({ show: false, items: [], x: 0, y: 0 });
-                      }}
-                    />
-                    {item.contactado ? (
-                      <span className={`${styles.badge} ${styles.contactadoBadge}`} title="Primer contacto realizado">
-                        ✅ Contactado
-                      </span>
-                    ) : (
-                      <span className={`${styles.badge} ${styles.noContactadoBadge}`} title="Pendiente de contacto inicial">
-                        ⚠️ Pendiente Contacto
-                      </span>
+                  <div className={styles.cardActions}>
+                    <div className={styles.playMenuContainer}>
+                      <button
+                        type="button"
+                        className={`${styles.playButton} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playButtonDisabled : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (item.estado === 'completado' || item.estado === 'completada') {
+                            return;
+                          }
+                          togglePlayMenu(item.id);
+                        }}
+                        disabled={item.estado === 'completado' || item.estado === 'completada'}
+                      >
+                        ▶️
+                      </button>
+                      {playMenuOpen === item.id && (
+                        <>
+                          <div
+                            className={styles.playMenuOverlay}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setPlayMenuOpen(null);
+                            }}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setPlayMenuOpen(null);
+                            }}
+                            onTouchStart={(e) => {
+                              // Prevenir que el touch se propague pero permitir el cierre
+                              e.stopPropagation();
+                            }}
+                          />
+                          <div
+                            className={styles.playMenu}
+                            onClick={(e) => {
+                              // Prevenir que clicks dentro del menú cierren el overlay
+                              e.stopPropagation();
+                            }}
+                            onTouchEnd={(e) => {
+                              // Prevenir que touches dentro del menú cierren el overlay
+                              e.stopPropagation();
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleIniciarCoordinacion(item.id);
+                                setPlayMenuOpen(null);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleIniciarCoordinacion(item.id);
+                                setPlayMenuOpen(null);
+                              }}
+                              disabled={item.estado === 'completado' || item.estado === 'completada'}
+                            >
+                              Iniciar Coordinación
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.playMenuItem}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (item.pre_coordinacion_url) {
+                                  setPreCoordinacionUrl(item.pre_coordinacion_url);
+                                  setShowPreCoordinacionModal(true);
+                                } else {
+                                  handleGenerarPreCoordinacion(item.id);
+                                }
+                                setPlayMenuOpen(null);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (item.pre_coordinacion_url) {
+                                  setPreCoordinacionUrl(item.pre_coordinacion_url);
+                                  setShowPreCoordinacionModal(true);
+                                } else {
+                                  handleGenerarPreCoordinacion(item.id);
+                                }
+                                setPlayMenuOpen(null);
+                              }}
+                              disabled={generandoPreCoordinacion || !item.tipo_evento}
+                              title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
+                            >
+                              {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.whatsappButton}
+                      onClick={() => handleWhatsApp(item)}
+                      title={item.telefono ? `Enviar WhatsApp a ${item.telefono}` : 'Agregar teléfono para enviar WhatsApp'}
+                      disabled={!item.telefono}
+                      style={!item.telefono ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                    >
+                      💬
+                    </button>
+                    {googleCalendarConnected && (
+                      <button
+                        type="button"
+                        className={styles.videocallButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAgendarVideollamada(item);
+                        }}
+                        onTouchEnd={(e) => {
+                          e.stopPropagation();
+                          handleAgendarVideollamada(item);
+                        }}
+                        title={item.videollamada_agendada ? `Videollamada agendada para ${item.videollamada_fecha ? formatDateFromDB(item.videollamada_fecha) : 'fecha no disponible'}` : 'Agendar Videollamada'}
+                      >
+                        {item.videollamada_agendada ? '📹' : '📅'}
+                      </button>
                     )}
-                    {
-                      item.prioridad && item.prioridad !== 'normal' && (
-                        <span
-                          className={styles.badge}
-                          style={{ backgroundColor: getPrioridadColor(item.prioridad) }}
-                        >
-                          {item.prioridad.toUpperCase()}
-                        </span>
-                      )
-                    }
+                    <button
+                      type="button"
+                      className={styles.viewButton}
+                      onClick={() => handleVerResumen(item)}
+                      title="Ver Coordinación"
+                    >
+                      👁️
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.pdfButton}
+                      onClick={() => handleExportPDF(item)}
+                      title="Exportar a PDF"
+                      disabled={exportingPdfId === item.id}
+                      style={exportingPdfId === item.id ? { opacity: 0.6, cursor: 'wait' } : {}}
+                    >
+                      {exportingPdfId === item.id ? '⏳' : '📄'}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.editButton}
+                      onClick={() => handleEdit(item)}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.deleteButton}
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
-                <div className={styles.cardActions}>
-                  <div className={styles.playMenuContainer}>
-                    <button
-                      type="button"
-                      className={`${styles.playButton} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playButtonDisabled : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (item.estado === 'completado' || item.estado === 'completada') {
-                          return;
-                        }
-                        togglePlayMenu(item.id);
-                      }}
-                      disabled={item.estado === 'completado' || item.estado === 'completada'}
-                    >
-                      ▶️
-                    </button>
-                    {playMenuOpen === item.id && (
-                      <>
-                        <div
-                          className={styles.playMenuOverlay}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setPlayMenuOpen(null);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setPlayMenuOpen(null);
-                          }}
-                          onTouchStart={(e) => {
-                            // Prevenir que el touch se propague pero permitir el cierre
-                            e.stopPropagation();
-                          }}
-                        />
-                        <div
-                          className={styles.playMenu}
-                          onClick={(e) => {
-                            // Prevenir que clicks dentro del menú cierren el overlay
-                            e.stopPropagation();
-                          }}
-                          onTouchEnd={(e) => {
-                            // Prevenir que touches dentro del menú cierren el overlay
-                            e.stopPropagation();
-                          }}
-                        >
-                          <button
-                            type="button"
-                            className={`${styles.playMenuItem} ${(item.estado === 'completado' || item.estado === 'completada') ? styles.playMenuItemDisabled : ''}`}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleIniciarCoordinacion(item.id);
-                              setPlayMenuOpen(null);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleIniciarCoordinacion(item.id);
-                              setPlayMenuOpen(null);
-                            }}
-                            disabled={item.estado === 'completado' || item.estado === 'completada'}
-                          >
-                            Iniciar Coordinación
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.playMenuItem}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              if (item.pre_coordinacion_url) {
-                                setPreCoordinacionUrl(item.pre_coordinacion_url);
-                                setShowPreCoordinacionModal(true);
-                              } else {
-                                handleGenerarPreCoordinacion(item.id);
-                              }
-                              setPlayMenuOpen(null);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              if (item.pre_coordinacion_url) {
-                                setPreCoordinacionUrl(item.pre_coordinacion_url);
-                                setShowPreCoordinacionModal(true);
-                              } else {
-                                handleGenerarPreCoordinacion(item.id);
-                              }
-                              setPlayMenuOpen(null);
-                            }}
-                            disabled={generandoPreCoordinacion || !item.tipo_evento}
-                            title={!item.tipo_evento ? 'La coordinación debe tener un tipo de evento' : ''}
-                          >
-                            {generandoPreCoordinacion ? 'Generando...' : item.pre_coordinacion_url ? 'Ver Link de Pre-Coordinación' : 'Generar Pre-Coordinación'}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.whatsappButton}
-                    onClick={() => handleWhatsApp(item)}
-                    title={item.telefono ? `Enviar WhatsApp a ${item.telefono}` : 'Agregar teléfono para enviar WhatsApp'}
-                    disabled={!item.telefono}
-                    style={!item.telefono ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                  >
-                    💬
-                  </button>
-                  {googleCalendarConnected && (
-                    <button
-                      type="button"
-                      className={styles.videocallButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAgendarVideollamada(item);
-                      }}
-                      onTouchEnd={(e) => {
-                        e.stopPropagation();
-                        handleAgendarVideollamada(item);
-                      }}
-                      title={item.videollamada_agendada ? `Videollamada agendada para ${item.videollamada_fecha ? formatDateFromDB(item.videollamada_fecha) : 'fecha no disponible'}` : 'Agendar Videollamada'}
-                    >
-                      {item.videollamada_agendada ? '📹' : '📅'}
-                    </button>
+                {item.descripcion && <p className={styles.description}>{item.descripcion}</p>}
+                <div className={styles.cardDetails}>
+                  {item.codigo_evento && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>🔢 Código:</span>
+                      <span><strong>{item.codigo_evento}</strong></span>
+                    </div>
                   )}
-                  <button
-                    type="button"
-                    className={styles.viewButton}
-                    onClick={() => handleVerResumen(item)}
-                    title="Ver Coordinación"
-                  >
-                    👁️
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.editButton}
-                    onClick={() => handleEdit(item)}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.deleteButton}
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    🗑️
-                  </button>
+                  {item.telefono && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>📞 Teléfono:</span>
+                      <span>{item.telefono}</span>
+                    </div>
+                  )}
+                  {item.hora_evento && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>🕐 Hora:</span>
+                      <span>{item.hora_evento}</span>
+                    </div>
+                  )}
+                  {item.salon_nombre && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>🏢 Salón:</span>
+                      <span>{item.salon_nombre}</span>
+                    </div>
+                  )}
+                  {item.dj_responsable_nombre && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>👤 Responsable:</span>
+                      <span>{item.dj_responsable_nombre}</span>
+                    </div>
+                  )}
+                  {item.pre_coordinacion_completado_por_cliente && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>✅ Pre-Coordinación:</span>
+                      <span style={{ color: '#4caf50', fontWeight: 600 }}>Completada por cliente</span>
+                    </div>
+                  )}
+                  {item.pre_coordinacion_url && !item.pre_coordinacion_completado_por_cliente && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>📋 Pre-Coordinación:</span>
+                      <span style={{ color: '#ff9800', fontWeight: 600 }}>Pendiente de completar</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-              {item.descripcion && <p className={styles.description}>{item.descripcion}</p>}
-              <div className={styles.cardDetails}>
-                {item.codigo_evento && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>🔢 Código:</span>
-                    <span><strong>{item.codigo_evento}</strong></span>
+                {item.notas && (
+                  <div className={styles.notas}>
+                    <strong>Notas:</strong> {item.notas}
                   </div>
                 )}
-                {item.telefono && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>📞 Teléfono:</span>
-                    <span>{item.telefono}</span>
-                  </div>
-                )}
-                {item.hora_evento && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>🕐 Hora:</span>
-                    <span>{item.hora_evento}</span>
-                  </div>
-                )}
-                {item.salon_nombre && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>🏢 Salón:</span>
-                    <span>{item.salon_nombre}</span>
-                  </div>
-                )}
-                {item.dj_responsable_nombre && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>👤 Responsable:</span>
-                    <span>{item.dj_responsable_nombre}</span>
-                  </div>
-                )}
-                {item.pre_coordinacion_completado_por_cliente && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>✅ Pre-Coordinación:</span>
-                    <span style={{ color: '#4caf50', fontWeight: 600 }}>Completada por cliente</span>
-                  </div>
-                )}
-                {item.pre_coordinacion_url && !item.pre_coordinacion_completado_por_cliente && (
-                  <div className={styles.detail}>
-                    <span className={styles.detailLabel}>📋 Pre-Coordinación:</span>
-                    <span style={{ color: '#ff9800', fontWeight: 600 }}>Pendiente de completar</span>
+                {flujosCache[item.id]?.count > 0 && (
+                  <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #f0f0f0', paddingTop: '1rem' }}>
+                    <button
+                      type="button"
+                      className={styles.saveButton}
+                      style={{ background: '#ff9800', border: 'none', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      onClick={() => handleCompletarInformacion(item.id)}
+                    >
+                      <span>📝</span> Completar información restante
+                    </button>
                   </div>
                 )}
               </div>
-              {item.notas && (
-                <div className={styles.notas}>
-                  <strong>Notas:</strong> {item.notas}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -1775,6 +1818,7 @@ export default function CoordinacionesPanel() {
 // Componente para el badge con detección de pendientes
 function PendientesBadge({ coordinacion, obtenerItemsPendientes, getEstadoColor, onShowTooltip, onHideTooltip }) {
   const [pendientesData, setPendientesData] = useState({ items: [], count: 0, loading: false });
+  const badgeRef = useRef(null);
 
   useEffect(() => {
     // Solo cargar si está completada
@@ -1785,6 +1829,22 @@ function PendientesBadge({ coordinacion, obtenerItemsPendientes, getEstadoColor,
       });
     }
   }, [coordinacion.id, coordinacion.estado, obtenerItemsPendientes]);
+
+  useEffect(() => {
+    if (badgeRef.current) {
+      const card = badgeRef.current.closest(`.${styles.card}`);
+      if (card) {
+        card.classList.remove(styles.glowPending);
+        if (styles.glowCompleted) card.classList.remove(styles.glowCompleted);
+
+        if (pendientesData.count > 0) {
+          card.classList.add(styles.glowPending);
+        } else if ((coordinacion.estado === 'completado' || coordinacion.estado === 'completada') && !pendientesData.loading) {
+          if (styles.glowCompleted) card.classList.add(styles.glowCompleted);
+        }
+      }
+    }
+  }, [pendientesData.count, pendientesData.loading, coordinacion.estado, styles.glowPending, styles.glowCompleted]);
 
   const handleMouseEnter = (e) => {
     if (pendientesData.count > 0) {
@@ -1798,6 +1858,7 @@ function PendientesBadge({ coordinacion, obtenerItemsPendientes, getEstadoColor,
 
   return (
     <span
+      ref={badgeRef}
       className={styles.badge}
       style={{
         backgroundColor: getEstadoColor(coordinacion.estado),

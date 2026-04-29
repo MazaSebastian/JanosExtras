@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI } from '@/services/api';
+import { FLUJOS_POR_TIPO } from './CoordinacionFlujo';
 import styles from '@/styles/WhatsAppTemplateModal.module.css';
 
 /**
@@ -12,6 +13,68 @@ export default function WhatsAppTemplateModal({ coordinacion, event, onClose }) 
     const [selectedId, setSelectedId] = useState(null);
     const [generating, setGenerating] = useState(false);
     const [livePreCoordUrl, setLivePreCoordUrl] = useState(coordinacion?.pre_coordinacion_url || null);
+    const [missingItems, setMissingItems] = useState([]);
+
+    useEffect(() => {
+        const fetchFlujoStatus = async () => {
+            if (!coordinacion?.id) return;
+            try {
+                const flujoResponse = await coordinacionesAPI.getFlujo(coordinacion.id);
+                const flujoData = flujoResponse?.data || flujoResponse;
+
+                let respuestasObj = {};
+                if (flujoData && flujoData.respuestas) {
+                    respuestasObj = typeof flujoData.respuestas === 'string'
+                        ? JSON.parse(flujoData.respuestas)
+                        : flujoData.respuestas;
+                }
+
+                // Normalizar tipo de evento
+                const rawTipo = coordinacion?.tipo_evento || '';
+                let tipoEventoNormalizado = '';
+                if (typeof rawTipo === 'string' && rawTipo.toLowerCase().includes('casamiento')) {
+                    tipoEventoNormalizado = 'Casamiento';
+                } else if (typeof rawTipo === 'string' && rawTipo.toLowerCase().includes('cumple')) {
+                    tipoEventoNormalizado = 'Cumpleaños';
+                } else {
+                    tipoEventoNormalizado = rawTipo; // Corporativo, XV, Religioso
+                }
+
+                const flujo = FLUJOS_POR_TIPO[tipoEventoNormalizado] || [];
+                const faltantes = [];
+
+                flujo.forEach(paso => {
+                    let pasoFaltante = false;
+                    paso.preguntas.forEach(pregunta => {
+                        const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                        const valorCondicion = respuestasObj[pregunta.condicional?.pregunta];
+                        const debeMostrar = !esCondicional || (valorCondicion === pregunta.condicional.valor);
+
+                        if (debeMostrar && pregunta.requerido) {
+                            const val = respuestasObj[pregunta.id];
+                            const isUndefined = val === undefined || val === null || String(val).trim() === '';
+                            const isPendiente = val === '__PENDIENTE__';
+                            const isPlaylistPendiente = pregunta.id === 'playlist_pendiente' && String(val).includes('Pendiente');
+
+                            if (isUndefined || isPendiente || isPlaylistPendiente) {
+                                pasoFaltante = true;
+                            }
+                        }
+                    });
+
+                    if (pasoFaltante) {
+                        faltantes.push(paso.titulo);
+                    }
+                });
+
+                setMissingItems(faltantes);
+            } catch (err) {
+                console.error("Error al recuperar respuestas del flujo:", err);
+            }
+        };
+
+        fetchFlujoStatus();
+    }, [coordinacion]);
 
     // ── Datos dinámicos ──
     const nombreCliente = coordinacion?.nombre_cliente || 'cliente';
@@ -77,22 +140,20 @@ Una vez que lo envíes, te invito a que coordinemos una videollamada, o bien una
             case 'agendar':
                 return `¡Hola ${nombreCliente}! Acá ${nombreDj} nuevamente.
 
-Ya estuve viendo tu formulario de pre-coordinación, ¡excelentes elecciones! Para avanzar, el siguiente paso es organizar nuestra reunión para repasar todos los detalles técnicos y dejar el cronograma cerrado.
+Me gustaría ver la posibilidad de coordinar una reunión presencial o videollamada para repasar todos los detalles técnicos de nuestro evento con fecha ${fechaEvento}.
 
-¿Preferís que hagamos una videollamada o que nos encontremos directamente en ${salonNombre}? Te dejo el link a mi agenda para que elijas el día y horario que te quede más cómodo:
-
-[Pegar aquí tu link de agenda]
-
-¡Cualquier cosa me escribís!`;
+¿Qué días y en qué horarios te quedaría mejor así lo vamos coordinando?`;
 
             case 'recordar':
+                const listaItems = missingItems.length > 0
+                    ? missingItems.map(item => `- ${item}`).join('\n')
+                    : '- Completar datos pendientes de la pre-coordinación';
+
                 return `¡Hola ${nombreCliente}! Acá ${nombreDj} nuevamente.
 
-Paso a dejarte un recordatorio rápido: vi en el sistema que todavía tenemos algunas cositas pendientes de definir para tu evento.
+Paso a dejarte un recordatorio rápido: vi en el sistema que todavía tenemos algunas cositas pendientes de definir para tu evento:
 
-Te dejo el link a mano para que, cuando tengan un ratito, puedan completarlo:
-
-${url}
+${listaItems}
 
 Si están trabados con alguna elección o necesitan recomendaciones de canciones para esos momentos, ¡avísenme y los ayudo a elegir!`;
 
@@ -128,8 +189,8 @@ Si están trabados con alguna elección o necesitan recomendaciones de canciones
             id: 'recordar',
             icon: '⏰',
             title: 'Recordar Items Faltantes',
-            needsUrl: true,
-            description: 'Recordale al cliente que complete los datos pendientes',
+            needsUrl: false,
+            description: 'Explicita por texto qué pasos tiene pendientes',
         },
     ];
 

@@ -125,6 +125,12 @@
   transform: scale(1.1);
 }
 
+.progressStep.warning .stepNumber {
+  background: #fff3e0;
+  border-color: #ffb74d;
+  color: #f57c00;
+}
+
 .stepLabel {
   font-size: 0.85rem;
   color: #666;
@@ -135,6 +141,11 @@
 .progressStep.completed .stepLabel,
 .progressStep.active .stepLabel {
   color: #333;
+  font-weight: 600;
+}
+
+.progressStep.warning .stepLabel {
+  color: #e65100;
   font-weight: 600;
 }
 

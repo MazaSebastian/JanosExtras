@@ -6,6 +6,8 @@ import { coordinacionesAPI, eventosAPI } from '@/services/api';
 import WhatsAppTemplateModal from '@/components/WhatsAppTemplateModal';
 import EditCoordinationModal from '@/components/EditCoordinationModal';
 import styles from '@/styles/EventActionModal.module.css';
+import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
+import { exportarCoordinacionPDF } from '@/utils/pdfExport';
 
 export default function EventActionModal({ event, onClose, onRefresh }) {
     const router = useRouter();
@@ -13,12 +15,14 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [exportingPdf, setExportingPdf] = useState(false);
     const [showWhatsAppTemplates, setShowWhatsAppTemplates] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [notas, setNotas] = useState('');
     const [savingNotas, setSavingNotas] = useState(false);
     const [contactado, setContactado] = useState(false);
     const [savingContactado, setSavingContactado] = useState(false);
+    const [showEncuestaResults, setShowEncuestaResults] = useState(false);
 
     useEffect(() => {
         const fetchCoordination = async () => {
@@ -28,11 +32,16 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                 // Find matching coordination mapped to this event's Date and Salon
                 // the event.fecha_evento is returned from server, usually starting with 'YYYY-MM-DD'
                 const rawDate = event.fecha_evento || '';
-                const searchDate = typeof rawDate === 'string' ? rawDate.split('T')[0] : '';
+                let searchDate = '';
+                if (typeof rawDate === 'string') {
+                    searchDate = rawDate.split('T')[0];
+                } else if (rawDate instanceof Date) {
+                    searchDate = rawDate.toISOString().split('T')[0];
+                }
 
                 const matching = res.data?.find((c) => {
                     const cDate = typeof c.fecha_evento === 'string' ? c.fecha_evento.split('T')[0] : '';
-                    return c.salon_id === event.salon_id && cDate === searchDate;
+                    return String(c.salon_id) === String(event.salon_id) && cDate === searchDate;
                 });
 
                 if (matching) {
@@ -110,56 +119,15 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
     };
 
     const handleExportPDF = async () => {
+        if (exportingPdf) return;
+        setExportingPdf(true);
         try {
-            alert("Generando PDF... por favor espera unos segundos.");
-            const html2pdf = (await import('html2pdf.js')).default;
-
-            // Creamos un wrapper invisible pero presentable para exportar al A4
-            const reportDiv = document.createElement('div');
-            reportDiv.style.padding = '40px';
-            reportDiv.style.fontFamily = 'Arial, sans-serif';
-            reportDiv.style.color = '#333';
-
-            const contentHtml = `
-        <div style="border-bottom: 2px solid #772c87; padding-bottom: 20px; margin-bottom: 30px;">
-          <h1 style="color: #772c87; margin: 0;">REPORTE DE COORDINACIÓN JANOS</h1>
-          <p style="color: #666; font-size: 14px; margin-top: 5px;">Generado el: ${format(new Date(), 'dd/MM/yyyy HH:mm')}</p>
-        </div>
-        
-        <div style="margin-bottom: 30px; line-height: 1.8; font-size: 16px;">
-          <h2 style="font-size: 20px; color: #444; border-bottom: 1px solid #eee; padding-bottom: 8px;">Información General</h2>
-          <p><strong>Evento:</strong> ${coordinacion.titulo || 'Sin título'} </p>
-          <p><strong>Cliente:</strong> ${coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'N/A'}</p>
-          <p><strong>Teléfono:</strong> ${coordinacion.telefono || 'N/A'}</p>
-          <p><strong>Tipo:</strong> ${coordinacion.tipo_evento || 'N/A'}</p>
-          <p><strong>Código:</strong> ${coordinacion.codigo_evento || 'N/A'}</p>
-          <p><strong>Estado:</strong> ${coordinacion.estado ? coordinacion.estado.toUpperCase() : 'PENDIENTE'}</p>
-        </div>
-
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
-          <h2 style="font-size: 20px; color: #444; margin-top: 0;">Resumen del Evento</h2>
-          <p style="color: #555;">La coordinación y el flujo de detalles correspondientes se encuentran almacenados y auditados en el sistema central de Janos DJ Dashboard.</p>
-        </div>
-      `;
-
-            reportDiv.innerHTML = contentHtml;
-            document.body.appendChild(reportDiv);
-
-            const opt = {
-                margin: 15,
-                filename: `Coordinacion_${(coordinacion.nombre_cliente ? `${coordinacion.nombre_cliente} ${coordinacion.apellido_cliente || ''}`.trim() : 'Evento').replace(/[^a-z0-9]/gi, '_')}_${coordinacion.codigo_evento || ''}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            await html2pdf().set(opt).from(reportDiv).save();
-
-            // Cleanup DOM
-            document.body.removeChild(reportDiv);
+            await exportarCoordinacionPDF(coordinacion, coordinacionesAPI, FLUJOS_POR_TIPO);
         } catch (error) {
             console.error('Error generando PDF:', error);
-            alert('Hubo un error al generar el PDF. Verifica la consola para más detalles.');
+            alert('Hubo un error al generar el PDF. Por favor intentarlo nuevamente.');
+        } finally {
+            setExportingPdf(false);
         }
     };
 
@@ -251,6 +219,14 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                             👑 <strong>Agasajado/a:</strong> {coordinacion.nombre_agasajado}
                         </div>
                     )}
+                    {coordinacion.videollamada_agendada && coordinacion.videollamada_fecha && (
+                        <div className={styles.infoItem} style={{ gridColumn: '1 / -1', marginTop: '8px', padding: '12px', background: '#e0e7ff', borderRadius: '8px', border: '1px solid #c7d2fe', color: '#3730a3', textAlign: 'center' }}>
+                            📅 <strong style={{ marginLeft: '4px' }}>
+                                Videollamada/Reunión agendada el día <span style={{ textTransform: 'capitalize' }}>{format(new Date(coordinacion.videollamada_fecha), "EEEE d 'de' MMMM, HH:mm'hs'", { locale: es })}</span>
+                            </strong>
+                            {coordinacion.videollamada_completada && <span style={{ marginLeft: '10px', backgroundColor: '#22c55e', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' }}>COMPLETADA ✅</span>}
+                        </div>
+                    )}
                     <div className={styles.infoItem} style={{ gridColumn: '1 / -1', marginTop: '8px', padding: '12px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #eee' }}>
                         💬 <strong style={{ marginRight: '12px' }}>Primer Contacto Realizado:</strong>
                         <button
@@ -320,6 +296,23 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     </button>
 
                     <button
+                        className={`${styles.actionButton} ${coordinacion.encuesta_completada ? '' : styles.whatsappAction}`}
+                        style={coordinacion.encuesta_completada ? { backgroundColor: '#facc15', color: '#111', border: 'none' } : {}}
+                        onClick={() => {
+                            if (coordinacion.encuesta_completada) {
+                                setShowEncuestaResults(true);
+                            } else {
+                                const url = `${window.location.origin}/encuesta/${coordinacion.id}`;
+                                const text = `¡Hola ${coordinacion.nombre_cliente}! Ojalá hayas pasado una fiesta increíble. 🥳 Me encantaría que me dejes tu opinión sobre el evento midiendo nuestro desempeño en este link cortito (te lleva 1 minuto): ${url}`;
+                                window.open(`https://wa.me/${(coordinacion.telefono || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+                            }
+                        }}
+                    >
+                        <span className={styles.actionIcon}>{coordinacion.encuesta_completada ? '⭐' : '📤'}</span>
+                        {coordinacion.encuesta_completada ? 'Ver Resultados Encuesta' : 'Enviar Encuesta'}
+                    </button>
+
+                    <button
                         className={`${styles.actionButton} ${styles.whatsappAction}`}
                         onClick={() => {
                             if (!coordinacion.telefono) {
@@ -330,7 +323,29 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                         }}
                     >
                         <span className={styles.actionIcon}>💬</span>
-                        Contactar por WhatsApp
+                        Plantillas WhatsApp
+                    </button>
+
+                    <button
+                        className={`${styles.actionButton} ${styles.whatsappAction}`}
+                        style={{ backgroundColor: '#25D366', color: 'white' }}
+                        onClick={() => {
+                            if (!coordinacion.telefono) {
+                                alert('Este evento no tiene número de teléfono asignado.');
+                                return;
+                            }
+                            let num = coordinacion.telefono.replace(/[^0-9]/g, '');
+                            // Normalización básica para Argentina (si empieza sin 549, agregarlo)
+                            if (num.startsWith('54') && !num.startsWith('549')) {
+                                num = '549' + num.substring(2);
+                            } else if (!num.startsWith('54')) {
+                                num = '549' + num;
+                            }
+                            window.open(`https://wa.me/${num}`, '_blank');
+                        }}
+                    >
+                        <span className={styles.actionIcon}>📱</span>
+                        Ir al chat
                     </button>
 
                     <button
@@ -352,9 +367,10 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     <button
                         className={`${styles.actionButton} ${styles.pdfAction}`}
                         onClick={handleExportPDF}
+                        disabled={exportingPdf || isDeleting}
                     >
-                        <span className={styles.actionIcon}>📄</span>
-                        Exportar a PDF
+                        <span className={styles.actionIcon}>{exportingPdf ? '⏳' : '📄'}</span>
+                        {exportingPdf ? 'Generando PDF...' : 'Exportar a PDF'}
                     </button>
 
                     <button
@@ -378,6 +394,64 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     event={event}
                     onClose={() => setShowWhatsAppTemplates(false)}
                 />
+            )}
+
+            {showEncuestaResults && coordinacion.encuesta_respuestas && (
+                <div className={styles.overlay} onClick={() => setShowEncuestaResults(false)} style={{ zIndex: 10001 }}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                        <div className={styles.header}>
+                            <h3 className={styles.title}>⭐ Resultados de la Encuesta</h3>
+                        </div>
+                        <div style={{ padding: '15px 0' }}>
+                            <p style={{ color: '#bbb', marginBottom: '20px' }}>
+                                A continuación, los puntajes que el cliente ({coordinacion.nombre_cliente}) asignó a este evento:
+                            </p>
+
+                            {(() => {
+                                const parseRespuestas = () => {
+                                    try {
+                                        return typeof coordinacion.encuesta_respuestas === 'string'
+                                            ? JSON.parse(coordinacion.encuesta_respuestas)
+                                            : coordinacion.encuesta_respuestas;
+                                    } catch (e) {
+                                        return null;
+                                    }
+                                };
+                                const data = parseRespuestas();
+                                if (!data) return <p>Hubo un error cargando las respuestas.</p>;
+
+                                const StarRow = ({ label, val }) => (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', background: '#333', padding: '10px 15px', borderRadius: '8px' }}>
+                                        <span style={{ fontWeight: '600' }}>{label}</span>
+                                        <span style={{ display: 'flex', gap: '4px' }}>
+                                            {[1, 2, 3, 4, 5].map(i => (
+                                                <span key={i} style={{ color: i <= val ? '#facc15' : '#555', fontSize: '20px' }}>★</span>
+                                            ))}
+                                        </span>
+                                    </div>
+                                );
+
+                                return (
+                                    <>
+                                        <StarRow label="Atención en la coordinación" val={data.atencion_coordinacion || 0} />
+                                        <StarRow label="Presencia en el evento" val={data.presencia_evento || 0} />
+                                        <StarRow label="Musicalización y Pista" val={data.musicalizacion || 0} />
+                                        <StarRow label="Calidad Técnica" val={data.calidad_tecnica || 0} />
+                                        <StarRow label="Calificación General" val={data.calificacion_general || 0} />
+
+                                        {data.comentarios && data.comentarios.trim() !== '' && (
+                                            <div style={{ marginTop: '20px', background: 'rgba(250, 204, 21, 0.1)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(250, 204, 21, 0.3)' }}>
+                                                <strong style={{ color: '#facc15', display: 'block', marginBottom: '8px' }}>Comentarios del Cliente:</strong>
+                                                <span style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>"{data.comentarios}"</span>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
+                        </div>
+                        <button className={styles.cancelButton} onClick={() => setShowEncuestaResults(false)} style={{ marginTop: '20px' }}>Cerrar</button>
+                    </div>
+                </div>
             )}
 
             {showEditModal && (
