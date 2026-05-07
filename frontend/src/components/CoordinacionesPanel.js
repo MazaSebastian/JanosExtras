@@ -1288,7 +1288,7 @@ export default function CoordinacionesPanel() {
 
       {/* Modal de Resumen de Coordinación */}
       {viewingResumen && (
-        <div className={styles.modalOverlay} onClick={closeResumenModal}>
+        <div className={styles.modalOverlay}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Resumen de Coordinación</h2>

@@ -46,7 +46,8 @@ let db = {
     { id: 17, nombre: 'San Telmo', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
     { id: 18, nombre: 'San Telmo 2', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
     { id: 19, nombre: 'San Telmo Boutique', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
-    { id: 20, nombre: 'Vicente López', direccion: '', activo: true, fecha_creacion: new Date().toISOString() }
+    { id: 20, nombre: 'Vicente López', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
+    { id: 21, nombre: 'Recoleta', direccion: '', activo: true, fecha_creacion: new Date().toISOString() }
   ],
   eventos: []
 };

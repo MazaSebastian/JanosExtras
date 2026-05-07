@@ -121,7 +121,11 @@ export default function DJLayout({ user, children }) {
           </div>
         </aside>
         {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
-        <main className={styles.content}>{children}</main>
+        <main className={styles.content}>
+          <div key={router.pathname} className={styles.pageTransition}>
+            {children}
+          </div>
+        </main>
       </div>
     </>
   );

@@ -50,10 +50,10 @@ export default function WhatsAppTemplateModal({ coordinacion, event, onClose }) 
                         const valorCondicion = respuestasObj[pregunta.condicional?.pregunta];
                         const debeMostrar = !esCondicional || (valorCondicion === pregunta.condicional.valor);
 
-                        if (debeMostrar && pregunta.requerido) {
+                        if (debeMostrar) {
                             const val = respuestasObj[pregunta.id];
-                            const isUndefined = val === undefined || val === null || String(val).trim() === '';
                             const isPendiente = val === '__PENDIENTE__';
+                            const isUndefined = (val === undefined || val === null || String(val).trim() === '') && pregunta.requerido;
                             const isPlaylistPendiente = pregunta.id === 'playlist_pendiente' && String(val).includes('Pendiente');
 
                             if (isUndefined || isPendiente || isPlaylistPendiente) {
