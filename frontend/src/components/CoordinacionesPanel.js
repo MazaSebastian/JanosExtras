@@ -201,12 +201,17 @@ export default function CoordinacionesPanel() {
 
       if (editingId) {
         // Para edición: solo enviar los campos que están en el formulario
+        const finalTipoEvento = formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+          ? `Religioso - ${formData.subtipo_evento}`
+          : formData.tipo_evento;
+
         const data = {
           titulo: formData.titulo || null,
           nombre_cliente: formData.nombre_cliente || null,
           apellido_cliente: formData.apellido_cliente || null,
+          nombre_agasajado: formData.nombre_agasajado || null,
           telefono: formData.telefono || null,
-          tipo_evento: formData.tipo_evento || null,
+          tipo_evento: finalTipoEvento || null,
           codigo_evento: formData.codigo_evento || null,
           fecha_evento: formData.fecha_evento || null,
           estado: formData.estado || 'pendiente',
@@ -221,9 +226,20 @@ export default function CoordinacionesPanel() {
         await coordinacionesAPI.update(editingId, data);
       } else {
         // Para creación: enviar todos los campos necesarios
+        const finalTipoEvento = formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+          ? `Religioso - ${formData.subtipo_evento}`
+          : formData.tipo_evento;
+
+        const finalTitulo = formData.titulo || (
+          formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+            ? `Religioso - ${formData.subtipo_evento} de ${formData.nombre_agasajado || formData.nombre_cliente}`
+            : null
+        );
+
         const data = {
           ...formData,
-          titulo: formData.titulo || null,
+          tipo_evento: finalTipoEvento,
+          titulo: finalTitulo,
           salon_id: formData.salon_id || null,
         };
 
@@ -240,7 +256,9 @@ export default function CoordinacionesPanel() {
         titulo: '',
         nombre_cliente: '',
         apellido_cliente: '',
+        nombre_agasajado: '',
         tipo_evento: '',
+        subtipo_evento: '',
         codigo_evento: '',
         fecha_evento: '',
         descripcion: '',
@@ -258,12 +276,21 @@ export default function CoordinacionesPanel() {
   };
 
   const handleEdit = useCallback((item) => {
+    let tipo = item.tipo_evento || '';
+    let subtipo = '';
+    if (tipo.startsWith('Religioso - ')) {
+      subtipo = tipo.split(' - ')[1];
+      tipo = 'Religioso';
+    }
+
     setFormData({
       titulo: item.titulo,
       nombre_cliente: item.nombre_cliente || '',
       apellido_cliente: item.apellido_cliente || '',
+      nombre_agasajado: item.nombre_agasajado || '',
       telefono: item.telefono || '',
-      tipo_evento: item.tipo_evento || '',
+      tipo_evento: tipo,
+      subtipo_evento: subtipo,
       codigo_evento: item.codigo_evento || '',
       fecha_evento: item.fecha_evento ? formatDateFromDBForInput(item.fecha_evento) : '',
       descripcion: item.descripcion || '',
@@ -511,7 +538,8 @@ export default function CoordinacionesPanel() {
       }
 
       const tipoEvento = coordinacion.tipo_evento?.trim();
-      const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+      const baseTipoEvento = tipoEvento?.startsWith('Religioso') ? 'Religioso' : tipoEvento;
+      const pasos = baseTipoEvento ? FLUJOS_POR_TIPO[baseTipoEvento] || [] : [];
 
       let respuestas = flujo.respuestas;
 
@@ -672,11 +700,35 @@ export default function CoordinacionesPanel() {
                 <CustomSelect
                   value={formData.tipo_evento}
                   options={['XV', 'Casamiento', 'Corporativo', 'Religioso', 'Cumpleaños']}
-                  onChange={(val) => setFormData({ ...formData, tipo_evento: val })}
+                  onChange={(val) => setFormData({ ...formData, tipo_evento: val, subtipo_evento: '' })}
                   required
                   placeholder="Seleccionar tipo de evento"
                 />
               </div>
+              {formData.tipo_evento === 'Religioso' && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Subtipo de Evento *</label>
+                    <CustomSelect
+                      value={formData.subtipo_evento}
+                      options={['Bat', 'Bar', 'Boda']}
+                      onChange={(val) => setFormData({ ...formData, subtipo_evento: val })}
+                      required
+                      placeholder="Seleccionar subtipo"
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Nombre del Agasajado/a *</label>
+                    <input
+                      type="text"
+                      value={formData.nombre_agasajado}
+                      onChange={(e) => setFormData({ ...formData, nombre_agasajado: e.target.value })}
+                      required={formData.tipo_evento === 'Religioso'}
+                      placeholder="Nombre del agasajado/a"
+                    />
+                  </div>
+                </>
+              )}
               <div className={styles.formGroup}>
                 <label>Código de Evento</label>
                 <input
@@ -1381,7 +1433,8 @@ export default function CoordinacionesPanel() {
                           {(() => {
                             const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
                             // Usar el flujo del cliente ya que las respuestas fueron guardadas con ese flujo
-                            const pasos = tipoEvento ? CLIENTE_FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+                            const baseTipoEvento = tipoEvento?.startsWith('Religioso') ? 'Religioso' : tipoEvento;
+                            const pasos = baseTipoEvento ? CLIENTE_FLUJOS_POR_TIPO[baseTipoEvento] || [] : [];
 
                             // Parsear respuestas correctamente
                             let respuestas = resumenData.flujo.respuestas;
@@ -1652,7 +1705,8 @@ export default function CoordinacionesPanel() {
                   {resumenData.flujo && resumenData.flujo.respuestas && !resumenData.coordinacion?.pre_coordinacion_completado_por_cliente ? (
                     (() => {
                       const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
-                      const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+                      const baseTipoEvento = tipoEvento?.startsWith('Religioso') ? 'Religioso' : tipoEvento;
+                      const pasos = baseTipoEvento ? FLUJOS_POR_TIPO[baseTipoEvento] || [] : [];
                       let respuestas = resumenData.flujo.respuestas;
 
                       // Constante para identificar respuestas pendientes

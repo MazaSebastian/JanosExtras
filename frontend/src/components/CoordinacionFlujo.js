@@ -36,6 +36,30 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
+    {
       id: 1,
       titulo: 'Ingreso a Recepción',
       preguntas: [
@@ -116,6 +140,30 @@ export const FLUJOS_POR_TIPO = {
     },
   ],
   Casamiento: [
+    {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 101,
       titulo: 'Shows',
@@ -257,6 +305,30 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
+    {
       id: 1,
       titulo: 'Temática del Evento',
       preguntas: [
@@ -321,42 +393,146 @@ export const FLUJOS_POR_TIPO = {
   ],
   Religioso: [
     {
-      id: 1,
-      titulo: 'Información del Evento',
+      id: 101,
+      titulo: 'Shows',
       preguntas: [
-        { id: 'tipo_ceremonia_religiosa', label: 'Tipo de ceremonia religiosa', tipo: 'select', opciones: ['Misa', 'Bautismo', 'Comunión', 'Confirmación', 'Otro'], requerido: true },
-        { id: 'nombre_celebrante', label: 'Nombre del celebrante', tipo: 'text', requerido: false },
-        { id: 'cantidad_fieles', label: 'Cantidad aproximada de fieles', tipo: 'number', requerido: true },
-        { id: 'lugar_ceremonia', label: 'Lugar de la ceremonia', tipo: 'text', requerido: true },
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 1,
+      titulo: 'Mejitzah',
+      preguntas: [
+        { id: 'utilizan_mejitzah', label: '¿Utilizarán Mejitzah?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
       ],
     },
     {
       id: 2,
-      titulo: 'Horarios',
+      titulo: 'Música de recepción / Comidas',
       preguntas: [
-        { id: 'hora_inicio', label: 'Hora de inicio de la ceremonia', tipo: 'time', requerido: true },
-        { id: 'duracion_estimada', label: 'Duración estimada (horas)', tipo: 'number', requerido: true },
-        { id: 'hora_arribo_dj', label: 'Hora de arribo del DJ', tipo: 'time', requerido: true },
+        { id: 'musica_recepcion_comidas', label: 'Música de recepción y comidas', tipo: 'text', requerido: true },
+        { id: 'artistas_favoritos', label: 'Artistas favoritos', tipo: 'text', requerido: true },
       ],
     },
     {
       id: 3,
-      titulo: 'Requisitos Musicales',
+      titulo: 'Pre-dancing',
       preguntas: [
-        { id: 'musica_religiosa', label: 'Música religiosa requerida', tipo: 'textarea', requerido: true },
-        { id: 'canciones_especiales', label: 'Canciones especiales o himnos', tipo: 'textarea', requerido: false },
-        { id: 'equipamiento_audio', label: 'Equipamiento de audio requerido', tipo: 'textarea', requerido: true },
+        { id: 'realizan_predancing', label: '¿Realizan pre-dancing?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalles_predancing', label: 'Detalles musicales del pre-dancing', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_predancing', valor: 'Sí' } },
+        { id: 'ultima_cancion_predancing', label: 'Última canción del pre-dancing', tipo: 'text', requerido: false, condicional: { pregunta: 'realizan_predancing', valor: 'Sí' } },
+      ],
+    },
+    {
+      id: 4,
+      titulo: 'Ingreso al salón',
+      preguntas: [
+        { id: 'realizan_ingreso_salon', label: '¿Realizan ingreso al salón?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_ingreso_salon', label: 'Detalles del ingreso al salón', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_ingreso_salon', valor: 'Sí' } },
+      ],
+    },
+    {
+      id: 5,
+      titulo: 'Homenajes',
+      preguntas: [
+        { id: 'realizan_homenajes', label: '¿Realizará homenajes?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_homenajes', label: 'Detalles del momento de homenajes', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_homenajes', valor: 'Sí' } },
+      ],
+    },
+    {
+      id: 6,
+      titulo: 'Velas',
+      preguntas: [
+        { id: 'ceremonia_velas', label: '¿Realizará vela guía?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'cancion_vela_guia', label: 'Canción de vela guía', tipo: 'text', requerido: false, condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' } },
+        { id: 'velas', label: 'Velas', tipo: 'velas', requerido: false, condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' } },
+      ],
+    },
+    {
+      id: 7,
+      titulo: 'Canción de Brindis',
+      preguntas: [
+        { id: 'cancion_brindis', label: 'Canción y detalles del momento brindis', tipo: 'textarea', requerido: false },
+      ],
+    },
+    {
+      id: 8,
+      titulo: 'Entrada en carioca',
+      preguntas: [
+        { id: 'realizan_ingreso_carioca', label: '¿Realiza ingreso en carioca?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_ingreso_carioca', label: 'Canción y detalles del ingreso a carioca', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_ingreso_carioca', valor: 'Sí' } },
+      ],
+    },
+    {
+      id: 9,
+      titulo: 'Club',
+      preguntas: [
+        { id: 'pertenece_club', label: '¿Pertenece a un club?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true, ayuda: 'Ejemplo de clubes: Hacoaj, Macabi' },
+        { id: 'detalles_club', label: 'Detalles del club', tipo: 'textarea', requerido: false, condicional: { pregunta: 'pertenece_club', valor: 'Sí' } },
+      ],
+    },
+    {
+      id: 10,
+      titulo: 'Música de tandas',
+      preguntas: [
+        { id: 'abre_tanda_sher', label: '¿Abrimos el momento de baile con una tanda sher?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalles_tanda_sher', label: 'Detalles de la tanda sher', tipo: 'textarea', requerido: false, condicional: { pregunta: 'abre_tanda_sher', valor: 'Sí' } },
+        { id: 'tanda_1', label: 'Tanda 1', tipo: 'textarea', requerido: true },
+        { id: 'tanda_2', label: 'Tanda 2', tipo: 'textarea', requerido: true },
+        { id: 'tanda_3', label: 'Tanda 3', tipo: 'textarea', requerido: true },
+        { id: 'tanda_4', label: 'Tanda 4', tipo: 'textarea', requerido: true },
       ],
     },
     {
       id: 99,
-      titulo: 'Playlist',
+      titulo: 'Playlist de referencia',
       preguntas: [
         { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
     },
   ],
   Cumpleaños: [
+    {
+      id: 101,
+      titulo: 'Shows',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: 'Pantalla y Videos',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: 'Complementos Técnicos',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 101,
       titulo: 'Shows',
@@ -726,7 +902,9 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   // Normalizar el tipo de evento (trim y verificar coincidencia)
   const tipoEventoNormalizado = useMemo(() => {
     if (!coordinacion?.tipo_evento) return null;
-    return coordinacion.tipo_evento.trim();
+    const tipo = coordinacion.tipo_evento.trim();
+    if (tipo.startsWith('Religioso')) return 'Religioso';
+    return tipo;
   }, [coordinacion?.tipo_evento]);
 
   const pasos = useMemo(() => {
@@ -1365,6 +1543,11 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
                       </span>
                     )}
                   </label>
+                  {pregunta.ayuda && (
+                    <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem', marginTop: '-0.25rem' }}>
+                      {pregunta.ayuda}
+                    </div>
+                  )}
                   {pregunta.tipo === 'text' && (
                     <>
                       <input

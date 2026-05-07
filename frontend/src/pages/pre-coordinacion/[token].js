@@ -122,7 +122,9 @@ export default function PreCoordinacionPage() {
 
   const tipoEventoNormalizado = useMemo(() => {
     if (!coordinacion?.tipo_evento) return null;
-    return coordinacion.tipo_evento.trim();
+    const tipo = coordinacion.tipo_evento.trim();
+    if (tipo.startsWith('Religioso')) return 'Religioso';
+    return tipo;
   }, [coordinacion?.tipo_evento]);
 
   const pasos = tipoEventoNormalizado ? CLIENTE_FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];

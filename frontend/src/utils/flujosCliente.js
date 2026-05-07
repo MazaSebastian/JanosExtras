@@ -30,6 +30,33 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
       ]
     },
+    {
+      id: 101,
+      titulo: '🎭 Shows',
+      descripcion: 'Shows adicionales contratados para el evento',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: '📺 Pantalla y Videos',
+      descripcion: 'Proyección de videos durante el evento',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: '⚙️ Complementos Técnicos',
+      descripcion: 'Servicios técnicos adicionales',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
 
     {
       id: 2,
@@ -214,6 +241,33 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
   ],
   Casamiento: [
+    {
+      id: 101,
+      titulo: '🎭 Shows',
+      descripcion: 'Shows adicionales contratados para el evento',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: '📺 Pantalla y Videos',
+      descripcion: 'Proyección de videos durante el evento',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: '⚙️ Complementos Técnicos',
+      descripcion: 'Servicios técnicos adicionales',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 101,
       titulo: '🎭 Shows',
@@ -492,6 +546,33 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ]
     },
     {
+      id: 101,
+      titulo: '🎭 Shows',
+      descripcion: 'Shows adicionales contratados para el evento',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: '📺 Pantalla y Videos',
+      descripcion: 'Proyección de videos durante el evento',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: '⚙️ Complementos Técnicos',
+      descripcion: 'Servicios técnicos adicionales',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
+    {
       id: 1,
       titulo: '🏢 Sobre tu Evento',
       descripcion: 'Cuéntanos sobre el tipo de evento',
@@ -739,6 +820,33 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
   ],
   Cumpleaños: [
+    {
+      id: 101,
+      titulo: '🎭 Shows',
+      descripcion: 'Shows adicionales contratados para el evento',
+      preguntas: [
+        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 102,
+      titulo: '📺 Pantalla y Videos',
+      descripcion: 'Proyección de videos durante el evento',
+      preguntas: [
+        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+      ]
+    },
+    {
+      id: 103,
+      titulo: '⚙️ Complementos Técnicos',
+      descripcion: 'Servicios técnicos adicionales',
+      preguntas: [
+        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+      ]
+    },
     {
       id: 101,
       titulo: '🎭 Shows',
