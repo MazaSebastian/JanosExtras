@@ -36,30 +36,6 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
-      id: 101,
-      titulo: 'Shows',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: 'Pantalla y Videos',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: 'Complementos Técnicos',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
-    {
       id: 1,
       titulo: 'Ingreso a Recepción',
       preguntas: [
@@ -140,30 +116,6 @@ export const FLUJOS_POR_TIPO = {
     },
   ],
   Casamiento: [
-    {
-      id: 101,
-      titulo: 'Shows',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: 'Pantalla y Videos',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: 'Complementos Técnicos',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
     {
       id: 101,
       titulo: 'Shows',
@@ -305,30 +257,6 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
-      id: 101,
-      titulo: 'Shows',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: 'Pantalla y Videos',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: 'Complementos Técnicos',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
-    {
       id: 1,
       titulo: 'Temática del Evento',
       preguntas: [
@@ -393,7 +321,7 @@ export const FLUJOS_POR_TIPO = {
   ],
   Religioso: [
     {
-      id: 101,
+      id: 1,
       titulo: 'Shows',
       preguntas: [
         { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -401,7 +329,7 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
-      id: 102,
+      id: 2,
       titulo: 'Pantalla y Videos',
       preguntas: [
         { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -409,7 +337,7 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
-      id: 103,
+      id: 3,
       titulo: 'Complementos Técnicos',
       preguntas: [
         { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -417,14 +345,14 @@ export const FLUJOS_POR_TIPO = {
       ]
     },
     {
-      id: 1,
+      id: 4,
       titulo: 'Mejitzah',
       preguntas: [
         { id: 'utilizan_mejitzah', label: '¿Utilizarán Mejitzah?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
       ],
     },
     {
-      id: 2,
+      id: 5,
       titulo: 'Música de recepción / Comidas',
       preguntas: [
         { id: 'musica_recepcion_comidas', label: 'Música de recepción y comidas', tipo: 'text', requerido: true },
@@ -432,7 +360,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 3,
+      id: 6,
       titulo: 'Pre-dancing',
       preguntas: [
         { id: 'realizan_predancing', label: '¿Realizan pre-dancing?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -441,7 +369,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 4,
+      id: 7,
       titulo: 'Ingreso al salón',
       preguntas: [
         { id: 'realizan_ingreso_salon', label: '¿Realizan ingreso al salón?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -449,7 +377,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 8,
       titulo: 'Homenajes',
       preguntas: [
         { id: 'realizan_homenajes', label: '¿Realizará homenajes?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -457,7 +385,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 9,
       titulo: 'Velas',
       preguntas: [
         { id: 'ceremonia_velas', label: '¿Realizará vela guía?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -466,14 +394,14 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 7,
+      id: 10,
       titulo: 'Canción de Brindis',
       preguntas: [
         { id: 'cancion_brindis', label: 'Canción y detalles del momento brindis', tipo: 'textarea', requerido: false },
       ],
     },
     {
-      id: 8,
+      id: 11,
       titulo: 'Entrada en carioca',
       preguntas: [
         { id: 'realizan_ingreso_carioca', label: '¿Realiza ingreso en carioca?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -481,7 +409,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 9,
+      id: 12,
       titulo: 'Club',
       preguntas: [
         { id: 'pertenece_club', label: '¿Pertenece a un club?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true, ayuda: 'Ejemplo de clubes: Hacoaj, Macabi' },
@@ -489,7 +417,7 @@ export const FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 10,
+      id: 13,
       titulo: 'Música de tandas',
       preguntas: [
         { id: 'abre_tanda_sher', label: '¿Abrimos el momento de baile con una tanda sher?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
@@ -509,30 +437,6 @@ export const FLUJOS_POR_TIPO = {
     },
   ],
   Cumpleaños: [
-    {
-      id: 101,
-      titulo: 'Shows',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: 'Pantalla y Videos',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: 'Complementos Técnicos',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
     {
       id: 101,
       titulo: 'Shows',
@@ -627,7 +531,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   const router = useRouter();
   const [coordinacion, setCoordinacion] = useState(null);
   const [preguntasPendientesIniciales, setPreguntasPendientesIniciales] = useState(null);
-  const [pasoActual, setPasoActual] = useState(1);
+  const [pasoActual, setPasoActual] = useState(null);
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -920,15 +824,15 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
     }).filter(Boolean);
   }, [tipoEventoNormalizado, soloPendientes, preguntasPendientesIniciales]);
 
-  // Asegurarnos de que el pasoActual apunte a un paso válido en modo filtrado
+  // Asegurarnos de que el pasoActual apunte a un paso válido
   useEffect(() => {
-    if (soloPendientes && pasos.length > 0) {
-      const pasoExiste = pasos.find(p => p.id === pasoActual);
+    if (pasos.length > 0) {
+      const pasoExiste = pasoActual ? pasos.find(p => p.id === pasoActual) : null;
       if (!pasoExiste) {
         setPasoActual(pasos[0].id);
       }
     }
-  }, [pasos, soloPendientes, pasoActual]);
+  }, [pasos, pasoActual]);
 
   const paso = pasos.find(p => p.id === pasoActual);
   const totalPasos = pasos.length;
