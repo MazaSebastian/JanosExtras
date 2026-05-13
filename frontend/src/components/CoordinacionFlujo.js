@@ -531,7 +531,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   const router = useRouter();
   const [coordinacion, setCoordinacion] = useState(null);
   const [preguntasPendientesIniciales, setPreguntasPendientesIniciales] = useState(null);
-  const [pasoActual, setPasoActual] = useState(null);
+  const [pasoActual, setPasoActual] = useState(0);
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -765,8 +765,19 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
           setRespuestas(respuestasExistentes);
 
           // Si hay respuestas, continuar desde donde se quedó
-          if (flujoData.paso_actual && flujoData.paso_actual < 999) {
-            setPasoActual(flujoData.paso_actual);
+          // Convertir paso_actual guardado a índice válido del array
+          if (flujoData.paso_actual != null) {
+            const tipoNorm = data.tipo_evento?.trim();
+            const tipoKey = tipoNorm?.startsWith('Religioso') ? 'Religioso' : tipoNorm;
+            const flujoActual = FLUJOS_POR_TIPO[tipoKey] || [];
+            // Buscar el paso por su id guardado
+            const idxGuardado = flujoActual.findIndex(p => p.id === flujoData.paso_actual);
+            if (idxGuardado >= 0) {
+              setPasoActual(idxGuardado);
+            } else {
+              // Si el ID guardado no existe en el flujo actual, empezar desde 0
+              setPasoActual(0);
+            }
           }
 
           // Si fue completado por el cliente, mostrar mensaje informativo
@@ -824,17 +835,14 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
     }).filter(Boolean);
   }, [tipoEventoNormalizado, soloPendientes, preguntasPendientesIniciales]);
 
-  // Asegurarnos de que el pasoActual apunte a un paso válido
+  // Asegurarnos de que el pasoActual apunte a un índice válido
   useEffect(() => {
-    if (pasos.length > 0) {
-      const pasoExiste = pasoActual ? pasos.find(p => p.id === pasoActual) : null;
-      if (!pasoExiste) {
-        setPasoActual(pasos[0].id);
-      }
+    if (pasos.length > 0 && pasoActual >= pasos.length) {
+      setPasoActual(0);
     }
   }, [pasos, pasoActual]);
 
-  const paso = pasos.find(p => p.id === pasoActual);
+  const paso = pasos[pasoActual] || pasos[0];
   const totalPasos = pasos.length;
 
   // Debug: mostrar qué tipo se está usando
@@ -905,7 +913,9 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   const validarPaso = () => {
     if (!paso) return false;
 
-    const preguntasRequeridas = paso.preguntas.filter(p => {
+    const pasoActualObj = pasos[pasoActual];
+    if (!pasoActualObj) return true;
+    const preguntasRequeridas = pasoActualObj.preguntas.filter(p => {
       // Si es condicional, verificar si debe mostrarse
       if (p.condicional && p.condicional.pregunta) {
         const debeMostrar = respuestas[p.condicional.pregunta] === p.condicional.valor;
@@ -929,9 +939,8 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
 
     setError('');
 
-    const currentIndex = pasos.findIndex(p => p.id === pasoActual);
-    if (currentIndex >= 0 && currentIndex < pasos.length - 1) {
-      setPasoActual(pasos[currentIndex + 1].id);
+    if (pasoActual < pasos.length - 1) {
+      setPasoActual(pasoActual + 1);
     } else {
       // Último paso - completar flujo
       await completarFlujo();
@@ -939,9 +948,8 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   };
 
   const handleAnterior = () => {
-    const currentIndex = pasos.findIndex(p => p.id === pasoActual);
-    if (currentIndex > 0) {
-      setPasoActual(pasos[currentIndex - 1].id);
+    if (pasoActual > 0) {
+      setPasoActual(pasoActual - 1);
       setError('');
     }
   };
@@ -1185,17 +1193,16 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
       {pasos.length > 0 && (
         <div className={styles.progressBar}>
         {pasos.map((pasoIter, index) => {
-          const currentIndex = pasos.findIndex(p => p.id === pasoActual);
           return (
             <div
-              key={pasoIter.id}
-              className={`${styles.progressStep} ${index < currentIndex ? styles.completed :
-                index === currentIndex ? styles.active :
+              key={`${pasoIter.id}-${index}`}
+              className={`${styles.progressStep} ${index < pasoActual ? styles.completed :
+                index === pasoActual ? styles.active :
                   soloPendientes ? styles.warning : styles.pending
                 }`}
             >
               <div className={styles.stepNumber}>
-                {index < currentIndex ? '✓' : (soloPendientes && index > currentIndex ? '!' : (index + 1))}
+                {index < pasoActual ? '✓' : (soloPendientes && index > pasoActual ? '!' : (index + 1))}
               </div>
               <div className={styles.stepLabel}>{pasoIter.titulo}</div>
             </div>
@@ -1692,7 +1699,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
           <button
             className={styles.buttonSecondary}
             onClick={handleAnterior}
-            disabled={pasos.findIndex(p => p.id === pasoActual) === 0 || guardando}
+            disabled={pasoActual === 0 || guardando}
           >
             ← Anterior
           </button>
@@ -1705,10 +1712,10 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
           </button>
           <button
             className={styles.buttonPrimary}
-            onClick={pasos.findIndex(p => p.id === pasoActual) < pasos.length - 1 ? handleSiguiente : completarFlujo}
+            onClick={pasoActual < pasos.length - 1 ? handleSiguiente : completarFlujo}
             disabled={guardando}
           >
-            {pasos.findIndex(p => p.id === pasoActual) < pasos.length - 1 ? 'Siguiente →' : '✓ Ver Resumen'}
+            {pasoActual < pasos.length - 1 ? 'Siguiente →' : '✓ Ver Resumen'}
           </button>
         </div>
       )}
