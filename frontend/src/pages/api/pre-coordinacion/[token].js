@@ -17,6 +17,7 @@ export default async function handler(req, res) {
           c.id,
           c.titulo,
           c.nombre_cliente,
+          c.nombre_agasajado,
           c.tipo_evento,
           c.codigo_evento,
           c.fecha_evento,

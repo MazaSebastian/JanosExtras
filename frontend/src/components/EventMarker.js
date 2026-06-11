@@ -144,13 +144,14 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
             />
           </div>
 
-          {formData.tipo_evento !== 'Corporativo' && (
+          {formData.tipo_evento && formData.tipo_evento !== 'Corporativo' && (
             <div className={styles.formGroup}>
-              <label>Nombre del Agasajado</label>
+              <label>Nombre del Agasajado {formData.tipo_evento === 'XV' || formData.tipo_evento === 'Religioso' ? '*' : ''}</label>
               <input
                 type="text"
                 value={formData.nombre_agasajado}
                 onChange={(e) => setFormData({ ...formData, nombre_agasajado: e.target.value })}
+                required={formData.tipo_evento === 'XV' || formData.tipo_evento === 'Religioso'}
                 placeholder="Nombre de/los protagonista/s (ej: María, Juan y Ana)"
               />
             </div>

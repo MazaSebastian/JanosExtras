@@ -98,13 +98,14 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
                         </div>
                     </div>
 
-                    {formData.tipo_evento !== 'Corporativo' && (
+                    {formData.tipo_evento && formData.tipo_evento !== 'Corporativo' && (
                         <div className={styles.formGroup}>
-                            <label>Nombre del Agasajado/a</label>
+                            <label>Nombre del Agasajado/a {formData.tipo_evento === 'XV' || formData.tipo_evento === 'Religioso' ? '*' : ''}</label>
                             <input
                                 type="text"
                                 value={formData.nombre_agasajado}
                                 onChange={(e) => setFormData({ ...formData, nombre_agasajado: e.target.value })}
+                                required={formData.tipo_evento === 'XV' || formData.tipo_evento === 'Religioso'}
                                 placeholder="Nombre de/los protagonista/s"
                             />
                         </div>

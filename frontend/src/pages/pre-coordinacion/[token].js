@@ -595,9 +595,11 @@ export default function PreCoordinacionPage() {
       <div className={styles.container}>
         <div className={styles.bienvenidaContainer}>
           <div className={styles.bienvenidaContent}>
-            <div className={styles.bienvenidaIcono}>👋</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+              <img src="/logo-janos-blanco.png" alt="Jano's Eventos" style={{ maxHeight: '75px', objectFit: 'contain' }} />
+            </div>
             <h1 className={styles.bienvenidaTitulo}>
-              ¡Hola, {coordinacion.nombre_cliente || coordinacion.titulo || 'Cliente'}!
+              ¡Hola, {coordinacion.nombre_agasajado || coordinacion.nombre_cliente || coordinacion.titulo || 'Cliente'}!
             </h1>
             <p className={styles.bienvenidaSubtitulo}>
               Estamos muy contentos de acompañarte en la organización de tu evento
@@ -658,7 +660,7 @@ export default function PreCoordinacionPage() {
 
             <div className={styles.resumenInfoGeneral}>
               <div className={styles.resumenInfoItem}>
-                <strong>Cliente:</strong> {coordinacion.nombre_cliente || coordinacion.titulo}
+                <strong>Agasajado/a:</strong> {coordinacion.nombre_agasajado || coordinacion.nombre_cliente || coordinacion.titulo}
               </div>
               <div className={styles.resumenInfoItem}>
                 <strong>Tipo de Evento:</strong> {coordinacion.tipo_evento}
@@ -741,9 +743,15 @@ export default function PreCoordinacionPage() {
                           <div className={styles.resumenValor}>
                             {valor.map((vela, idx) => (
                               <div key={idx} className={styles.velaItem}>
-                                <strong>{vela.nombre}</strong> - {vela.familiar}
-                                <br />
-                                🎵 {vela.cancion}
+                                <div className={styles.candleFlameContainer}>
+                                  <div className={styles.candle}>
+                                    <div className={styles.flame}></div>
+                                  </div>
+                                </div>
+                                <div className={styles.velaInfo}>
+                                  <strong>{vela.nombre}</strong> - {vela.familiar}
+                                  <div className={styles.velaCancion}>{vela.cancion}</div>
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -812,10 +820,13 @@ export default function PreCoordinacionPage() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <img src="/logo-janos-blanco.png" alt="Jano's Eventos" style={{ maxHeight: '60px', objectFit: 'contain' }} />
+        </div>
         <h1 className={styles.titulo}>Pre-Coordinación del Evento</h1>
         <div className={styles.infoGeneral}>
           <div className={styles.infoItem}>
-            <strong>Cliente:</strong> {coordinacion.nombre_cliente || coordinacion.titulo}
+            <strong>Agasajado/a:</strong> {coordinacion.nombre_agasajado || coordinacion.nombre_cliente || coordinacion.titulo}
           </div>
           <div className={styles.infoItem}>
             <strong>Tipo de Evento:</strong> {coordinacion.tipo_evento}
@@ -987,9 +998,14 @@ export default function PreCoordinacionPage() {
                       <div className={styles.velasList}>
                         {respuestasCliente.velas.map((vela) => (
                           <div key={vela.id} className={styles.velaItem}>
+                            <div className={styles.candleFlameContainer}>
+                              <div className={styles.candle}>
+                                <div className={styles.flame}></div>
+                              </div>
+                            </div>
                             <div className={styles.velaInfo}>
                               <strong>{vela.nombre}</strong> - {vela.familiar}
-                              <div className={styles.velaCancion}>🎵 {vela.cancion}</div>
+                              <div className={styles.velaCancion}>{vela.cancion}</div>
                             </div>
                             <button
                               type="button"

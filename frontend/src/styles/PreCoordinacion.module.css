@@ -1,73 +1,103 @@
+/* Estilos Pre-Coordinación - Tema Luxury Glassmorphism & Gold/Violet */
+
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
-  padding: 2rem 1rem;
+  background: radial-gradient(circle at 15% 20%, rgba(119, 44, 135, 0.18) 0%, transparent 45%),
+              radial-gradient(circle at 85% 80%, rgba(217, 70, 239, 0.12) 0%, transparent 45%),
+              #080312;
+  padding: 3rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: 'Inter', sans-serif;
+  color: #f3f4f6;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Panel base Glassmorphic */
+.glassPanel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 800px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  composes: glassPanel;
 }
 
 .titulo {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #333;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
   margin: 0 0 1.5rem 0;
   text-align: center;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d946ef 50%, #ffffff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
 .infoGeneral {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8f9ff;
-  border-radius: 8px;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
 }
 
 .infoItem {
   font-size: 0.95rem;
-  color: #555;
+  color: #d1d5db;
+  line-height: 1.4;
 }
 
 .infoItem strong {
-  color: #772c87;
+  color: #d946ef;
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Barra de progreso premium */
 .progressBar {
   width: 100%;
   max-width: 800px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  margin-bottom: 2rem;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  margin-bottom: 2.5rem;
   position: relative;
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .progressFill {
   height: 100%;
-  background: white;
-  border-radius: 20px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #772c87 0%, #d946ef 50%, #f59e0b 100%);
+  border-radius: 14px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
 }
 
 .progressText {
@@ -75,121 +105,127 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #333;
-  font-weight: 600;
-  font-size: 0.9rem;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
   z-index: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  font-family: 'Outfit', sans-serif;
 }
 
 .errorContainer,
 .confirmacionContainer {
-  background: white;
-  border-radius: 16px;
-  padding: 3rem;
-  width: 100%;
+  composes: glassPanel;
   max-width: 600px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 3.5rem;
 }
 
 .confirmacionContainer h1 {
+  font-family: 'Outfit', sans-serif;
   color: #4caf50;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 2.2rem;
+  font-weight: 800;
 }
 
 .error {
-  background: #fff3cd;
-  border: 2px solid #ffc107;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
   width: 100%;
   max-width: 800px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #856404;
+  gap: 0.75rem;
+  color: #fca5a5;
   font-weight: 500;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);
 }
 
 .pasoContainer {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 800px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  composes: glassPanel;
 }
 
 .pasoTitulo {
-  font-size: 1.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.7rem;
   font-weight: 700;
-  color: #772c87;
+  color: #ffffff;
   margin: 0 0 0.5rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .pasoDescripcion {
-  font-size: 1rem;
-  color: #666;
+  font-size: 0.95rem;
+  color: #9ca3af;
   margin: 0 0 2rem 0;
   font-style: italic;
+  font-weight: 400;
 }
 
 .preguntas {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .pregunta {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .preguntaLabel {
   font-weight: 600;
-  color: #333;
-  font-size: 1rem;
+  color: #f3f4f6;
+  font-size: 1.05rem;
+  font-family: 'Outfit', sans-serif;
 }
 
 .required {
-  color: #f44336;
+  color: #ef4444;
+  margin-left: 4px;
 }
 
 .input,
 .textarea {
-  padding: 0.75rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 0.9rem 1.25rem;
   font-size: 1rem;
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: #772c87;
+  border-color: #d946ef;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 15px rgba(217, 70, 239, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
 }
 
 .ayuda {
   display: block;
   margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #666;
+  font-size: 0.85rem;
+  color: #9ca3af;
   font-style: italic;
 }
 
-/* Estilos para botones seleccionables */
+/* Botones de Selección */
 .buttonsContainer {
   display: flex;
   flex-direction: column;
@@ -199,47 +235,48 @@
 .buttonsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem;
+  gap: 0.85rem;
   margin-top: 0.5rem;
 }
 
 .selectableButton {
-  padding: 0.875rem 1.25rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: white;
-  color: #333;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #e5e7eb;
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
   word-wrap: break-word;
   white-space: normal;
-  min-height: 48px;
+  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .selectableButton:hover {
-  border-color: #772c87;
-  background: #f9f9f9;
+  border-color: #d946ef;
+  background: rgba(255, 255, 255, 0.07);
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(119, 44, 135, 0.2);
+  box-shadow: 0 5px 15px rgba(217, 70, 239, 0.25);
+  color: #ffffff;
 }
 
 .selectableButtonActive {
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  background: linear-gradient(135deg, #772c87 0%, #d946ef 100%);
   color: white;
-  border-color: #772c87;
-  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 5px 20px rgba(217, 70, 239, 0.4);
 }
 
 .selectableButtonActive:hover {
-  background: linear-gradient(135deg, #5a1f6b 0%, #772c87 100%);
+  background: linear-gradient(135deg, #8b349d 0%, #f472b6 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(119, 44, 135, 0.4);
+  box-shadow: 0 8px 25px rgba(217, 70, 239, 0.5);
 }
 
 .buttonWrapper {
@@ -249,340 +286,439 @@
 }
 
 .otroInput {
-  padding: 0.75rem;
-  border: 2px solid #772c87;
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid #772c87;
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 0.9rem 1.25rem;
   font-size: 0.95rem;
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
   margin-top: 0.5rem;
 }
 
 .otroInput:focus {
   outline: none;
-  border-color: #5a1f6b;
-  box-shadow: 0 0 0 3px rgba(119, 44, 135, 0.1);
+  border-color: #d946ef;
+  box-shadow: 0 0 15px rgba(217, 70, 239, 0.25);
 }
 
+/* Navegación */
 .navegacion {
   display: flex;
   justify-content: space-between;
   width: 100%;
   max-width: 800px;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  margin-bottom: 3rem;
 }
 
 .botonAnterior,
 .botonSiguiente,
 .botonFinalizar,
 .botonVolver {
-  padding: 1rem 2rem;
+  padding: 1.1rem 2.2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .botonAnterior {
-  background: #f5f5f5;
-  color: #333;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
 }
 
 .botonAnterior:disabled {
-  opacity: 0.5;
+  opacity: 0.3;
   cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .botonAnterior:not(:disabled):hover {
-  background: #e0e0e0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .botonSiguiente,
 .botonFinalizar {
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  background: linear-gradient(135deg, #772c87 0%, #d946ef 100%);
   color: white;
   flex: 1;
+  box-shadow: 0 5px 15px rgba(119, 44, 135, 0.35);
 }
 
 .botonSiguiente:hover,
 .botonFinalizar:hover {
-  transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(217, 70, 239, 0.5);
+  background: linear-gradient(135deg, #8b349d 0%, #f472b6 100%);
 }
 
 .botonVolver {
-  background: #f5f5f5;
-  color: #333;
-  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+  margin-top: 1.5rem;
 }
 
 .botonVolver:hover {
-  background: #e0e0e0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .footer {
   text-align: center;
-  color: white;
+  color: #9ca3af;
   font-size: 0.9rem;
-  opacity: 0.9;
   max-width: 800px;
+  margin-top: 2rem;
+  opacity: 0.7;
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem 0.5rem;
-  }
-
-  .header,
-  .pasoContainer {
-    padding: 1.5rem;
-  }
-
-  .titulo {
-    font-size: 1.5rem;
-  }
-
-  .infoGeneral {
-    grid-template-columns: 1fr;
-  }
-
-  .navegacion {
-    flex-direction: column;
-  }
-
-  .botonAnterior,
-  .botonSiguiente {
-    width: 100%;
-  }
-}
-
-/* Estilos para el resumen de pre-coordinación */
+/* Resumen Final de pre-coordinación */
 .resumenContainer {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
+  composes: glassPanel;
   max-width: 900px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
 }
 
 .resumenHeader {
   text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .resumenHeader h1 {
-  font-size: 2rem;
-  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
   color: #4caf50;
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .mensajeExito {
   font-size: 1.1rem;
-  color: #2e7d32;
-  background: #e8f5e9;
-  padding: 1rem;
-  border-radius: 8px;
+  color: #d1e7dd;
+  background: rgba(25, 135, 84, 0.15);
+  border: 1px solid rgba(25, 135, 84, 0.3);
+  padding: 1.25rem;
+  border-radius: 14px;
   margin: 0;
+  box-shadow: 0 4px 15px rgba(25, 135, 84, 0.1);
 }
 
 .resumenContent {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
 }
 
 .resumenTitulo {
-  font-size: 1.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.7rem;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0 0 1.5rem 0;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .resumenInfoGeneral {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8f9ff;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  margin-bottom: 2.5rem;
 }
 
 .resumenInfoItem {
   font-size: 0.95rem;
-  color: #555;
+  color: #d1d5db;
 }
 
 .resumenInfoItem strong {
-  color: #772c87;
+  color: #d946ef;
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
 }
 
 .resumenSeccion {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: #f9f9f9;
-  border-radius: 8px;
+  margin-bottom: 2.5rem;
+  padding: 1.75rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
   border-left: 4px solid #772c87;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .resumenSeccionTitulo {
-  font-size: 1.2rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #772c87;
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  color: #d946ef;
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .resumenCampo {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.resumenCampo:last-child {
+  margin-bottom: 0;
 }
 
 .resumenLabel {
   font-weight: 600;
-  color: #555;
-  font-size: 0.95rem;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-family: 'Outfit', sans-serif;
 }
 
 .resumenValor {
-  color: #333;
-  font-size: 1rem;
+  color: #ffffff;
+  font-size: 1.05rem;
   line-height: 1.6;
 }
 
-.velaItem {
-  padding: 0.75rem;
-  background: white;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
-  border: 1px solid #e0e0e0;
-}
-
 .resumenFooter {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
 }
 
 .resumenFooterTexto {
-  color: #666;
+  color: #9ca3af;
   font-size: 0.95rem;
   font-style: italic;
   margin: 0;
 }
 
 .resumenAcciones {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
   align-items: center;
 }
 
 .mensajeConfirmacion {
   font-size: 1.1rem;
-  color: #555;
+  color: #d1d5db;
   text-align: center;
   margin: 0.5rem 0 1rem 0;
+  max-width: 600px;
+  line-height: 1.6;
 }
 
-/* Mensaje de cierre final */
+/* Pantalla de cierre definitivo */
 .mensajeCierreContainer {
-  background: white;
-  border-radius: 16px;
-  padding: 4rem 3rem;
-  width: 100%;
+  composes: glassPanel;
   max-width: 600px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 4.5rem 3.5rem;
 }
 
 .mensajeCierreIcono {
-  font-size: 5rem;
-  margin-bottom: 1.5rem;
+  font-size: 5.5rem;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 15px rgba(76, 175, 80, 0.4));
+  animation: pulseGlow 2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.3));
+  }
+  to {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 25px rgba(76, 175, 80, 0.6));
+  }
 }
 
 .mensajeCierreTitulo {
-  font-size: 2rem;
-  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
   color: #4caf50;
   margin: 0 0 1.5rem 0;
+  text-transform: uppercase;
 }
 
 .mensajeCierreTexto {
-  font-size: 1.1rem;
-  color: #555;
-  line-height: 1.6;
-  margin: 0 0 1rem 0;
+  font-size: 1.15rem;
+  color: #e5e7eb;
+  line-height: 1.7;
+  margin: 0 0 1.5rem 0;
 }
 
 .mensajeCierreDetalle {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   padding-top: 2rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .mensajeCierreDetalle p {
   font-size: 1rem;
-  color: #666;
+  color: #9ca3af;
   font-style: italic;
   margin: 0;
 }
 
-/* Estilos para velas */
+/* Sistema de Ceremonia de Velas */
 .velasContainer {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .agregarVelaButton {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  padding: 0.9rem 1.75rem;
+  background: linear-gradient(135deg, #772c87 0%, #d946ef 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   align-self: flex-start;
+  box-shadow: 0 4px 15px rgba(217, 70, 239, 0.3);
 }
 
 .agregarVelaButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(119, 44, 135, 0.4);
+  box-shadow: 0 8px 25px rgba(217, 70, 239, 0.5);
+  background: linear-gradient(135deg, #8b349d 0%, #f472b6 100%);
 }
 
 .velasList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .velaItem {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: #f9f9f9;
-  border-radius: 8px;
-  border-left: 3px solid #772c87;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.velaItem:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #d946ef;
+  transform: translateX(4px);
+  box-shadow: 0 6px 20px rgba(217, 70, 239, 0.15);
+}
+
+/* CSS de la flama de la vela */
+.candleFlameContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 70px;
+  position: relative;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.candle {
+  width: 12px;
+  height: 32px;
+  background: linear-gradient(to bottom, #d946ef, #772c87);
+  border-radius: 3px 3px 1px 1px;
+  position: absolute;
+  bottom: 8px;
+  box-shadow: 0 0 10px rgba(119, 44, 135, 0.3);
+}
+
+.candle::before {
+  content: '';
+  width: 2px;
+  height: 6px;
+  background: #444;
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.flame {
+  width: 10px;
+  height: 20px;
+  background: linear-gradient(to top, #ff7b00 0%, #ffcc00 40%, #ffffff 100%);
+  border-radius: 50% 50% 35% 35% / 60% 60% 40% 40%;
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px rgba(255, 123, 0, 0.7), 
+              0 0 20px rgba(255, 204, 0, 0.5);
+  transform-origin: 50% 90%;
+  animation: flicker 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  0% {
+    transform: translateX(-50%) scale(1) rotate(-1.5deg);
+    opacity: 0.95;
+  }
+  25% {
+    transform: translateX(-50%) scale(1.05) rotate(1deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.95) rotate(-2deg);
+    opacity: 0.9;
+  }
+  75% {
+    transform: translateX(-50%) scale(1.02) rotate(1.5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1.05) rotate(2deg);
+    opacity: 1;
+  }
 }
 
 .velaInfo {
@@ -590,81 +726,114 @@
 }
 
 .velaInfo strong {
-  color: #333;
+  color: #ffffff;
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+  font-family: 'Outfit', sans-serif;
 }
 
 .velaCancion {
-  color: #666;
+  color: #9ca3af;
   font-size: 0.9rem;
   margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.velaCancion::before {
+  content: '🎵';
+  font-size: 0.85rem;
 }
 
 .eliminarVelaButton {
-  background: #f44336;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .eliminarVelaButton:hover {
-  background: #d32f2f;
+  background: rgba(239, 68, 68, 0.35);
+  border-color: #ef4444;
+  color: #ffffff;
   transform: scale(1.05);
 }
 
-/* Estilos para modal */
+/* Modales */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(8, 3, 18, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 .modalContent {
-  background: white;
-  border-radius: 16px;
+  background: #110924;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+  animation: modalEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 2px solid #e0e0e0;
+  padding: 1.5rem 1.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modalHeader h3 {
   margin: 0;
-  color: #333;
-  font-size: 1.25rem;
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
 }
 
 .modalCloseButton {
   background: none;
   border: none;
-  font-size: 2rem;
-  color: #666;
+  font-size: 1.75rem;
+  color: #9ca3af;
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -673,98 +842,97 @@
 }
 
 .modalCloseButton:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .modalBody {
-  padding: 1.5rem;
+  padding: 1.75rem;
 }
 
 .modalFooter {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  padding: 1.5rem 1.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Estilos para pantalla de bienvenida */
+/* Pantalla de Bienvenida Estilo Portada */
 .bienvenidaContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   width: 100%;
-  padding: 2rem 1rem;
+  padding: 3rem 1.5rem;
 }
 
 .bienvenidaContent {
-  background: white;
-  border-radius: 20px;
-  padding: 3rem 2.5rem;
-  width: 100%;
+  composes: glassPanel;
   max-width: 700px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   text-align: center;
-  animation: fadeInUp 0.5s ease-out;
+  padding: 4rem 3.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Detalle decorativo oro en la esquina */
+.bienvenidaContent::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .bienvenidaIcono {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  animation: wave 2s ease-in-out infinite;
+  font-size: 4.5rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  animation: wave 2.2s ease-in-out infinite;
 }
 
 @keyframes wave {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-10deg);
-  }
-  75% {
-    transform: rotate(10deg);
-  }
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-8deg) scale(1.05); }
+  75% { transform: rotate(8deg) scale(1.05); }
 }
 
 .bienvenidaTitulo {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 10%, #d946ef 55%, #f59e0b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
 .bienvenidaSubtitulo {
   font-size: 1.2rem;
-  color: #666;
-  margin: 0 0 2rem 0;
-  line-height: 1.6;
+  color: #d1d5db;
+  margin: 0 0 2.5rem 0;
+  line-height: 1.7;
 }
 
 .bienvenidaInfo {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-  border-radius: 12px;
-  border: 2px solid rgba(119, 44, 135, 0.1);
+  gap: 1.25rem;
+  margin: 2.5rem 0;
+  padding: 1.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .bienvenidaInfoItem {
@@ -772,33 +940,38 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
 }
 
 .bienvenidaInfoLabel {
-  font-weight: 600;
-  color: #772c87;
+  font-weight: 700;
+  color: #d946ef;
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
 }
 
 .bienvenidaInfoValor {
-  color: #333;
-  font-weight: 500;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .bienvenidaMensaje {
-  margin: 2rem 0;
+  margin: 2.5rem 0;
   text-align: left;
-  background: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 1.75rem;
+  border-radius: 16px;
   border-left: 4px solid #772c87;
 }
 
 .bienvenidaMensaje p {
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.7;
-  margin: 0 0 1rem 0;
+  font-size: 1.05rem;
+  color: #e5e7eb;
+  line-height: 1.75;
+  margin: 0 0 1.25rem 0;
 }
 
 .bienvenidaMensaje p:last-child {
@@ -808,59 +981,97 @@
 .bienvenidaChatbot {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
-  border-radius: 12px;
-  border: 2px solid rgba(76, 175, 80, 0.2);
+  gap: 1.25rem;
+  margin: 2.5rem 0;
+  padding: 1.5rem 1.75rem;
+  background: rgba(76, 175, 80, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
   text-align: left;
 }
 
 .bienvenidaChatbotIcono {
-  font-size: 2rem;
+  font-size: 2.2rem;
   flex-shrink: 0;
 }
 
 .bienvenidaChatbotTexto {
   font-size: 0.95rem;
-  color: #555;
-  line-height: 1.6;
+  color: #d1d5db;
+  line-height: 1.65;
   margin: 0;
 }
 
 .bienvenidaChatbotTexto strong {
-  color: #2e7d32;
-  font-weight: 600;
+  color: #81c784;
+  font-weight: 700;
 }
 
 .bienvenidaBoton {
   margin-top: 2rem;
-  padding: 1.25rem 3rem;
-  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  padding: 1.25rem 3.5rem;
+  background: linear-gradient(135deg, #772c87 0%, #d946ef 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 16px rgba(119, 44, 135, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 20px rgba(119, 44, 135, 0.45);
 }
 
 .bienvenidaBoton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 24px rgba(119, 44, 135, 0.4);
-  background: linear-gradient(135deg, #5a1f6b 0%, #772c87 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(217, 70, 239, 0.55);
+  background: linear-gradient(135deg, #8b349d 0%, #f472b6 100%);
 }
 
 .bienvenidaBoton:active {
   transform: translateY(-1px);
 }
 
+/* Media Queries Responsivas */
 @media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .glassPanel {
+    padding: 1.75rem;
+    border-radius: 20px;
+  }
+
+  .titulo {
+    font-size: 1.75rem;
+  }
+
+  .pasoTitulo {
+    font-size: 1.4rem;
+  }
+
+  .infoGeneral {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .navegacion {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .botonAnterior,
+  .botonSiguiente,
+  .botonFinalizar {
+    width: 100%;
+    padding: 1rem 1.5rem;
+  }
+
   .bienvenidaContent {
-    padding: 2rem 1.5rem;
+    padding: 2.5rem 1.5rem;
   }
 
   .bienvenidaTitulo {
@@ -868,28 +1079,24 @@
   }
 
   .bienvenidaSubtitulo {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    margin-bottom: 1.75rem;
   }
 
   .bienvenidaInfoItem {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
     text-align: center;
+    font-size: 1.05rem;
   }
 
   .bienvenidaBoton {
     width: 100%;
-    padding: 1rem 2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .resumenContainer {
-    padding: 1.5rem;
+    padding: 1.1rem 2rem;
   }
 
   .resumenHeader h1 {
-    font-size: 1.5rem;
+    font-size: 1.65rem;
   }
 
   .resumenInfoGeneral {
@@ -901,4 +1108,3 @@
     margin: 1rem;
   }
 }
-

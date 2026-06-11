@@ -706,28 +706,28 @@ export default function CoordinacionesPanel() {
                 />
               </div>
               {formData.tipo_evento === 'Religioso' && (
-                <>
-                  <div className={styles.formGroup}>
-                    <label>Subtipo de Evento *</label>
-                    <CustomSelect
-                      value={formData.subtipo_evento}
-                      options={['Bat', 'Bar', 'Boda']}
-                      onChange={(val) => setFormData({ ...formData, subtipo_evento: val })}
-                      required
-                      placeholder="Seleccionar subtipo"
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Nombre del Agasajado/a *</label>
-                    <input
-                      type="text"
-                      value={formData.nombre_agasajado}
-                      onChange={(e) => setFormData({ ...formData, nombre_agasajado: e.target.value })}
-                      required={formData.tipo_evento === 'Religioso'}
-                      placeholder="Nombre del agasajado/a"
-                    />
-                  </div>
-                </>
+                <div className={styles.formGroup}>
+                  <label>Subtipo de Evento *</label>
+                  <CustomSelect
+                    value={formData.subtipo_evento}
+                    options={['Bat', 'Bar', 'Boda']}
+                    onChange={(val) => setFormData({ ...formData, subtipo_evento: val })}
+                    required
+                    placeholder="Seleccionar subtipo"
+                  />
+                </div>
+              )}
+              {formData.tipo_evento && formData.tipo_evento !== 'Corporativo' && (
+                <div className={styles.formGroup}>
+                  <label>Nombre del Agasajado/a {formData.tipo_evento === 'XV' || formData.tipo_evento === 'Religioso' ? '*' : ''}</label>
+                  <input
+                    type="text"
+                    value={formData.nombre_agasajado}
+                    onChange={(e) => setFormData({ ...formData, nombre_agasajado: e.target.value })}
+                    required={formData.tipo_evento === 'XV' || formData.tipo_evento === 'Religioso'}
+                    placeholder="Nombre del agasajado/a"
+                  />
+                </div>
               )}
               <div className={styles.formGroup}>
                 <label>Código de Evento</label>
