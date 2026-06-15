@@ -226,7 +226,7 @@ export default function JanosSyncPanel() {
           <h3 className={styles.cardTitle}>
             <span>🔐</span> Credenciales Corporativas (Jano's Portal)
           </h3>
-          <p className={styles.subtitle} style={{ marginTop: '-8px' }}>
+          <p className={styles.cardSubtitle} style={{ marginTop: '-8px' }}>
             Estas credenciales se guardan localmente en este navegador para completar el inicio de sesión del portal automáticamente.
           </p>
 
