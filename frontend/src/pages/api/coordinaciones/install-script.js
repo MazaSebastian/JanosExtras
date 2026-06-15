@@ -11,6 +11,7 @@ export default function handler(req, res) {
 // @author       Antigravity
 // @match        https://tecnica.janosgroup.com/index.php*
 // @match        https://tecnica.janosgroup.com/
+// @match        ${baseUrl}/dashboard/janos-sync*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -23,6 +24,13 @@ export default function handler(req, res) {
 
     const API_URL = "${baseUrl}/api/coordinaciones/sync-bulk";
     const PARENT_ORIGIN = "${baseUrl}";
+
+    // Ping al dashboard si estamos cargados en él
+    const isDashboard = window.location.href.includes('/dashboard/janos-sync');
+    if (isDashboard) {
+        window.postMessage({ type: 'JANOS_SYNC_SCRIPT_INSTALLED_PING' }, window.location.origin);
+        return;
+    }
 
     // Comunicar estado al Dashboard si estamos en un iframe
     const isIframe = window.self !== window.top;

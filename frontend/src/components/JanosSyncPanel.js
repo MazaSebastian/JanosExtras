@@ -30,13 +30,14 @@ export default function JanosSyncPanel() {
   // Escuchar mensajes del UserScript
   useEffect(() => {
     const handleMessage = (event) => {
-      // Ignorar mensajes que no provengan del portal Jano's
-      if (!event.origin.includes('janosgroup.com')) return;
+      // Aceptar del portal Jano's o de nuestra propia página
+      const isTrusted = event.origin.includes('janosgroup.com') || event.origin === window.location.origin;
+      if (!isTrusted) return;
 
       const data = event.data;
       if (!data || typeof data !== 'object') return;
 
-      if (data.type === 'JANOS_SYNC_SCRIPT_LOADED') {
+      if (data.type === 'JANOS_SYNC_SCRIPT_LOADED' || data.type === 'JANOS_SYNC_SCRIPT_INSTALLED_PING') {
         setScriptDetected(true);
       }
 
