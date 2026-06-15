@@ -1,6 +1,8 @@
 .container {
   padding: 1.5rem;
-  color: #fff;
+  color: #334155;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .header {
@@ -8,13 +10,18 @@
 }
 
 .header h2 {
-  color: #fff;
-  font-size: 1.8rem;
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 700;
   margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header p {
-  color: rgba(255, 255, 255, 0.7);
+  color: #64748b;
   font-size: 0.95rem;
 }
 
@@ -23,14 +30,14 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #e2e8f0;
   padding-bottom: 0.5rem;
 }
 
 .tabButton {
   padding: 0.75rem 1.5rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
   border: none;
   border-bottom: 3px solid transparent;
   font-size: 1rem;
@@ -40,22 +47,20 @@
 }
 
 .tabButton:hover {
-  color: #fff;
+  color: #772c87;
 }
 
 .tabButtonActive {
-  color: #fff;
+  color: #772c87;
   border-bottom-color: #9a4da8;
 }
 
 /* Card Wrapper */
 .card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #ffffff;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 2rem;
   margin-bottom: 2rem;
   animation: fadeIn 0.4s ease-out;
@@ -74,11 +79,11 @@
 
 .cardTitle {
   font-size: 1.3rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #f1f5f9;
   padding-bottom: 0.75rem;
-  color: #fff;
+  color: #1e293b;
 }
 
 /* Form Styling */
@@ -97,14 +102,14 @@
 .formGroup label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: #334155;
 }
 
 .selectInput {
   padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
   border-radius: 8px;
   font-size: 0.95rem;
   outline: none;
@@ -112,14 +117,14 @@
 }
 
 .selectInput option {
-  background: #1c142c;
-  color: #fff;
+  background: #ffffff;
+  color: #1e293b;
 }
 
 .selectInput:focus {
   border-color: #9a4da8;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 2px rgba(154, 77, 168, 0.3);
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(154, 77, 168, 0.2);
 }
 
 /* Switch Option */
@@ -127,15 +132,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.25rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s;
 }
 
 .switchOption:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #f1f5f9;
 }
 
 .switchLabel {
@@ -147,11 +152,12 @@
 .switchLabel span:first-child {
   font-weight: 600;
   font-size: 1rem;
+  color: #1e293b;
 }
 
 .switchLabel span:last-child {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
 }
 
 /* Toggle Switch Element */
@@ -175,7 +181,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #cbd5e1;
   transition: .4s;
   border-radius: 34px;
 }
@@ -206,9 +212,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fafc;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #e2e8f0;
   margin-top: 1rem;
 }
 
@@ -217,6 +223,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
+  color: #1e293b;
 }
 
 .statusDot {
@@ -227,19 +234,19 @@
 
 .statusDotActive {
   background-color: #4CAF50;
-  box-shadow: 0 0 8px #4CAF50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
 }
 
 .statusDotInactive {
   background-color: #FF5722;
-  box-shadow: 0 0 8px #FF5722;
+  box-shadow: 0 0 8px rgba(255, 87, 34, 0.4);
 }
 
 .pushButton {
   padding: 0.6rem 1.2rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
@@ -248,7 +255,9 @@
 }
 
 .pushButton:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #94a3b8;
 }
 
 /* Availability Accordions/Weekdays Grid */
@@ -259,16 +268,16 @@
 }
 
 .dayRow {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 1.25rem;
   transition: all 0.3s;
 }
 
 .dayRowActive {
-  background: rgba(154, 77, 168, 0.08);
-  border-color: rgba(154, 77, 168, 0.3);
+  background: rgba(154, 77, 168, 0.03);
+  border-color: rgba(154, 77, 168, 0.2);
 }
 
 .dayHeader {
@@ -295,20 +304,22 @@
   font-size: 1.1rem;
   font-weight: 600;
   text-transform: capitalize;
+  color: #1e293b;
 }
 
 .slotsIndicator {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.1);
+  color: #475569;
+  background: #e2e8f0;
   padding: 0.2rem 0.6rem;
   border-radius: 20px;
+  font-weight: 600;
 }
 
 .dayContent {
   margin-top: 1.25rem;
   padding-top: 1rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  border-top: 1px dashed #e2e8f0;
   animation: slideDown 0.3s ease-out;
 }
 
@@ -335,27 +346,27 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
   transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.8);
+  color: #475569;
   user-select: none;
 }
 
 .slotPill:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 .slotPillActive {
   background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
   border-color: #9a4da8;
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(154, 77, 168, 0.3);
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(154, 77, 168, 0.2);
 }
 
 .quickActions {
@@ -365,7 +376,7 @@
 
 .actionLink {
   font-size: 0.8rem;
-  color: #b070bd;
+  color: #772c87;
   background: none;
   border: none;
   cursor: pointer;
@@ -374,7 +385,7 @@
 }
 
 .actionLink:hover {
-  color: #d194de;
+  color: #9a4da8;
   text-decoration: underline;
 }
 
@@ -385,7 +396,7 @@
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #e2e8f0;
 }
 
 .saveButton {
@@ -398,11 +409,11 @@
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(154, 77, 168, 0.4);
+  box-shadow: 0 4px 15px rgba(154, 77, 168, 0.3);
 }
 
 .saveButton:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(154, 77, 168, 0.6);
+  box-shadow: 0 6px 20px rgba(154, 77, 168, 0.5);
   transform: translateY(-1px);
 }
 
@@ -413,9 +424,9 @@
 
 .cancelButton {
   padding: 0.75rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
@@ -424,15 +435,16 @@
 }
 
 .cancelButton:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 /* Message Styles */
 .successMessage {
   padding: 1rem;
-  background: rgba(76, 175, 80, 0.15);
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  color: #81C784;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-weight: 600;
@@ -443,15 +455,22 @@
 
 .errorMessage {
   padding: 1rem;
-  background: rgba(244, 67, 54, 0.15);
-  border: 1px solid rgba(244, 67, 54, 0.3);
-  color: #E57373;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
