@@ -195,8 +195,10 @@ export const FLUJOS_POR_TIPO = {
       id: 7,
       titulo: 'Canción para Ramo (novia) / Whisky (novio)',
       preguntas: [
-        { id: 'cancion_ramo_novia', label: 'Canción para Ramo (novia)', tipo: 'textarea', requerido: true },
-        { id: 'cancion_whisky_novio', label: 'Canción para Whisky (novio)', tipo: 'textarea', requerido: true },
+        { id: 'arroja_ramo', label: '¿La novia va a arrojar el ramo?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'cancion_ramo_novia', label: 'Canción para Ramo (novia)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'arroja_ramo', valor: 'Sí' } },
+        { id: 'arroja_whisky', label: '¿El novio va a arrojar el whisky?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'cancion_whisky_novio', label: 'Canción para Whisky (novio)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'arroja_whisky', valor: 'Sí' } },
       ],
     },
     {

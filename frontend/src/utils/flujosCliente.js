@@ -293,17 +293,37 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Tradiciones clásicas para animar a los invitados.',
       preguntas: [
         {
+          id: 'arroja_ramo',
+          label: '¿La novia va a arrojar el ramo?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
           id: 'cancion_ramo_novia',
           label: '¿Qué canción quiere la novia para el lanzamiento del ramo?',
           tipo: 'textarea',
           requerido: true,
+          condicional: { pregunta: 'arroja_ramo', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
+        },
+        {
+          id: 'arroja_whisky',
+          label: '¿El novio va a arrojar el whisky?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
         },
         {
           id: 'cancion_whisky_novio',
           label: '¿Qué canción quiere el novio para el juego del whisky?',
           tipo: 'textarea',
           requerido: true,
+          condicional: { pregunta: 'arroja_whisky', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
       ],
