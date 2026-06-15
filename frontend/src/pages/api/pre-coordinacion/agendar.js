@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     ]);
 
     // 4. Enviar notificación push al DJ y administradores
-    const clienteNombre = coordinacion.nombre_cliente || coordinacion.nombre_agasajado || 'Un cliente';
+    const clienteNombre = coordinacion.nombre_agasajado || coordinacion.nombre_cliente || 'Un cliente';
     
     // Formatear la fecha del evento para el mensaje
     let fechaEventoFormateada = '';
