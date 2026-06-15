@@ -18,16 +18,16 @@
   font-size: 2.5rem;
   font-weight: 800;
   margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 100%);
+  background: linear-gradient(135deg, #772c87 0%, #4a1d52 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: white;
+  color: #772c87;
 }
 
 .subtitle {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #4b5563;
   margin: 0;
 }
 
@@ -37,14 +37,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: rgba(254, 243, 199, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: #fffbeb;
+  border: 1px solid #fde68a;
   border-left: 4px solid #fbbf24;
   padding: 1rem 1.25rem;
   border-radius: 12px;
-  color: #fef3c7;
+  color: #92400e;
   font-weight: 500;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .warningText {
@@ -55,7 +55,7 @@
 }
 
 .warningLink {
-  color: #fbbf24;
+  color: #b45309;
   font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
@@ -65,7 +65,7 @@
 }
 
 .warningLink:hover {
-  color: #f59e0b;
+  color: #78350f;
 }
 
 /* Top KPI Stats Grid */
@@ -77,9 +77,8 @@
 }
 
 .statCard {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   padding: 1.25rem;
   border-radius: 16px;
   display: flex;
@@ -91,13 +90,14 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 25px rgba(119, 44, 135, 0.2);
+  background: #fbfbfe;
+  box-shadow: 0 8px 25px rgba(119, 44, 135, 0.15);
 }
 
 .statIcon {
   font-size: 2rem;
-  background: rgba(255, 255, 255, 0.15);
+  background: #f3e8ff;
+  color: #772c87;
   width: 48px;
   height: 48px;
   display: flex;
@@ -114,13 +114,13 @@
 .statNumber {
   font-size: 1.6rem;
   font-weight: 800;
-  color: white;
+  color: #1f2937;
   line-height: 1.2;
 }
 
 .statLabel {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: #4b5563;
   font-weight: 600;
 }
 
