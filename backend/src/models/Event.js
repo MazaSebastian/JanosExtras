@@ -31,9 +31,11 @@ export class Event {
         d.email as dj_email
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.salon_id = $1 
         AND EXTRACT(YEAR FROM e.fecha_evento) = $2
         AND EXTRACT(MONTH FROM e.fecha_evento) = $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento
     `;
     const result = await pool.query(query, [salon_id, year, month]);
@@ -47,9 +49,11 @@ export class Event {
         s.nombre as salon_nombre
       FROM eventos e
       INNER JOIN salones s ON e.salon_id = s.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.dj_id = $1 
         AND EXTRACT(YEAR FROM e.fecha_evento) = $2
         AND EXTRACT(MONTH FROM e.fecha_evento) = $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento
     `;
     const result = await pool.query(query, [dj_id, year, month]);
@@ -60,11 +64,13 @@ export class Event {
     const query = `
       SELECT 
         COUNT(*) as total_eventos,
-        COUNT(DISTINCT salon_id) as total_salones
-      FROM eventos
-      WHERE dj_id = $1 
-        AND EXTRACT(YEAR FROM fecha_evento) = $2
-        AND EXTRACT(MONTH FROM fecha_evento) = $3
+        COUNT(DISTINCT e.salon_id) as total_salones
+      FROM eventos e
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+      WHERE e.dj_id = $1 
+        AND EXTRACT(YEAR FROM e.fecha_evento) = $2
+        AND EXTRACT(MONTH FROM e.fecha_evento) = $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
     `;
     const result = await pool.query(query, [dj_id, year, month]);
     return result.rows[0];
