@@ -35,6 +35,7 @@ export default function PreCoordinacionPage() {
   const [selectedBookingHour, setSelectedBookingHour] = useState(null);
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [bookedVideocall, setBookedVideocall] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(true);
 
   const toggleSuggestions = (id) => {
     setShowSuggestions((prev) => ({
