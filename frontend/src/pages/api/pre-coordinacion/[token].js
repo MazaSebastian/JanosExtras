@@ -26,9 +26,13 @@ export default async function handler(req, res) {
           c.salon_id,
           c.pre_coordinacion_completado_por_cliente,
           c.pre_coordinacion_fecha_completado,
-          s.nombre AS salon_nombre
+          c.dj_responsable_id,
+          s.nombre AS salon_nombre,
+          d.nombre AS dj_nombre,
+          d.disponibilidad_videollamada AS dj_disponibilidad
         FROM coordinaciones c
         LEFT JOIN salones s ON c.salon_id = s.id
+        LEFT JOIN djs d ON c.dj_responsable_id = d.id
         WHERE c.pre_coordinacion_token = $1
           AND c.activo = true
       `;

@@ -1925,6 +1925,232 @@
   }
 }
 
+/* Videocall Booking Styles */
+.bookingContainer {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: left;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  opacity: 0;
+}
+
+.bookingTitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.bookingSubtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.bookingSubtitle strong {
+  color: #b070bd;
+}
+
+.daysSliderWrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.daysGrid {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 1rem 0.25rem;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.daysGrid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.daysGrid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.dayCard {
+  flex: 0 0 100px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dayCard:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.dayCardActive {
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  border-color: #9a4da8;
+  box-shadow: 0 8px 20px rgba(154, 77, 168, 0.4);
+  transform: translateY(-2px);
+}
+
+.dayCardName {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.dayCardNumber {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.dayCardMonth {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.slotsSection {
+  margin-top: 1.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.slotsTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.75rem;
+}
+
+.slotsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.slotButton {
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.slotButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.slotButtonActive {
+  background: #9a4da8;
+  border-color: #b070bd;
+  box-shadow: 0 4px 10px rgba(154, 77, 168, 0.3);
+}
+
+.confirmBookingButton {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #772c87 0%, #9a4da8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(154, 77, 168, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.confirmBookingButton:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(154, 77, 168, 0.6);
+  transform: translateY(-1px);
+}
+
+.confirmBookingButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bookedMessageCard {
+  background: rgba(154, 77, 168, 0.12);
+  border: 1px solid rgba(154, 77, 168, 0.3);
+  border-radius: 16px;
+  padding: 1.75rem;
+  text-align: center;
+  margin-top: 2rem;
+  animation: scaleUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.bookedIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.bookedTitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.bookedText {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.bookedMeetButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.bookedMeetButton:hover {
+  background: #1d4ed8;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+  transform: translateY(-1px);
+}
+
+
 
 
 

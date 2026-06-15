@@ -28,6 +28,14 @@ export default function PreCoordinacionPage() {
   const [mostrarBienvenida, setMostrarBienvenida] = useState(true);
   const [showSuggestions, setShowSuggestions] = useState({});
 
+  // Estados para agendar videollamada
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [availability, setAvailability] = useState(null);
+  const [selectedBookingDate, setSelectedBookingDate] = useState(null);
+  const [selectedBookingHour, setSelectedBookingHour] = useState(null);
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [bookedVideocall, setBookedVideocall] = useState(null);
+
   const toggleSuggestions = (id) => {
     setShowSuggestions((prev) => ({
       ...prev,
@@ -74,6 +82,18 @@ export default function PreCoordinacionPage() {
       const data = response.data;
 
       setCoordinacion(data.coordinacion);
+
+      if (data.coordinacion?.pre_coordinacion_completado_por_cliente) {
+        setPreCoordinacionEnviada(true);
+        setMostrarBienvenida(false);
+        if (data.coordinacion.videollamada_agendada) {
+          setBookedVideocall({
+            fecha: data.coordinacion.videollamada_fecha,
+            meetLink: data.coordinacion.videollamada_meet_link
+          });
+        }
+      }
+
       const respuestas = data.respuestasCliente || {};
 
       console.log('=== CARGANDO PRE-COORDINACIÓN ===');
@@ -154,6 +174,242 @@ export default function PreCoordinacionPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (preCoordinacionEnviada && token) {
+      fetchAvailability();
+    }
+  }, [preCoordinacionEnviada, token]);
+
+  const fetchAvailability = async () => {
+    try {
+      setBookingLoading(true);
+      const res = await preCoordinacionAPI.getDisponibilidad(token);
+      if (res.data.alreadyBooked) {
+        setBookedVideocall({
+          fecha: res.data.fecha,
+          meetLink: res.data.meetLink
+        });
+      } else if (res.data.activo) {
+        setAvailability(res.data);
+      }
+    } catch (err) {
+      console.error('Error al cargar disponibilidad:', err);
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const bookingDateOptions = useMemo(() => {
+    if (!availability?.disponibilidad?.horasDisponibles) return [];
+    
+    const options = [];
+    const today = new Date();
+    const diasSemanaMap = {
+      0: 'domingo',
+      1: 'lunes',
+      2: 'martes',
+      3: 'miercoles',
+      4: 'jueves',
+      5: 'viernes',
+      6: 'sabado'
+    };
+    
+    const diasSemanaNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+    for (let i = 1; i <= 14; i++) {
+      const nextDate = new Date();
+      nextDate.setDate(today.getDate() + i);
+      const dayIndex = nextDate.getDay();
+      const dayKey = diasSemanaMap[dayIndex];
+      
+      const configSlots = availability.disponibilidad.horasDisponibles[dayKey] || [];
+      if (configSlots.length > 0) {
+        const yyyy = nextDate.getFullYear();
+        const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(nextDate.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        
+        options.push({
+          dateStr,
+          dayName: diasSemanaNombres[dayIndex],
+          dayNumber: nextDate.getDate(),
+          monthName: mesesNombres[nextDate.getMonth()],
+          dayKey
+        });
+      }
+    }
+    return options;
+  }, [availability]);
+
+  const bookingHourOptions = useMemo(() => {
+    if (!selectedBookingDate || !availability) return [];
+    const dayKey = selectedBookingDate.dayKey;
+    const configSlots = availability.disponibilidad.horasDisponibles[dayKey] || [];
+    
+    return configSlots.filter(hour => {
+      const targetDateStr = selectedBookingDate.dateStr;
+      const targetTime = new Date(`${targetDateStr}T${hour}:00`);
+      
+      const isBooked = (availability.bookedDates || []).some(bookedISO => {
+        const d = new Date(bookedISO);
+        return Math.abs(d.getTime() - targetTime.getTime()) < 1000 * 60 * 10;
+      });
+      return !isBooked;
+    });
+  }, [selectedBookingDate, availability]);
+
+  const handleConfirmBooking = async () => {
+    if (!selectedBookingDate || !selectedBookingHour) return;
+    setBookingSubmitting(true);
+    try {
+      const res = await preCoordinacionAPI.agendarVideollamada(
+        token,
+        selectedBookingDate.dateStr,
+        selectedBookingHour
+      );
+      if (res.data.success) {
+        const targetDate = new Date(`${selectedBookingDate.dateStr}T${selectedBookingHour}:00`);
+        setBookedVideocall({
+          fecha: targetDate.toISOString(),
+          meetLink: res.data.meetLink
+        });
+      }
+    } catch (err) {
+      console.error('Error al agendar videollamada:', err);
+      alert('Hubo un error al agendar la videollamada. Por favor, intenta de nuevo.');
+    } finally {
+      setBookingSubmitting(false);
+    }
+  };
+
+  const formatBookedDate = (isoString) => {
+    if (!isoString) return '';
+    try {
+      const d = new Date(isoString);
+      const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+      const diaSemana = diasSemana[d.getDay()];
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const anio = d.getFullYear();
+      const hora = String(d.getHours()).padStart(2, '0');
+      const minutos = String(d.getMinutes()).padStart(2, '0');
+      return `${diaSemana} ${dia}/${mes}/${anio} a las ${hora}:${minutos} hs`;
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const renderBookingSection = () => {
+    if (bookingLoading) {
+      return (
+        <div style={{ textAlign: 'center', marginTop: '2rem', color: 'rgba(255,255,255,0.6)' }}>
+          Cargando opciones de videollamada...
+        </div>
+      );
+    }
+
+    if (bookedVideocall) {
+      return (
+        <div className={styles.bookedMessageCard}>
+          <div className={styles.bookedIcon}>📅</div>
+          <h3 className={styles.bookedTitle}>¡Videollamada Agendada!</h3>
+          <p className={styles.bookedText}>
+            Tu reunión está programada para el <strong>{formatBookedDate(bookedVideocall.fecha)}</strong>.
+          </p>
+          {bookedVideocall.meetLink ? (
+            <a 
+              href={bookedVideocall.meetLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={styles.bookedMeetButton}
+            >
+              📹 Unirse a la Videollamada
+            </a>
+          ) : (
+            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>
+              El link de la llamada estará disponible en el panel.
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    if (!availability || !availability.activo) {
+      return null;
+    }
+
+    return (
+      <div className={styles.bookingContainer}>
+        <h3 className={styles.bookingTitle}>📅 ¿Deseas agendar una videollamada con nosotros?</h3>
+        <p className={styles.bookingSubtitle}>
+          Elige un día y horario para tener una reunión virtual de coordinación con tu DJ (<strong>{availability.djNombre}</strong>).
+        </p>
+
+        <div className={styles.daysSliderWrapper}>
+          <div className={styles.daysGrid}>
+            {bookingDateOptions.map((opt) => {
+              const isActive = selectedBookingDate?.dateStr === opt.dateStr;
+              return (
+                <div 
+                  key={opt.dateStr}
+                  className={`${styles.dayCard} ${isActive ? styles.dayCardActive : ''}`}
+                  onClick={() => {
+                    setSelectedBookingDate(opt);
+                    setSelectedBookingHour(null);
+                  }}
+                >
+                  <span className={styles.dayCardName}>{opt.dayName}</span>
+                  <span className={styles.dayCardNumber}>{opt.dayNumber}</span>
+                  <span className={styles.dayCardMonth}>{opt.monthName}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {selectedBookingDate && (
+          <div className={styles.slotsSection}>
+            <h4 className={styles.slotsTitle}>Horarios disponibles para el {selectedBookingDate.dayName} {selectedBookingDate.dayNumber} de {selectedBookingDate.monthName}:</h4>
+            
+            {bookingHourOptions.length > 0 ? (
+              <div className={styles.slotsGrid}>
+                {bookingHourOptions.map((hour) => {
+                  const isActive = selectedBookingHour === hour;
+                  return (
+                    <button 
+                      key={hour}
+                      type="button"
+                      className={`${styles.slotButton} ${isActive ? styles.slotButtonActive : ''}`}
+                      onClick={() => setSelectedBookingHour(hour)}
+                    >
+                      {hour}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '1.5rem' }}>
+                No quedan horarios disponibles para este día. Elige otra fecha.
+              </p>
+            )}
+          </div>
+        )}
+
+        {selectedBookingDate && selectedBookingHour && (
+          <button 
+            type="button" 
+            className={styles.confirmBookingButton}
+            onClick={handleConfirmBooking}
+            disabled={bookingSubmitting}
+          >
+            {bookingSubmitting ? 'Agendando...' : 'Confirmar Videollamada'}
+          </button>
+        )}
+      </div>
+    );
   };
 
   const tipoEventoNormalizado = useMemo(() => {
@@ -737,6 +993,7 @@ export default function PreCoordinacionPage() {
           <div className={styles.mensajeCierreDetalle}>
             <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
           </div>
+          {renderBookingSection()}
         </div>
       </div>
     );

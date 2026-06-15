@@ -35,114 +35,42 @@ export default async function handler(req, res) {
         });
       }
 
-      // Crear cliente de Google Calendar
-      const calendarClient = new GoogleCalendarClient(auth.user.id);
-      await calendarClient.initialize();
-
       // Construir fecha/hora de inicio y fin
-      // Asegurar formato correcto de fecha (YYYY-MM-DD) y hora (HH:MM)
       const fechaFormateada = fecha.includes('T') ? fecha.split('T')[0] : fecha;
       const horaFormateada = hora.includes(':') ? hora : `${hora.substring(0, 2)}:${hora.substring(2)}`;
-      
-      // IMPORTANTE: Crear la fecha en la zona horaria de Argentina (UTC-3)
-      // El problema es que cuando creamos un Date y lo convertimos a ISO, se convierte a UTC
-      // Solución: crear el string ISO directamente con la zona horaria de Argentina (-03:00)
-      
-      // Parsear la hora para obtener horas y minutos
       const [horas, minutos] = horaFormateada.split(':').map(Number);
-      
-      // Crear fecha de inicio en formato ISO con zona horaria de Argentina (UTC-3)
-      // Formato: YYYY-MM-DDTHH:MM:SS-03:00
       const startDateTimeISO = `${fechaFormateada}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00-03:00`;
       
-      // Calcular fecha de fin sumando la duración
-      // Crear un objeto Date temporal para calcular la hora de fin
-      // Usamos la fecha/hora como si fuera en Argentina (sin conversión UTC)
       const tempStartDate = new Date(`${fechaFormateada}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00`);
       const tempEndDate = new Date(tempStartDate.getTime() + duracion * 60 * 1000);
-      
-      // Extraer horas y minutos de la fecha de fin
       const endHours = tempEndDate.getHours();
       const endMinutes = tempEndDate.getMinutes();
-      
-      // Verificar si la duración hace que pase al día siguiente
       const endDate = tempEndDate.getDate() !== tempStartDate.getDate() 
         ? tempEndDate.toISOString().split('T')[0] 
         : fechaFormateada;
-      
-      // Crear fecha de fin en formato ISO con zona horaria de Argentina
       const endDateTimeISO = `${endDate}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00-03:00`;
-
-      console.log('📅 Datos del evento a crear (con zona horaria corregida):', {
-        fecha,
-        hora,
-        fechaFormateada,
-        horaFormateada,
-        horas,
-        minutos,
-        startDateTimeISO,
-        endDateTimeISO,
-        duracion,
-        timeZone: 'America/Argentina/Buenos_Aires (UTC-3)'
-      });
-
-      // Preparar descripción del evento
-      const eventDescription = descripcion || `
-Coordinación: ${coordinacion.titulo}
-Cliente: ${coordinacion.nombre_cliente || 'N/A'}
-Tipo de Evento: ${coordinacion.tipo_evento || 'N/A'}
-Fecha del Evento: ${coordinacion.fecha_evento || 'N/A'}
-${coordinacion.telefono ? `Teléfono: ${coordinacion.telefono}` : ''}
-${coordinacion.descripcion ? `\n\nNotas:\n${coordinacion.descripcion}` : ''}
-      `.trim();
-
-      // Crear evento en Google Calendar
-      const eventSummary = `Coordinación: ${coordinacion.nombre_cliente || coordinacion.titulo} - ${coordinacion.tipo_evento || 'Evento'}`;
-      
-      console.log('🚀 Iniciando creación de evento en Google Calendar:', {
-        summary: eventSummary,
-        coordinacion_id,
-        startDateTime: startDateTimeISO,
-        endDateTime: endDateTimeISO
-      });
-
-      const eventResult = await calendarClient.createEvent({
-        summary: eventSummary,
-        description: eventDescription,
-        startDateTime: startDateTimeISO, // Usar el formato ISO con zona horaria de Argentina
-        endDateTime: endDateTimeISO, // Usar el formato ISO con zona horaria de Argentina
-        timeZone: 'America/Argentina/Buenos_Aires',
-        attendees: coordinacion.telefono ? [] : [], // Podríamos agregar email del cliente si está disponible
-        conferenceData: true // Incluir Google Meet
-      });
-
-      console.log('✅ Evento creado, resultado:', {
-        eventId: eventResult.eventId,
-        htmlLink: eventResult.htmlLink,
-        meetLink: eventResult.meetLink,
-        calendarId: eventResult.calendarId
-      });
 
       // Crear objeto Date para guardar en la base de datos (sin zona horaria, solo fecha/hora)
       const videollamadaFecha = new Date(`${fechaFormateada}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00`);
+      const meetLink = `https://meet.jit.si/JanosExtras-${coordinacion_id}`;
 
       // Actualizar coordinación con información del evento
       await Coordinacion.update(coordinacion_id, {
-        google_calendar_event_id: eventResult.eventId,
+        google_calendar_event_id: null,
         videollamada_agendada: true,
         videollamada_fecha: videollamadaFecha,
         videollamada_duracion: duracion,
-        videollamada_meet_link: eventResult.meetLink
+        videollamada_meet_link: meetLink
       });
 
       return res.status(201).json({
         success: true,
         event: {
-          id: eventResult.eventId,
-          htmlLink: eventResult.htmlLink,
-          meetLink: eventResult.meetLink,
-          start: eventResult.start,
-          end: eventResult.end
+          id: null,
+          htmlLink: null,
+          meetLink: meetLink,
+          start: startDateTimeISO,
+          end: endDateTimeISO
         }
       });
     } catch (error) {

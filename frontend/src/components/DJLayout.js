@@ -43,6 +43,7 @@ export default function DJLayout({ user, children }) {
     { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋', pageTitle: 'Coordinaciones' },
     { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅', pageTitle: 'Fechas Libres' },
     { path: '/dashboard/check-in-tecnico', label: 'Check-In Técnico', icon: '🔧', pageTitle: 'Check-In Técnico' },
+    { path: '/dashboard/ajustes', label: 'Ajustes', icon: '⚙️', pageTitle: 'Ajustes' },
     { path: null, label: 'Adicionales de Técnica', icon: '⚡', inDevelopment: true },
   ];
 

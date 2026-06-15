@@ -21,7 +21,14 @@ export class DJ {
   }
 
   static async findById(id) {
-    const query = 'SELECT id, nombre, salon_id, rol, color_hex, fecha_registro FROM djs WHERE id = $1';
+    const query = `
+      SELECT 
+        id, nombre, salon_id, rol, color_hex, fecha_registro,
+        notific_recordatorio_horas, notific_reuniones_dia, 
+        notific_precoordinacion_completada, disponibilidad_videollamada 
+      FROM djs 
+      WHERE id = $1
+    `;
     const result = await pool.query(query, [id]);
     return result.rows[0];
   }

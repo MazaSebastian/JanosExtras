@@ -130,7 +130,7 @@ export async function enviarNotificacionPrecoordinacion(coordinacionId) {
     }
 
     const bodyText = fechaFormateada 
-      ? `${agasajadoNombre} ha completado la pre-coordinación del evento ${tipoEvento} y ${fechaFormateada}!`
+      ? `${agasajadoNombre} ha completado la pre-coordinación del evento ${tipoEvento} del día ${fechaFormateada}!`
       : `${agasajadoNombre} ha completado la pre-coordinación del evento ${tipoEvento}!`;
 
     const payload = {

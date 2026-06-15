@@ -48,6 +48,7 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data, { baseURL: '/api' }),
   login: (data) => api.post('/auth/login', data),
   getProfile: () => api.get('/auth/profile'),
+  updateProfile: (data) => api.patch('/auth/profile', data),
 };
 
 // Salones API
@@ -159,6 +160,20 @@ export const preCoordinacionAPI = {
       headers: {},
     });
     return publicApi.post(`/pre-coordinacion/${token}`, { respuestas, finalizado });
+  },
+  getDisponibilidad: (token) => {
+    const publicApi = api.create({
+      baseURL: api.defaults.baseURL,
+      headers: {},
+    });
+    return publicApi.get(`/pre-coordinacion/disponibilidad?token=${token}`);
+  },
+  agendarVideollamada: (token, fecha, hora) => {
+    const publicApi = api.create({
+      baseURL: api.defaults.baseURL,
+      headers: {},
+    });
+    return publicApi.post(`/pre-coordinacion/agendar`, { token, fecha, hora });
   },
 };
 
