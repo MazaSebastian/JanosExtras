@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     const djQuery = `
       SELECT nombre, disponibilidad_videollamada
       FROM djs
-      WHERE id = $1 AND activo = true
+      WHERE id = $1
     `;
     const djRes = await pool.query(djQuery, [djId]);
     if (djRes.rows.length === 0) {
