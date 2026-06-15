@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { clearAuth } from '@/utils/auth';
 import { salonesAPI } from '@/services/api';
+import { suscribirNotificacionesPush } from '@/utils/pushHelper';
 import styles from '@/styles/DJLayout.module.css';
 
 export default function DJLayout({ user, children }) {
@@ -18,6 +19,12 @@ export default function DJLayout({ user, children }) {
           if (res.data?.nombre) setSalonNombre(res.data.nombre);
         })
         .catch(err => console.warn('Error cargando salón'));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      suscribirNotificacionesPush();
     }
   }, [user]);
 

@@ -15,6 +15,20 @@ import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
 import WhatsAppTemplateModal from '@/components/WhatsAppTemplateModal';
 import { exportarCoordinacionPDF } from '@/utils/pdfExport';
 
+// Helper to adapt URL for local development/testing
+const resolvePreCoordinacionUrl = (url) => {
+  if (!url) return '';
+  if (typeof window !== 'undefined') {
+    if (url.includes('janosdjs.com')) {
+      return url.replace(/https?:\/\/janosdjs\.com/, window.location.origin);
+    }
+    if (url.includes('localhost') && !window.location.origin.includes('localhost')) {
+      return url.replace(/https?:\/\/localhost:\d+/, window.location.origin);
+    }
+  }
+  return url;
+};
+
 export default function CoordinacionesPanel() {
   const router = useRouter();
   const [user, setUser] = useState(null);
@@ -60,6 +74,15 @@ export default function CoordinacionesPanel() {
   const [whatsappMenuOpen, setWhatsappMenuOpen] = useState(null);
   const [showWhatsAppTemplates, setShowWhatsAppTemplates] = useState(false);
   const [selectedCoordForWhatsApp, setSelectedCoordForWhatsApp] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage('');
+    }, 3500);
+  };
 
   // El componente GoogleCalendarConnect manejará la verificación del estado
   // No necesitamos verificarlo aquí, solo mostramos el componente si hay user
@@ -309,15 +332,20 @@ export default function CoordinacionesPanel() {
     }
   }, [salones.length, loadSalones]);
 
-  const handleDelete = async (id) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta coordinación?')) {
-      return;
-    }
+  const handleDelete = (id) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await coordinacionesAPI.delete(id);
+      await coordinacionesAPI.delete(deleteConfirmId);
       loadCoordinaciones();
+      showToast('Coordinación eliminada correctamente.');
     } catch (err) {
       setError(err.response?.data?.error || 'Error al eliminar la coordinación.');
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -364,7 +392,7 @@ export default function CoordinacionesPanel() {
       const response = await coordinacionesAPI.generarPreCoordinacion(id);
 
       if (response.data.success) {
-        setPreCoordinacionUrl(response.data.url);
+        setPreCoordinacionUrl(resolvePreCoordinacionUrl(response.data.url));
         setShowPreCoordinacionModal(true);
 
         // Recargar coordinaciones para actualizar el estado
@@ -379,7 +407,7 @@ export default function CoordinacionesPanel() {
 
   const copiarUrl = () => {
     navigator.clipboard.writeText(preCoordinacionUrl).then(() => {
-      alert('¡URL copiada al portapapeles! Ahora puedes compartirla con tu cliente.');
+      showToast('¡URL copiada al portapapeles! Ahora puedes compartirla con tu cliente.');
     }).catch(() => {
       // Fallback para navegadores que no soportan clipboard API
       const textarea = document.createElement('textarea');
@@ -388,7 +416,7 @@ export default function CoordinacionesPanel() {
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      alert('¡URL copiada al portapapeles!');
+      showToast('¡URL copiada al portapapeles!');
     });
   };
 
@@ -880,7 +908,10 @@ export default function CoordinacionesPanel() {
         <div className={styles.list}>
           {coordinaciones.map((item) => {
             return (
-              <div key={item.id} className={styles.card}>
+              <div
+                key={item.id}
+                className={`${styles.card} ${item.pre_coordinacion_completado_por_cliente ? styles.glowPreCoordinacion : ''}`}
+              >
                 <div className={styles.cardHeader}>
                   <div className={styles.cardHeaderLeft}>
                     <div className={styles.cardTitleRow}>
@@ -1009,7 +1040,7 @@ export default function CoordinacionesPanel() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 if (item.pre_coordinacion_url) {
-                                  setPreCoordinacionUrl(item.pre_coordinacion_url);
+                                  setPreCoordinacionUrl(resolvePreCoordinacionUrl(item.pre_coordinacion_url));
                                   setShowPreCoordinacionModal(true);
                                 } else {
                                   handleGenerarPreCoordinacion(item.id);
@@ -1020,7 +1051,7 @@ export default function CoordinacionesPanel() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 if (item.pre_coordinacion_url) {
-                                  setPreCoordinacionUrl(item.pre_coordinacion_url);
+                                  setPreCoordinacionUrl(resolvePreCoordinacionUrl(item.pre_coordinacion_url));
                                   setShowPreCoordinacionModal(true);
                                 } else {
                                   handleGenerarPreCoordinacion(item.id);
@@ -1258,6 +1289,37 @@ export default function CoordinacionesPanel() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Eliminación (Flotante Central) */}
+      {deleteConfirmId && (
+        <div className={styles.confirmOverlay} onClick={() => setDeleteConfirmId(null)}>
+          <div className={styles.confirmContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmIconContainer}>
+              <span className={styles.confirmIcon}>⚠️</span>
+            </div>
+            <h3 className={styles.confirmTitle}>¿Estás seguro?</h3>
+            <p className={styles.confirmText}>
+              ¿Realmente deseas eliminar esta coordinación? Esta acción no se puede deshacer.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.confirmCancelButton}
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.confirmDeleteButton}
+                onClick={handleConfirmDelete}
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1982,6 +2044,12 @@ export default function CoordinacionesPanel() {
             setSelectedCoordForWhatsApp(null);
           }}
         />
+      )}
+      {toastMessage && (
+        <div className={styles.toast}>
+          <span>✨</span>
+          <span>{toastMessage}</span>
+        </div>
       )}
 
     </section>

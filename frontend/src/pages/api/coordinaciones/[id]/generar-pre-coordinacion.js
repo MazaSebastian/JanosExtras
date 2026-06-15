@@ -38,11 +38,14 @@ export default async function handler(req, res) {
     const shortToken = (fullUUID.substring(0, 8) + timestamp.substring(timestamp.length - 4)).toLowerCase();
     
     // Generar URL comercial (siempre usar el dominio principal en producción)
-    // Prioridad: NEXT_PUBLIC_APP_URL (si contiene janosdjs.com) > janosdjs.com > VERCEL_URL (solo en desarrollo)
     let baseUrl = 'https://janosdjs.com';
     
-    // Si hay una variable de entorno con el dominio comercial, usarla
-    if (process.env.NEXT_PUBLIC_APP_URL) {
+    if (process.env.NODE_ENV === 'development') {
+      // En desarrollo local, usar el host de la petición o localhost:3000 por defecto
+      const host = req.headers.host || 'localhost:3000';
+      const protocol = host.includes('localhost') ? 'http' : (req.headers['x-forwarded-proto'] || 'http');
+      baseUrl = `${protocol}://${host}`;
+    } else if (process.env.NEXT_PUBLIC_APP_URL) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL.startsWith('http') 
         ? process.env.NEXT_PUBLIC_APP_URL 
         : `https://${process.env.NEXT_PUBLIC_APP_URL}`;

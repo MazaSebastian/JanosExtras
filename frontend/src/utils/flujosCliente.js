@@ -4,70 +4,9 @@
 export const CLIENTE_FLUJOS_POR_TIPO = {
   XV: [
     {
-      id: 101,
-      titulo: '🎭 Shows',
-      descripcion: 'Shows adicionales contratados para el evento',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: '📺 Pantalla y Videos',
-      descripcion: 'Proyección de videos durante el evento',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: '⚙️ Complementos Técnicos',
-      descripcion: 'Servicios técnicos adicionales',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
-
-    {
-      id: 2,
-      titulo: '🎵 Música de recepción y/o momentos que NO son tandas de baile',
-      descripcion: 'Ayúdanos a elegir la música perfecta para tu evento',
-      preguntas: [
-        {
-          id: 'musica_recepcion',
-          label: '¿Qué tipo de música te gustaría durante la recepción?',
-          tipo: 'buttons',
-          requerido: true,
-          opciones: [
-            'Música Chill',
-            'Acústicos',
-            'Bossa N Nova',
-            'Rock Nacional',
-            'Pop Funcional',
-            'Deep House',
-            'Música Comercial',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-        {
-          id: 'artistas_favoritos',
-          label: '¿Tienes artistas o canciones favoritas que no pueden faltar? (opcional)',
-          tipo: 'textarea',
-          requerido: false,
-          placeholder: 'Menciona los artistas o canciones que no pueden faltar en tu evento'
-        },
-      ],
-    },
-
-    {
       id: 4,
       titulo: '🚪 Ingreso al Salón',
-      descripcion: 'Esta es la cancion que usara [nombre de agasajada/o] para realizar su ingreso oficial al salón',
+      descripcion: 'Esta es la canción que sonará cuando hagas tu ingreso oficial al salón. ¡Elegí un tema que te represente y genere gran impacto!',
       preguntas: [
         {
           id: 'realiza_ingreso_salon',
@@ -80,11 +19,14 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         },
         {
           id: 'cancion_ingreso_salon',
-          label: 'Canción de ingreso:',
+          label: '¿Con qué canción realizarás tu ingreso al salón?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realiza_ingreso_salon', valor: 'Sí' },
-          placeholder: 'Nombre de la canción y artista'
+          placeholder: 'Nombre de la canción y artista',
+          sugerencias: [
+            { titulo: "Ingresos XV - Jano's Costanera", url: 'https://open.spotify.com/playlist/695pH6i5BOAhE1mF9yje2r?si=d1CXdpSsTT2EZSkHjmqrCg' }
+          ]
         },
       ],
     },
@@ -106,9 +48,15 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_vals',
           label: '¿Qué canción te gustaría para el vals? (puedes mencionar más de una si quieres)',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'baila_vals', valor: 'Sí' },
-          placeholder: 'Nombre de la canción y artista'
+          placeholder: 'Nombre de la canción y artista',
+          sugerencias: [
+            { titulo: "Vals XV (Inglés) - Jano's Costanera", url: 'https://open.spotify.com/playlist/0mznIiPlc7F6kpafg2Nc7C?si=qSOAylsqSiuygdeJ2m4U9Q' },
+            { titulo: "Vals XV (Español) - Jano's Costanera", url: 'https://open.spotify.com/playlist/2YN5WoQ0S1gTtxmbF2gTcx?si=chqRPdPATBWMFJpC0beuAQ' },
+            { titulo: "Vals XV (Disney) - Jano's Costanera", url: 'https://open.spotify.com/playlist/05JOvsVPL93X3RGLpRgZX0?si=71GWp2aDQwG4PqroHbUaKw' },
+            { titulo: "Vals XV (Instrumentales) - Jano's Costanera", url: 'https://open.spotify.com/playlist/2hrnI3wKn3dEBuJJGjYOnd?si=8e2eNNXsTtm-Z_WooNf7NQ' }
+          ]
         },
       ],
     },
@@ -130,7 +78,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'velas',
           label: 'Velas',
           tipo: 'velas',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' },
           ayuda: 'Agrega cada vela que quieras incluir. Para cada una, indica a quién está dedicada y qué canción quieres'
         },
@@ -154,9 +102,9 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'descripcion_coreografia',
           label: 'Cuéntanos sobre tu coreografía o presentación',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realiza_coreografia', valor: 'Sí' },
-          placeholder: 'Describe qué harás, con quién, y si necesitas alguna canción específica'
+          placeholder: 'Describe qué harás, con quién, and si necesitas alguna canción específica'
         },
       ],
     },
@@ -170,7 +118,10 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           label: '¿Qué canción te gustaría para el brindis?',
           tipo: 'textarea',
           requerido: true,
-          placeholder: 'Nombre de la canción y artista'
+          placeholder: 'Nombre de la canción y artista',
+          sugerencias: [
+            { titulo: "Sugerencias Brindis - Jano's Costanera", url: 'https://open.spotify.com/playlist/50DNFEtKXdBoaWHTCLMfwh?si=dLP9tUK0RF2fSZPS83blsg' }
+          ]
         },
       ],
     },
@@ -192,22 +143,25 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_carioca',
           label: '¿Qué canción te gustaría para tu ingreso a la carioca?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realiza_ingreso_carioca', valor: 'Sí' },
-          placeholder: 'Nombre de la canción y artista'
+          placeholder: 'Nombre de la canción y artista',
+          sugerencias: [
+            { titulo: "Ingresos Carioca - Jano's Costanera", url: 'https://open.spotify.com/playlist/5UYBsUbn8ZANdDWqWT0bfe?si=AneXW3pIRs6G9sktvO6aFg' }
+          ]
         },
       ],
     },
     {
       id: 99,
-      titulo: '🎧 Playlist de Referencia',
-      descripcion: 'Compartinos la música que no puede faltar en tu evento',
+      titulo: '🎧 Link de playlist',
+      descripcion: 'Te invitamos a armar y compartirnos el link de tu playlist de Spotify, Apple Music o YouTube con las canciones que más te gusten. Tené en cuenta que esta playlist servirá como referencia de tus gustos musicales; las canciones no deben seguir ningún orden en particular, simplemente compartinos los temas que te encantan para que nosotros (DJs) tengamos un espectro mucho más amplio de tus gustos y podamos hacer brillar tu noche.',
       preguntas: [
         {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],
@@ -220,7 +174,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Shows adicionales contratados para el evento',
       preguntas: [
         { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
       ]
     },
     {
@@ -229,7 +183,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Proyección de videos durante el evento',
       preguntas: [
         { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
       ]
     },
     {
@@ -238,7 +192,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Servicios técnicos adicionales',
       preguntas: [
         { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
       ]
     },
     {
@@ -247,7 +201,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Shows adicionales contratados para el evento',
       preguntas: [
         { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
       ]
     },
     {
@@ -256,7 +210,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Proyección de videos durante el evento',
       preguntas: [
         { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
       ]
     },
     {
@@ -265,7 +219,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Servicios técnicos adicionales',
       preguntas: [
         { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
       ]
     },
     {
@@ -344,7 +298,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_novio',
           label: '¿Qué canción quiere el novio para su ingreso?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realizan_ceremonia_salon', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -352,7 +306,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_novia',
           label: '¿Qué canción quiere la novia para su ingreso?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realizan_ceremonia_salon', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -376,7 +330,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_salon',
           label: '¿Qué canción les gustaría para el ingreso al salón?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realizan_ingreso_salon', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -400,7 +354,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_vals',
           label: '¿Qué canción les gustaría para el vals?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'bailan_vals', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -424,7 +378,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'detalles_coreografia',
           label: 'Cuéntennos sobre su coreografía o presentación',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realizan_coreografia', valor: 'Sí' },
           placeholder: 'Describe qué harán y si necesitan alguna canción específica'
         },
@@ -469,7 +423,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_carioca',
           label: '¿Qué canción les gustaría para el ingreso a la carioca?',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realizan_ingreso_carioca', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -484,7 +438,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],
@@ -799,7 +753,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Shows adicionales contratados para el evento',
       preguntas: [
         { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
       ]
     },
     {
@@ -808,7 +762,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Proyección de videos durante el evento',
       preguntas: [
         { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
       ]
     },
     {
@@ -817,7 +771,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Servicios técnicos adicionales',
       preguntas: [
         { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
       ]
     },
     {
@@ -826,7 +780,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Shows adicionales contratados para el evento',
       preguntas: [
         { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
+        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
       ]
     },
     {
@@ -835,7 +789,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Proyección de videos durante el evento',
       preguntas: [
         { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
+        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
       ]
     },
     {
@@ -844,7 +798,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       descripcion: 'Servicios técnicos adicionales',
       preguntas: [
         { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
+        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
       ]
     },
     {
@@ -914,7 +868,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_salon',
           label: 'Canción de ingreso:',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realiza_ingreso_salon', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -952,7 +906,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'descripcion_coreografia',
           label: 'Cuéntanos sobre tu coreografía o presentación',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realiza_coreografia', valor: 'Sí' },
           placeholder: 'Describe qué harás y si necesitas alguna canción específica'
         },
@@ -976,7 +930,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'cancion_ingreso_carioca',
           label: 'Canción para ingreso al carioca:',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           condicional: { pregunta: 'realiza_ingreso_carioca', valor: 'Sí' },
           placeholder: 'Nombre de la canción y artista'
         },
@@ -991,7 +945,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           id: 'link_playlist',
           label: 'Pegá el link de tu playlist acá:',
           tipo: 'textarea',
-          requerido: false,
+          requerido: true,
           placeholder: 'https://open.spotify.com/playlist/...'
         },
       ],

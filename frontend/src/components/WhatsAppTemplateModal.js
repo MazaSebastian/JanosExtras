@@ -5,6 +5,20 @@ import { coordinacionesAPI } from '@/services/api';
 import { FLUJOS_POR_TIPO } from './CoordinacionFlujo';
 import styles from '@/styles/WhatsAppTemplateModal.module.css';
 
+// Helper to adapt URL for local development/testing
+const resolvePreCoordinacionUrl = (url) => {
+  if (!url) return '';
+  if (typeof window !== 'undefined') {
+    if (url.includes('janosdjs.com')) {
+      return url.replace(/https?:\/\/janosdjs\.com/, window.location.origin);
+    }
+    if (url.includes('localhost') && !window.location.origin.includes('localhost')) {
+      return url.replace(/https?:\/\/localhost:\d+/, window.location.origin);
+    }
+  }
+  return url;
+};
+
 /**
  * WhatsAppTemplateModal — Selector de plantillas de mensaje pre-armadas.
  * Auto-genera el link de pre-coordinación si no existe al momento de enviar.
@@ -12,7 +26,7 @@ import styles from '@/styles/WhatsAppTemplateModal.module.css';
 export default function WhatsAppTemplateModal({ coordinacion, event, onClose }) {
     const [selectedId, setSelectedId] = useState(null);
     const [generating, setGenerating] = useState(false);
-    const [livePreCoordUrl, setLivePreCoordUrl] = useState(coordinacion?.pre_coordinacion_url || null);
+    const [livePreCoordUrl, setLivePreCoordUrl] = useState(resolvePreCoordinacionUrl(coordinacion?.pre_coordinacion_url) || null);
     const [missingItems, setMissingItems] = useState([]);
 
     useEffect(() => {
@@ -103,7 +117,7 @@ export default function WhatsAppTemplateModal({ coordinacion, event, onClose }) 
         try {
             setGenerating(true);
             const res = await coordinacionesAPI.generarPreCoordinacion(coordinacion.id);
-            const url = res.data?.url || null;
+            const url = resolvePreCoordinacionUrl(res.data?.url || null);
             if (url) {
                 setLivePreCoordUrl(url);
             }

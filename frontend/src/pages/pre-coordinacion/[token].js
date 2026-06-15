@@ -18,11 +18,47 @@ export default function PreCoordinacionPage() {
   const [coordinacion, setCoordinacion] = useState(null);
   const [respuestasCliente, setRespuestasCliente] = useState({});
   const [pasoActual, setPasoActual] = useState(1);
+  const [direction, setDirection] = useState('forward');
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [preCoordinacionEnviada, setPreCoordinacionEnviada] = useState(false);
   const [showVelaModal, setShowVelaModal] = useState(false);
+  const [isVelaModalClosing, setIsVelaModalClosing] = useState(false);
+  const [velasEliminando, setVelasEliminando] = useState([]);
   const [velaForm, setVelaForm] = useState({ nombre: '', familiar: '', cancion: '' });
   const [mostrarBienvenida, setMostrarBienvenida] = useState(true);
+  const [showSuggestions, setShowSuggestions] = useState({});
+
+  const toggleSuggestions = (id) => {
+    setShowSuggestions((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const dateParts = useMemo(() => {
+    if (!coordinacion?.fecha_evento) return null;
+    let fechaStr = coordinacion.fecha_evento;
+    if (typeof fechaStr === 'string') {
+      fechaStr = fechaStr.split('T')[0].split(' ')[0];
+    } else if (fechaStr instanceof Date) {
+      const year = fechaStr.getUTCFullYear();
+      const month = String(fechaStr.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(fechaStr.getUTCDate()).padStart(2, '0');
+      fechaStr = `${year}-${month}-${day}`;
+    }
+    if (!fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) return null;
+    const [year, month, day] = fechaStr.split('-');
+    const monthNames = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return {
+      day: parseInt(day, 10),
+      month: monthNames[parseInt(month, 10) - 1],
+      year: parseInt(year, 10)
+    };
+  }, [coordinacion?.fecha_evento]);
+
 
   useEffect(() => {
     if (token) {
@@ -106,7 +142,7 @@ export default function PreCoordinacionPage() {
             return respuestas[p.id] !== undefined && respuestas[p.id] !== null && respuestas[p.id] !== '';
           });
           if (!todasRespondidas) {
-            primerPasoIncompleto = paso.id;
+            primerPasoIncompleto = i + 1;
             break;
           }
         }
@@ -132,6 +168,7 @@ export default function PreCoordinacionPage() {
   const totalPasos = pasos.length;
 
   const handleInputChange = (preguntaId, value) => {
+    setError('');
     setRespuestasCliente({
       ...respuestasCliente,
       [preguntaId]: value,
@@ -139,6 +176,7 @@ export default function PreCoordinacionPage() {
   };
 
   const handleButtonToggle = async (preguntaId, opcion, permiteOtro, multiple = true) => {
+    setError('');
     const valorActual = respuestasCliente[preguntaId] || [];
     const esArray = Array.isArray(valorActual);
     const valores = esArray ? valorActual : (valorActual ? [valorActual] : []);
@@ -238,6 +276,7 @@ export default function PreCoordinacionPage() {
   };
 
   const handleOtroInputChange = (preguntaId, valor) => {
+    setError('');
     const valorActual = respuestasCliente[preguntaId] || [];
     const valores = Array.isArray(valorActual) ? valorActual : (valorActual ? [valorActual] : []);
     const otroIndex = valores.findIndex(v => typeof v === 'object' && v.tipo === 'otro');
@@ -272,8 +311,18 @@ export default function PreCoordinacionPage() {
     return otro ? otro.valor : '';
   };
 
+  const cerrarVelaModal = () => {
+    setIsVelaModalClosing(true);
+    setTimeout(() => {
+      setShowVelaModal(false);
+      setIsVelaModalClosing(false);
+      setVelaForm({ nombre: '', familiar: '', cancion: '' });
+    }, 280);
+  };
+
   const handleAgregarVela = () => {
     setVelaForm({ nombre: '', familiar: '', cancion: '' });
+    setIsVelaModalClosing(false);
     setShowVelaModal(true);
   };
 
@@ -296,17 +345,26 @@ export default function PreCoordinacionPage() {
       velas: [...velasActuales, nuevaVela],
     });
 
-    setShowVelaModal(false);
-    setVelaForm({ nombre: '', familiar: '', cancion: '' });
-    setError('');
+    setIsVelaModalClosing(true);
+    setTimeout(() => {
+      setShowVelaModal(false);
+      setIsVelaModalClosing(false);
+      setVelaForm({ nombre: '', familiar: '', cancion: '' });
+      setError('');
+    }, 280);
   };
 
   const handleEliminarVela = (id) => {
-    const velasActuales = respuestasCliente.velas || [];
-    setRespuestasCliente({
-      ...respuestasCliente,
-      velas: velasActuales.filter(v => v.id !== id),
-    });
+    setError('');
+    setVelasEliminando((prev) => [...prev, id]);
+    setTimeout(() => {
+      const velasActuales = respuestasCliente.velas || [];
+      setRespuestasCliente({
+        ...respuestasCliente,
+        velas: velasActuales.filter(v => v.id !== id),
+      });
+      setVelasEliminando((prev) => prev.filter(item => item !== id));
+    }, 320);
   };
 
   const handleSiguiente = async () => {
@@ -357,39 +415,118 @@ export default function PreCoordinacionPage() {
 
     setError('');
 
-    // Guardar progreso automáticamente
-    await guardarProgreso();
+    setGuardando(true);
+    try {
+      // Guardar progreso automáticamente
+      await guardarProgreso();
 
-    if (pasoActual < totalPasos) {
-      setPasoActual(pasoActual + 1);
-      // Scroll al inicio
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      // Último paso - mostrar resumen para confirmar
-      setMostrarConfirmacion(true);
+      if (pasoActual < totalPasos) {
+        setDirection('forward');
+        setPasoActual(pasoActual + 1);
+        // Scroll al inicio
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // Último paso - mostrar resumen para confirmar
+        setMostrarConfirmacion(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGuardando(false);
     }
   };
 
   const handleAnterior = () => {
     if (pasoActual > 1) {
+      setDirection('backward');
       setPasoActual(pasoActual - 1);
       setError('');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const guardarProgreso = async () => {
+  const guardarProgreso = async (respuestas = respuestasCliente) => {
     try {
       console.log('=== GUARDANDO PROGRESO ===');
-      console.log('RespuestasCliente en guardarProgreso:', respuestasCliente);
-      console.log('Total de respuestas a guardar:', Object.keys(respuestasCliente).length);
-      console.log('Keys a guardar:', Object.keys(respuestasCliente));
-      console.log('Valor completo:', JSON.stringify(respuestasCliente, null, 2));
-      await preCoordinacionAPI.guardarRespuestas(token, respuestasCliente);
+      console.log('RespuestasCliente en guardarProgreso:', respuestas);
+      console.log('Total de respuestas a guardar:', Object.keys(respuestas).length);
+      console.log('Keys a guardar:', Object.keys(respuestas));
+      console.log('Valor completo:', JSON.stringify(respuestas, null, 2));
+      await preCoordinacionAPI.guardarRespuestas(token, respuestas);
       console.log('Progreso guardado exitosamente');
     } catch (err) {
       console.error('Error al guardar progreso:', err);
       // No mostrar error al usuario para no interrumpir el flujo
+    }
+  };
+
+  const handleDejarPendiente = async () => {
+    setError('');
+    
+    const nuevasRespuestas = { ...respuestasCliente };
+    
+    paso.preguntas.forEach(pregunta => {
+      // Verificar si la condición se cumple o si no es condicional
+      let condMet = true;
+      if (pregunta.condicional) {
+        const valorCondicional = respuestasCliente[pregunta.condicional.pregunta];
+        const valorEsperado = pregunta.condicional.valor;
+        if (Array.isArray(valorCondicional)) {
+          condMet = valorCondicional.includes(valorEsperado);
+        } else if (typeof valorCondicional === 'string') {
+          condMet = valorCondicional === valorEsperado;
+        } else {
+          condMet = false;
+        }
+      }
+
+      if (condMet) {
+        const valor = respuestasCliente[pregunta.id];
+        let esVacio = false;
+        if (valor === undefined || valor === null) {
+          esVacio = true;
+        } else if (pregunta.tipo === 'velas') {
+          esVacio = !Array.isArray(valor) || valor.length === 0;
+        } else if (pregunta.tipo === 'buttons') {
+          if (Array.isArray(valor)) {
+            esVacio = valor.length === 0;
+          } else {
+            esVacio = valor === '';
+          }
+        } else {
+          esVacio = typeof valor === 'string' ? valor.trim() === '' : false;
+        }
+
+        if (esVacio) {
+          if (pregunta.tipo === 'buttons') {
+            nuevasRespuestas[pregunta.id] = pregunta.multiple !== false ? ['Pendiente'] : 'Pendiente';
+          } else if (pregunta.tipo === 'velas') {
+            nuevasRespuestas[pregunta.id] = [{ id: 'pendiente', nombre: 'Pendiente', familiar: 'Pendiente', cancion: 'Pendiente' }];
+          } else {
+            nuevasRespuestas[pregunta.id] = 'Pendiente';
+          }
+        }
+      }
+    });
+
+    setRespuestasCliente(nuevasRespuestas);
+    
+    setGuardando(true);
+    try {
+      // Guardar el progreso pasando el nuevo objeto de respuestas
+      await guardarProgreso(nuevasRespuestas);
+
+      if (pasoActual < totalPasos) {
+        setDirection('forward');
+        setPasoActual(pasoActual + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setMostrarConfirmacion(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -573,7 +710,23 @@ export default function PreCoordinacionPage() {
     return (
       <div className={styles.container}>
         <div className={styles.mensajeCierreContainer}>
-          <div className={styles.mensajeCierreIcono}>✅</div>
+          <div className={styles.successAnimationWrapper}>
+            <div className={styles.successCircleGlow}></div>
+            <svg className={styles.successCheckmark} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+              <circle className={styles.successCheckmarkCircle} cx="26" cy="26" r="25" fill="none" />
+              <path className={styles.successCheckmarkCheck} fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+            </svg>
+            <div className={styles.sparklesContainer}>
+              <div className={`${styles.sparkle} ${styles.sparkle1}`}>✨</div>
+              <div className={`${styles.sparkle} ${styles.sparkle2}`}>⭐</div>
+              <div className={`${styles.sparkle} ${styles.sparkle3}`}>✨</div>
+              <div className={`${styles.sparkle} ${styles.sparkle4}`}>⭐</div>
+              <div className={`${styles.sparkle} ${styles.sparkle5}`}>✨</div>
+              <div className={`${styles.sparkle} ${styles.sparkle6}`}>⭐</div>
+              <div className={`${styles.sparkle} ${styles.sparkle7}`}>✨</div>
+              <div className={`${styles.sparkle} ${styles.sparkle8}`}>⭐</div>
+            </div>
+          </div>
           <h1 className={styles.mensajeCierreTitulo}>¡Pre-Coordinación Finalizada!</h1>
           <p className={styles.mensajeCierreTexto}>
             Hemos recibido tu información y la hemos enviado a nuestro DJ.
@@ -605,28 +758,31 @@ export default function PreCoordinacionPage() {
               Estamos muy contentos de acompañarte en la organización de tu evento
             </p>
 
-            <div className={styles.bienvenidaInfo}>
-              <div className={styles.bienvenidaInfoItem}>
-                <span className={styles.bienvenidaInfoLabel}>🎉 Tipo de Evento:</span>
-                <span className={styles.bienvenidaInfoValor}>{coordinacion.tipo_evento}</span>
-              </div>
-              {coordinacion.fecha_evento && (
-                <div className={styles.bienvenidaInfoItem}>
-                  <span className={styles.bienvenidaInfoLabel}>📅 Fecha:</span>
-                  <span className={styles.bienvenidaInfoValor}>
-                    {formatDateFromDBLong(coordinacion.fecha_evento)}
-                  </span>
+            {coordinacion.fecha_evento && (
+              <div className={styles.bienvenidaFechaCard}>
+                <div className={styles.fechaBadge}>
+                  {dateParts ? (
+                    <>
+                      <span className={styles.fechaMes}>{dateParts.month}</span>
+                      <span className={styles.fechaDia}>{dateParts.day}</span>
+                      <span className={styles.fechaAnio}>{dateParts.year}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.fechaMes}>Fecha del Evento</span>
+                      <span className={styles.fechaTextoLargo}>{formatDateFromDBLong(coordinacion.fecha_evento)}</span>
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className={styles.bienvenidaMensaje}>
               <p>
                 Para asegurarnos de que tu evento sea perfecto, necesitamos conocer algunos detalles sobre tus preferencias.
               </p>
               <p>
-                El proceso es simple y te guiaremos paso a paso. No te preocupes si no tienes todas las respuestas ahora mismo,
-                puedes completar lo que sepas y continuar más tarde.
+                El proceso es simple y te guiaremos paso a paso. No te preocupes si no tienes todas las respuestas ahora mismo, podes marcar las que no sepas como &quot;pendiente&quot; para despues hablarlo con el DJ!
               </p>
             </div>
 
@@ -812,6 +968,18 @@ export default function PreCoordinacionPage() {
             </button>
           </div>
         </div>
+        {guardando && (
+          <div className={styles.loadingOverlay}>
+            <div className={styles.loadingContainer}>
+              <div className={styles.loadingSpinner}>
+                <div className={styles.spinnerRing}></div>
+                <div className={styles.spinnerRing}></div>
+                <div className={styles.spinnerRing}></div>
+              </div>
+              <p className={styles.loadingMessage}>Enviando pre-coordinación...</p>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -861,7 +1029,7 @@ export default function PreCoordinacionPage() {
         </div>
       )}
 
-      <div className={styles.pasoContainer}>
+      <div key={pasoActual} className={`${styles.pasoContainer} ${direction === 'forward' ? styles.slideInRight : styles.slideInLeft} ${(paso.id === 4 || paso.id === 5 || paso.id === 7 || paso.id === 8 || paso.id === 9 || paso.id === 99) ? styles.pasoCentrado : ''}`}>
         <h2 className={styles.pasoTitulo}>{paso.titulo}</h2>
         {paso.descripcion && (
           <p className={styles.pasoDescripcion}>
@@ -926,6 +1094,49 @@ export default function PreCoordinacionPage() {
                     />
                     {pregunta.ayuda && (
                       <small className={styles.ayuda}>{pregunta.ayuda}</small>
+                    )}
+                    {!pregunta.id.includes('coreografia') && (pregunta.id.startsWith('cancion_') || (pregunta.placeholder && pregunta.placeholder.toLowerCase().includes('canción'))) && (
+                      <div className={styles.recordatorioAlerta}>
+                        <span className={styles.recordatorioFlecha}>↑</span>
+                        <span className={styles.recordatorioTexto}>
+                          <strong>Recordá ingresar el link/enlace</strong> de la canción o versión exacta (evitando colocar solo nombres genéricos como "Perfect"). ¡Así evitamos errores y nos aseguramos de que suene tu versión preferida! 🎵
+                        </span>
+                      </div>
+                    )}
+                    {pregunta.sugerencias && (
+                      <div className={styles.sugerenciasWrapper}>
+                        <button
+                          type="button"
+                          onClick={() => toggleSuggestions(pregunta.id)}
+                          className={`${styles.sugerenciasBoton} ${!showSuggestions[pregunta.id] ? styles.pulsanteNeon : ''}`}
+                        >
+                          <svg className={styles.spotifyIcon} viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.565.387-.86.207-2.377-1.454-5.37-1.783-8.893-.982-.336.075-.668-.135-.744-.47-.077-.337.136-.669.472-.745 3.848-.876 7.144-.505 9.818 1.13.295.18.387.563.207.86zm1.224-2.72c-.227.367-.707.487-1.074.26-2.72-1.672-6.87-2.157-10.076-1.183-.412.125-.845-.107-.97-.52-.125-.413.108-.847.52-.97 3.666-1.11 8.234-.575 11.34 1.337.368.228.488.708.26 1.075zm.106-2.825C14.364 8.78 8.49 8.586 5.1 9.614c-.522.158-1.076-.14-1.235-.662-.158-.523.14-1.077.662-1.236 3.896-1.183 10.385-.95 14.47 1.474.47.28.623.89.344 1.36-.28.47-.89.624-1.36.344z"/>
+                          </svg>
+                          {showSuggestions[pregunta.id] ? 'Ocultar sugerencias' : 'Ver sugerencias'}
+                        </button>
+                        <div className={`${styles.sugerenciasContainer} ${showSuggestions[pregunta.id] ? styles.sugerenciasContainerOpen : ''}`}>
+                          <div className={styles.sugerenciasTitulo}>
+                            <span>🎧</span> Playlists recomendadas en Spotify:
+                          </div>
+                          <div className={styles.sugerenciasGrid}>
+                            {pregunta.sugerencias.map((sug, idx) => (
+                              <a
+                                key={idx}
+                                href={sug.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.spotifyLinkCard}
+                              >
+                                <svg className={styles.spotifyIcon} viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                  <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.565.387-.86.207-2.377-1.454-5.37-1.783-8.893-.982-.336.075-.668-.135-.744-.47-.077-.337.136-.669.472-.745 3.848-.876 7.144-.505 9.818 1.13.295.18.387.563.207.86zm1.224-2.72c-.227.367-.707.487-1.074.26-2.72-1.672-6.87-2.157-10.076-1.183-.412.125-.845-.107-.97-.52-.125-.413.108-.847.52-.97 3.666-1.11 8.234-.575 11.34 1.337.368.228.488.708.26 1.075zm.106-2.825C14.364 8.78 8.49 8.586 5.1 9.614c-.522.158-1.076-.14-1.235-.662-.158-.523.14-1.077.662-1.236 3.896-1.183 10.385-.95 14.47 1.474.47.28.623.89.344 1.36-.28.47-.89.624-1.36.344z"/>
+                                </svg>
+                                <span>{sug.titulo}</span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </>
                 )}
@@ -997,7 +1208,10 @@ export default function PreCoordinacionPage() {
                     {respuestasCliente.velas && respuestasCliente.velas.length > 0 && (
                       <div className={styles.velasList}>
                         {respuestasCliente.velas.map((vela) => (
-                          <div key={vela.id} className={styles.velaItem}>
+                          <div 
+                            key={vela.id} 
+                            className={`${styles.velaItem} ${velasEliminando.includes(vela.id) ? styles.velaItemDeleting : ''}`}
+                          >
                             <div className={styles.candleFlameContainer}>
                               <div className={styles.candle}>
                                 <div className={styles.flame}></div>
@@ -1027,16 +1241,19 @@ export default function PreCoordinacionPage() {
       </div>
 
       {showVelaModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowVelaModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div 
+          className={`${styles.modalOverlay} ${isVelaModalClosing ? styles.modalOverlayClosing : ''}`} 
+          onClick={cerrarVelaModal}
+        >
+          <div 
+            className={`${styles.modalContent} ${isVelaModalClosing ? styles.modalContentClosing : ''}`} 
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
               <h3>Agregar Vela</h3>
               <button
                 className={styles.modalCloseButton}
-                onClick={() => {
-                  setShowVelaModal(false);
-                  setVelaForm({ nombre: '', familiar: '', cancion: '' });
-                }}
+                onClick={cerrarVelaModal}
               >
                 ×
               </button>
@@ -1077,14 +1294,17 @@ export default function PreCoordinacionPage() {
                   rows={3}
                   placeholder="Nombre de la canción y artista"
                 />
+                <div className={styles.recordatorioAlerta}>
+                  <span className={styles.recordatorioFlecha}>↑</span>
+                  <span className={styles.recordatorioTexto}>
+                    <strong>Recordá ingresar el link/enlace</strong> de la canción o versión exacta (evitando colocar solo nombres genéricos como "Perfect"). ¡Así evitamos errores y nos aseguramos de que suene tu versión preferida! 🎵
+                  </span>
+                </div>
               </div>
             </div>
             <div className={styles.modalFooter}>
               <button
-                onClick={() => {
-                  setShowVelaModal(false);
-                  setVelaForm({ nombre: '', familiar: '', cancion: '' });
-                }}
+                onClick={cerrarVelaModal}
                 className={styles.botonAnterior}
               >
                 Cancelar
@@ -1103,13 +1323,21 @@ export default function PreCoordinacionPage() {
       <div className={styles.navegacion}>
         <button
           onClick={handleAnterior}
-          disabled={pasoActual === 1}
+          disabled={pasoActual === 1 || guardando}
           className={styles.botonAnterior}
         >
           ← Anterior
         </button>
         <button
+          onClick={handleDejarPendiente}
+          disabled={guardando}
+          className={styles.botonPendiente}
+        >
+          Dejar Pendiente ⏳
+        </button>
+        <button
           onClick={handleSiguiente}
+          disabled={guardando}
           className={styles.botonSiguiente}
         >
           {pasoActual === totalPasos ? 'Finalizar' : 'Siguiente →'}
@@ -1126,6 +1354,19 @@ export default function PreCoordinacionPage() {
         pasoActual={pasoActual}
         respuestasCliente={respuestasCliente}
       />
+
+      {guardando && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}>
+              <div className={styles.spinnerRing}></div>
+              <div className={styles.spinnerRing}></div>
+              <div className={styles.spinnerRing}></div>
+            </div>
+            <p className={styles.loadingMessage}>Guardando tu progreso...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

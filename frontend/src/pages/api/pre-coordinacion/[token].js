@@ -1,6 +1,7 @@
 import { Coordinacion } from '@/lib/models/Coordinacion.js';
 import { CoordinacionFlujo } from '@/lib/models/CoordinacionFlujo.js';
 import pool from '@/lib/database-config.js';
+import { enviarNotificacionPrecoordinacion } from '@/lib/pushNotifier.js';
 
 export default async function handler(req, res) {
   const { token } = req.query;
@@ -211,6 +212,11 @@ export default async function handler(req, res) {
         await Coordinacion.update(coordinacion.id, {
           pre_coordinacion_completado_por_cliente: true,
           pre_coordinacion_fecha_completado: new Date().toISOString(),
+        });
+        
+        // Enviar notificación push de forma asíncrona
+        enviarNotificacionPrecoordinacion(coordinacion.id).catch(err => {
+          console.error('Error al enviar notificación push de pre-coordinación:', err);
         });
       } else {
         console.log('Guardado de progreso - NO se marca como completada');
