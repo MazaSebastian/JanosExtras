@@ -6,7 +6,7 @@ export default function handler(req, res) {
   const script = `// ==UserScript==
 // @name         Jano's Sync - Planilla de Coordinaciones
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  Sincroniza y extrae detalles completos de clientes desde la ficha técnica de Jano's.
 // @author       Antigravity
 // @match        https://tecnica.janosgroup.com/index.php*
@@ -28,7 +28,16 @@ export default function handler(req, res) {
     // Ping al dashboard si estamos cargados en él
     const isDashboard = window.location.href.includes('/dashboard/janos-sync');
     if (isDashboard) {
+        // Enviar ping inicial de inmediato
         window.postMessage({ type: 'JANOS_SYNC_SCRIPT_INSTALLED_PING' }, window.location.origin);
+        
+        // Escuchar pings del dashboard
+        window.addEventListener('message', function(event) {
+            if (event.origin !== window.location.origin) return;
+            if (event.data && event.data.type === 'JANOS_SYNC_CHECK_PING') {
+                window.postMessage({ type: 'JANOS_SYNC_SCRIPT_INSTALLED_PING' }, window.location.origin);
+            }
+        });
         return;
     }
 
