@@ -118,6 +118,16 @@ export default function CoordinacionesPanel() {
     loadCoordinaciones();
   }, [filterEstado, filterPrioridad]);
 
+  // Si hay coordinacionId en la query, abrir de inmediato los detalles de la coordinacion
+  useEffect(() => {
+    if (router.isReady && router.query.coordinacionId && coordinaciones.length > 0) {
+      const found = coordinaciones.find(c => c.id === Number(router.query.coordinacionId));
+      if (found && viewingResumen !== found.id) {
+        handleVerResumen(found);
+      }
+    }
+  }, [router.isReady, router.query.coordinacionId, coordinaciones]);
+
   // Cargar salones solo cuando se abre el modal
   useEffect(() => {
     if (showForm && salones.length === 0) {

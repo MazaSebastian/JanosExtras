@@ -17,7 +17,11 @@ export default function CoordinacionesPage() {
     }
 
     if (auth.user.rol === 'admin') {
-      router.push('/admin');
+      const { coordinacionId } = router.query;
+      router.push({
+        pathname: '/admin',
+        query: coordinacionId ? { coordinacionId } : undefined,
+      });
       return;
     }
 

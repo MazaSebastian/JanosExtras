@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/router';
 import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { formatDateFromDB, formatDateFromDBForInput } from '@/utils/dateFormat';
@@ -11,6 +12,7 @@ import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
 
 export default function CoordinacionesAdminPanel() {
+  const router = useRouter();
   const [coordinaciones, setCoordinaciones] = useState([]);
   const [salones, setSalones] = useState([]);
   const [djs, setDjs] = useState([]);
@@ -66,6 +68,16 @@ export default function CoordinacionesAdminPanel() {
   useEffect(() => {
     loadCoordinaciones();
   }, [filters]);
+
+  // Si hay coordinacionId en la query, abrir de inmediato los detalles de la coordinacion
+  useEffect(() => {
+    if (router.isReady && router.query.coordinacionId && coordinaciones.length > 0) {
+      const found = coordinaciones.find(c => c.id === Number(router.query.coordinacionId));
+      if (found && viewingResumen !== found.id) {
+        handleViewResumen(found);
+      }
+    }
+  }, [router.isReady, router.query.coordinacionId, coordinaciones]);
 
   const loadCoordinaciones = async () => {
     try {

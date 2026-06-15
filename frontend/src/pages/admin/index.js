@@ -121,6 +121,12 @@ export default function AdminDashboardPage() {
   }, [router]);
 
   useEffect(() => {
+    if (router.isReady && router.query.coordinacionId) {
+      setActiveMenu('coordinaciones');
+    }
+  }, [router.isReady, router.query.coordinacionId]);
+
+  useEffect(() => {
     if (!user) return;
     loadDashboardData();
   }, [user, selectedYear, selectedMonth]);

@@ -92,6 +92,8 @@ export async function enviarNotificacionPrecoordinacion(coordinacionId) {
         c.titulo, 
         c.nombre_cliente, 
         c.nombre_agasajado, 
+        c.tipo_evento,
+        c.fecha_evento,
         c.dj_responsable_id,
         s.nombre AS salon_nombre
       FROM coordinaciones c
@@ -102,11 +104,39 @@ export async function enviarNotificacionPrecoordinacion(coordinacionId) {
     if (result.rows.length === 0) return;
 
     const coord = result.rows[0];
-    const clienteNombre = coord.nombre_agasajado || coord.nombre_cliente || 'Un cliente';
+    const agasajadoNombre = coord.nombre_agasajado || coord.nombre_cliente || 'El cliente';
+    const tipoEvento = coord.tipo_evento || 'N/A';
+    
+    // Formatear la fecha
+    let fechaFormateada = '';
+    if (coord.fecha_evento) {
+      try {
+        const d = new Date(coord.fecha_evento);
+        if (typeof coord.fecha_evento === 'string' && coord.fecha_evento.includes('-')) {
+          const parts = coord.fecha_evento.split('T')[0].split('-');
+          if (parts.length === 3) {
+            fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+        }
+        if (!fechaFormateada && !isNaN(d.getTime())) {
+          const dia = String(d.getUTCDate()).padStart(2, '0');
+          const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
+          const anio = d.getUTCFullYear();
+          fechaFormateada = `${dia}/${mes}/${anio}`;
+        }
+      } catch (e) {
+        console.error('Error al formatear fecha:', e);
+      }
+    }
+
+    const bodyText = fechaFormateada 
+      ? `${agasajadoNombre} ha completado la pre-coordinación del evento ${tipoEvento} y ${fechaFormateada}!`
+      : `${agasajadoNombre} ha completado la pre-coordinación del evento ${tipoEvento}!`;
+
     const payload = {
       title: '¡Pre-coordinación completada!',
-      body: `${clienteNombre} completó los datos para el salón ${coord.salon_nombre || 'N/A'}.`,
-      url: `/dashboard/coordinaciones`
+      body: bodyText,
+      url: `/dashboard/coordinaciones?coordinacionId=${coord.id}`
     };
 
     const recipients = new Set();
