@@ -34,8 +34,8 @@ export default function DJLayout({ user, children }) {
   };
 
   const menuItems = [
-    { path: '/dashboard/home', label: 'Home', icon: '🏠', pageTitle: 'Home' },
-    { path: '/dashboard', label: 'Eventos y Extras', icon: '📊', pageTitle: 'Eventos y Extras' },
+    { path: '/dashboard', label: 'Home', icon: '🏠', pageTitle: 'Home' },
+    { path: '/dashboard/eventos', label: 'Eventos y Extras', icon: '📊', pageTitle: 'Eventos y Extras' },
     { path: '/dashboard/fichadas', label: 'Fichadas', icon: '⏱️', pageTitle: 'Fichadas' },
     { path: '/dashboard/software', label: 'Software', icon: '💻', pageTitle: 'Software' },
     { path: '/dashboard/shows', label: 'Shows', icon: '🎤', pageTitle: 'Shows' },

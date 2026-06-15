@@ -888,6 +888,213 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
   ],
+  Casamiento: [
+    {
+      id: 3,
+      titulo: '⛪ Ceremonia',
+      descripcion: 'Si realizás la ceremonia en el salón, podés elegir las canciones para cada momento especial.',
+      preguntas: [
+        {
+          id: 'realiza_ceremonia_salon',
+          label: '¿Realizás la ceremonia en el salón?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'detalles_ceremonia',
+          label: 'Detalles de la ceremonia',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'realiza_ceremonia_salon', valor: 'Sí' },
+          placeholder: 'Indicá lecturas, rituales o cualquier detalle organizativo especial...'
+        },
+        {
+          id: 'cancion_ingreso_novio',
+          label: 'Canción de ingreso del novio',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'realiza_ceremonia_salon', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        },
+        {
+          id: 'cancion_ingreso_novia',
+          label: 'Canción de ingreso de la novia',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'realiza_ceremonia_salon', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ]
+    },
+    {
+      id: 4,
+      titulo: '🚪 Ingreso al Salón',
+      descripcion: 'Esta es la canción que sonará cuando hagan su ingreso oficial al salón. ¡Elegí un tema divertido y con ritmo!',
+      preguntas: [
+        {
+          id: 'realiza_ingreso_salon',
+          label: '¿Realizás ingreso al salón?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_ingreso_salon',
+          label: '¿Con qué canción ingresarás al salón?',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'realiza_ingreso_salon', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ]
+    },
+    {
+      id: 5,
+      titulo: '💃 El Vals',
+      descripcion: 'El baile tradicional de los novios.',
+      preguntas: [
+        {
+          id: 'baila_vals',
+          label: '¿Van a bailar el vals?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_vals',
+          label: '¿Qué canción les gustaría para el vals?',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'baila_vals', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ]
+    },
+    {
+      id: 6,
+      titulo: '🎭 Coreografías o Presentaciones',
+      descripcion: '¿Tienen alguna coreografía especial o show sorpresa con amigos?',
+      preguntas: [
+        {
+          id: 'realiza_coreografia',
+          label: '¿Harán alguna coreografía o presentación especial?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'descripcion_coreografia',
+          label: 'Cuéntanos sobre su coreografía o presentación',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'realiza_coreografia', valor: 'Sí' },
+          placeholder: 'Describe qué harán y si necesitan alguna canción específica'
+        }
+      ]
+    },
+    {
+      id: 7,
+      titulo: '💐 Ramo y 🥃 Whisky',
+      descripcion: 'El momento tradicional donde la novia arroja el ramo y el novio la botella de Whisky.',
+      preguntas: [
+        {
+          id: 'arroja_ramo',
+          label: '¿La novia va a arrojar el ramo?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_ramo_novia',
+          label: '¿Con qué canción la novia arrojará el ramo?',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'arroja_ramo', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        },
+        {
+          id: 'arroja_whisky',
+          label: '¿El novio va a arrojar el Whisky?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_whisky_novio',
+          label: '¿Con qué canción el novio arrojará el Whisky?',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'arroja_whisky', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ]
+    },
+    {
+      id: 8,
+      titulo: '🥂 Brindis',
+      descripcion: 'El brindis y momento de la torta de novios.',
+      preguntas: [
+        {
+          id: 'cancion_brindis',
+          label: '¿Qué canción les gustaría para el brindis / torta?',
+          tipo: 'textarea',
+          requerido: true,
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ]
+    },
+    {
+      id: 9,
+      titulo: '🎊 Ingreso a Carioca',
+      descripcion: 'El gran inicio del baile de carioca o cotillón.',
+      preguntas: [
+        {
+          id: 'realiza_ingreso_carioca',
+          label: '¿Realizan ingreso a carioca?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_ingreso_carioca',
+          label: '¿Qué canción les gustaría para su ingreso al carioca?',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'realiza_ingreso_carioca', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ]
+    },
+    {
+      id: 99,
+      titulo: '🎧 Link de playlist',
+      descripcion: 'Te invitamos a armar y compartirnos el link de tu playlist de Spotify, Apple Music o YouTube con las canciones que más te gusten. Tené en cuenta que esta playlist servirá como referencia de tus gustos musicales; las canciones no deben seguir ningún orden en particular, simplemente compartinos los temas que te encantan para que nosotros (DJs) tengamos un espectro mucho más amplio de tus gustos y podamos hacer brillar tu noche.',
+      preguntas: [
+        {
+          id: 'link_playlist',
+          label: 'Pegá el link de tu playlist acá:',
+          tipo: 'textarea',
+          requerido: true,
+          placeholder: 'https://open.spotify.com/playlist/...'
+        }
+      ]
+    }
+  ],
   Cumpleaños: [
     {
       id: 1,

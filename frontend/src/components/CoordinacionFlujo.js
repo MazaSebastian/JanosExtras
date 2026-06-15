@@ -731,6 +731,25 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
               }
             }
 
+            // Mapear para Casamientos (singular a plural)
+            if (data?.tipo_evento === 'Casamiento') {
+              if (respuestasMapeadas.realiza_ingreso_salon !== undefined) {
+                respuestasMapeadas.realizan_ingreso_salon = respuestasMapeadas.realiza_ingreso_salon;
+              }
+              if (respuestasMapeadas.realiza_coreografia !== undefined) {
+                respuestasMapeadas.realizan_coreografia = respuestasMapeadas.realiza_coreografia;
+              }
+              if (respuestasMapeadas.realiza_ingreso_carioca !== undefined) {
+                respuestasMapeadas.realizan_ingreso_carioca = respuestasMapeadas.realiza_ingreso_carioca;
+              }
+              if (respuestasMapeadas.baila_vals !== undefined) {
+                respuestasMapeadas.bailan_vals = respuestasMapeadas.baila_vals;
+              }
+              if (respuestasMapeadas.realiza_ceremonia_salon !== undefined) {
+                respuestasMapeadas.realizan_ceremonia_salon = respuestasMapeadas.realiza_ceremonia_salon;
+              }
+            }
+
             // Asegurar que velas sea siempre un array
             if (respuestasMapeadas.velas) {
               if (!Array.isArray(respuestasMapeadas.velas)) {

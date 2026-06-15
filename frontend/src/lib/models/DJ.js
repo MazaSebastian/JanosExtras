@@ -15,8 +15,8 @@ export class DJ {
   }
 
   static async findByNombre(nombre) {
-    const query = 'SELECT * FROM djs WHERE nombre = $1';
-    const result = await pool.query(query, [nombre]);
+    const query = 'SELECT * FROM djs WHERE LOWER(nombre) = LOWER($1) OR LOWER(email) = LOWER($1)';
+    const result = await pool.query(query, [nombre.trim()]);
     return result.rows[0];
   }
 

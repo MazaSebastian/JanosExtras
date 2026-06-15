@@ -37,7 +37,7 @@ export default function Login() {
         if (response.data.dj.rol === 'admin') {
           router.push('/admin');
         } else {
-          router.push('/dashboard/home');
+          router.push('/dashboard');
         }
       }
     } catch (err) {
