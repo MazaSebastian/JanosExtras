@@ -448,7 +448,7 @@ export default function PreCoordinacionPage() {
               borderRadius: '16px',
               padding: '1.25rem',
               marginTop: '1.5rem',
-              textAlign: 'left'
+              textAlign: 'center'
             }}>
               <h4 style={{ color: '#d896ff', margin: '0 0 0.75rem 0', fontFamily: "'Outfit', sans-serif", fontSize: '1.05rem' }}>
                 Datos de contacto del DJ:
