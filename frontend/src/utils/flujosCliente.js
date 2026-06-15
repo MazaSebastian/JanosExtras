@@ -170,78 +170,6 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
   Casamiento: [
     {
       id: 1,
-      titulo: '💍 Estilo de Casamiento',
-      descripcion: 'Cuéntennos el estilo de su celebración para poder adaptar toda la musicalización.',
-      preguntas: [
-        {
-          id: 'estilo_casamiento',
-          label: '¿Qué estilo tiene su casamiento?',
-          tipo: 'buttons',
-          opciones: ['Ceremonial (tradicional y formal)', 'Formal y Elegante (sofisticado)', 'Descontracturado (relajado y divertido)'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-      ],
-    },
-    {
-      id: 2,
-      titulo: '🎵 Música de Recepción',
-      descripcion: 'La música ideal para acompañar el inicio de la fiesta mientras llegan los invitados.',
-      preguntas: [
-        {
-          id: 'musica_recepcion',
-          label: '¿Qué tipo de música les gustaría durante la recepción?',
-          tipo: 'buttons',
-          requerido: true,
-          opciones: [
-            'Música Chill',
-            'Acústicos',
-            'Bossa Nova',
-            'Rock Nacional',
-            'Pop Funcional',
-            'Deep House',
-            'Música Comercial',
-            'Otro (especificar)'
-          ],
-          multiple: true,
-          permiteOtro: true
-        },
-        {
-          id: 'artistas_favoritos',
-          label: '¿Tienen artistas o canciones favoritas? (opcional)',
-          tipo: 'textarea',
-          requerido: false,
-          placeholder: 'Mencionen los artistas o canciones que no pueden faltar en su evento'
-        },
-      ],
-    },
-    {
-      id: 3,
-      titulo: '🚪 Ingreso a Recepción',
-      descripcion: 'Si realizan un ingreso especial al momento de la recepción, coordinemos la canción adecuada.',
-      preguntas: [
-        {
-          id: 'realizan_ingreso_recepcion',
-          label: '¿Realizan ingreso a recepción?',
-          tipo: 'buttons',
-          opciones: ['Sí', 'No'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
-          id: 'cancion_ingreso_recepcion',
-          label: '¿Qué canción les gustaría para el ingreso a la recepción?',
-          tipo: 'textarea',
-          requerido: true,
-          condicional: { pregunta: 'realizan_ingreso_recepcion', valor: 'Sí' },
-          placeholder: 'Nombre de la canción y artista'
-        }
-      ],
-    },
-    {
-      id: 4,
       titulo: '💒 Ceremonia en el Salón',
       descripcion: 'Si realizan la ceremonia en el salón, coordinemos las canciones clave para ese momento mágico.',
       preguntas: [
@@ -281,7 +209,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
+      id: 2,
       titulo: '🚪 Ingreso al Salón',
       descripcion: 'Esta es la canción que sonará cuando hagan su ingreso oficial al salón como pareja. ¡Elegí un tema lleno de energía!',
       preguntas: [
@@ -308,7 +236,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 3,
       titulo: '💃 El Vals',
       descripcion: 'El baile tradicional de los casamientos. Un clásico inolvidable.',
       preguntas: [
@@ -336,7 +264,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 7,
+      id: 4,
       titulo: '🎭 Coreografías o Presentaciones',
       descripcion: '¿Tienen preparada alguna coreografía o baile especial con amigos o familiares?',
       preguntas: [
@@ -355,13 +283,13 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           tipo: 'textarea',
           requerido: true,
           condicional: { pregunta: 'realizan_coreografia', valor: 'Sí' },
-          placeholder: 'Describe qué harán y si necesitan alguna canción específica'
+          placeholder: 'Describe qué harán y si necesitas alguna canción específica'
         },
       ],
     },
     {
-      id: 8,
-      titulo: '🌹 Momentos Especiales (Ramo y Whisky)',
+      id: 5,
+      titulo: '🌹 Ramo y Whisky',
       descripcion: 'Tradiciones clásicas para animar a los invitados.',
       preguntas: [
         {
@@ -381,7 +309,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 9,
+      id: 6,
       titulo: '🥂 Brindis',
       descripcion: 'El momento del brindis y festejo con copas al alza.',
       preguntas: [
@@ -398,7 +326,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 10,
+      id: 7,
       titulo: '🎊 Ingreso a Carioca',
       descripcion: 'El gran inicio de la tanda carioca o tanda de cotillón.',
       preguntas: [
