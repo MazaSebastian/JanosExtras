@@ -144,6 +144,7 @@ export const FLUJOS_POR_TIPO = {
       id: 1,
       titulo: 'Música de recepción y/o momentos que NO son tandas de baile',
       preguntas: [
+        { id: 'estilo_casamiento', label: 'Selecciona el estilo del casamiento', tipo: 'select', opciones: ['Ceremonial', 'Formal y Elegante', 'Descontracturado'], requerido: true },
         { id: 'musica_recepcion', label: 'Descripción de la música de recepción', tipo: 'textarea', requerido: true },
         { id: 'artistas_favoritos', label: 'Artistas favoritos', tipo: 'textarea', requerido: false },
       ],
@@ -643,7 +644,13 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
                 valorLimpio = primerValor.split('(')[0].trim();
               }
 
-              respuestasMapeadas.tematica_evento = valorLimpio;
+              const mapeoTematicaCorporativo = {
+                'Presentación': 'Presentación',
+                'Charla o Conferencia': 'Charla',
+                'Team Building / Trabajo en Equipo': 'Team Work',
+                'Fiesta o Celebración': 'Fiesta'
+              };
+              respuestasMapeadas.tematica_evento = mapeoTematicaCorporativo[valorLimpio] || valorLimpio;
             }
 
             // Mapear estilo_casamiento (Casamiento): convertir valores del cliente al formato del DJ

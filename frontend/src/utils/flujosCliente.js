@@ -169,40 +169,13 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
   ],
   Casamiento: [
     {
-      id: 101,
-      titulo: '🎭 Shows',
-      descripcion: 'Shows adicionales contratados para el evento. ¡Contanos qué shows tendrán contratados!',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: '📺 Pantalla y Videos',
-      descripcion: 'Proyección de videos durante el evento. Si tienen videos emotivos o de historia, contanos los detalles.',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: '⚙️ Complementos Técnicos',
-      descripcion: 'Servicios técnicos adicionales contratados para la pista o el salón.',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
-    {
       id: 1,
-      titulo: '💍 Sobre tu Casamiento',
-      descripcion: 'Cuéntanos el estilo de tu celebración para poder adaptar toda la musicalización e iluminación.',
+      titulo: '💍 Estilo de Casamiento',
+      descripcion: 'Cuéntennos el estilo de su celebración para poder adaptar toda la musicalización.',
       preguntas: [
         {
           id: 'estilo_casamiento',
-          label: '¿Qué estilo tiene tu casamiento?',
+          label: '¿Qué estilo tiene su casamiento?',
           tipo: 'buttons',
           opciones: ['Ceremonial (tradicional y formal)', 'Formal y Elegante (sofisticado)', 'Descontracturado (relajado y divertido)'],
           requerido: true,
@@ -218,13 +191,13 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       preguntas: [
         {
           id: 'musica_recepcion',
-          label: '¿Qué tipo de música te gustaría durante la recepción?',
+          label: '¿Qué tipo de música les gustaría durante la recepción?',
           tipo: 'buttons',
           requerido: true,
           opciones: [
             'Música Chill',
             'Acústicos',
-            'Bossa N Nova',
+            'Bossa Nova',
             'Rock Nacional',
             'Pop Funcional',
             'Deep House',
@@ -236,15 +209,39 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
         },
         {
           id: 'artistas_favoritos',
-          label: '¿Tienes artistas o canciones favoritas? (opcional)',
+          label: '¿Tienen artistas o canciones favoritas? (opcional)',
           tipo: 'textarea',
           requerido: false,
-          placeholder: 'Menciona los artistas o canciones que no pueden faltar en tu evento'
+          placeholder: 'Mencionen los artistas o canciones que no pueden faltar en su evento'
         },
       ],
     },
     {
-      id: 5,
+      id: 3,
+      titulo: '🚪 Ingreso a Recepción',
+      descripcion: 'Si realizan un ingreso especial al momento de la recepción, coordinemos la canción adecuada.',
+      preguntas: [
+        {
+          id: 'realizan_ingreso_recepcion',
+          label: '¿Realizan ingreso a recepción?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_ingreso_recepcion',
+          label: '¿Qué canción les gustaría para el ingreso a la recepción?',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'realizan_ingreso_recepcion', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        }
+      ],
+    },
+    {
+      id: 4,
       titulo: '💒 Ceremonia en el Salón',
       descripcion: 'Si realizan la ceremonia en el salón, coordinemos las canciones clave para ese momento mágico.',
       preguntas: [
@@ -263,7 +260,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           tipo: 'textarea',
           requerido: false,
           condicional: { pregunta: 'realizan_ceremonia_salon', valor: 'Sí' },
-          placeholder: 'Cualquier detalle especial que quieras compartir'
+          placeholder: 'Cualquier detalle especial que quieran compartir'
         },
         {
           id: 'cancion_ingreso_novio',
@@ -284,7 +281,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 6,
+      id: 5,
       titulo: '🚪 Ingreso al Salón',
       descripcion: 'Esta es la canción que sonará cuando hagan su ingreso oficial al salón como pareja. ¡Elegí un tema lleno de energía!',
       preguntas: [
@@ -311,7 +308,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 7,
+      id: 6,
       titulo: '💃 El Vals',
       descripcion: 'El baile tradicional de los casamientos. Un clásico inolvidable.',
       preguntas: [
@@ -339,7 +336,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 8,
+      id: 7,
       titulo: '🎭 Coreografías o Presentaciones',
       descripcion: '¿Tienen preparada alguna coreografía o baile especial con amigos o familiares?',
       preguntas: [
@@ -363,7 +360,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 9,
+      id: 8,
       titulo: '🌹 Momentos Especiales (Ramo y Whisky)',
       descripcion: 'Tradiciones clásicas para animar a los invitados.',
       preguntas: [
@@ -380,6 +377,23 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           tipo: 'textarea',
           requerido: true,
           placeholder: 'Nombre de la canción y artista'
+        },
+      ],
+    },
+    {
+      id: 9,
+      titulo: '🥂 Brindis',
+      descripcion: 'El momento del brindis y festejo con copas al alza.',
+      preguntas: [
+        {
+          id: 'cancion_brindis',
+          label: '¿Qué canción les gustaría para el brindis?',
+          tipo: 'textarea',
+          requerido: true,
+          placeholder: 'Nombre de la canción y artista',
+          sugerencias: [
+            { titulo: "Sugerencias Brindis - Jano's Costanera", url: 'https://open.spotify.com/playlist/50DNFEtKXdBoaWHTCLMfwh?si=dLP9tUK0RF2fSZPS83blsg' }
+          ]
         },
       ],
     },
@@ -426,33 +440,6 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
   ],
   Corporativo: [
-    {
-      id: 101,
-      titulo: '🎭 Shows',
-      descripcion: 'Shows adicionales contratados para el evento corporativo.',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: '📺 Pantalla y Videos',
-      descripcion: 'Proyección de videos institucionales, presentaciones o logos.',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: '⚙️ Complementos Técnicos',
-      descripcion: 'Servicios técnicos adicionales (iluminación especial, pantallas extra, sonido reforzado).',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
     {
       id: 1,
       titulo: '🏢 Sobre tu Evento',
@@ -700,33 +687,6 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
   ],
   Religioso: [
-    {
-      id: 101,
-      titulo: '🎭 Shows',
-      descripcion: 'Shows adicionales contratados para el evento. ¡Contanos qué shows tendrán contratados!',
-      preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 102,
-      titulo: '📺 Pantalla y Videos',
-      descripcion: 'Proyección de videos durante el evento. Si tienen videos emotivos o de historia, contanos los detalles.',
-      preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
-    },
-    {
-      id: 103,
-      titulo: '⚙️ Complementos Técnicos',
-      descripcion: 'Servicios técnicos adicionales contratados para la pista o el salón.',
-      preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'buttons', opciones: ['Sí', 'No'], requerido: true, multiple: false, permiteOtro: false },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: true, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
-    },
     {
       id: 1,
       titulo: '🕍 Mejitzah',
