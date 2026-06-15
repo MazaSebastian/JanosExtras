@@ -218,25 +218,26 @@ export default function PreCoordinacionPage() {
     
     const diasSemanaNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-    for (let i = 1; i <= 14; i++) {
-      const nextDate = new Date();
-      nextDate.setDate(today.getDate() + i);
-      const dayIndex = nextDate.getDay();
-      const dayKey = diasSemanaMap[dayIndex];
+    
+    for (let i = 1; i <= 30; i++) {
+      const targetDate = new Date();
+      targetDate.setDate(today.getDate() + i);
+      
+      const dayOfWeekNum = targetDate.getDay();
+      const dayKey = diasSemanaMap[dayOfWeekNum];
       
       const configSlots = availability.disponibilidad.horasDisponibles[dayKey] || [];
       if (configSlots.length > 0) {
-        const yyyy = nextDate.getFullYear();
-        const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(nextDate.getDate()).padStart(2, '0');
-        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const year = targetDate.getFullYear();
+        const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const day = String(targetDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
         
         options.push({
           dateStr,
-          dayName: diasSemanaNombres[dayIndex],
-          dayNumber: nextDate.getDate(),
-          monthName: mesesNombres[nextDate.getMonth()],
+          dayName: diasSemanaNombres[dayOfWeekNum],
+          dayNumber: targetDate.getDate(),
+          monthName: mesesNombres[targetDate.getMonth()],
           dayKey
         });
       }
@@ -249,13 +250,12 @@ export default function PreCoordinacionPage() {
     const dayKey = selectedBookingDate.dayKey;
     const configSlots = availability.disponibilidad.horasDisponibles[dayKey] || [];
     
-    return configSlots.filter(hour => {
-      const targetDateStr = selectedBookingDate.dateStr;
-      const targetTime = new Date(`${targetDateStr}T${hour}:00`);
-      
+    return configSlots.filter((hourStr) => {
       const isBooked = (availability.bookedDates || []).some(bookedISO => {
         const d = new Date(bookedISO);
-        return Math.abs(d.getTime() - targetTime.getTime()) < 1000 * 60 * 10;
+        const bookedDateStr = d.toISOString().split('T')[0];
+        const bookedHourStr = d.toISOString().split('T')[1].substring(0, 5);
+        return bookedDateStr === selectedBookingDate.dateStr && bookedHourStr === hourStr;
       });
       return !isBooked;
     });
@@ -276,6 +276,7 @@ export default function PreCoordinacionPage() {
           fecha: targetDate.toISOString(),
           meetLink: res.data.meetLink
         });
+        setShowBookingModal(false);
       }
     } catch (err) {
       console.error('Error al agendar videollamada:', err);
@@ -341,73 +342,120 @@ export default function PreCoordinacionPage() {
       return null;
     }
 
-    return (
-      <div className={styles.bookingContainer}>
-        <h3 className={styles.bookingTitle}>📅 ¿Deseas agendar una videollamada con nosotros?</h3>
-        <p className={styles.bookingSubtitle}>
-          Elige un día y horario para tener una reunión virtual de coordinación con tu DJ (<strong>{availability.djNombre}</strong>).
-        </p>
-
-        <div className={styles.daysSliderWrapper}>
-          <div className={styles.daysGrid}>
-            {bookingDateOptions.map((opt) => {
-              const isActive = selectedBookingDate?.dateStr === opt.dateStr;
-              return (
-                <div 
-                  key={opt.dateStr}
-                  className={`${styles.dayCard} ${isActive ? styles.dayCardActive : ''}`}
-                  onClick={() => {
-                    setSelectedBookingDate(opt);
-                    setSelectedBookingHour(null);
-                  }}
-                >
-                  <span className={styles.dayCardName}>{opt.dayName}</span>
-                  <span className={styles.dayCardNumber}>{opt.dayNumber}</span>
-                  <span className={styles.dayCardMonth}>{opt.monthName}</span>
-                </div>
-              );
-            })}
-          </div>
+    if (!showBookingModal) {
+      return (
+        <div className={styles.reopenBookingBanner}>
+          <div style={{ fontSize: '2rem' }}>📅</div>
+          <h4 style={{ margin: '0.25rem 0', color: '#fff', fontSize: '1.15rem', fontFamily: "'Outfit', sans-serif" }}>
+            ¿Querés agendar una videollamada con tu DJ?
+          </h4>
+          <p style={{ margin: '0 0 1rem 0', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+            Elegí un día y horario para tener una reunión virtual de coordinación con <strong>{availability.djNombre}</strong>.
+          </p>
+          <button 
+            type="button" 
+            className={styles.reopenBookingButton}
+            onClick={() => setShowBookingModal(true)}
+          >
+            🗓️ Reservar Videollamada
+          </button>
         </div>
+      );
+    }
 
-        {selectedBookingDate && (
-          <div className={styles.slotsSection}>
-            <h4 className={styles.slotsTitle}>Horarios disponibles para el {selectedBookingDate.dayName} {selectedBookingDate.dayNumber} de {selectedBookingDate.monthName}:</h4>
-            
-            {bookingHourOptions.length > 0 ? (
-              <div className={styles.slotsGrid}>
-                {bookingHourOptions.map((hour) => {
-                  const isActive = selectedBookingHour === hour;
+    return (
+      <div className={styles.bookingModalOverlay} onClick={() => setShowBookingModal(false)}>
+        <div className={styles.bookingModalContent} onClick={(e) => e.stopPropagation()}>
+          <button 
+            type="button" 
+            className={styles.bookingModalClose}
+            onClick={() => setShowBookingModal(false)}
+          >
+            ×
+          </button>
+          
+          <div className={styles.bookingModalHeader}>
+            <div className={styles.bookingModalIcon}>📹</div>
+            <h3 className={styles.bookingModalTitle}>¡Agendá tu Videollamada!</h3>
+            <p className={styles.bookingModalSubtitle}>
+              Elegí un día y horario para tener una reunión virtual de coordinación con tu DJ (<strong>{availability.djNombre}</strong>). ¡Es rápido y automático!
+            </p>
+          </div>
+
+          <div className={styles.bookingModalBody}>
+            {/* Selección de fecha */}
+            <div className={styles.daysSliderWrapper}>
+              <div className={styles.daysGrid}>
+                {bookingDateOptions.map((opt) => {
+                  const isActive = selectedBookingDate?.dateStr === opt.dateStr;
                   return (
-                    <button 
-                      key={hour}
-                      type="button"
-                      className={`${styles.slotButton} ${isActive ? styles.slotButtonActive : ''}`}
-                      onClick={() => setSelectedBookingHour(hour)}
+                    <div 
+                      key={opt.dateStr}
+                      className={`${styles.dayCard} ${isActive ? styles.dayCardActive : ''}`}
+                      onClick={() => {
+                        setSelectedBookingDate(opt);
+                        setSelectedBookingHour(null);
+                      }}
                     >
-                      {hour}
-                    </button>
+                      <span className={styles.dayCardName}>{opt.dayName}</span>
+                      <span className={styles.dayCardNumber}>{opt.dayNumber}</span>
+                      <span className={styles.dayCardMonth}>{opt.monthName}</span>
+                    </div>
                   );
                 })}
               </div>
-            ) : (
-              <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '1.5rem' }}>
-                No quedan horarios disponibles para este día. Elige otra fecha.
-              </p>
+            </div>
+
+            {/* Selección de hora */}
+            {selectedBookingDate && (
+              <div className={styles.slotsSection}>
+                <h4 className={styles.slotsTitle}>
+                  Horarios disponibles para el {selectedBookingDate.dayName} {selectedBookingDate.dayNumber} de {selectedBookingDate.monthName}:
+                </h4>
+                
+                {bookingHourOptions.length > 0 ? (
+                  <div className={styles.slotsGrid}>
+                    {bookingHourOptions.map((hour) => {
+                      const isActive = selectedBookingHour === hour;
+                      return (
+                        <button 
+                          key={hour}
+                          type="button"
+                          className={`${styles.slotButton} ${isActive ? styles.slotButtonActive : ''}`}
+                          onClick={() => setSelectedBookingHour(hour)}
+                        >
+                          {hour}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '1.5rem', textAlign: 'center' }}>
+                    No quedan horarios disponibles para este día. Por favor elige otra fecha.
+                  </p>
+                )}
+              </div>
             )}
           </div>
-        )}
 
-        {selectedBookingDate && selectedBookingHour && (
-          <button 
-            type="button" 
-            className={styles.confirmBookingButton}
-            onClick={handleConfirmBooking}
-            disabled={bookingSubmitting}
-          >
-            {bookingSubmitting ? 'Agendando...' : 'Confirmar Videollamada'}
-          </button>
-        )}
+          <div className={styles.bookingModalFooter}>
+            <button 
+              type="button" 
+              className={styles.confirmBookingButton}
+              onClick={handleConfirmBooking}
+              disabled={!selectedBookingDate || !selectedBookingHour || bookingSubmitting}
+            >
+              {bookingSubmitting ? 'Reservando...' : '📅 Confirmar y Reservar Reunión'}
+            </button>
+            <button 
+              type="button" 
+              className={styles.maybeLaterButton}
+              onClick={() => setShowBookingModal(false)}
+            >
+              Quizás más tarde
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
