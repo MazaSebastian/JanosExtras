@@ -92,6 +92,36 @@ export default function JanosSyncPanel() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  // Enviar pings para detectar si el UserScript está activo en la página
+  useEffect(() => {
+    let pingInterval;
+    
+    const startPinging = () => {
+      if (scriptDetected) return;
+      
+      // Detener cualquier interval previo
+      if (pingInterval) clearInterval(pingInterval);
+      
+      // Mandar ping de inmediato
+      window.postMessage({ type: 'JANOS_SYNC_CHECK_PING' }, window.location.origin);
+      
+      // Configurar interval
+      pingInterval = setInterval(() => {
+        window.postMessage({ type: 'JANOS_SYNC_CHECK_PING' }, window.location.origin);
+      }, 1500);
+    };
+
+    startPinging();
+
+    // Re-iniciar pings cuando el usuario vuelve a enfocar la pestaña
+    window.addEventListener('focus', startPinging);
+
+    return () => {
+      if (pingInterval) clearInterval(pingInterval);
+      window.removeEventListener('focus', startPinging);
+    };
+  }, [scriptDetected]);
+
   // Guardar credenciales
   const handleSaveCredentials = (e) => {
     e.preventDefault();
@@ -202,7 +232,7 @@ export default function JanosSyncPanel() {
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <a
-              href="/api/coordinaciones/install-script"
+              href="/api/coordinaciones/install-script.user.js"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.buttonPrimary}
