@@ -466,6 +466,7 @@ export const FLUJOS_POR_TIPO = {
       titulo: 'Temática del Evento',
       preguntas: [
         { id: 'tematica_evento', label: 'Selecciona la temática del evento', tipo: 'select', opciones: ['Formal', 'Descontracturado', 'Temático'], requerido: true },
+        { id: 'descripcion_tematica', label: 'Descripción de la temática', tipo: 'textarea', requerido: false, condicional: { pregunta: 'tematica_evento', valor: 'Temático' } }
       ],
     },
     {

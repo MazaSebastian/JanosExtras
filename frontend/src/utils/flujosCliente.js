@@ -995,6 +995,14 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           multiple: false,
           permiteOtro: false
         },
+        {
+          id: 'descripcion_tematica',
+          label: 'Descripción de la temática',
+          tipo: 'textarea',
+          requerido: true,
+          condicional: { pregunta: 'tematica_evento', valor: 'Temático (con una temática específica)' },
+          placeholder: 'Cuéntanos cuál es la temática de la fiesta...'
+        }
       ],
     },
     {
