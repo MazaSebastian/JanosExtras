@@ -29,7 +29,9 @@ export default async function handler(req, res) {
           c.dj_responsable_id,
           s.nombre AS salon_nombre,
           d.nombre AS dj_nombre,
-          d.disponibilidad_videollamada AS dj_disponibilidad
+          d.disponibilidad_videollamada AS dj_disponibilidad,
+          d.email AS dj_email,
+          d.telefono AS dj_telefono
         FROM coordinaciones c
         LEFT JOIN salones s ON c.salon_id = s.id
         LEFT JOIN djs d ON c.dj_responsable_id = d.id

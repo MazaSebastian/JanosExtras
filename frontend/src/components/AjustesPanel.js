@@ -28,6 +28,10 @@ export default function AjustesPanel() {
   const [recordatorioHoras, setRecordatorioHoras] = useState(2);
   const [reunionesDia, setReunionesDia] = useState(true);
   const [precoordinacionCompletada, setPrecoordinacionCompletada] = useState(true);
+
+  // Contact Information States
+  const [email, setEmail] = useState('');
+  const [telefono, setTelefono] = useState('');
   
   // Push Notification Device Status
   const [pushGranted, setPushGranted] = useState(false);
@@ -67,6 +71,12 @@ export default function AjustesPanel() {
           }
           if (dj.notific_precoordinacion_completada !== undefined && dj.notific_precoordinacion_completada !== null) {
             setPrecoordinacionCompletada(dj.notific_precoordinacion_completada);
+          }
+          if (dj.email !== undefined && dj.email !== null) {
+            setEmail(dj.email);
+          }
+          if (dj.telefono !== undefined && dj.telefono !== null) {
+            setTelefono(dj.telefono);
           }
           
           if (dj.disponibilidad_videollamada) {
@@ -162,6 +172,8 @@ export default function AjustesPanel() {
         notific_recordatorio_horas: parseInt(recordatorioHoras),
         notific_reuniones_dia: reunionesDia,
         notific_precoordinacion_completada: precoordinacionCompletada,
+        email,
+        telefono,
         disponibilidad_videollamada: {
           activo: dispActiva,
           horasDisponibles: horasDisponibles
@@ -214,77 +226,112 @@ export default function AjustesPanel() {
 
       <form onSubmit={handleSave}>
         {activeTab === 'notificaciones' && (
-          <div className={styles.card}>
-            <h3 className={styles.cardTitle}>Preferencias de Notificaciones</h3>
-            
-            <div className={styles.formGrid}>
-              <div className={styles.formGroup}>
-                <label htmlFor="recordatorio_horas">Recordatorio de Eventos</label>
-                <select 
-                  id="recordatorio_horas"
-                  className={styles.selectInput}
-                  value={recordatorioHoras}
-                  onChange={(e) => setRecordatorioHoras(e.target.value)}
-                >
-                  <option value={1}>1 hora antes del evento</option>
-                  <option value={2}>2 horas antes del evento</option>
-                  <option value={3}>3 horas antes del evento</option>
-                  <option value={4}>4 horas antes del evento</option>
-                  <option value={12}>12 horas antes del evento</option>
-                  <option value={24}>24 horas antes del evento</option>
-                </select>
-              </div>
-
-              <div className={styles.switchOption}>
-                <div className={styles.switchLabel}>
-                  <span>Resumen Diario</span>
-                  <span>Recibe un recordatorio cada mañana con tus eventos de ese día.</span>
-                </div>
-                <label className={styles.switch}>
+          <>
+            <div className={styles.card}>
+              <h3 className={styles.cardTitle}>Datos de Contacto</h3>
+              <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
+                Esta información se le mostrará a los clientes cuando agenden una videollamada para que puedan contactarte en caso de necesidad.
+              </p>
+              
+              <div className={styles.formGrid}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="telefono">Número de Teléfono / WhatsApp</label>
                   <input 
-                    type="checkbox" 
-                    checked={reunionesDia} 
-                    onChange={(e) => setReunionesDia(e.target.checked)}
+                    id="telefono"
+                    type="text" 
+                    className={styles.textInput} 
+                    placeholder="Ej: +54 9 11 1234 5678" 
+                    value={telefono} 
+                    onChange={(e) => setTelefono(e.target.value)}
                   />
-                  <span className={styles.slider}></span>
-                </label>
-              </div>
-
-              <div className={styles.switchOption}>
-                <div className={styles.switchLabel}>
-                  <span>Pre-coordinaciones Completadas</span>
-                  <span>Recibe notificaciones inmediatas cuando un cliente finalice su pre-coordinación.</span>
                 </div>
-                <label className={styles.switch}>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="email">Correo Electrónico de Contacto</label>
                   <input 
-                    type="checkbox" 
-                    checked={precoordinacionCompletada} 
-                    onChange={(e) => setPrecoordinacionCompletada(e.target.checked)}
+                    id="email"
+                    type="email" 
+                    className={styles.textInput} 
+                    placeholder="Ej: tuemail@janos.com" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)}
                   />
-                  <span className={styles.slider}></span>
-                </label>
-              </div>
-
-              <div className={styles.pushStatusWrapper}>
-                <div>
-                  <div className={styles.statusIndicator}>
-                    <span className={`${styles.statusDot} ${pushGranted ? styles.statusDotActive : styles.statusDotInactive}`}></span>
-                    <span>Push en este dispositivo: {pushGranted ? 'Habilitado' : 'No Habilitado'}</span>
-                  </div>
-                  <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.25rem' }}>
-                    Para recibir alertas en tiempo real, debes suscribir cada dispositivo que utilices.
-                  </p>
                 </div>
-                <button 
-                  type="button" 
-                  className={styles.pushButton}
-                  onClick={handlePushRegister}
-                >
-                  {pushGranted ? 'Re-suscripción' : 'Activar en este Dispositivo'}
-                </button>
               </div>
             </div>
-          </div>
+
+            <div className={styles.card}>
+              <h3 className={styles.cardTitle}>Preferencias de Notificaciones</h3>
+              
+              <div className={styles.formGrid}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="recordatorio_horas">Recordatorio de Eventos</label>
+                  <select 
+                    id="recordatorio_horas"
+                    className={styles.selectInput}
+                    value={recordatorioHoras}
+                    onChange={(e) => setRecordatorioHoras(e.target.value)}
+                  >
+                    <option value={1}>1 hora antes del evento</option>
+                    <option value={2}>2 horas antes del evento</option>
+                    <option value={3}>3 horas antes del evento</option>
+                    <option value={4}>4 horas antes del evento</option>
+                    <option value={12}>12 horas antes del evento</option>
+                    <option value={24}>24 horas antes del evento</option>
+                  </select>
+                </div>
+
+                <div className={styles.switchOption}>
+                  <div className={styles.switchLabel}>
+                    <span>Resumen Diario</span>
+                    <span>Recibe un recordatorio cada mañana con tus eventos de ese día.</span>
+                  </div>
+                  <label className={styles.switch}>
+                    <input 
+                      type="checkbox" 
+                      checked={reunionesDia} 
+                      onChange={(e) => setReunionesDia(e.target.checked)}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+
+                <div className={styles.switchOption}>
+                  <div className={styles.switchLabel}>
+                    <span>Pre-coordinaciones Completadas</span>
+                    <span>Recibe notificaciones inmediatas cuando un cliente finalice su pre-coordinación.</span>
+                  </div>
+                  <label className={styles.switch}>
+                    <input 
+                      type="checkbox" 
+                      checked={precoordinacionCompletada} 
+                      onChange={(e) => setPrecoordinacionCompletada(e.target.checked)}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+
+                <div className={styles.pushStatusWrapper}>
+                  <div>
+                    <div className={styles.statusIndicator}>
+                      <span className={`${styles.statusDot} ${pushGranted ? styles.statusDotActive : styles.statusDotInactive}`}></span>
+                      <span>Push en este dispositivo: {pushGranted ? 'Habilitado' : 'No Habilitado'}</span>
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>
+                      Para recibir alertas en tiempo real, debes suscribir cada dispositivo que utilices.
+                    </p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className={styles.pushButton}
+                    onClick={handlePushRegister}
+                  >
+                    {pushGranted ? 'Re-suscripción' : 'Activar en este Dispositivo'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {activeTab === 'disponibilidad' && (
@@ -307,7 +354,7 @@ export default function AjustesPanel() {
             {dispActiva && (
               <>
                 <h3 className={styles.cardTitle}>Horarios Disponibles por Día de la Semana</h3>
-                <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '1.5rem' }}>
+                <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
                   Selecciona qué días estás disponible y haz clic en cada día para configurar tus franjas horarias específicas.
                 </p>
 
@@ -356,11 +403,11 @@ export default function AjustesPanel() {
                               <button type="button" className={styles.actionLink} onClick={() => handleSelectAllDay(day.key)}>
                                 Seleccionar Todos
                               </button>
-                              <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+                              <span style={{ color: '#cbd5e1' }}>|</span>
                               <button type="button" className={styles.actionLink} onClick={() => handleClearDay(day.key)}>
                                 Limpiar
                               </button>
-                              <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+                              <span style={{ color: '#cbd5e1' }}>|</span>
                               <button type="button" className={styles.actionLink} onClick={() => handleCopyDayToAll(day.key)}>
                                 Copiar a todos los días
                               </button>

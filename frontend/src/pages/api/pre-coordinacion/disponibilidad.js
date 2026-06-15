@@ -27,10 +27,21 @@ export default async function handler(req, res) {
     
     // Si ya tiene una videollamada agendada, retornar los detalles de la misma
     if (coordinacion.videollamada_agendada) {
+      const djQuery = `
+        SELECT nombre, email, telefono
+        FROM djs
+        WHERE id = $1
+      `;
+      const djRes = await pool.query(djQuery, [coordinacion.dj_responsable_id]);
+      const dj = djRes.rows[0] || {};
+
       return res.status(200).json({
         alreadyBooked: true,
         fecha: coordinacion.videollamada_fecha,
-        meetLink: coordinacion.videollamada_meet_link
+        meetLink: coordinacion.videollamada_meet_link,
+        djNombre: dj.nombre,
+        djEmail: dj.email,
+        djTelefono: dj.telefono
       });
     }
 

@@ -27,7 +27,9 @@ export default async function handler(req, res) {
         notific_recordatorio_horas,
         notific_reuniones_dia,
         notific_precoordinacion_completada,
-        disponibilidad_videollamada
+        disponibilidad_videollamada,
+        email,
+        telefono
       } = req.body;
 
       const query = `
@@ -36,15 +38,19 @@ export default async function handler(req, res) {
           notific_recordatorio_horas = CASE WHEN $1::integer IS NOT NULL THEN $1::integer ELSE notific_recordatorio_horas END,
           notific_reuniones_dia = CASE WHEN $2::boolean IS NOT NULL THEN $2::boolean ELSE notific_reuniones_dia END,
           notific_precoordinacion_completada = CASE WHEN $3::boolean IS NOT NULL THEN $3::boolean ELSE notific_precoordinacion_completada END,
-          disponibilidad_videollamada = CASE WHEN $4::jsonb IS NOT NULL THEN $4::jsonb ELSE disponibilidad_videollamada END
-        WHERE id = $5
-        RETURNING id, nombre, salon_id, rol, color_hex, notific_recordatorio_horas, notific_reuniones_dia, notific_precoordinacion_completada, disponibilidad_videollamada
+          disponibilidad_videollamada = CASE WHEN $4::jsonb IS NOT NULL THEN $4::jsonb ELSE disponibilidad_videollamada END,
+          email = CASE WHEN $5::varchar IS NOT NULL THEN $5::varchar ELSE email END,
+          telefono = CASE WHEN $6::varchar IS NOT NULL THEN $6::varchar ELSE telefono END
+        WHERE id = $7
+        RETURNING id, nombre, salon_id, rol, color_hex, notific_recordatorio_horas, notific_reuniones_dia, notific_precoordinacion_completada, disponibilidad_videollamada, email, telefono
       `;
       const result = await pool.query(query, [
         notific_recordatorio_horas !== undefined ? notific_recordatorio_horas : null,
         notific_reuniones_dia !== undefined ? notific_reuniones_dia : null,
         notific_precoordinacion_completada !== undefined ? notific_precoordinacion_completada : null,
         disponibilidad_videollamada !== undefined && disponibilidad_videollamada !== null ? JSON.stringify(disponibilidad_videollamada) : null,
+        email !== undefined ? email : null,
+        telefono !== undefined ? telefono : null,
         auth.user.id
       ]);
 

@@ -36,6 +36,7 @@ export default function PreCoordinacionPage() {
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [bookedVideocall, setBookedVideocall] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const toggleSuggestions = (id) => {
     setShowSuggestions((prev) => ({
@@ -278,6 +279,7 @@ export default function PreCoordinacionPage() {
           meetLink: res.data.meetLink
         });
         setShowBookingModal(false);
+        setShowSuccessModal(true);
       }
     } catch (err) {
       console.error('Error al agendar videollamada:', err);
@@ -406,6 +408,87 @@ export default function PreCoordinacionPage() {
     );
   };
 
+  const renderSuccessModal = () => {
+    if (!showSuccessModal) return null;
+
+    const nombreAgasajado = coordinacion?.nombre_agasajado || '';
+    const djNombre = coordinacion?.dj_nombre || 'Sebastián Maza';
+    const djTelefono = coordinacion?.dj_telefono || '';
+    const djEmail = coordinacion?.dj_email || '';
+
+    return (
+      <div className={styles.bookingModalOverlay} onClick={() => setShowSuccessModal(false)}>
+        <div className={styles.bookingModalContent} onClick={(e) => e.stopPropagation()}>
+          <button 
+            type="button" 
+            className={styles.bookingModalClose}
+            onClick={() => setShowSuccessModal(false)}
+          >
+            ×
+          </button>
+          
+          <div className={styles.bookingModalHeader}>
+            <div className={styles.bookingModalIcon} style={{ animation: 'none' }}>🎉</div>
+            <h3 className={styles.bookingModalTitle}>
+              {nombreAgasajado ? `¡Excelente ${nombreAgasajado}!` : '¡Excelente!'}
+            </h3>
+            <p className={styles.bookingModalSubtitle} style={{ marginTop: '1rem', fontSize: '1rem', lineHeight: '1.6' }}>
+              ¡Has agendado una videollamada con <strong>{djNombre}</strong>, el DJ encargado de que tu fiesta sea inolvidable!
+            </p>
+          </div>
+
+          <div className={styles.bookingModalBody} style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', lineHeight: '1.6' }}>
+            <p style={{ marginBottom: '1.5rem' }}>
+              Recibirás un mensaje de coordinación por parte de {djNombre} para confirmar la videollamada.
+            </p>
+            
+            <div style={{
+              background: 'rgba(154, 77, 168, 0.12)',
+              border: '1px solid rgba(154, 77, 168, 0.25)',
+              borderRadius: '16px',
+              padding: '1.25rem',
+              marginTop: '1.5rem',
+              textAlign: 'left'
+            }}>
+              <h4 style={{ color: '#d896ff', margin: '0 0 0.75rem 0', fontFamily: "'Outfit', sans-serif", fontSize: '1.05rem' }}>
+                Datos de contacto del DJ:
+              </h4>
+              <p style={{ margin: '0.35rem 0', fontSize: '0.95rem' }}>
+                <strong>Nombre:</strong> {djNombre}
+              </p>
+              {djTelefono && (
+                <p style={{ margin: '0.35rem 0', fontSize: '0.95rem' }}>
+                  <strong>WhatsApp / Tel:</strong>{' '}
+                  <a href={`https://wa.me/${djTelefono.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#d896ff', textDecoration: 'underline' }}>
+                    {djTelefono}
+                  </a>
+                </p>
+              )}
+              {djEmail && (
+                <p style={{ margin: '0.35rem 0', fontSize: '0.95rem' }}>
+                  <strong>Email:</strong>{' '}
+                  <a href={`mailto:${djEmail}`} style={{ color: '#d896ff', textDecoration: 'underline' }}>
+                    {djEmail}
+                  </a>
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.bookingModalFooter}>
+            <button 
+              type="button" 
+              className={styles.confirmBookingButton}
+              onClick={() => setShowSuccessModal(false)}
+            >
+              Entendido, ¡muchas gracias!
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderBookingInlineSection = () => {
     if (bookingLoading) {
       return (
@@ -423,20 +506,6 @@ export default function PreCoordinacionPage() {
           <p className={styles.bookedText}>
             Tu reunión está programada para el <strong>{formatBookedDate(bookedVideocall.fecha)}</strong>.
           </p>
-          {bookedVideocall.meetLink ? (
-            <a 
-              href={bookedVideocall.meetLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={styles.bookedMeetButton}
-            >
-              📹 Unirse a la Videollamada
-            </a>
-          ) : (
-            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>
-              El link de la llamada estará disponible en el panel.
-            </p>
-          )}
         </div>
       );
     }
@@ -1023,6 +1092,7 @@ export default function PreCoordinacionPage() {
     return (
       <div className={styles.container}>
         {renderBookingModal()}
+        {renderSuccessModal()}
         <div className={styles.mensajeCierreContainer}>
           <div className={styles.successAnimationWrapper}>
             <div className={styles.successCircleGlow}></div>

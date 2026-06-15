@@ -25,7 +25,8 @@ export class DJ {
       SELECT 
         id, nombre, salon_id, rol, color_hex, fecha_registro,
         notific_recordatorio_horas, notific_reuniones_dia, 
-        notific_precoordinacion_completada, disponibilidad_videollamada 
+        notific_precoordinacion_completada, disponibilidad_videollamada,
+        email, telefono
       FROM djs 
       WHERE id = $1
     `;
