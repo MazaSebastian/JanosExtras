@@ -93,14 +93,14 @@ export default async function handler(req, res) {
           const updateQuery = `
             UPDATE coordinaciones
             SET 
-              fecha_evento = COALESCE($2, fecha_evento),
-              salon_id = COALESCE($3, salon_id),
-              tipo_evento = COALESCE($4, tipo_evento),
-              nombre_cliente = COALESCE($5, nombre_cliente),
-              apellido_cliente = COALESCE($6, apellido_cliente),
-              nombre_agasajado = COALESCE($7, nombre_agasajado),
-              telefono = COALESCE($8, telefono),
-              notas = COALESCE($9, notas),
+              fecha_evento = COALESCE(fecha_evento, $2),
+              salon_id = COALESCE(salon_id, $3),
+              tipo_evento = COALESCE(NULLIF(tipo_evento, ''), $4),
+              nombre_cliente = COALESCE(NULLIF(nombre_cliente, ''), $5),
+              apellido_cliente = COALESCE(NULLIF(apellido_cliente, ''), $6),
+              nombre_agasajado = COALESCE(NULLIF(nombre_agasajado, ''), $7),
+              telefono = COALESCE(NULLIF(telefono, ''), $8),
+              notas = COALESCE(NULLIF(notas, ''), $9),
               fecha_actualizacion = CURRENT_TIMESTAMP
             WHERE id = $1
           `;
