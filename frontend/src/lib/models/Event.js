@@ -53,9 +53,11 @@ export class Event {
         d.color_hex as dj_color_hex
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.salon_id = $1 
         AND EXTRACT(YEAR FROM e.fecha_evento) = $2
         AND EXTRACT(MONTH FROM e.fecha_evento) = $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento
     `;
     const result = await pool.query(query, [salon_id, year, month]);
@@ -70,7 +72,9 @@ export class Event {
         s.id as salon_id
       FROM eventos e
       INNER JOIN salones s ON e.salon_id = s.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.dj_id = $1
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento DESC
     `;
     const result = await pool.query(query, [dj_id]);
@@ -85,9 +89,11 @@ export class Event {
         s.id as salon_id
       FROM eventos e
       INNER JOIN salones s ON e.salon_id = s.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.dj_id = $1 
         AND EXTRACT(YEAR FROM e.fecha_evento) = $2
         AND EXTRACT(MONTH FROM e.fecha_evento) = $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento
     `;
     const result = await pool.query(query, [dj_id, year, month]);
@@ -102,8 +108,10 @@ export class Event {
         s.id as salon_id
       FROM eventos e
       INNER JOIN salones s ON e.salon_id = s.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.dj_id = $1 
         AND DATE(e.fecha_evento) BETWEEN $2 AND $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento
     `;
     const result = await pool.query(query, [dj_id, startDate, endDate]);
@@ -114,17 +122,21 @@ export class Event {
     const monthlyQuery = `
       SELECT 
         COUNT(*) as total_eventos,
-        COUNT(DISTINCT salon_id) as total_salones
-      FROM eventos
-      WHERE dj_id = $1 
-        AND EXTRACT(YEAR FROM fecha_evento) = $2
-        AND EXTRACT(MONTH FROM fecha_evento) = $3
+        COUNT(DISTINCT e.salon_id) as total_salones
+      FROM eventos e
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+      WHERE e.dj_id = $1 
+        AND EXTRACT(YEAR FROM e.fecha_evento) = $2
+        AND EXTRACT(MONTH FROM e.fecha_evento) = $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
     `;
     const totalQuery = `
       SELECT 
         COUNT(*) as total_eventos
-      FROM eventos
-      WHERE dj_id = $1
+      FROM eventos e
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+      WHERE e.dj_id = $1
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
     `;
 
     const [monthlyResult, totalResult] = await Promise.all([
@@ -151,10 +163,12 @@ export class Event {
     const query = `
       SELECT 
         COUNT(*) as total_eventos,
-        COUNT(DISTINCT salon_id) as total_salones
-      FROM eventos
-      WHERE dj_id = $1 
-        AND DATE(fecha_evento) BETWEEN $2 AND $3
+        COUNT(DISTINCT e.salon_id) as total_salones
+      FROM eventos e
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+      WHERE e.dj_id = $1 
+        AND DATE(e.fecha_evento) BETWEEN $2 AND $3
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
     `;
     const result = await pool.query(query, [dj_id, startDate, endDate]);
     const data = result.rows[0];
@@ -177,8 +191,10 @@ export class Event {
         d.color_hex as dj_color_hex
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE e.salon_id = $1 
         AND EXTRACT(YEAR FROM e.fecha_evento) = $2
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento
     `;
     const result = await pool.query(query, [salon_id, year]);
@@ -219,7 +235,9 @@ export class Event {
       FROM eventos e
       INNER JOIN djs d ON e.dj_id = d.id
       INNER JOIN salones s ON e.salon_id = s.id
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
       WHERE DATE(e.fecha_evento) = $1::date
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ORDER BY e.fecha_evento, d.nombre
     `;
     const result = await pool.query(query, [fechaParaQuery]);
@@ -247,7 +265,14 @@ export class Event {
   }
 
   static async countUnreadAssignments(dj_id) {
-    const query = `SELECT COUNT(*) FROM eventos WHERE dj_id = $1 AND is_new_assignment = true`;
+    const query = `
+      SELECT COUNT(*) 
+      FROM eventos e
+      LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+      WHERE e.dj_id = $1 
+        AND e.is_new_assignment = true
+        AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
+    `;
     const result = await pool.query(query, [dj_id]);
     return parseInt(result.rows[0].count, 10);
   }

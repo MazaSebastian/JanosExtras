@@ -408,7 +408,7 @@ export class Coordinacion {
   }
 
   static async delete(id) {
-    const query = `DELETE FROM coordinaciones WHERE id = $1 RETURNING id`;
+    const query = `UPDATE coordinaciones SET activo = false WHERE id = $1 RETURNING id`;
     const result = await pool.query(query, [id]);
     return result.rows[0] || null;
   }

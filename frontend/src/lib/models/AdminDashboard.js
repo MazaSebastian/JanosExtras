@@ -4,10 +4,12 @@ export class AdminDashboard {
   static async getSummary(year, month) {
     const query = `
       WITH eventos_filtrados AS (
-        SELECT *
-        FROM eventos
-        WHERE EXTRACT(YEAR FROM fecha_evento) = $1
-          AND EXTRACT(MONTH FROM fecha_evento) = $2
+        SELECT e.*
+        FROM eventos e
+        LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+        WHERE EXTRACT(YEAR FROM e.fecha_evento) = $1
+          AND EXTRACT(MONTH FROM e.fecha_evento) = $2
+          AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
       ),
       eventos_por_dj AS (
         SELECT dj_id, COUNT(*) AS total_eventos
@@ -48,20 +50,24 @@ export class AdminDashboard {
     const query = `
       WITH eventos_totales AS (
         SELECT 
-          dj_id,
+          e.dj_id,
           COUNT(*) AS total_eventos,
-          MAX(fecha_evento) AS ultimo_evento
-        FROM eventos
-        GROUP BY dj_id
+          MAX(e.fecha_evento) AS ultimo_evento
+        FROM eventos e
+        LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+        WHERE (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
+        GROUP BY e.dj_id
       ),
       eventos_mes AS (
         SELECT 
-          dj_id,
+          e.dj_id,
           COUNT(*) AS total_eventos_mes
-        FROM eventos
-        WHERE EXTRACT(YEAR FROM fecha_evento) = $1
-          AND EXTRACT(MONTH FROM fecha_evento) = $2
-        GROUP BY dj_id
+        FROM eventos e
+        LEFT JOIN coordinaciones c ON DATE(e.fecha_evento) = DATE(c.fecha_evento) AND e.salon_id = c.salon_id
+        WHERE EXTRACT(YEAR FROM e.fecha_evento) = $1
+          AND EXTRACT(MONTH FROM e.fecha_evento) = $2
+          AND (c.tipo_evento IS NULL OR TRIM(LOWER(c.tipo_evento)) NOT IN ('reunión', 'reunion'))
+        GROUP BY e.dj_id
       )
       SELECT 
         d.id,
@@ -106,7 +112,12 @@ export class AdminDashboard {
         COALESCE(COUNT(e.id), 0) AS total_eventos,
         COALESCE(COUNT(DISTINCT e.dj_id), 0) AS djs_activos
       FROM salones s
-      LEFT JOIN eventos e 
+      LEFT JOIN (
+        SELECT ev.*
+        FROM eventos ev
+        LEFT JOIN coordinaciones co ON DATE(ev.fecha_evento) = DATE(co.fecha_evento) AND ev.salon_id = co.salon_id
+        WHERE co.tipo_evento IS NULL OR TRIM(LOWER(co.tipo_evento)) NOT IN ('reunión', 'reunion')
+      ) e 
         ON e.salon_id = s.id
         AND EXTRACT(YEAR FROM e.fecha_evento) = $1
         AND EXTRACT(MONTH FROM e.fecha_evento) = $2

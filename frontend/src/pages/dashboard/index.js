@@ -90,9 +90,26 @@ export default function DJHomePage() {
       const coordinacionesRes = await coordinacionesAPI.getAll({ activo: true });
       const allCoordinaciones = coordinacionesRes.data || [];
 
-      // 1. Filtrar videollamadas próximas agendadas (no completadas)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const sevenDaysLater = new Date(today);
+      sevenDaysLater.setDate(today.getDate() + 7);
+      sevenDaysLater.setHours(23, 59, 59, 999);
+
+      // 1. Filtrar videollamadas próximas agendadas (no completadas) de la semana (próximos 7 días)
       const meetings = allCoordinaciones
-        .filter(c => c.videollamada_agendada && !c.videollamada_completada && c.videollamada_fecha)
+        .filter(c => {
+          if (!c.videollamada_agendada || c.videollamada_completada || !c.videollamada_fecha) return false;
+          let datePart = '';
+          if (typeof c.videollamada_fecha === 'string') {
+            datePart = c.videollamada_fecha.split('T')[0];
+          } else if (c.videollamada_fecha instanceof Date) {
+            datePart = c.videollamada_fecha.toISOString().split('T')[0];
+          }
+          if (!datePart) return false;
+          const meetingDate = new Date(datePart + 'T00:00:00'); // Evitar desfasajes
+          return meetingDate >= today && meetingDate <= sevenDaysLater;
+        })
         .sort((a, b) => new Date(a.videollamada_fecha) - new Date(b.videollamada_fecha));
       setUpcomingMeetings(meetings);
 
@@ -103,15 +120,11 @@ export default function DJHomePage() {
       setCompletedPreCoords(completedPre);
 
       // 3. Filtrar eventos asignados en la semana (próximos 7 días)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const sevenDaysLater = new Date(today);
-      sevenDaysLater.setDate(today.getDate() + 7);
-      sevenDaysLater.setHours(23, 59, 59, 999);
-
       const week = allCoordinaciones
         .filter(c => {
           if (!c.fecha_evento) return false;
+          // Excluir reuniones/videollamadas de los eventos de la semana
+          if (c.tipo_evento && ['reunión', 'reunion'].includes(c.tipo_evento.trim().toLowerCase())) return false;
           let datePart = '';
           if (typeof c.fecha_evento === 'string') {
             datePart = c.fecha_evento.split('T')[0];
@@ -349,7 +362,7 @@ export default function DJHomePage() {
                                 {meeting.nombre_agasajado ? `${meeting.nombre_agasajado} (${meeting.nombre_cliente})` : meeting.nombre_cliente || meeting.titulo}
                               </span>
                               <span className={styles.meetingTime} style={{ textTransform: 'capitalize' }}>
-                                ⏰ {dateFormatted} {meeting.tipo_evento && ` • ${meeting.tipo_evento}`}
+                                ⏰ {dateFormatted} • {meeting.tipo_evento === 'Reunión' ? 'Reunión' : 'Videollamada'}
                               </span>
                             </div>
                             <div className={styles.meetingActions}>
