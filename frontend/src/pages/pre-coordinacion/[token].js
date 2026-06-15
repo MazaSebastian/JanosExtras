@@ -304,64 +304,9 @@ export default function PreCoordinacionPage() {
     }
   };
 
-  const renderBookingSection = () => {
-    if (bookingLoading) {
-      return (
-        <div style={{ textAlign: 'center', marginTop: '2rem', color: 'rgba(255,255,255,0.6)' }}>
-          Cargando opciones de videollamada...
-        </div>
-      );
-    }
-
-    if (bookedVideocall) {
-      return (
-        <div className={styles.bookedMessageCard}>
-          <div className={styles.bookedIcon}>📅</div>
-          <h3 className={styles.bookedTitle}>¡Videollamada Agendada!</h3>
-          <p className={styles.bookedText}>
-            Tu reunión está programada para el <strong>{formatBookedDate(bookedVideocall.fecha)}</strong>.
-          </p>
-          {bookedVideocall.meetLink ? (
-            <a 
-              href={bookedVideocall.meetLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={styles.bookedMeetButton}
-            >
-              📹 Unirse a la Videollamada
-            </a>
-          ) : (
-            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>
-              El link de la llamada estará disponible en el panel.
-            </p>
-          )}
-        </div>
-      );
-    }
-
-    if (!availability || !availability.activo) {
+  const renderBookingModal = () => {
+    if (bookingLoading || bookedVideocall || !availability || !availability.activo || !showBookingModal) {
       return null;
-    }
-
-    if (!showBookingModal) {
-      return (
-        <div className={styles.reopenBookingBanner}>
-          <div style={{ fontSize: '2rem' }}>📅</div>
-          <h4 style={{ margin: '0.25rem 0', color: '#fff', fontSize: '1.15rem', fontFamily: "'Outfit', sans-serif" }}>
-            ¿Querés agendar una videollamada con tu DJ?
-          </h4>
-          <p style={{ margin: '0 0 1rem 0', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
-            Elegí un día y horario para tener una reunión virtual de coordinación con <strong>{availability.djNombre}</strong>.
-          </p>
-          <button 
-            type="button" 
-            className={styles.reopenBookingButton}
-            onClick={() => setShowBookingModal(true)}
-          >
-            🗓️ Reservar Videollamada
-          </button>
-        </div>
-      );
     }
 
     return (
@@ -459,6 +404,69 @@ export default function PreCoordinacionPage() {
         </div>
       </div>
     );
+  };
+
+  const renderBookingInlineSection = () => {
+    if (bookingLoading) {
+      return (
+        <div style={{ textAlign: 'center', marginTop: '2rem', color: 'rgba(255,255,255,0.6)' }}>
+          Cargando opciones de videollamada...
+        </div>
+      );
+    }
+
+    if (bookedVideocall) {
+      return (
+        <div className={styles.bookedMessageCard}>
+          <div className={styles.bookedIcon}>📅</div>
+          <h3 className={styles.bookedTitle}>¡Videollamada Agendada!</h3>
+          <p className={styles.bookedText}>
+            Tu reunión está programada para el <strong>{formatBookedDate(bookedVideocall.fecha)}</strong>.
+          </p>
+          {bookedVideocall.meetLink ? (
+            <a 
+              href={bookedVideocall.meetLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={styles.bookedMeetButton}
+            >
+              📹 Unirse a la Videollamada
+            </a>
+          ) : (
+            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>
+              El link de la llamada estará disponible en el panel.
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    if (!availability || !availability.activo) {
+      return null;
+    }
+
+    if (!showBookingModal) {
+      return (
+        <div className={styles.reopenBookingBanner}>
+          <div style={{ fontSize: '2rem' }}>📅</div>
+          <h4 style={{ margin: '0.25rem 0', color: '#fff', fontSize: '1.15rem', fontFamily: "'Outfit', sans-serif" }}>
+            ¿Querés agendar una videollamada con tu DJ?
+          </h4>
+          <p style={{ margin: '0 0 1rem 0', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+            Elegí un día y horario para tener una reunión virtual de coordinación con <strong>{availability.djNombre}</strong>.
+          </p>
+          <button 
+            type="button" 
+            className={styles.reopenBookingButton}
+            onClick={() => setShowBookingModal(true)}
+          >
+            🗓️ Reservar Videollamada
+          </button>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   const tipoEventoNormalizado = useMemo(() => {
@@ -1014,6 +1022,7 @@ export default function PreCoordinacionPage() {
   if (preCoordinacionEnviada) {
     return (
       <div className={styles.container}>
+        {renderBookingModal()}
         <div className={styles.mensajeCierreContainer}>
           <div className={styles.successAnimationWrapper}>
             <div className={styles.successCircleGlow}></div>
@@ -1042,7 +1051,7 @@ export default function PreCoordinacionPage() {
           <div className={styles.mensajeCierreDetalle}>
             <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
           </div>
-          {renderBookingSection()}
+          {renderBookingInlineSection()}
         </div>
       </div>
     );
