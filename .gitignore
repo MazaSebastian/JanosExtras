@@ -44,3 +44,4 @@ frontend/data/
 
 # Vercel
 .vercel
+.env*

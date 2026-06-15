@@ -214,8 +214,8 @@ export default async function handler(req, res) {
           pre_coordinacion_fecha_completado: new Date().toISOString(),
         });
         
-        // Enviar notificación push de forma asíncrona
-        enviarNotificacionPrecoordinacion(coordinacion.id).catch(err => {
+        // Enviar notificación push de forma asíncrona esperando que complete en serverless
+        await enviarNotificacionPrecoordinacion(coordinacion.id).catch(err => {
           console.error('Error al enviar notificación push de pre-coordinación:', err);
         });
       } else {
