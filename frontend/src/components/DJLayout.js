@@ -41,6 +41,7 @@ export default function DJLayout({ user, children }) {
     { path: '/dashboard/shows', label: 'Shows', icon: '🎤', pageTitle: 'Shows' },
     { path: '/dashboard/contenido', label: 'Contenido', icon: '📦', pageTitle: 'Contenido' },
     { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋', pageTitle: 'Coordinaciones' },
+    { path: '/dashboard/janos-sync', label: "Jano's Sync", icon: '🔄', pageTitle: "Jano's Sync" },
     { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅', pageTitle: 'Fechas Libres' },
     { path: '/dashboard/check-in-tecnico', label: 'Check-In Técnico', icon: '🔧', pageTitle: 'Check-In Técnico' },
     { path: '/dashboard/ajustes', label: 'Ajustes', icon: '⚙️', pageTitle: 'Ajustes' },
