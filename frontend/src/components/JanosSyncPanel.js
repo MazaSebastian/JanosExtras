@@ -11,6 +11,7 @@ export default function JanosSyncPanel() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
   const [iframeUrl, setIframeUrl] = useState('https://tecnica.janosgroup.com/index.php');
+  const [debugLogs, setDebugLogs] = useState([]);
   const iframeRef = useRef(null);
 
   // Cargar credenciales guardadas al montar
@@ -25,6 +26,17 @@ export default function JanosSyncPanel() {
         console.warn('Error parseando credenciales');
       }
     }
+  }, []);
+
+  // Escuchar errores globales y clicks para diagnóstico
+  useEffect(() => {
+    const handleError = (e) => {
+      setDebugLogs(prev => [...prev, `[ERROR] ${e.message || e.error || e}`]);
+    };
+    window.addEventListener('error', handleError);
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
   }, []);
 
   // Escuchar mensajes del UserScript
@@ -125,51 +137,74 @@ export default function JanosSyncPanel() {
   // Guardar credenciales
   const handleSaveCredentials = (e) => {
     e.preventDefault();
+    setDebugLogs(prev => [...prev, '[CLICK] Guardar Credenciales clicked']);
     localStorage.setItem(
       'janos_sync_credentials',
       JSON.stringify({ usuario, contrasena })
     );
+    setDebugLogs(prev => [...prev, '[SUCCESS] Credenciales guardadas en localStorage']);
     alert('🔐 Credenciales guardadas localmente en tu navegador.');
     
     // Si el iframe está cargado, enviarle las nuevas credenciales de inmediato
     if (iframeRef.current) {
-      iframeRef.current.contentWindow.postMessage(
-        {
-          type: 'JANOS_SYNC_AUTO_LOGIN',
-          usuario,
-          contrasena
-        },
-        '*'
-      );
+      try {
+        iframeRef.current.contentWindow.postMessage(
+          {
+            type: 'JANOS_SYNC_AUTO_LOGIN',
+            usuario,
+            contrasena
+          },
+          '*'
+        );
+        setDebugLogs(prev => [...prev, '[SUCCESS] Sent credentials auto-login postMessage to iframe']);
+      } catch (err) {
+        setDebugLogs(prev => [...prev, `[ERR] Failed to postMessage: ${err.message}`]);
+      }
     }
   };
 
   // Rellenar credenciales manualmente en el portal
   const handleAutoLogin = () => {
+    setDebugLogs(prev => [...prev, '[CLICK] Autorellenar Portal clicked']);
     if (!usuario || !contrasena) {
       alert('⚠️ Por favor, ingresá las credenciales primero.');
       return;
     }
     if (iframeRef.current) {
-      iframeRef.current.contentWindow.postMessage(
-        {
-          type: 'JANOS_SYNC_AUTO_LOGIN',
-          usuario,
-          contrasena
-        },
-        '*'
-      );
+      try {
+        iframeRef.current.contentWindow.postMessage(
+          {
+            type: 'JANOS_SYNC_AUTO_LOGIN',
+            usuario,
+            contrasena
+          },
+          '*'
+        );
+        setDebugLogs(prev => [...prev, '[SUCCESS] Sent credentials manual-login postMessage to iframe']);
+      } catch (err) {
+        setDebugLogs(prev => [...prev, `[ERR] Failed to postMessage: ${err.message}`]);
+      }
+    } else {
+      setDebugLogs(prev => [...prev, '[ERR] iframeRef.current is null on login!']);
     }
   };
 
   // Recargar el navegador interno
   const handleReloadIframe = () => {
+    setDebugLogs(prev => [...prev, '[CLICK] Recargar iframe clicked']);
     if (iframeRef.current) {
-      // Forzar recarga del iframe usando un timestamp único para evitar la caché y saltarse bloqueos
-      iframeRef.current.src = `https://tecnica.janosgroup.com/index.php?_t=${Date.now()}`;
+      try {
+        const newSrc = `https://tecnica.janosgroup.com/index.php?_t=${Date.now()}`;
+        iframeRef.current.src = newSrc;
+        setDebugLogs(prev => [...prev, `[SUCCESS] iframe src updated to: ${newSrc}`]);
+      } catch (err) {
+        setDebugLogs(prev => [...prev, `[ERR] Failed to set iframe src: ${err.message}`]);
+      }
       setSyncStatus('idle');
       setReport(null);
       setError(null);
+    } else {
+      setDebugLogs(prev => [...prev, '[ERR] iframeRef.current is null on reload!']);
     }
   };
 
@@ -433,6 +468,43 @@ export default function JanosSyncPanel() {
             className={styles.browserFrame}
             title="Portal Jano's"
           />
+        </div>
+
+        {/* DEBUG LOGS */}
+        <div style={{
+          gridColumn: '1 / -1',
+          background: '#0e0a1a',
+          border: '1px solid rgba(124, 58, 237, 0.4)',
+          borderRadius: '16px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '13px',
+          color: '#cbd5e1',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}>
+          <div style={{ fontWeight: 'bold', color: '#c084fc', borderBottom: '1px solid rgba(124, 58, 237, 0.2)', paddingBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>🛠️ Diagnósticos de Consola en Tiempo Real</span>
+            <button 
+              type="button" 
+              onClick={() => setDebugLogs([])} 
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}
+            >
+              Limpiar
+            </button>
+          </div>
+          <div style={{ maxHeight: '160px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {debugLogs.length === 0 ? (
+              <div style={{ color: '#64748b' }}>No se han registrado eventos todavía. Probá hacer clic en los botones.</div>
+            ) : (
+              debugLogs.map((log, index) => (
+                <div key={index} style={{ color: log.includes('[ERR') || log.includes('[ERROR') ? '#f87171' : log.includes('[SUCCESS') ? '#34d399' : '#cbd5e1' }}>
+                  {log}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
