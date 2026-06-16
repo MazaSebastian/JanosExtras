@@ -450,7 +450,7 @@ export default function JanosSyncPanel() {
               <span>tecnica.janosgroup.com/index.php</span>
             </div>
 
-            <div className={styles.browserActions}>
+            <div className={styles.browserActions} style={{ display: 'flex', gap: '8px' }}>
               <button
                 className={styles.buttonSecondary}
                 style={{ padding: '6px 12px', fontSize: '12px' }}
@@ -458,6 +458,15 @@ export default function JanosSyncPanel() {
               >
                 🔄 Recargar
               </button>
+              <a
+                href="https://tecnica.janosgroup.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.buttonSecondary}
+                style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                🌐 Abrir en Pestaña Nueva
+              </a>
             </div>
           </div>
 
