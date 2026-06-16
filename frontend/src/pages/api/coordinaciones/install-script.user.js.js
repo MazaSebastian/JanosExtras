@@ -275,7 +275,7 @@ export default function handler(req, res) {
 
         for (const ev of baseEventos) {
             completed++;
-            syncBtn.innerText = `⏳ Cargando \${completed}/\${baseEventos.length}...`;
+            syncBtn.innerText = \`⏳ Cargando \${completed}/\${baseEventos.length}...\`;
             if (isIframe) {
                 window.top.postMessage({ 
                     type: 'JANOS_SYNC_PROGRESS', 
@@ -289,9 +289,9 @@ export default function handler(req, res) {
                 const details = await fetchEventDetails(ev.codigo_evento);
                 let telLimpio = details.telefono ? details.telefono.replace(/[^\\d+]/g, '') : '';
                 const extraNotes = [];
-                if (details.mail) extraNotes.push(`Mail: \${details.mail}`);
-                if (details.dni) extraNotes.push(`DNI: \${details.dni}`);
-                if (details.direccion) extraNotes.push(`Dirección: \${details.direccion}\${details.localidad ? ', ' + details.localidad : ''}`);
+                if (details.mail) extraNotes.push(\`Mail: \${details.mail}\`);
+                if (details.dni) extraNotes.push(\`DNI: \${details.dni}\`);
+                if (details.direccion) extraNotes.push(\`Dirección: \${details.direccion}\${details.localidad ? ', ' + details.localidad : ''}\`);
                 
                 richEventos.push({
                     ...ev,
@@ -303,7 +303,7 @@ export default function handler(req, res) {
                     notas: extraNotes.length > 0 ? extraNotes.join(' | ') : null
                 });
             } catch (err) {
-                console.error(`Error cargando ficha para \${ev.codigo_evento}:`, err);
+                console.error(\`Error cargando ficha para \${ev.codigo_evento}:\`, err);
                 richEventos.push(ev);
             }
             await new Promise(resolve => setTimeout(resolve, 150));
@@ -319,7 +319,7 @@ export default function handler(req, res) {
             url: API_URL,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer \${token}\`
+                "Authorization": \`Bearer \${token}\`
             },
             data: JSON.stringify({ eventos: richEventos }),
             onload: function(response) {
@@ -327,7 +327,7 @@ export default function handler(req, res) {
                     const resData = JSON.parse(response.responseText);
                     if (response.status === 200 && resData.success) {
                         const report = resData.report;
-                        const msg = `🎉 Sincronización completada: \${report.recibidos} procesados, \${report.creados} creados, \${report.actualizados} actualizados.`;
+                        const msg = \`🎉 Sincronización completada: \${report.recibidos} procesados, \${report.creados} creados, \${report.actualizados} actualizados.\`;
                         if (isIframe) {
                             window.top.postMessage({ type: 'JANOS_SYNC_SUCCESS', report }, '*');
                         } else {
@@ -338,7 +338,7 @@ export default function handler(req, res) {
                         if (isIframe) {
                             window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: errMsg }, '*');
                         } else {
-                            alert(`❌ Error del servidor: \${errMsg}`);
+                            alert(\`❌ Error del servidor: \${errMsg}\`);
                         }
                     }
                 } catch (e) {
