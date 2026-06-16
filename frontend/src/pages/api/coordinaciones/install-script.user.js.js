@@ -6,7 +6,7 @@ export default function handler(req, res) {
   const script = `// ==UserScript==
 // @name         Jano's Sync - Planilla de Coordinaciones
 // @namespace    http://tampermonkey.net/
-// @version      1.8
+// @version      1.9
 // @description  Sincroniza y extrae detalles completos de clientes desde la ficha técnica de Jano's.
 // @author       Antigravity
 // @match        *://tecnica.janosgroup.com/*
@@ -107,9 +107,17 @@ export default function handler(req, res) {
 
                     // Cliquear botón de ingresar
                     if (submitBtn) {
-                        setTimeout(() => {
-                            submitBtn.click();
-                        }, 100);
+                        const attempted = sessionStorage.getItem('janos_sync_auto_login_attempted');
+                        if (event.data.isManual || !attempted) {
+                            if (!event.data.isManual) {
+                                sessionStorage.setItem('janos_sync_auto_login_attempted', 'true');
+                            }
+                            setTimeout(() => {
+                                submitBtn.click();
+                            }, 100);
+                        } else {
+                            console.log("Jano's Sync: Auto-login already attempted. Skipping click to prevent loops.");
+                        }
                     }
                 }
             }
@@ -124,6 +132,9 @@ export default function handler(req, res) {
     if (!table) {
         return;
     }
+
+    // Login exitoso detectado -> Limpiar flag de intento de autologin
+    sessionStorage.removeItem('janos_sync_auto_login_attempted');
 
     // 2. Insertar contenedor de Jano's Sync en la interfaz
     const syncContainer = document.createElement('div');

@@ -188,7 +188,8 @@ export default function JanosSyncPanel() {
           {
             type: 'JANOS_SYNC_AUTO_LOGIN',
             usuario,
-            contrasena
+            contrasena,
+            isManual: true
           },
           '*'
         );
