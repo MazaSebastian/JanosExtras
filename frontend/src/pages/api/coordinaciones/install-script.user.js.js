@@ -6,7 +6,7 @@ export default function handler(req, res) {
   const script = `// ==UserScript==
 // @name         Jano's Sync - Planilla de Coordinaciones
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.8
 // @description  Sincroniza y extrae detalles completos de clientes desde la ficha técnica de Jano's.
 // @author       Antigravity
 // @match        *://tecnica.janosgroup.com/*
@@ -83,9 +83,10 @@ export default function handler(req, res) {
                                   document.querySelector('input[type="password"]') ||
                                   document.querySelector('input[placeholder*="contrase" i]');
                 
-                let submitBtn = document.querySelector('button[type="submit"]') ||
+                let submitBtn = document.querySelector('form button[type="submit"]') ||
+                                document.querySelector('button[type="submit"]') ||
                                 document.querySelector('input[type="submit"]') ||
-                                document.querySelector('button') ||
+                                document.querySelector('form button') ||
                                 document.querySelector('.btn-primary');
 
                 if (!submitBtn) {
@@ -116,6 +117,12 @@ export default function handler(req, res) {
 
         // Solicitar credenciales
         window.top.postMessage({ type: 'JANOS_SYNC_REQUEST_CREDS' }, '*');
+    }
+
+    // Solo continuar y crear la interfaz si estamos en la página de la planilla (existe la tabla de coordinaciones)
+    const table = getPlanillaTable();
+    if (!table) {
+        return;
     }
 
     // 2. Insertar contenedor de Jano's Sync en la interfaz
