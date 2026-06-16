@@ -6,7 +6,7 @@ export default function handler(req, res) {
   const script = `// ==UserScript==
 // @name         Jano's Sync - Planilla de Coordinaciones
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  Sincroniza y extrae detalles completos de clientes desde la ficha técnica de Jano's.
 // @author       Antigravity
 // @match        https://tecnica.janosgroup.com/index.php*
@@ -52,14 +52,44 @@ export default function handler(req, res) {
 
             if (event.data.type === 'JANOS_SYNC_AUTO_LOGIN') {
                 const { usuario, contrasena } = event.data;
-                const userInput = document.querySelector('input[name="usuario"], input[type="text"]');
-                const passInput = document.querySelector('input[name="contrasena"], input[type="password"]');
-                const submitBtn = document.querySelector('button[type="submit"], input[type="submit"]');
+                
+                // Selector robusto de campos de texto
+                const userInput = document.querySelector('input[name="usuario"]') ||
+                                  document.querySelector('input[type="text"]') ||
+                                  document.querySelector('input[placeholder*="usuario" i]');
+                                  
+                const passInput = document.querySelector('input[name="contrasena"]') ||
+                                  document.querySelector('input[name="contraseña"]') ||
+                                  document.querySelector('input[type="password"]') ||
+                                  document.querySelector('input[placeholder*="contrase" i]');
+                
+                let submitBtn = document.querySelector('button[type="submit"]') ||
+                                document.querySelector('input[type="submit"]') ||
+                                document.querySelector('button') ||
+                                document.querySelector('.btn-primary');
 
-                if (userInput && passInput && submitBtn) {
+                if (!submitBtn) {
+                    const clickables = Array.from(document.querySelectorAll('button, input, a, div, span'));
+                    submitBtn = clickables.find(el => el.innerText && el.innerText.trim().toLowerCase() === 'ingresar');
+                }
+
+                if (userInput && passInput) {
+                    // Autofilar valores
                     userInput.value = usuario;
                     passInput.value = contrasena;
-                    submitBtn.click();
+
+                    // Despachar eventos nativos para forzar que frameworks (React/Vue) actualicen el estado interno
+                    userInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    userInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    passInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    passInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    // Cliquear botón de ingresar
+                    if (submitBtn) {
+                        setTimeout(() => {
+                            submitBtn.click();
+                        }, 100);
+                    }
                 }
             }
         });
