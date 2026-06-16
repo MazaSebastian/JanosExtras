@@ -6,12 +6,13 @@ export default function handler(req, res) {
   const script = `// ==UserScript==
 // @name         Jano's Sync - Planilla de Coordinaciones
 // @namespace    http://tampermonkey.net/
-// @version      1.5
+// @version      1.6
 // @description  Sincroniza y extrae detalles completos de clientes desde la ficha técnica de Jano's.
 // @author       Antigravity
 // @match        https://tecnica.janosgroup.com/index.php*
 // @match        https://tecnica.janosgroup.com/
 // @match        ${baseUrl}/dashboard/janos-sync*
+// @allFrames    true
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -24,6 +25,21 @@ export default function handler(req, res) {
 
     const API_URL = "${baseUrl}/api/coordinaciones/sync-bulk";
     const PARENT_ORIGIN = "${baseUrl}";
+
+    // Indicador visual en la pantalla de Login para diagnosticar si el script corre en el iframe
+    const isLoginPage = window.location.href.includes('/index.php') || window.location.pathname === '/';
+    if (isLoginPage) {
+        setTimeout(() => {
+            const loginCard = document.querySelector('form') || document.querySelector('.card') || document.body;
+            if (loginCard && !document.getElementById('janos-sync-badge')) {
+                const badge = document.createElement('div');
+                badge.id = "janos-sync-badge";
+                badge.innerText = "⚡ Jano's Sync Conectado";
+                badge.style.cssText = "background-color: #7c3aed; color: white; padding: 8px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 6px; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+                loginCard.appendChild(badge);
+            }
+        }, 500);
+    }
 
     // Ping al dashboard si estamos cargados en él
     const isDashboard = window.location.href.includes('/dashboard/janos-sync');
