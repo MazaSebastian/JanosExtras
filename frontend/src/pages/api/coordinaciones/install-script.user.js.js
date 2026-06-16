@@ -220,18 +220,18 @@ export default function handler(req, res) {
             return match ? match[1].trim() : '';
         };
 
-        const tipoVal = clean(/Tipo de evento\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i) || clean(/Tipo\\\\s*:\\\\s*([^\\\\n]+)/i);
+        const tipoVal = clean(/Tipo de evento\\s*[:\\-]?\\s*([^\\n]+)/i) || clean(/Tipo\\s*:\\s*([^\\n]+)/i);
 
         return {
             tipo: tipoVal.toLowerCase().includes('de evento') ? '' : tipoVal,
-            nombre: clean(/Nombre\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i),
-            apellido: clean(/Apellido\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i),
-            agasajado: clean(/Agasajad[oa]\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i),
-            telefono: clean(/Celular\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i) || clean(/Teléfono\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i) || clean(/Telefono\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i),
-            mail: clean(/Mail\\\\s*[:\\\\-]?\\\\s*([^\\\\n\\\\s]+)/i),
-            dni: clean(/DNI\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i),
-            direccion: clean(/Direccion\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i) || clean(/Dirección\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i),
-            localidad: clean(/Localidad\\\\s*[:\\\\-]?\\\\s*([^\\\\n]+)/i)
+            nombre: clean(/Nombre\\s*[:\\-]?\\s*([^\\n]+)/i),
+            apellido: clean(/Apellido\\s*[:\\-]?\\s*([^\\n]+)/i),
+            agasajado: clean(/Agasajad[oa]\\s*[:\\-]?\\s*([^\\n]+)/i),
+            telefono: clean(/Celular\\s*[:\\-]?\\s*([^\\n]+)/i) || clean(/Teléfono\\s*[:\\-]?\\s*([^\\n]+)/i) || clean(/Telefono\\s*[:\\-]?\\s*([^\\n]+)/i),
+            mail: clean(/Mail\\s*[:\\-]?\\s*([^\\n\\s]+)/i),
+            dni: clean(/DNI\\s*[:\\-]?\\s*([^\\n]+)/i),
+            direccion: clean(/Direccion\\s*[:\\-]?\\s*([^\\n]+)/i) || clean(/Dirección\\s*[:\\-]?\\s*([^\\n]+)/i),
+            localidad: clean(/Localidad\\s*[:\\-]?\\s*([^\\n]+)/i)
         };
     }
 
@@ -277,7 +277,7 @@ export default function handler(req, res) {
                 const tipo = cells[3].innerText.trim();
                 const cliente = cells[6].innerText.trim();
 
-                if (codigo && /^\\\\d+$/.test(codigo)) {
+                if (codigo && /^\\d+$/.test(codigo)) {
                     baseEventos.push({
                         codigo_evento: codigo,
                         fecha_evento: fecha,
