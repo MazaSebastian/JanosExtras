@@ -44,6 +44,12 @@ export default function handler(req, res) {
     // Ping al dashboard si estamos cargados en él
     const isDashboard = window.location.href.includes('/dashboard/janos-sync');
     if (isDashboard) {
+        // Guardar el token de la sesión activa
+        const activeToken = localStorage.getItem('token');
+        if (activeToken) {
+            GM_setValue('sync_token', activeToken);
+        }
+
         // Enviar ping inicial de inmediato
         window.postMessage({ type: 'JANOS_SYNC_SCRIPT_INSTALLED_PING' }, window.location.origin);
         
@@ -51,6 +57,10 @@ export default function handler(req, res) {
         window.addEventListener('message', function(event) {
             if (event.origin !== window.location.origin) return;
             if (event.data && event.data.type === 'JANOS_SYNC_CHECK_PING') {
+                const currentToken = localStorage.getItem('token');
+                if (currentToken) {
+                    GM_setValue('sync_token', currentToken);
+                }
                 window.postMessage({ type: 'JANOS_SYNC_SCRIPT_INSTALLED_PING' }, window.location.origin);
             }
         });
@@ -71,7 +81,10 @@ export default function handler(req, res) {
             if (!isAuthorizedOrigin) return;
 
             if (event.data.type === 'JANOS_SYNC_AUTO_LOGIN') {
-                const { usuario, contrasena } = event.data;
+                const { usuario, contrasena, token } = event.data;
+                if (token) {
+                    GM_setValue('sync_token', token);
+                }
                 
                 // Selector robusto de campos de texto
                 const userInput = document.querySelector('input[name="usuario"]') ||

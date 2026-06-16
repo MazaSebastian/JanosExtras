@@ -68,11 +68,13 @@ export default function JanosSyncPanel() {
           try {
             const parsed = JSON.parse(stored);
             if (parsed.usuario && parsed.contrasena && iframeRef.current) {
+              const userToken = localStorage.getItem('token');
               iframeRef.current.contentWindow.postMessage(
                 {
                   type: 'JANOS_SYNC_AUTO_LOGIN',
                   usuario: parsed.usuario,
-                  contrasena: parsed.contrasena
+                  contrasena: parsed.contrasena,
+                  token: userToken
                 },
                 '*'
               );
@@ -160,11 +162,13 @@ export default function JanosSyncPanel() {
     // Si el iframe está cargado, enviarle las nuevas credenciales de inmediato
     if (iframeRef.current) {
       try {
+        const userToken = localStorage.getItem('token');
         iframeRef.current.contentWindow.postMessage(
           {
             type: 'JANOS_SYNC_AUTO_LOGIN',
             usuario,
-            contrasena
+            contrasena,
+            token: userToken
           },
           '*'
         );
@@ -184,12 +188,14 @@ export default function JanosSyncPanel() {
     }
     if (iframeRef.current) {
       try {
+        const userToken = localStorage.getItem('token');
         iframeRef.current.contentWindow.postMessage(
           {
             type: 'JANOS_SYNC_AUTO_LOGIN',
             usuario,
             contrasena,
-            isManual: true
+            isManual: true,
+            token: userToken
           },
           '*'
         );
