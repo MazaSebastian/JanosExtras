@@ -54,7 +54,7 @@ export default function JanosSyncPanel() {
                   usuario: parsed.usuario,
                   contrasena: parsed.contrasena
                 },
-                'https://tecnica.janosgroup.com'
+                '*'
               );
             }
           } catch (e) {
@@ -139,7 +139,7 @@ export default function JanosSyncPanel() {
           usuario,
           contrasena
         },
-        'https://tecnica.janosgroup.com'
+        '*'
       );
     }
   };
@@ -157,7 +157,7 @@ export default function JanosSyncPanel() {
           usuario,
           contrasena
         },
-        'https://tecnica.janosgroup.com'
+        '*'
       );
     }
   };
@@ -165,8 +165,8 @@ export default function JanosSyncPanel() {
   // Recargar el navegador interno
   const handleReloadIframe = () => {
     if (iframeRef.current) {
-      // Forzar recarga del iframe reasignando el src
-      iframeRef.current.src = 'https://tecnica.janosgroup.com/index.php';
+      // Forzar recarga del iframe usando un timestamp único para evitar la caché y saltarse bloqueos
+      iframeRef.current.src = `https://tecnica.janosgroup.com/index.php?_t=${Date.now()}`;
       setSyncStatus('idle');
       setReport(null);
       setError(null);
