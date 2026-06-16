@@ -6,17 +6,17 @@ export default function handler(req, res) {
   const script = `// ==UserScript==
 // @name         Jano's Sync - Planilla de Coordinaciones
 // @namespace    http://tampermonkey.net/
-// @version      1.6
+// @version      1.7
 // @description  Sincroniza y extrae detalles completos de clientes desde la ficha técnica de Jano's.
 // @author       Antigravity
-// @match        https://tecnica.janosgroup.com/index.php*
-// @match        https://tecnica.janosgroup.com/
+// @match        *://tecnica.janosgroup.com/*
 // @match        ${baseUrl}/dashboard/janos-sync*
 // @allFrames    true
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @connect      localhost
+// @connect      janosgroup.com
 // @connect      janosdjs.com
 // ==/UserScript==
 
@@ -60,11 +60,15 @@ export default function handler(req, res) {
     // Comunicar estado al Dashboard si estamos en un iframe
     const isIframe = window.self !== window.top;
     if (isIframe) {
-        window.top.postMessage({ type: 'JANOS_SYNC_SCRIPT_LOADED' }, PARENT_ORIGIN);
+        window.top.postMessage({ type: 'JANOS_SYNC_SCRIPT_LOADED' }, '*');
 
         // Escuchar credenciales desde el dashboard principal
         window.addEventListener('message', function(event) {
-            if (event.origin !== PARENT_ORIGIN) return;
+            const isAuthorizedOrigin = event.origin === PARENT_ORIGIN || 
+                                       event.origin.includes('localhost') || 
+                                       event.origin.includes('janosdjs.com') || 
+                                       event.origin.includes('vercel.app');
+            if (!isAuthorizedOrigin) return;
 
             if (event.data.type === 'JANOS_SYNC_AUTO_LOGIN') {
                 const { usuario, contrasena } = event.data;
@@ -111,7 +115,7 @@ export default function handler(req, res) {
         });
 
         // Solicitar credenciales
-        window.top.postMessage({ type: 'JANOS_SYNC_REQUEST_CREDS' }, PARENT_ORIGIN);
+        window.top.postMessage({ type: 'JANOS_SYNC_REQUEST_CREDS' }, '*');
     }
 
     // 2. Insertar contenedor de Jano's Sync en la interfaz
@@ -271,23 +275,23 @@ export default function handler(req, res) {
 
         for (const ev of baseEventos) {
             completed++;
-            syncBtn.innerText = \`⏳ Cargando \${completed}/\${baseEventos.length}...\`;
+            syncBtn.innerText = `⏳ Cargando \${completed}/\${baseEventos.length}...`;
             if (isIframe) {
                 window.top.postMessage({ 
                     type: 'JANOS_SYNC_PROGRESS', 
                     current: completed, 
                     total: baseEventos.length,
                     codigo: ev.codigo_evento
-                }, PARENT_ORIGIN);
+                }, '*');
             }
 
             try {
                 const details = await fetchEventDetails(ev.codigo_evento);
-                let telLimpio = details.telefono ? details.telefono.replace(/[^\\\\d+]/g, '') : '';
+                let telLimpio = details.telefono ? details.telefono.replace(/[^\\d+]/g, '') : '';
                 const extraNotes = [];
-                if (details.mail) extraNotes.push(\`Mail: \${details.mail}\`);
-                if (details.dni) extraNotes.push(\`DNI: \${details.dni}\`);
-                if (details.direccion) extraNotes.push(\`Dirección: \${details.direccion}\${details.localidad ? ', ' + details.localidad : ''}\`);
+                if (details.mail) extraNotes.push(`Mail: \${details.mail}`);
+                if (details.dni) extraNotes.push(`DNI: \${details.dni}`);
+                if (details.direccion) extraNotes.push(`Dirección: \${details.direccion}\${details.localidad ? ', ' + details.localidad : ''}`);
                 
                 richEventos.push({
                     ...ev,
@@ -299,7 +303,7 @@ export default function handler(req, res) {
                     notas: extraNotes.length > 0 ? extraNotes.join(' | ') : null
                 });
             } catch (err) {
-                console.error(\`Error cargando ficha para \${ev.codigo_evento}:\`, err);
+                console.error(`Error cargando ficha para \${ev.codigo_evento}:`, err);
                 richEventos.push(ev);
             }
             await new Promise(resolve => setTimeout(resolve, 150));
@@ -307,7 +311,7 @@ export default function handler(req, res) {
 
         syncBtn.innerText = '📤 Enviando a Extras...';
         if (isIframe) {
-            window.top.postMessage({ type: 'JANOS_SYNC_SENDING' }, PARENT_ORIGIN);
+            window.top.postMessage({ type: 'JANOS_SYNC_SENDING' }, '*');
         }
 
         GM_xmlhttpRequest({
@@ -315,7 +319,7 @@ export default function handler(req, res) {
             url: API_URL,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": \`Bearer \${token}\`
+                "Authorization": `Bearer \${token}\`
             },
             data: JSON.stringify({ eventos: richEventos }),
             onload: function(response) {
@@ -323,23 +327,23 @@ export default function handler(req, res) {
                     const resData = JSON.parse(response.responseText);
                     if (response.status === 200 && resData.success) {
                         const report = resData.report;
-                        const msg = \`🎉 Sincronización completada: \${report.recibidos} procesados, \${report.creados} creados, \${report.actualizados} actualizados.\`;
+                        const msg = `🎉 Sincronización completada: \${report.recibidos} procesados, \${report.creados} creados, \${report.actualizados} actualizados.`;
                         if (isIframe) {
-                            window.top.postMessage({ type: 'JANOS_SYNC_SUCCESS', report }, PARENT_ORIGIN);
+                            window.top.postMessage({ type: 'JANOS_SYNC_SUCCESS', report }, '*');
                         } else {
                             alert(msg);
                         }
                     } else {
                         const errMsg = resData.error || response.statusText;
                         if (isIframe) {
-                            window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: errMsg }, PARENT_ORIGIN);
+                            window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: errMsg }, '*');
                         } else {
-                            alert(\`❌ Error del servidor: \${errMsg}\`);
+                            alert(`❌ Error del servidor: \${errMsg}`);
                         }
                     }
                 } catch (e) {
                     if (isIframe) {
-                        window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: 'Error parseando respuesta' }, PARENT_ORIGIN);
+                        window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: 'Error parseando respuesta' }, '*');
                     } else {
                         alert('❌ Error al procesar respuesta.');
                     }
@@ -348,7 +352,7 @@ export default function handler(req, res) {
             },
             onerror: function(error) {
                 if (isIframe) {
-                    window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: 'Error de conexión' }, PARENT_ORIGIN);
+                    window.top.postMessage({ type: 'JANOS_SYNC_ERROR', error: 'Error de conexión' }, '*');
                 } else {
                     alert('❌ Error de conexión al servidor.');
                 }

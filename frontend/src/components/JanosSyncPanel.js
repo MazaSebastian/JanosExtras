@@ -12,6 +12,7 @@ export default function JanosSyncPanel() {
   const [error, setError] = useState(null);
   const [iframeUrl, setIframeUrl] = useState('https://tecnica.janosgroup.com/index.php');
   const [debugLogs, setDebugLogs] = useState([]);
+  const [iframeKey, setIframeKey] = useState(0);
   const iframeRef = useRef(null);
 
   // Cargar credenciales guardadas al montar
@@ -42,6 +43,11 @@ export default function JanosSyncPanel() {
   // Escuchar mensajes del UserScript
   useEffect(() => {
     const handleMessage = (event) => {
+      // Registrar todos los mensajes para diagnóstico
+      if (event.data && event.data.type) {
+        setDebugLogs(prev => [...prev, `[MSG RECEIVED] type: ${event.data.type} from origin: ${event.origin}`]);
+      }
+
       // Aceptar del portal Jano's o de nuestra propia página
       const isTrusted = event.origin.includes('janosgroup.com') || event.origin === window.location.origin;
       if (!isTrusted) return;
@@ -51,9 +57,11 @@ export default function JanosSyncPanel() {
 
       if (data.type === 'JANOS_SYNC_SCRIPT_LOADED' || data.type === 'JANOS_SYNC_SCRIPT_INSTALLED_PING') {
         setScriptDetected(true);
+        setDebugLogs(prev => [...prev, `[SUCCESS] Jano's Sync Script detected/activated`]);
       }
 
       if (data.type === 'JANOS_SYNC_REQUEST_CREDS') {
+        setDebugLogs(prev => [...prev, `[REQUEST] Iframe requested login credentials`]);
         // Enviar credenciales guardadas de forma automática al script si existen
         const stored = localStorage.getItem('janos_sync_credentials');
         if (stored) {
@@ -68,10 +76,14 @@ export default function JanosSyncPanel() {
                 },
                 '*'
               );
+              setDebugLogs(prev => [...prev, `[SUCCESS] Sent credentials response to iframe query`]);
             }
           } catch (e) {
             console.error('Error enviando credenciales automáticas', e);
+            setDebugLogs(prev => [...prev, `[ERR] Error parsing credentials on request: ${e.message}`]);
           }
+        } else {
+          setDebugLogs(prev => [...prev, `[INFO] Iframe requested credentials but none are stored locally`]);
         }
       }
 
@@ -192,20 +204,12 @@ export default function JanosSyncPanel() {
   // Recargar el navegador interno
   const handleReloadIframe = () => {
     setDebugLogs(prev => [...prev, '[CLICK] Recargar iframe clicked']);
-    if (iframeRef.current) {
-      try {
-        const newSrc = `https://tecnica.janosgroup.com/index.php?_t=${Date.now()}`;
-        iframeRef.current.src = newSrc;
-        setDebugLogs(prev => [...prev, `[SUCCESS] iframe src updated to: ${newSrc}`]);
-      } catch (err) {
-        setDebugLogs(prev => [...prev, `[ERR] Failed to set iframe src: ${err.message}`]);
-      }
-      setSyncStatus('idle');
-      setReport(null);
-      setError(null);
-    } else {
-      setDebugLogs(prev => [...prev, '[ERR] iframeRef.current is null on reload!']);
-    }
+    // Forzar re-montaje destruyendo y creando el iframe mediante un cambio de key
+    setIframeKey(prev => prev + 1);
+    setSyncStatus('idle');
+    setReport(null);
+    setError(null);
+    setDebugLogs(prev => [...prev, '[SUCCESS] Iframe destroyed and remounted to force fresh reload']);
   };
 
   return (
@@ -463,6 +467,7 @@ export default function JanosSyncPanel() {
           </div>
 
           <iframe
+            key={iframeKey}
             ref={iframeRef}
             src={iframeUrl}
             className={styles.browserFrame}
