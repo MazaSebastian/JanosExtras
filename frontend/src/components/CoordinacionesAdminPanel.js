@@ -10,6 +10,7 @@ import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/CoordinacionesAdminPanel.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { CLIENTE_FLUJOS_POR_TIPO } from '@/utils/flujosCliente';
+import { parseNotasAdicionales } from '@/utils/notasParser';
 
 export default function CoordinacionesAdminPanel() {
   const router = useRouter();
@@ -641,10 +642,12 @@ export default function CoordinacionesAdminPanel() {
                 <div style={{ textAlign: 'center', padding: '2rem' }}>
                   <p>Cargando resumen...</p>
                 </div>
-              ) : resumenData ? (
-                <div className={styles.resumenContainer}>
-                  <div className={styles.resumenSeccion}>
-                    <h3>Información General</h3>
+              ) : resumenData ? (() => {
+                  const parsedNotas = parseNotasAdicionales(resumenData.coordinacion?.notas);
+                  return (
+                    <div className={styles.resumenContainer}>
+                      <div className={styles.resumenSeccion}>
+                        <h3>Información General</h3>
                     <div className={styles.resumenCampo}>
                       <span className={styles.resumenLabel}>Cliente:</span>
                       <span className={styles.resumenValor}>
@@ -657,6 +660,24 @@ export default function CoordinacionesAdminPanel() {
                         <span className={styles.resumenValor}>
                           {resumenData.coordinacion.telefono}
                         </span>
+                      </div>
+                    )}
+                    {parsedNotas.mail && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>Mail:</span>
+                        <span className={styles.resumenValor}>{parsedNotas.mail}</span>
+                      </div>
+                    )}
+                    {parsedNotas.dni && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>DNI:</span>
+                        <span className={styles.resumenValor}>{parsedNotas.dni}</span>
+                      </div>
+                    )}
+                    {parsedNotas.direccion && (
+                      <div className={styles.resumenCampo}>
+                        <span className={styles.resumenLabel}>Dirección:</span>
+                        <span className={styles.resumenValor}>{parsedNotas.direccion}</span>
                       </div>
                     )}
                     <div className={styles.resumenCampo}>
@@ -882,14 +903,15 @@ export default function CoordinacionesAdminPanel() {
                     </div>
                   )}
 
-                  {resumenData.coordinacion?.notas && (
+                  {parsedNotas.notasRestantes && (
                     <div className={styles.resumenSeccion}>
                       <h3>Notas</h3>
-                      <p>{resumenData.coordinacion.notas}</p>
+                      <p>{parsedNotas.notasRestantes}</p>
                     </div>
                   )}
                 </div>
-              ) : null}
+              );
+            })() : null}
             </div>
           </div>
         </div>,

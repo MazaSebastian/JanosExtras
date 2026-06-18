@@ -8,6 +8,7 @@ import EditCoordinationModal from '@/components/EditCoordinationModal';
 import styles from '@/styles/EventActionModal.module.css';
 import { FLUJOS_POR_TIPO } from '@/components/CoordinacionFlujo';
 import { exportarCoordinacionPDF } from '@/utils/pdfExport';
+import { parseNotasAdicionales } from '@/utils/notasParser';
 
 export default function EventActionModal({ event, onClose, onRefresh }) {
     const router = useRouter();
@@ -46,7 +47,8 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
 
                 if (matching) {
                     setCoordinacion(matching);
-                    setNotas(matching.notas || '');
+                    const parsed = parseNotasAdicionales(matching.notas || '');
+                    setNotas(parsed.notasRestantes || '');
                     setContactado(matching.contactado || false);
                 }
             } catch (err) {
@@ -80,11 +82,25 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
     };
 
     const handleSaveNotas = async () => {
-        if (!coordinacion || notas === (coordinacion.notas || '')) return;
+        if (!coordinacion) return;
+
+        const parsedOriginal = parseNotasAdicionales(coordinacion.notas || '');
+        const prefixParts = [];
+        if (parsedOriginal.mail) prefixParts.push(`Mail: ${parsedOriginal.mail}`);
+        if (parsedOriginal.dni) prefixParts.push(`DNI: ${parsedOriginal.dni}`);
+        if (parsedOriginal.direccion) prefixParts.push(`Dirección: ${parsedOriginal.direccion}`);
+
+        const prefix = prefixParts.length > 0 ? prefixParts.join(' | ') : '';
+        const fullNotas = prefix 
+            ? (notas ? `${prefix} | ${notas}` : prefix)
+            : notas;
+
+        if (fullNotas === (coordinacion.notas || '')) return;
+
         try {
             setSavingNotas(true);
-            await coordinacionesAPI.update(coordinacion.id, { notas });
-            setCoordinacion(prev => ({ ...prev, notas }));
+            await coordinacionesAPI.update(coordinacion.id, { notas: fullNotas });
+            setCoordinacion(prev => ({ ...prev, notas: fullNotas }));
         } catch (e) {
             console.error('Error guardando notas:', e);
             alert('Error al guardar las notas. Intenta de nuevo.');
@@ -190,6 +206,8 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
         );
     }
 
+    const parsed = parseNotasAdicionales(coordinacion.notas || '');
+
     return (
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -208,6 +226,21 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     <div className={styles.infoItem}>
                         📞 <strong>Tel:</strong> {coordinacion.telefono || 'N/A'}
                     </div>
+                    {parsed.mail && (
+                        <div className={styles.infoItem}>
+                            📧 <strong>Mail:</strong> {parsed.mail}
+                        </div>
+                    )}
+                    {parsed.dni && (
+                        <div className={styles.infoItem}>
+                            🪪 <strong>DNI:</strong> {parsed.dni}
+                        </div>
+                    )}
+                    {parsed.direccion && (
+                        <div className={styles.infoItem}>
+                            📍 <strong>Dirección:</strong> {parsed.direccion}
+                        </div>
+                    )}
                     <div className={styles.infoItem}>
                         #️⃣ <strong>Código:</strong> {coordinacion.codigo_evento || 'N/A'}
                     </div>

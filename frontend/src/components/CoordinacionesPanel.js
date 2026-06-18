@@ -14,6 +14,7 @@ import AgendarVideollamadaModal from '@/components/AgendarVideollamadaModal';
 import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
 import WhatsAppTemplateModal from '@/components/WhatsAppTemplateModal';
 import { exportarCoordinacionPDF } from '@/utils/pdfExport';
+import { parseNotasAdicionales } from '@/utils/notasParser';
 
 // Helper to adapt URL for local development/testing
 const resolvePreCoordinacionUrl = (url) => {
@@ -917,6 +918,7 @@ export default function CoordinacionesPanel() {
       ) : (
         <div className={styles.list}>
           {coordinaciones.map((item) => {
+            const parsedNotas = parseNotasAdicionales(item.notas);
             return (
               <div
                 key={item.id}
@@ -1248,6 +1250,24 @@ export default function CoordinacionesPanel() {
                       <span>{item.telefono}</span>
                     </div>
                   )}
+                  {parsedNotas.mail && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>📧 Mail:</span>
+                      <span>{parsedNotas.mail}</span>
+                    </div>
+                  )}
+                  {parsedNotas.dni && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>🪪 DNI:</span>
+                      <span>{parsedNotas.dni}</span>
+                    </div>
+                  )}
+                  {parsedNotas.direccion && (
+                    <div className={styles.detail}>
+                      <span className={styles.detailLabel}>📍 Dirección:</span>
+                      <span>{parsedNotas.direccion}</span>
+                    </div>
+                  )}
                   {item.hora_evento && (
                     <div className={styles.detail}>
                       <span className={styles.detailLabel}>🕐 Hora:</span>
@@ -1279,9 +1299,9 @@ export default function CoordinacionesPanel() {
                     </div>
                   )}
                 </div>
-                {item.notas && (
+                {parsedNotas.notasRestantes && (
                   <div className={styles.notas}>
-                    <strong>Notas:</strong> {item.notas}
+                    <strong>Notas:</strong> {parsedNotas.notasRestantes}
                   </div>
                 )}
                 {flujosCache[item.id]?.count > 0 && (

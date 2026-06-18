@@ -165,10 +165,11 @@
 }
 
 .pasoDescripcion {
-  font-size: 0.95rem;
-  color: #9ca3af;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.85); /* Elegante off-white de alto contraste */
   margin: 0 0 2rem 0;
-  font-style: italic;
   font-weight: 400;
   opacity: 0;
   animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -237,9 +238,10 @@
 .ayuda {
   display: block;
   margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: #9ca3af;
-  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65); /* Más suave que el texto principal, pero legible */
+  font-family: 'Inter', sans-serif;
 }
 
 /* Botones de Selección */
@@ -419,11 +421,11 @@
 
 .footer {
   text-align: center;
-  color: #9ca3af;
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  line-height: 1.5;
   max-width: 800px;
   margin-top: 2rem;
-  opacity: 0.7;
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -540,7 +542,7 @@
 
 .resumenLabel {
   font-weight: 600;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
   font-family: 'Outfit', sans-serif;
 }
@@ -559,9 +561,9 @@
 }
 
 .resumenFooterTexto {
-  color: #9ca3af;
-  font-size: 0.95rem;
-  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  font-family: 'Outfit', sans-serif;
   margin: 0;
 }
 
@@ -643,9 +645,10 @@
 }
 
 .mensajeCierreDetalle p {
-  font-size: 1rem;
-  color: #9ca3af;
-  font-style: italic;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
   margin: 0;
 }
 
@@ -968,7 +971,7 @@
 }
 
 .velaCancion {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.65);
   font-size: 0.9rem;
   margin-top: 0.25rem;
   display: flex;
@@ -1109,7 +1112,7 @@
   background: none;
   border: none;
   font-size: 1.75rem;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   padding: 0;
   width: 36px;
@@ -1444,7 +1447,7 @@
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   font-weight: 500;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.6);
   letter-spacing: 4px;
   text-indent: 4px;
 }

@@ -106,6 +106,10 @@ export default function JanosSyncPanel() {
         setSyncStatus('success');
         setReport(data.report);
         setError(null);
+        // Recargar la página después de 3 segundos para visualizar los cambios
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       }
 
       if (data.type === 'JANOS_SYNC_ERROR') {
@@ -404,22 +408,31 @@ export default function JanosSyncPanel() {
             )}
 
             {syncStatus === 'success' && report && (
-              <div className={styles.successReport}>
-                <div className={styles.successTitle}>Resumen del proceso de sincronización:</div>
+              <div className={styles.successReport} style={report.duplicados > 0 ? { borderColor: 'rgba(251, 191, 36, 0.4)', background: 'rgba(251, 191, 36, 0.05)', color: '#f59e0b' } : {}}>
+                <div className={styles.successTitle}>
+                  {report.duplicados > 0 
+                    ? '⚠️ Chequeo Completado: Se detectaron eventos duplicados' 
+                    : '🎉 Sincronización completada con éxito'}
+                </div>
                 <div className={styles.successGrid}>
-                  <div className={styles.successItem}>
+                  <div className={styles.successItem} style={{ color: '#cbd5e1', background: 'rgba(255, 255, 255, 0.05)' }}>
                     Leídos <span className={styles.successValue}>{report.recibidos}</span>
                   </div>
-                  <div className={styles.successItem}>
-                    Creados <span className={styles.successValue}>{report.creados}</span>
+                  <div className={styles.successItem} style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.15)' }}>
+                    Agregados <span className={styles.successValue}>{report.creados}</span>
                   </div>
-                  <div className={styles.successItem}>
-                    Actualizados <span className={styles.successValue}>{report.actualizados}</span>
+                  <div className={styles.successItem} style={report.duplicados > 0 ? { color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)' } : { color: '#cbd5e1', background: 'rgba(255, 255, 255, 0.05)' }}>
+                    Duplicados <span className={styles.successValue}>{report.duplicados || 0}</span>
                   </div>
-                  <div className={styles.successItem}>
+                  <div className={styles.successItem} style={{ color: '#cbd5e1', background: 'rgba(255, 255, 255, 0.05)' }}>
                     Errores <span className={styles.successValue}>{report.errores.length}</span>
                   </div>
                 </div>
+                {report.duplicados > 0 && (
+                  <div style={{ fontSize: '13px', color: '#fbbf24', marginTop: '8px', lineHeight: '1.4' }}>
+                    <strong>Aviso de Seguridad:</strong> Se omitió la importación de {report.duplicados} {report.duplicados === 1 ? 'evento que ya existe' : 'eventos que ya existen'} en la plataforma para evitar sobreescribir y perder datos de coordinaciones manuales ya realizadas.
+                  </div>
+                )}
                 {report.errores.length > 0 && (
                   <div style={{ marginTop: '8px', fontSize: '12px', color: '#f87171' }}>
                     <strong>Errores registrados:</strong>

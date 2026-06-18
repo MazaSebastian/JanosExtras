@@ -1,13 +1,19 @@
 import { authenticateToken } from '@/lib/auth.js';
 import { Coordinacion } from '@/lib/models/Coordinacion.js';
+import installScriptHandler from './install-script.js';
 
 export default async function handler(req, res) {
+  const { id } = req.query;
+
+  // Servir el script de Tampermonkey de forma pública sin requerir autenticación
+  if (id === 'install-script.user.js' || id === 'install-script') {
+    return installScriptHandler(req, res);
+  }
+
   const auth = authenticateToken(req);
   if (auth.error) {
     return res.status(auth.status).json({ error: auth.error });
   }
-
-  const { id } = req.query;
 
   if (req.method === 'GET') {
     try {

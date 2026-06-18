@@ -219,7 +219,7 @@
 
 .chatbotTyping {
   display: inline-block;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.7);
   font-style: italic;
   font-size: 13px;
 }
