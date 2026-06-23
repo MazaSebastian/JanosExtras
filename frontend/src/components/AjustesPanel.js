@@ -283,8 +283,8 @@ export default function AjustesPanel() {
 
                 <div className={styles.switchOption}>
                   <div className={styles.switchLabel}>
-                    <span>Resumen Diario</span>
-                    <span>Recibe un recordatorio cada mañana con tus eventos de ese día.</span>
+                    <span>Recordatorios del Día</span>
+                    <span>Recibe recordatorios periódicos de tus compromisos durante el día (cada 3 hs entre las 9:00 y las 20:00).</span>
                   </div>
                   <label className={styles.switch}>
                     <input 

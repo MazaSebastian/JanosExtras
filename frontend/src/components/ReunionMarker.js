@@ -3,7 +3,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI } from '@/services/api';
 import { LoadingButton } from '@/components/Loading';
+import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/EventMarker.module.css';
+
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
 
 export default function ReunionMarker({ date, salonId, djId, onEventCreated, onClose }) {
     const [loading, setLoading] = useState(false);
@@ -22,22 +26,21 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
                 const res = await coordinacionesAPI.getAll({ activo: true });
                 const events = res.data || [];
 
-                // Filtrar eventos del salón actual que NO sean reuniones y que AÚN no tengan reunión agendada
+                // Filtrar eventos del salón actual que NO sean reuniones
                 const filtered = events.filter(e => {
                     // Mismo salón
                     if (String(e.salon_id) !== String(salonId)) return false;
-
-                    // No estar "Completado" (LUZ VERDE - Ya coordinado)
-                    const estado = (e.estado || '').toLowerCase();
-                    if (estado === 'completado' || estado === 'completada') return false;
-
-                    // No tener reunión ya definida
-                    if (e.videollamada_agendada || e.videollamada_fecha) return false;
 
                     // No ser un evento "Reunión" del modelo antiguo
                     const isReunionTipo = e.tipo_evento && e.tipo_evento.toLowerCase().includes('reuni');
                     const isReunionTitulo = e.titulo && e.titulo.toLowerCase().includes('reuni');
                     if (isReunionTipo || isReunionTitulo) return false;
+
+                    // Para coordinaciones NO completadas, no debe tener reunión ya agendada (se reprograma desde la agenda)
+                    // Para coordinaciones completadas, permitimos volver a agendar videollamada de refuerzo/confirmación
+                    const estado = (e.estado || '').toLowerCase();
+                    const isCompletada = estado === 'completado' || estado === 'completada';
+                    if (!isCompletada && (e.videollamada_agendada || e.videollamada_fecha)) return false;
 
                     return true;
                 });
@@ -78,7 +81,8 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
             // Update existing coordination instead of creating a new one
             await coordinacionesAPI.update(formData.coordinacion_id, {
                 videollamada_agendada: true,
-                videollamada_fecha: combinedDate
+                videollamada_fecha: combinedDate,
+                videollamada_completada: false
             });
 
             if (onEventCreated) {
@@ -93,6 +97,24 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
             setLoading(false);
         }
     };
+
+    // Mapear eventos a opciones para CustomSelect
+    const selectOptions = availableEvents.map(event => {
+        const eventDate = event.fecha_evento ? format(new Date(event.fecha_evento.split('T')[0] + 'T00:00:00'), 'dd/MM/yyyy') : 'Sin Fecha';
+        const clientName = event.nombre_cliente ? `${event.nombre_cliente} ${event.apellido_cliente || ''}`.trim() : 'Sin Nombre';
+        const title = event.titulo || event.tipo_evento || 'Evento';
+        
+        const estado = (event.estado || '').toLowerCase();
+        const isCompletada = estado === 'completado' || estado === 'completada';
+        const statusLabel = isCompletada ? '🟢 Coordinación Completada' : '🔴 Coordinación Pendiente';
+        const textColor = isCompletada ? '#10B981' : '#EF4444';
+
+        return {
+            value: event.id,
+            label: `${statusLabel} | [${eventDate}] - ${title} (${clientName})`,
+            color: textColor
+        };
+    });
 
     return (
         <div className={styles.overlay}>
@@ -114,34 +136,43 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
                         ) : availableEvents.length === 0 ? (
                             <p style={{ color: '#ef4444', fontSize: '14px', margin: '10px 0' }}>No hay eventos cargados para este salón.</p>
                         ) : (
-                            <select
+                            <CustomSelect
                                 value={formData.coordinacion_id}
-                                onChange={(e) => setFormData({ ...formData, coordinacion_id: e.target.value })}
+                                options={selectOptions}
+                                onChange={(val) => setFormData({ ...formData, coordinacion_id: val })}
                                 required
-                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', fontSize: '15px' }}
-                            >
-                                {availableEvents.map(event => {
-                                    const eventDate = event.fecha_evento ? format(new Date(event.fecha_evento.split('T')[0] + 'T00:00:00'), 'dd/MM/yyyy') : 'Sin Fecha';
-                                    const clientName = event.nombre_cliente ? `${event.nombre_cliente} ${event.apellido_cliente || ''}`.trim() : 'Sin Nombre';
-                                    const title = event.titulo || event.tipo_evento || 'Evento';
-                                    return (
-                                        <option key={event.id} value={event.id}>
-                                            [{eventDate}] - {title} ({clientName})
-                                        </option>
-                                    );
-                                })}
-                            </select>
+                                placeholder="Seleccionar coordinación..."
+                            />
                         )}
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label>Horario *</label>
-                        <input
-                            type="time"
-                            value={formData.hora}
-                            onChange={(e) => setFormData({ ...formData, hora: e.target.value })}
-                            required
-                        />
+                        <label>Horario (Formato 24hs) *</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <div style={{ flex: 1 }}>
+                                <CustomSelect
+                                    value={formData.hora.split(':')[0]}
+                                    options={HOURS}
+                                    onChange={(h) => {
+                                        const mins = formData.hora.split(':')[1] || '00';
+                                        setFormData({ ...formData, hora: `${h}:${mins}` });
+                                    }}
+                                    placeholder="HH"
+                                />
+                            </div>
+                            <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#772c87' }}>:</span>
+                            <div style={{ flex: 1 }}>
+                                <CustomSelect
+                                    value={formData.hora.split(':')[1] || '00'}
+                                    options={MINUTES}
+                                    onChange={(m) => {
+                                        const hrs = formData.hora.split(':')[0] || '15';
+                                        setFormData({ ...formData, hora: `${hrs}:${m}` });
+                                    }}
+                                    placeholder="MM"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className={styles.actions}>

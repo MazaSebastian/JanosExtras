@@ -66,7 +66,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // --- 2. RESUMEN DIARIO DE REUNIONES Y EVENTOS (A LAS 09:00 AM HORA ARGENTINA) ---
+    // --- 2. RESUMEN PERIÓDICO DE REUNIONES Y EVENTOS (CADA 3 HORAS DE 9:00 A 20:00 HORA ARGENTINA) ---
     const localTimeStr = new Date().toLocaleTimeString('es-AR', {
       timeZone: 'America/Argentina/Buenos_Aires',
       hour: '2-digit',
@@ -75,8 +75,9 @@ export default async function handler(req, res) {
     });
 
     const [hour, minute] = localTimeStr.split(':').map(Number);
-    // Ejecutar si el cron se llama entre las 9:00 y las 9:15, o si se pasa ?testDaily=true
-    if ((hour === 9 && minute >= 0 && minute < 15) || req.query.testDaily === 'true') {
+    // Ejecutar cada 3 horas (09:00, 12:00, 15:00, 18:00) dentro de la ventana de 15 min del cron, o si se pasa ?testDaily=true
+    const horasPermitidas = [9, 12, 15, 18];
+    if ((horasPermitidas.includes(hour) && minute >= 0 && minute < 15) || req.query.testDaily === 'true') {
       report.resumenDiarioEnviado = true;
 
       // 1. Obtener todos los DJs activos que tengan activada la preferencia de resumen diario

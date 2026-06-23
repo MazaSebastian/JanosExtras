@@ -544,6 +544,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   const [velaForm, setVelaForm] = useState({ nombre: '', familiar: '', cancion: '' });
   const [mostrarResumen, setMostrarResumen] = useState(false);
   const [confirmado, setConfirmado] = useState(false);
+  const [guardadoExitoso, setGuardadoExitoso] = useState(false);
 
   useEffect(() => {
     loadCoordinacion();
@@ -986,10 +987,23 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   const guardarProgreso = async () => {
     try {
       setGuardando(true);
-      // TODO: Implementar guardado del progreso en la base de datos
-      // await coordinacionesFlujoAPI.save(coordinacionId, { pasoActual, respuestas });
+      setError('');
+      setGuardadoExitoso(false);
+      
+      const pasoActualObj = pasos[pasoActual];
+      const pasoId = pasoActualObj ? pasoActualObj.id : null;
+      
+      await coordinacionesAPI.saveFlujo(coordinacionId, {
+        paso_actual: pasoId,
+        respuestas,
+        tipo_evento: coordinacion?.tipo_evento,
+      });
+      
+      setGuardadoExitoso(true);
+      setTimeout(() => setGuardadoExitoso(false), 3000);
     } catch (err) {
       console.error('Error al guardar progreso:', err);
+      setError(err.response?.data?.error || 'Error al guardar el progreso en el servidor.');
     } finally {
       setGuardando(false);
     }
@@ -1737,7 +1751,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
             onClick={guardarProgreso}
             disabled={guardando}
           >
-            {guardando ? 'Guardando...' : '💾 Guardar Progreso'}
+            {guardando ? 'Guardando...' : guardadoExitoso ? '✅ ¡Guardado!' : '💾 Guardar Progreso'}
           </button>
           <button
             className={styles.buttonPrimary}

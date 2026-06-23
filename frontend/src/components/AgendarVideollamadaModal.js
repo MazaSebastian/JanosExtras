@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { formatDateFromDB } from '@/utils/dateFormat';
 import api from '@/services/api';
+import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/AgendarVideollamadaModal.module.css';
+
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
 
 /**
  * Modal para agendar una videollamada en Google Calendar desde una coordinación
@@ -108,13 +112,31 @@ export default function AgendarVideollamadaModal({
             <label className={styles.label}>
               Hora *
             </label>
-            <input
-              type="time"
-              value={formData.hora}
-              onChange={(e) => setFormData({ ...formData, hora: e.target.value })}
-              className={styles.input}
-              required
-            />
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <CustomSelect
+                  value={formData.hora.split(':')[0]}
+                  options={HOURS}
+                  onChange={(h) => {
+                    const mins = formData.hora.split(':')[1] || '00';
+                    setFormData({ ...formData, hora: `${h}:${mins}` });
+                  }}
+                  placeholder="HH"
+                />
+              </div>
+              <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#772c87' }}>:</span>
+              <div style={{ flex: 1 }}>
+                <CustomSelect
+                  value={formData.hora.split(':')[1] || '00'}
+                  options={MINUTES}
+                  onChange={(m) => {
+                    const hrs = formData.hora.split(':')[0] || '15';
+                    setFormData({ ...formData, hora: `${hrs}:${m}` });
+                  }}
+                  placeholder="MM"
+                />
+              </div>
+            </div>
           </div>
 
           <div className={styles.formGroup}>
@@ -190,4 +212,3 @@ export default function AgendarVideollamadaModal({
     </div>
   );
 }
-

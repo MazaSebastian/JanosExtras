@@ -27,14 +27,20 @@ export default function CustomSelect({ value, options, onChange, placeholder = '
         setIsOpen(false);
     };
 
+    const selectedOption = options.find(o => (typeof o === 'object' ? o.value : o) === value);
+    const selectedColor = typeof selectedOption === 'object' ? selectedOption.color : null;
+
     return (
         <div
             className={`${styles.selectContainer} ${disabled ? styles.disabled : ''}`}
             ref={containerRef}
             onClick={() => !disabled && setIsOpen(!isOpen)}
         >
-            <div className={`${styles.selectHeader} ${isOpen ? styles.open : ''} ${!value ? styles.placeholder : ''}`}>
-                <span>{options.find(o => (typeof o === 'object' ? o.value : o) === value)?.label || options.find(o => (typeof o === 'object' ? o.value : o) === value)?.value || value || placeholder}</span>
+            <div 
+                className={`${styles.selectHeader} ${isOpen ? styles.open : ''} ${!value ? styles.placeholder : ''}`}
+                style={selectedColor ? { color: selectedColor } : {}}
+            >
+                <span>{selectedOption?.label || selectedOption?.value || value || placeholder}</span>
                 <span className={styles.arrow}>{isOpen ? '▲' : '▼'}</span>
             </div>
 
@@ -46,10 +52,14 @@ export default function CustomSelect({ value, options, onChange, placeholder = '
                     {options.map((option, index) => {
                         const optionValue = typeof option === 'object' ? option.value : option;
                         const optionLabel = typeof option === 'object' ? option.label : option;
+                        const optionColor = typeof option === 'object' ? option.color : null;
+                        const isSelected = value === optionValue;
+
                         return (
                             <div
                                 key={index}
-                                className={`${styles.dropdownItem} ${value === optionValue ? styles.selected : ''}`}
+                                className={`${styles.dropdownItem} ${isSelected ? styles.selected : ''}`}
+                                style={isSelected ? {} : (optionColor ? { color: optionColor } : {})}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleSelect(optionValue);
