@@ -49,11 +49,23 @@ export default async function handler(req, res) {
 
       // Verificar si la fecha del evento ya pasó (opcional: invalidar tokens viejos)
       if (coordinacion.fecha_evento) {
-        const fechaEvento = new Date(coordinacion.fecha_evento);
+        let fechaEventoStr = '';
+        if (typeof coordinacion.fecha_evento === 'string') {
+          fechaEventoStr = coordinacion.fecha_evento.split('T')[0].split(' ')[0];
+        } else if (coordinacion.fecha_evento instanceof Date) {
+          const year = coordinacion.fecha_evento.getUTCFullYear();
+          const month = String(coordinacion.fecha_evento.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(coordinacion.fecha_evento.getUTCDate()).padStart(2, '0');
+          fechaEventoStr = `${year}-${month}-${day}`;
+        }
+
         const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
+        const hoyYear = hoy.getFullYear();
+        const hoyMonth = String(hoy.getMonth() + 1).padStart(2, '0');
+        const hoyDay = String(hoy.getDate()).padStart(2, '0');
+        const hoyStr = `${hoyYear}-${hoyMonth}-${hoyDay}`;
         
-        if (fechaEvento < hoy) {
+        if (fechaEventoStr < hoyStr) {
           return res.status(400).json({ error: 'Esta pre-coordinación ha expirado (la fecha del evento ya pasó)' });
         }
       }

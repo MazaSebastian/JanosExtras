@@ -1254,7 +1254,7 @@ export default function PreCoordinacionPage({ metadata }) {
               </div>
               {coordinacion.fecha_evento && (
                 <div className={styles.resumenInfoItem}>
-                  <strong>Fecha:</strong> {format(new Date(coordinacion.fecha_evento), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                  <strong>Fecha:</strong> {formatDateFromDBLong(coordinacion.fecha_evento)}
                 </div>
               )}
               {coordinacion.salon_nombre && (
@@ -1435,7 +1435,7 @@ export default function PreCoordinacionPage({ metadata }) {
           </div>
           {coordinacion.fecha_evento && (
             <div className={styles.infoItem}>
-              <strong>Fecha:</strong> {format(new Date(coordinacion.fecha_evento), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+              <strong>Fecha:</strong> {formatDateFromDBLong(coordinacion.fecha_evento)}
             </div>
           )}
           {coordinacion.salon_nombre && (
