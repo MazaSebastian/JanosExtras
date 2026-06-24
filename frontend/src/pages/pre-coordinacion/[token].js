@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { format } from 'date-fns';
 import { formatDateFromDBLong } from '@/utils/dateFormat';
 import { es } from 'date-fns/locale';
@@ -9,7 +10,7 @@ import Loading from '@/components/Loading';
 import ChatbotPreCoordinacion from '@/components/ChatbotPreCoordinacion';
 import styles from '@/styles/PreCoordinacion.module.css';
 
-export default function PreCoordinacionPage() {
+export default function PreCoordinacionPage({ metadata }) {
   const router = useRouter();
   const { token } = router.query;
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,34 @@ export default function PreCoordinacionPage() {
   const [bookedVideocall, setBookedVideocall] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Valores dinámicos si existe la metadata
+  const title = (coordinacion?.tipo_evento && coordinacion?.nombre_agasajado)
+    ? `Pre-coordinación ${coordinacion.tipo_evento.trim()} de ${coordinacion.nombre_agasajado}`
+    : (metadata?.tipo_evento && metadata?.nombre_agasajado)
+      ? `Pre-coordinación ${metadata.tipo_evento} de ${metadata.nombre_agasajado}`
+      : "Pre-coordinación - Jano's DJ's";
+
+  const description = "¡Ingresá a este link para comenzar el recorrido guiado!";
+
+  const headTags = (
+    <Head>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      
+      {/* Open Graph / Facebook */}
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content="https://janosdjs.com/logo-janos-blanco.png" />
+      
+      {/* Twitter */}
+      <meta property="twitter:card" content="summary_large_image" />
+      <meta property="twitter:title" content={title} />
+      <meta property="twitter:description" content={description} />
+      <meta property="twitter:image" content="https://janosdjs.com/logo-janos-blanco.png" />
+    </Head>
+  );
 
   const toggleSuggestions = (id) => {
     setShowSuggestions((prev) => ({
@@ -1059,78 +1088,92 @@ export default function PreCoordinacionPage() {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <Loading message="Cargando pre-coordinación..." fullScreen />
-      </div>
+      <>
+        {headTags}
+        <div className={styles.container}>
+          <Loading message="Cargando pre-coordinación..." fullScreen />
+        </div>
+      </>
     );
   }
 
   if (error && !coordinacion) {
     return (
-      <div className={styles.container}>
-        <div className={styles.errorContainer}>
-          <h1>❌ Error</h1>
-          <p>{error}</p>
+      <>
+        {headTags}
+        <div className={styles.container}>
+          <div className={styles.errorContainer}>
+            <h1>❌ Error</h1>
+            <p>{error}</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!coordinacion || !paso) {
     return (
-      <div className={styles.container}>
-        <div className={styles.errorContainer}>
-          <h1>❌ Pre-coordinación no encontrada</h1>
-          <p>El link proporcionado no es válido o ha expirado.</p>
+      <>
+        {headTags}
+        <div className={styles.container}>
+          <div className={styles.errorContainer}>
+            <h1>❌ Pre-coordinación no encontrada</h1>
+            <p>El link proporcionado no es válido o ha expirado.</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // PRIORIDAD 1: Mostrar mensaje de cierre si ya se envió
   if (preCoordinacionEnviada) {
     return (
-      <div className={styles.container}>
-        {renderBookingModal()}
-        {renderSuccessModal()}
-        <div className={styles.mensajeCierreContainer}>
-          <div className={styles.successAnimationWrapper}>
-            <div className={styles.successCircleGlow}></div>
-            <svg className={styles.successCheckmark} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-              <circle className={styles.successCheckmarkCircle} cx="26" cy="26" r="25" fill="none" />
-              <path className={styles.successCheckmarkCheck} fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-            </svg>
-            <div className={styles.sparklesContainer}>
-              <div className={`${styles.sparkle} ${styles.sparkle1}`}>✨</div>
-              <div className={`${styles.sparkle} ${styles.sparkle2}`}>⭐</div>
-              <div className={`${styles.sparkle} ${styles.sparkle3}`}>✨</div>
-              <div className={`${styles.sparkle} ${styles.sparkle4}`}>⭐</div>
-              <div className={`${styles.sparkle} ${styles.sparkle5}`}>✨</div>
-              <div className={`${styles.sparkle} ${styles.sparkle6}`}>⭐</div>
-              <div className={`${styles.sparkle} ${styles.sparkle7}`}>✨</div>
-              <div className={`${styles.sparkle} ${styles.sparkle8}`}>⭐</div>
+      <>
+        {headTags}
+        <div className={styles.container}>
+          {renderBookingModal()}
+          {renderSuccessModal()}
+          <div className={styles.mensajeCierreContainer}>
+            <div className={styles.successAnimationWrapper}>
+              <div className={styles.successCircleGlow}></div>
+              <svg className={styles.successCheckmark} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle className={styles.successCheckmarkCircle} cx="26" cy="26" r="25" fill="none" />
+                <path className={styles.successCheckmarkCheck} fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
+              <div className={styles.sparklesContainer}>
+                <div className={`${styles.sparkle} ${styles.sparkle1}`}>✨</div>
+                <div className={`${styles.sparkle} ${styles.sparkle2}`}>⭐</div>
+                <div className={`${styles.sparkle} ${styles.sparkle3}`}>✨</div>
+                <div className={`${styles.sparkle} ${styles.sparkle4}`}>⭐</div>
+                <div className={`${styles.sparkle} ${styles.sparkle5}`}>✨</div>
+                <div className={`${styles.sparkle} ${styles.sparkle6}`}>⭐</div>
+                <div className={`${styles.sparkle} ${styles.sparkle7}`}>✨</div>
+                <div className={`${styles.sparkle} ${styles.sparkle8}`}>⭐</div>
+              </div>
             </div>
+            <h1 className={styles.mensajeCierreTitulo}>¡Pre-Coordinación Finalizada!</h1>
+            <p className={styles.mensajeCierreTexto}>
+              Hemos recibido tu información y la hemos enviado a nuestro DJ.
+            </p>
+            <p className={styles.mensajeCierreTexto}>
+              Te contactaremos próximamente para coordinar los detalles finales de tu evento.
+            </p>
+            <div className={styles.mensajeCierreDetalle}>
+              <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
+            </div>
+            {renderBookingInlineSection()}
           </div>
-          <h1 className={styles.mensajeCierreTitulo}>¡Pre-Coordinación Finalizada!</h1>
-          <p className={styles.mensajeCierreTexto}>
-            Hemos recibido tu información y la hemos enviado a nuestro DJ.
-          </p>
-          <p className={styles.mensajeCierreTexto}>
-            Te contactaremos próximamente para coordinar los detalles finales de tu evento.
-          </p>
-          <div className={styles.mensajeCierreDetalle}>
-            <p>Gracias por completar la pre-coordinación. ¡Estamos ansiosos por hacer de tu evento algo especial!</p>
-          </div>
-          {renderBookingInlineSection()}
         </div>
-      </div>
+      </>
     );
   }
 
   // PRIORIDAD 2: Mostrar pantalla de bienvenida si es la primera vez
   if (mostrarBienvenida) {
     return (
-      <div className={styles.container}>
+      <>
+        {headTags}
+        <div className={styles.container}>
         <div className={styles.bienvenidaContainer}>
           <div className={styles.bienvenidaContent}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
@@ -1180,6 +1223,7 @@ export default function PreCoordinacionPage() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
@@ -1187,8 +1231,10 @@ export default function PreCoordinacionPage() {
   // Solo mostrar si no está enviada (para evitar mostrar ambos)
   if (mostrarConfirmacion && !preCoordinacionEnviada) {
     return (
-      <div className={styles.container}>
-        <div className={styles.resumenContainer}>
+      <>
+        {headTags}
+        <div className={styles.container}>
+          <div className={styles.resumenContainer}>
           <div className={styles.resumenHeader}>
             <h1>✅ ¡Cuestionario Completado!</h1>
             <p className={styles.mensajeConfirmacion}>
@@ -1366,13 +1412,16 @@ export default function PreCoordinacionPage() {
           </div>
         )}
       </div>
+      </>
     );
   }
 
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
+    <>
+      {headTags}
+      <div className={styles.container}>
+        <header className={styles.header}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
           <img src="/logo-janos-blanco.png" alt="Jano's Eventos" style={{ maxHeight: '60px', objectFit: 'contain' }} />
         </div>
@@ -1753,6 +1802,38 @@ export default function PreCoordinacionPage() {
         </div>
       )}
     </div>
+    </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const { token } = context.params;
+  let metadata = null;
+
+  try {
+    const pool = (await import('@/lib/database-config.js')).default;
+    const query = `
+      SELECT nombre_agasajado, tipo_evento
+      FROM coordinaciones
+      WHERE pre_coordinacion_token = $1
+        AND activo = true
+      LIMIT 1
+    `;
+    const result = await pool.query(query, [token]);
+    if (result.rows.length > 0) {
+      metadata = {
+        nombre_agasajado: result.rows[0].nombre_agasajado || '',
+        tipo_evento: result.rows[0].tipo_evento || ''
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching coordination metadata in getServerSideProps:', error);
+  }
+
+  return {
+    props: {
+      metadata
+    }
+  };
 }
 
