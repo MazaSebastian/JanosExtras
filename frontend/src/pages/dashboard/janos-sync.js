@@ -31,7 +31,7 @@ export default function JanosSyncPage() {
   return (
     <DJLayout user={user}>
       <div className={styles.container}>
-        <JanosSyncPanel />
+        <JanosSyncPanel user={user} />
       </div>
     </DJLayout>
   );
