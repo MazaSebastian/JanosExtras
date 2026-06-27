@@ -164,6 +164,121 @@ export default function handler(req, res) {
         window.top.postMessage({ type: 'JANOS_SYNC_REQUEST_CREDS' }, '*');
     }
 
+    // --- BOTÓN FLOTANTE PARA PANTALLA DIVIDIDA (COMPARADOR ESPEJO) ---
+    const isLoginPage = window.location.href.includes('/index.php') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+    if (!isLoginPage && !isIframe) {
+        const floatBtn = document.createElement('button');
+        floatBtn.id = 'janos-sync-floating-btn';
+        floatBtn.innerText = '📅 Ver Calendario Espejo';
+        floatBtn.style.cssText = \`
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            z-index: 99999999 !important;
+            padding: 12px 18px !important;
+            background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%) !important;
+            color: white !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            border-radius: 50px !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+            transition: all 0.2s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        \`;
+        
+        floatBtn.onmouseover = () => {
+            floatBtn.style.transform = 'scale(1.05) translateY(-2px)';
+            floatBtn.style.boxShadow = '0 12px 30px rgba(124, 58, 237, 0.4)';
+        };
+        floatBtn.onmouseout = () => {
+            floatBtn.style.transform = '';
+            floatBtn.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+        };
+
+        let splitActive = false;
+        let rightColumn = null;
+
+        const toggleSplit = () => {
+            if (splitActive) {
+                // Desactivar split
+                const col = document.getElementById('janos-sync-split-right');
+                if (col) col.remove();
+                const styleEl = document.getElementById('janos-split-injected-styles');
+                if (styleEl) styleEl.remove();
+                document.documentElement.style.width = '';
+                document.documentElement.style.marginRight = '';
+                document.documentElement.style.overflowX = '';
+                document.body.style.width = '';
+                document.body.style.marginRight = '';
+                floatBtn.innerText = '📅 Ver Calendario Espejo';
+                floatBtn.style.background = 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)';
+                splitActive = false;
+            } else {
+                // Activar split
+                // Ajustar el ancho del document y body a 50%
+                document.documentElement.style.width = '50%';
+                document.documentElement.style.marginRight = '50%';
+                document.documentElement.style.overflowX = 'auto';
+                document.body.style.width = '100%'; // para que tome el 100% de su contenedor de 50%
+                
+                // Forzar que los elementos fijos también respeten el 50%
+                const style = document.createElement('style');
+                style.id = 'janos-split-injected-styles';
+                style.innerHTML = \`
+                    @media screen and (min-width: 0px) {
+                        body { width: 50% !important; margin-right: 50% !important; }
+                        /* Forzar que menús superiores o barras fijas respeten el ancho */
+                        .navbar-fixed-top, .header, header, nav, [style*="position: fixed"], [style*="position:fixed"] {
+                            width: 50% !important;
+                            right: auto !important;
+                        }
+                    }
+                \`;
+                
+                rightColumn = document.createElement('div');
+                rightColumn.id = 'janos-sync-split-right';
+                rightColumn.style.cssText = \`
+                    position: fixed !important;
+                    top: 0 !important;
+                    right: 0 !important;
+                    width: 50% !important;
+                    height: 100vh !important;
+                    z-index: 99999998 !important;
+                    border-left: 4px solid #7c3aed !important;
+                    background: #0d0714 !important;
+                    box-shadow: -10px 0 30px rgba(0,0,0,0.5) !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                \`;
+                
+                const iframe = document.createElement('iframe');
+                iframe.src = \`\${PARENT_ORIGIN}/dashboard/janos-sync?embed=true\`;
+                iframe.style.cssText = \`
+                    width: 100% !important;
+                    height: 100% !important;
+                    border: none !important;
+                    background: #09070f !important;
+                \`;
+                
+                rightColumn.appendChild(iframe);
+                document.body.appendChild(rightColumn);
+                document.head.appendChild(style);
+                
+                floatBtn.innerText = '✕ Cerrar Comparador';
+                floatBtn.style.background = '#dc2626';
+                splitActive = true;
+            }
+        };
+
+        floatBtn.addEventListener('click', toggleSplit);
+        document.body.appendChild(floatBtn);
+    }
+
     // Solo continuar y crear la interfaz si estamos en la página de la planilla (existe la tabla de coordinaciones)
     const table = getPlanillaTable();
     if (!table) {

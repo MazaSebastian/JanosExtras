@@ -76,6 +76,22 @@ export default function DJLayout({ user, children }) {
     };
   }, [menuOpen]);
 
+  const isEmbed = router.query.embed === 'true';
+
+  if (isEmbed) {
+    return (
+      <>
+        <Head>
+          <title>Jano's DJ's - {pageTitle} (Embed)</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </Head>
+        <main style={{ background: '#09070f', minHeight: '100vh', padding: '16px', overflowY: 'auto' }}>
+          {children}
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <Head>
