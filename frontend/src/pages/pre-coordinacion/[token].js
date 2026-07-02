@@ -57,13 +57,13 @@ export default function PreCoordinacionPage({ metadata }) {
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content="https://janosdjs.com/logo-janos-blanco.png" />
+      <meta property="og:image" content="https://janosdjs.com/pre-coordinacion-preview.png" />
       
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
       <meta property="twitter:title" content={title} />
       <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content="https://janosdjs.com/logo-janos-blanco.png" />
+      <meta property="twitter:image" content="https://janosdjs.com/pre-coordinacion-preview.png" />
     </Head>
   );
 
