@@ -3,9 +3,41 @@ import { coordinacionesAPI } from '@/services/api';
 import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/EditCoordinationModal.module.css';
 
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+
+function parseInitialVideollamada(fechaStr) {
+    if (!fechaStr) return { fecha: '', hora: '15', minuto: '00' };
+
+    if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+        const [datePart, timePart] = fechaStr.split('T');
+        const timeComponents = (timePart || '').split(':');
+        const hh = timeComponents[0] || '15';
+        const mm = timeComponents[1] || '00';
+        return {
+            fecha: datePart,
+            hora: String(hh).padStart(2, '0'),
+            minuto: String(mm).substring(0, 2).padStart(2, '0')
+        };
+    }
+    const dateObj = new Date(fechaStr);
+    if (!isNaN(dateObj.getTime())) {
+        const yyyy = dateObj.getFullYear();
+        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const dd = String(dateObj.getDate()).padStart(2, '0');
+        const hh = String(dateObj.getHours()).padStart(2, '0');
+        const min = String(dateObj.getMinutes()).padStart(2, '0');
+        return { fecha: `${yyyy}-${mm}-${dd}`, hora: hh, minuto: min };
+    }
+    return { fecha: '', hora: '15', minuto: '00' };
+}
+
 export default function EditCoordinationModal({ coordinacion, onClose, onSave }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const initialMeeting = parseInitialVideollamada(coordinacion?.videollamada_fecha);
+
     const [formData, setFormData] = useState({
         nombre_cliente: coordinacion?.nombre_cliente || '',
         apellido_cliente: coordinacion?.apellido_cliente || '',
@@ -13,6 +45,10 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
         telefono: coordinacion?.telefono || '',
         tipo_evento: coordinacion?.tipo_evento || '',
         codigo_evento: coordinacion?.codigo_evento || '',
+        videollamada_agendada: coordinacion?.videollamada_agendada ?? false,
+        videollamada_fecha_dia: initialMeeting.fecha,
+        videollamada_hora: initialMeeting.hora,
+        videollamada_minuto: initialMeeting.minuto,
     });
 
     const handleSubmit = async (e) => {
@@ -32,6 +68,11 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
                 codigo_evento: formData.codigo_evento || null,
             };
 
+            if (formData.videollamada_fecha_dia) {
+                payload.videollamada_agendada = true;
+                payload.videollamada_fecha = `${formData.videollamada_fecha_dia}T${formData.videollamada_hora}:${formData.videollamada_minuto}:00`;
+            }
+
             await coordinacionesAPI.update(coordinacion.id, payload);
 
             if (onSave) {
@@ -47,12 +88,50 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
     return (
         <div className={styles.overlay} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <h3 className={styles.title}>✏️ Editar Datos</h3>
-                <p className={styles.subtitle}>Modificá la información de la coordinación actual</p>
+                <h3 className={styles.title}>✏️ Editar Datos y Reunión</h3>
+                <p className={styles.subtitle}>Modificá la fecha y hora de la reunión o los datos de la coordinación</p>
 
                 {error && <div className={styles.error}>{error}</div>}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
+                    <div style={{ background: '#f4effa', padding: '16px', borderRadius: '12px', border: '1px solid #e1d4f0', marginBottom: '8px' }}>
+                        <h4 style={{ margin: '0 0 12px 0', fontSize: '15px', color: '#772c87', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            ⏰ Horario y Fecha de la Reunión
+                        </h4>
+                        <div className={styles.formRow}>
+                            <div className={styles.formGroup}>
+                                <label style={{ color: '#555' }}>Fecha de la Reunión</label>
+                                <input
+                                    type="date"
+                                    value={formData.videollamada_fecha_dia}
+                                    onChange={(e) => setFormData({ ...formData, videollamada_fecha_dia: e.target.value })}
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label style={{ color: '#555' }}>Horario (HH:MM)</label>
+                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <CustomSelect
+                                            value={formData.videollamada_hora}
+                                            options={HOURS}
+                                            onChange={(h) => setFormData({ ...formData, videollamada_hora: h })}
+                                            placeholder="HH"
+                                        />
+                                    </div>
+                                    <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#772c87' }}>:</span>
+                                    <div style={{ flex: 1 }}>
+                                        <CustomSelect
+                                            value={formData.videollamada_minuto}
+                                            options={MINUTES}
+                                            onChange={(m) => setFormData({ ...formData, videollamada_minuto: m })}
+                                            placeholder="MM"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
                             <label>Nombre *</label>
