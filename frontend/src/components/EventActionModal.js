@@ -255,7 +255,7 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     {coordinacion.videollamada_agendada && coordinacion.videollamada_fecha && (
                         <div className={styles.infoItem} style={{ gridColumn: '1 / -1', marginTop: '8px', padding: '12px', background: '#e0e7ff', borderRadius: '8px', border: '1px solid #c7d2fe', color: '#3730a3', textAlign: 'center' }}>
                             📅 <strong style={{ marginLeft: '4px' }}>
-                                Videollamada/Reunión agendada el día <span style={{ textTransform: 'capitalize' }}>{format(new Date(coordinacion.videollamada_fecha), "EEEE d 'de' MMMM, HH:mm'hs'", { locale: es })}</span>
+                                Videollamada/Reunión agendada el día <span style={{ textTransform: 'capitalize' }}>{format(new Date(String(coordinacion.videollamada_fecha).replace(' ', 'T').replace(/Z$/, '')), "EEEE d 'de' MMMM, HH:mm'hs'", { locale: es })}</span>
                             </strong>
                             {coordinacion.videollamada_completada && <span style={{ marginLeft: '10px', backgroundColor: '#22c55e', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' }}>COMPLETADA ✅</span>}
                         </div>

@@ -101,7 +101,8 @@ export default function DayAgendaModal({
                                 let timeStr = '';
                                 if (vc.videollamada_fecha) {
                                     try {
-                                        timeStr = format(new Date(vc.videollamada_fecha), 'HH:mm');
+                                        const cleanStr = String(vc.videollamada_fecha).replace(' ', 'T').replace(/Z$/, '');
+                                        timeStr = format(new Date(cleanStr), 'HH:mm');
                                     } catch (e) { }
                                 }
                                 return (

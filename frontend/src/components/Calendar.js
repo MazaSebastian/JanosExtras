@@ -369,7 +369,8 @@ export default function Calendar({
                       let timeStr = '';
                       if (c.videollamada_fecha) {
                         try {
-                          timeStr = format(new Date(c.videollamada_fecha), 'HH:mm');
+                          const cleanStr = String(c.videollamada_fecha).replace(' ', 'T').replace(/Z$/, '');
+                          timeStr = format(new Date(cleanStr), 'HH:mm');
                         } catch (e) { }
                       }
                       return `Reunión: ${c.nombre_cliente || c.titulo}${timeStr ? ` a las ${timeStr}hs` : ''}`;

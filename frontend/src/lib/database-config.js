@@ -3,8 +3,11 @@
 // o establece USE_REAL_DB=true
 
 import pkg from 'pg';
-const { Pool } = pkg;
+const { Pool, types } = pkg;
 import jsonDB from './database.js';
+
+// Prevenir desfase de zona horaria en TIMESTAMP (OID 1114) al consultar la BD
+types.setTypeParser(1114, (str) => (str ? str.replace(' ', 'T') : null));
 
 const USE_REAL_DB = process.env.USE_REAL_DB === 'true' || !!process.env.DATABASE_URL;
 
