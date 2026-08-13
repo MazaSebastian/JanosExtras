@@ -18,12 +18,17 @@ export default function DayAgendaModal({
     const [editingVideocall, setEditingVideocall] = useState(null);
 
     const handleDeleteVideocall = async (colId) => {
-        if (!confirm('¿Estás seguro de que deseas eliminar esta reunión? Esta acción es irreversible.')) {
+        if (!confirm('¿Estás seguro de que deseas quitar esta reunión? La coordinación y los datos del evento se mantendrán intactos.')) {
             return;
         }
         try {
             setDeletingId(colId);
-            await coordinacionesAPI.delete(colId);
+            await coordinacionesAPI.update(colId, {
+                videollamada_agendada: false,
+                videollamada_fecha: null,
+                videollamada_completada: false,
+                videollamada_meet_link: null
+            });
             if (onRefresh) onRefresh();
 
             // Si era la última cosa agendada, podríamos cerrar el modal,
@@ -32,8 +37,8 @@ export default function DayAgendaModal({
                 onClose();
             }
         } catch (err) {
-            console.error('Error eliminando reunión:', err);
-            alert('Hubo un error al eliminar la reunión. Por favor intenta de nuevo.');
+            console.error('Error al quitar reunión:', err);
+            alert('Hubo un error al quitar la reunión. Por favor intenta de nuevo.');
         } finally {
             setDeletingId(null);
         }

@@ -2,11 +2,16 @@ import jwt from 'jsonwebtoken';
 import { DJ } from '@/lib/models/DJ.js';
 import { loginSchema } from '@/utils/validation.js';
 import * as Sentry from '@sentry/nextjs';
+import { rateLimitByIP } from '@/lib/middleware/security.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
+
+  // Rate Limiting: Máximo 5 intentos por minuto por IP para prevenir ataques de fuerza bruta
+  const allowed = rateLimitByIP(5, 60000)(req, res);
+  if (allowed !== true) return;
 
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
