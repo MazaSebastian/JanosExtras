@@ -38,12 +38,22 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
 
     const initialMeeting = parseInitialVideollamada(coordinacion?.videollamada_fecha);
 
+    let initialTipo = coordinacion?.tipo_evento || '';
+    let initialSubtipo = '';
+    if (initialTipo.startsWith('Religioso - ')) {
+        initialSubtipo = initialTipo.split(' - ')[1];
+        initialTipo = 'Religioso';
+        if (initialSubtipo === 'Bar' || initialSubtipo === 'Bat') initialSubtipo = 'Bar / Bat Mitzvah';
+        if (initialSubtipo === 'Boda') initialSubtipo = 'Boda Religiosa / Jupá';
+    }
+
     const [formData, setFormData] = useState({
         nombre_cliente: coordinacion?.nombre_cliente || '',
         apellido_cliente: coordinacion?.apellido_cliente || '',
         nombre_agasajado: coordinacion?.nombre_agasajado || '',
         telefono: coordinacion?.telefono || '',
-        tipo_evento: coordinacion?.tipo_evento || '',
+        tipo_evento: initialTipo,
+        subtipo_evento: initialSubtipo,
         codigo_evento: coordinacion?.codigo_evento || '',
         videollamada_agendada: coordinacion?.videollamada_agendada ?? false,
         videollamada_fecha_dia: initialMeeting.fecha,
@@ -58,13 +68,21 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
             setError('');
 
             const nombreCompleto = `${formData.nombre_cliente} ${formData.apellido_cliente}`.trim();
+            const finalTipoEvento = formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+                ? `Religioso - ${formData.subtipo_evento}`
+                : formData.tipo_evento;
+
+            const finalTitulo = formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+                ? `Religioso - ${formData.subtipo_evento} de ${formData.nombre_agasajado || nombreCompleto}`
+                : `${formData.tipo_evento} - ${nombreCompleto}`;
+
             const payload = {
-                titulo: `${formData.tipo_evento} - ${nombreCompleto}`,
+                titulo: finalTitulo,
                 nombre_cliente: formData.nombre_cliente || null,
                 apellido_cliente: formData.apellido_cliente || null,
                 nombre_agasajado: formData.tipo_evento !== 'Corporativo' ? formData.nombre_agasajado : null,
                 telefono: formData.telefono || null,
-                tipo_evento: formData.tipo_evento || null,
+                tipo_evento: finalTipoEvento || null,
                 codigo_evento: formData.codigo_evento || null,
             };
 
@@ -171,11 +189,24 @@ export default function EditCoordinationModal({ coordinacion, onClose, onSave })
                             <CustomSelect
                                 value={formData.tipo_evento}
                                 options={['XV', 'Casamiento', 'Corporativo', 'Religioso', 'Cumpleaños']}
-                                onChange={(val) => setFormData({ ...formData, tipo_evento: val })}
+                                onChange={(val) => setFormData({ ...formData, tipo_evento: val, subtipo_evento: '' })}
                                 required
                             />
                         </div>
                     </div>
+
+                    {formData.tipo_evento === 'Religioso' && (
+                        <div className={styles.formGroup}>
+                            <label>Subtipo de Evento *</label>
+                            <CustomSelect
+                                value={formData.subtipo_evento}
+                                options={['Bar / Bat Mitzvah', 'Boda Religiosa / Jupá']}
+                                onChange={(val) => setFormData({ ...formData, subtipo_evento: val })}
+                                required
+                                placeholder="Seleccionar subtipo"
+                            />
+                        </div>
+                    )}
 
                     {formData.tipo_evento && formData.tipo_evento !== 'Corporativo' && (
                         <div className={styles.formGroup}>

@@ -574,7 +574,22 @@ export default function PreCoordinacionPage({ metadata }) {
     return tipo;
   }, [coordinacion?.tipo_evento]);
 
-  const pasos = tipoEventoNormalizado ? CLIENTE_FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
+  const pasos = useMemo(() => {
+    const flujosOriginales = tipoEventoNormalizado ? CLIENTE_FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
+    let subtipoActual = respuestasCliente.subtipo_religioso;
+    if (!subtipoActual && coordinacion?.tipo_evento) {
+      if (coordinacion.tipo_evento.includes('Boda')) subtipoActual = 'Boda Religiosa / Jupá';
+      else if (coordinacion.tipo_evento.includes('Bar') || coordinacion.tipo_evento.includes('Bat')) subtipoActual = 'Bar / Bat Mitzvah';
+    }
+
+    return flujosOriginales.filter(pasoIter => {
+      if (pasoIter.subtipo && subtipoActual) {
+        return pasoIter.subtipo === subtipoActual;
+      }
+      return true;
+    });
+  }, [tipoEventoNormalizado, coordinacion?.tipo_evento, respuestasCliente.subtipo_religioso]);
+
   const paso = pasos[pasoActual - 1];
   const totalPasos = pasos.length;
 

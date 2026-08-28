@@ -315,6 +315,8 @@ export default function CoordinacionesPanel() {
     if (tipo.startsWith('Religioso - ')) {
       subtipo = tipo.split(' - ')[1];
       tipo = 'Religioso';
+      if (subtipo === 'Bar' || subtipo === 'Bat') subtipo = 'Bar / Bat Mitzvah';
+      if (subtipo === 'Boda') subtipo = 'Boda Religiosa / Jupá';
     }
 
     setFormData({
@@ -749,7 +751,7 @@ export default function CoordinacionesPanel() {
                   <label>Subtipo de Evento *</label>
                   <CustomSelect
                     value={formData.subtipo_evento}
-                    options={['Bat', 'Bar', 'Boda']}
+                    options={['Bar / Bat Mitzvah', 'Boda Religiosa / Jupá']}
                     onChange={(val) => setFormData({ ...formData, subtipo_evento: val })}
                     required
                     placeholder="Seleccionar subtipo"

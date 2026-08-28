@@ -325,41 +325,58 @@ export const FLUJOS_POR_TIPO = {
   Religioso: [
     {
       id: 1,
-      titulo: 'Shows',
+      titulo: 'Clasificación y Perfil del Evento',
       preguntas: [
-        { id: 'contrataron_shows', label: '¿Contrataron shows?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_shows', label: 'Detalle de los shows', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_shows', valor: 'Sí' } }
-      ]
+        { id: 'subtipo_religioso', label: 'Tipo de celebración religiosa', tipo: 'select', opciones: ['Bar / Bat Mitzvah', 'Boda Religiosa / Jupá'], requerido: true },
+        { id: 'tipo_perfil', label: 'Perfil / Nivel de tradición', tipo: 'select', opciones: ['Tradicional / Laico', 'Ortodoxo'], requerido: true },
+      ],
     },
     {
       id: 2,
-      titulo: 'Pantalla y Videos',
+      titulo: 'Protocolo y Técnica de Salón',
       preguntas: [
-        { id: 'proyectan_videos', label: '¿Tienen videos que deseen proyectar en la pantalla?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_videos', label: 'Detalle de los videos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'proyectan_videos', valor: 'Sí' } }
-      ]
+        { id: 'utilizan_mejitzah', label: '¿Utilizarán Mejitzah (separación física)?', tipo: 'select', opciones: ['Sí', 'No'], requerido: false, condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' } },
+        { id: 'alcance_mejitzah', label: 'Momento de uso de la Mejitzah', tipo: 'select', opciones: ['Permanente (toda la fiesta)', 'Solo en momentos de baile / tandas tradicionales', 'Solo en la ceremonia'], requerido: false, condicional: { pregunta: 'utilizan_mejitzah', valor: 'Sí' } },
+        { id: 'detalles_mejitzah', label: 'Detalles de montaje o distribución de pista y mesas', tipo: 'textarea', requerido: false, condicional: { pregunta: 'utilizan_mejitzah', valor: 'Sí' } },
+        { id: 'aplica_kol_isha', label: '¿Aplica la regla de Kol Isha (sin voces femeninas solistas)?', tipo: 'select', opciones: ['Sí', 'No'], requerido: false, condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' }, ayuda: 'Si es Sí: Solo voces masculinas o instrumentales en presencia masculina, y animador masculino.' },
+        { id: 'preferencia_iluminacion', label: 'Preferencia de iluminación para tandas de baile y salón', tipo: 'textarea', requerido: false, condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' }, placeholder: 'Indicá si desean modo fiesta estándar o salón iluminado con mucha luz en tandas de baile, o detalles para el operador técnico.' },
+        { id: 'audio_ceremonia_oficiantes', label: 'Audio en Ceremonia & Microfonía (Rabino / Jazán / Coro)', tipo: 'select', opciones: ['Solo Rabino / Oficiante', 'Rabino + Jazán (cantor litúrgico)', 'Coro / Músicos en vivo', 'No aplica / Sin ceremonia'], requerido: false },
+        { id: 'detalles_microfonia_ceremonia', label: 'Detalles técnicos de microfonía y pistas para la ceremonia', tipo: 'textarea', requerido: false, condicional: { pregunta: 'audio_ceremonia_oficiantes', valor: 'Rabino + Jazán (cantor litúrgico)' }, placeholder: 'Indicá si el Jazán trae pistas (pendrive) o canta a capela/con instrumentos, y confirmar micrófonos inalámbricos/corbateros para el altar.' },
+      ],
     },
     {
       id: 3,
-      titulo: 'Complementos Técnicos',
+      titulo: 'Ceremonia de Jupá y Entrada de Novios (Bodas)',
+      subtipo: 'Boda Religiosa / Jupá',
       preguntas: [
-        { id: 'contrataron_complementos', label: '¿Han contratado complementos técnicos?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_complementos', label: 'Detalle de los complementos técnicos', tipo: 'textarea', requerido: false, condicional: { pregunta: 'contrataron_complementos', valor: 'Sí' } }
-      ]
+        { id: 'realizan_jupa_salon', label: '¿Realizan la ceremonia de Jupá en el salón?', tipo: 'select', opciones: ['Sí', 'No'], requerido: false },
+        { id: 'cancion_ingreso_novio', label: 'Canción de ingreso del Novio (con sus padres)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_jupa_salon', valor: 'Sí' } },
+        { id: 'cancion_ingreso_novia', label: 'Canción de ingreso de la Novia (con sus madres) / 7 Vueltas', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_jupa_salon', valor: 'Sí' } },
+        { id: 'canto_im_eshkajej', label: '¿Rompen la copa directo o hay canto previo de Im Eshkajej Yerushalayim?', tipo: 'select', opciones: ['Canto previo de Im Eshkajej (solemne)', 'Rompen la copa directo'], requerido: false, condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' } },
+        { id: 'detalle_im_eshkajej', label: 'Detalle o pista para Im Eshkajej (previo a romper la copa)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'canto_im_eshkajej', valor: 'Canto previo de Im Eshkajej (solemne)' }, placeholder: 'Indicar versión/pista o si canta el Jazán a capela. Mazal Tov explosivo al quiebre del vidrio.' },
+        { id: 'cancion_rompimiento_copa', label: 'Canción para el Rompimiento de la Copa (Mazal Tov - Festejo inmediato)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_jupa_salon', valor: 'Sí' } },
+        { id: 'baila_vals_novios', label: '¿Realizan vals o baile lento de novios?', tipo: 'select', opciones: ['Sí', 'No'], requerido: false },
+        { id: 'cancion_vals_novios', label: 'Canción para el vals o baile de novios', tipo: 'textarea', requerido: false, condicional: { pregunta: 'baila_vals_novios', valor: 'Sí' } },
+      ],
     },
     {
       id: 4,
-      titulo: 'Mejitzah',
+      titulo: 'Ceremonia de Velas y Club (Bar/Bat Mitzvah)',
+      subtipo: 'Bar / Bat Mitzvah',
       preguntas: [
-        { id: 'utilizan_mejitzah', label: '¿Utilizarán Mejitzah?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'ceremonia_velas', label: '¿Realizarán ceremonia de vela guía y encendido de velas?', tipo: 'select', opciones: ['Sí', 'No'], requerido: false },
+        { id: 'cancion_vela_guia', label: 'Canción para la Vela Guía', tipo: 'textarea', requerido: false, condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' } },
+        { id: 'velas', label: 'Velas y Homenajeados', tipo: 'velas', requerido: false, condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' } },
+        { id: 'pertenece_club', label: '¿El/la agasajado/a pertenece a algún club o institución?', tipo: 'select', opciones: ['Sí', 'No'], requerido: false },
+        { id: 'detalles_club', label: 'Detalles del club (cantos, banderas, camisetas)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'pertenece_club', valor: 'Sí' } },
       ],
     },
     {
       id: 5,
-      titulo: 'Música de recepción / Comidas',
+      titulo: 'Música de Recepción y Comidas',
       preguntas: [
-        { id: 'musica_recepcion_comidas', label: 'Música de recepción y comidas', tipo: 'text', requerido: true },
-        { id: 'artistas_favoritos', label: 'Artistas favoritos', tipo: 'text', requerido: true },
+        { id: 'musica_recepcion_comidas', label: 'Música para recepción y momentos de comida', tipo: 'textarea', requerido: true },
+        { id: 'artistas_favoritos', label: 'Artistas o géneros preferidos', tipo: 'textarea', requerido: true },
       ],
     },
     {
@@ -368,72 +385,48 @@ export const FLUJOS_POR_TIPO = {
       preguntas: [
         { id: 'realizan_predancing', label: '¿Realizan pre-dancing?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
         { id: 'detalles_predancing', label: 'Detalles musicales del pre-dancing', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_predancing', valor: 'Sí' } },
-        { id: 'ultima_cancion_predancing', label: 'Última canción del pre-dancing', tipo: 'text', requerido: false, condicional: { pregunta: 'realizan_predancing', valor: 'Sí' } },
+        { id: 'ultima_cancion_predancing', label: 'Última canción del pre-dancing', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_predancing', valor: 'Sí' } },
       ],
     },
     {
       id: 7,
-      titulo: 'Ingreso al salón',
+      titulo: 'Ingreso al Salón',
       preguntas: [
         { id: 'realizan_ingreso_salon', label: '¿Realizan ingreso al salón?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_ingreso_salon', label: 'Detalles del ingreso al salón', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_ingreso_salon', valor: 'Sí' } },
+        { id: 'detalle_ingreso_salon', label: 'Detalles del ingreso al salón (canción, artista, momentos)', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_ingreso_salon', valor: 'Sí' } },
       ],
     },
     {
       id: 8,
-      titulo: 'Homenajes',
+      titulo: 'Homenajes y Brindis',
       preguntas: [
-        { id: 'realizan_homenajes', label: '¿Realizará homenajes?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalle_homenajes', label: 'Detalles del momento de homenajes', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_homenajes', valor: 'Sí' } },
+        { id: 'realizan_homenajes', label: '¿Realizarán homenajes especiales?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'detalle_homenajes', label: 'Detalles de los homenajes y canciones elegidas', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_homenajes', valor: 'Sí' } },
+        { id: 'cancion_brindis', label: 'Canción para el brindis', tipo: 'textarea', requerido: true },
       ],
     },
     {
       id: 9,
-      titulo: 'Velas',
+      titulo: 'Entrada en Carioca',
+      subtipo: 'Bar / Bat Mitzvah',
       preguntas: [
-        { id: 'ceremonia_velas', label: '¿Realizará vela guía?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'cancion_vela_guia', label: 'Canción de vela guía', tipo: 'text', requerido: false, condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' } },
-        { id: 'velas', label: 'Velas', tipo: 'velas', requerido: false, condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' } },
-      ],
-    },
-    {
-      id: 10,
-      titulo: 'Canción de Brindis',
-      preguntas: [
-        { id: 'cancion_brindis', label: 'Canción y detalles del momento brindis', tipo: 'textarea', requerido: false },
-      ],
-    },
-    {
-      id: 11,
-      titulo: 'Entrada en carioca',
-      preguntas: [
-        { id: 'realizan_ingreso_carioca', label: '¿Realiza ingreso en carioca?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
+        { id: 'realizan_ingreso_carioca', label: '¿Realizan ingreso en carioca (cotillón)?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
         { id: 'detalle_ingreso_carioca', label: 'Canción y detalles del ingreso a carioca', tipo: 'textarea', requerido: false, condicional: { pregunta: 'realizan_ingreso_carioca', valor: 'Sí' } },
       ],
     },
     {
-      id: 12,
-      titulo: 'Club',
+      id: 10,
+      titulo: 'Musicalización Tandas',
       preguntas: [
-        { id: 'pertenece_club', label: '¿Pertenece a un club?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true, ayuda: 'Ejemplo de clubes: Hacoaj, Macabi' },
-        { id: 'detalles_club', label: 'Detalles del club', tipo: 'textarea', requerido: false, condicional: { pregunta: 'pertenece_club', valor: 'Sí' } },
-      ],
-    },
-    {
-      id: 13,
-      titulo: 'Música de tandas',
-      preguntas: [
-        { id: 'abre_tanda_sher', label: '¿Abrimos el momento de baile con una tanda sher?', tipo: 'select', opciones: ['Sí', 'No'], requerido: true },
-        { id: 'detalles_tanda_sher', label: 'Detalles de la tanda sher', tipo: 'textarea', requerido: false, condicional: { pregunta: 'abre_tanda_sher', valor: 'Sí' } },
-        { id: 'tanda_1', label: 'Tanda 1', tipo: 'textarea', requerido: true },
+        { id: 'tanda_1', label: 'Tanda 1 (ej: Tanda Tradicional / Rikudim / Cachengue)', tipo: 'textarea', requerido: true },
         { id: 'tanda_2', label: 'Tanda 2', tipo: 'textarea', requerido: true },
         { id: 'tanda_3', label: 'Tanda 3', tipo: 'textarea', requerido: true },
-        { id: 'tanda_4', label: 'Tanda 4', tipo: 'textarea', requerido: true },
+        { id: 'tanda_4', label: 'Tanda 4 (Cierre / Final de fiesta)', tipo: 'textarea', requerido: true },
       ],
     },
     {
       id: 99,
-      titulo: 'Playlist de referencia',
+      titulo: 'Playlist de Referencia',
       preguntas: [
         { id: 'link_playlist', label: 'Link de la playlist', tipo: 'textarea', requerido: false, placeholder: 'https://open.spotify.com/playlist/...' }
       ],
@@ -818,7 +811,8 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
           // Si estamos en modo soloPendientes, calcular las iniciales
           if (soloPendientes && data.tipo_evento) {
             const tipoEvent = data.tipo_evento.trim();
-            const flujos = FLUJOS_POR_TIPO[tipoEvent] || [];
+            const tipoKey = tipoEvent?.startsWith('Religioso') ? 'Religioso' : tipoEvent;
+            const flujos = FLUJOS_POR_TIPO[tipoKey] || [];
             const pendientesIds = new Set();
             flujos.forEach(pasoIter => {
                pasoIter.preguntas.forEach(p => {
@@ -854,16 +848,31 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
 
   const pasos = useMemo(() => {
     const flujosOriginales = tipoEventoNormalizado ? FLUJOS_POR_TIPO[tipoEventoNormalizado] || [] : [];
-    if (!soloPendientes || !preguntasPendientesIniciales) return flujosOriginales;
     
-    return flujosOriginales.map(pasoIter => {
+    // Determinar subtipo actual si es Religioso
+    let subtipoActual = respuestas.subtipo_religioso;
+    if (!subtipoActual && coordinacion?.tipo_evento) {
+      if (coordinacion.tipo_evento.includes('Boda')) subtipoActual = 'Boda Religiosa / Jupá';
+      else if (coordinacion.tipo_evento.includes('Bar') || coordinacion.tipo_evento.includes('Bat')) subtipoActual = 'Bar / Bat Mitzvah';
+    }
+
+    const flujosFiltradosPorSubtipo = flujosOriginales.filter(pasoIter => {
+      if (pasoIter.subtipo && subtipoActual) {
+        return pasoIter.subtipo === subtipoActual;
+      }
+      return true;
+    });
+
+    if (!soloPendientes || !preguntasPendientesIniciales) return flujosFiltradosPorSubtipo;
+    
+    return flujosFiltradosPorSubtipo.map(pasoIter => {
       const preguntasFiltradas = pasoIter.preguntas.filter(p => preguntasPendientesIniciales.has(p.id));
       if (preguntasFiltradas.length > 0) {
         return { ...pasoIter, preguntas: preguntasFiltradas };
       }
       return null;
     }).filter(Boolean);
-  }, [tipoEventoNormalizado, soloPendientes, preguntasPendientesIniciales]);
+  }, [tipoEventoNormalizado, soloPendientes, preguntasPendientesIniciales, coordinacion?.tipo_evento, respuestas.subtipo_religioso]);
 
   // Asegurarnos de que el pasoActual apunte a un índice válido
   useEffect(() => {

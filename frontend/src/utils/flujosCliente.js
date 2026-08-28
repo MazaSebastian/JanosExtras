@@ -637,14 +637,23 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
   Religioso: [
     {
       id: 1,
-      titulo: '🕍 Mejitzah',
-      descripcion: 'Contanos si en la fiesta utilizarán Mejitzah (separación física para el momento del baile tradicional).',
+      titulo: '🕍 Clasificación y Perfil del Evento',
+      descripcion: 'Para comenzar, contanos qué tipo de celebración religiosa realizarán y qué perfil o tradición tendrá la fiesta.',
       preguntas: [
         {
-          id: 'utilizan_mejitzah',
-          label: '¿Utilizarán Mejitzah?',
+          id: 'subtipo_religioso',
+          label: '¿Qué tipo de celebración religiosa es?',
           tipo: 'buttons',
-          opciones: ['Sí', 'No'],
+          opciones: ['Bar / Bat Mitzvah', 'Boda Religiosa / Jupá'],
+          requerido: true,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'tipo_perfil',
+          label: '¿Qué perfil o nivel de tradición tendrá el evento?',
+          tipo: 'buttons',
+          opciones: ['Tradicional / Laico', 'Ortodoxo'],
           requerido: true,
           multiple: false,
           permiteOtro: false
@@ -653,15 +662,221 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
     },
     {
       id: 2,
+      titulo: '📜 Protocolo y Técnica de Salón',
+      descripcion: 'Condiciones de montaje, pautas de música y técnica de iluminación para coordinar con el salón y el DJ.',
+      preguntas: [
+        {
+          id: 'utilizan_mejitzah',
+          label: '¿Utilizarán Mejitzah (separación física para el baile o salón)?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: false,
+          condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' },
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'alcance_mejitzah',
+          label: '¿En qué momentos se utilizará la Mejitzah?',
+          tipo: 'buttons',
+          opciones: [
+            'Permanente (toda la fiesta)',
+            'Solo en momentos de baile / tandas tradicionales',
+            'Solo en la ceremonia'
+          ],
+          requerido: false,
+          condicional: { pregunta: 'utilizan_mejitzah', valor: 'Sí' },
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'detalles_mejitzah',
+          label: 'Detalles de montaje o distribución de pista y mesas para la Mejitzah:',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'utilizan_mejitzah', valor: 'Sí' },
+          placeholder: 'Aclaraciones sobre biombos, telas, división de pista o ubicación de mesas'
+        },
+        {
+          id: 'aplica_kol_isha',
+          label: '¿Aplica la regla de Kol Isha (sin voces femeninas solistas en presencia masculina)?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: false,
+          condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' },
+          multiple: false,
+          permiteOtro: false,
+          ayuda: 'Si es Sí, el DJ solo reproducirá voces masculinas o instrumentales en presencia de público masculino, y la animación/conducción al micrófono será realizada por personal masculino.'
+        },
+        {
+          id: 'preferencia_iluminacion',
+          label: 'Preferencia de iluminación para tandas de baile y salón:',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' },
+          placeholder: 'Indicá si solicitan mantener el salón iluminado con mucha luz durante las tandas de baile, o detalles para el operador técnico.'
+        },
+        {
+          id: 'audio_ceremonia_oficiantes',
+          label: 'Audio en Ceremonia & Microfonía (Rabino / Jazán / Coro):',
+          tipo: 'buttons',
+          opciones: [
+            'Solo Rabino / Oficiante',
+            'Rabino + Jazán (cantor litúrgico)',
+            'Coro / Músicos en vivo',
+            'No aplica / Sin ceremonia'
+          ],
+          requerido: false,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'detalles_microfonia_ceremonia',
+          label: 'Detalles técnicos de microfonía y pistas para la ceremonia:',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'audio_ceremonia_oficiantes', valor: 'Rabino + Jazán (cantor litúrgico)' },
+          placeholder: 'Indicá si el Jazán trae pistas (pendrive) o canta a capela/con instrumentos, y confirmar requerimientos de micrófonos inalámbricos o corbateros dedicados para el altar.'
+        },
+      ],
+    },
+    {
+      id: 3,
+      titulo: '💍 Ceremonia de Jupá y Entrada de Novios',
+      descripcion: 'Detalles de la ceremonia religiosa en el salón y canciones de ingreso.',
+      subtipo: 'Boda Religiosa / Jupá',
+      preguntas: [
+        {
+          id: 'realizan_jupa_salon',
+          label: '¿Realizan la ceremonia de Jupá en el salón?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: false,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_ingreso_novio',
+          label: 'Canción de ingreso del Novio (con sus padres):',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'realizan_jupa_salon', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista para la entrada del novio'
+        },
+        {
+          id: 'cancion_ingreso_novia',
+          label: 'Canción de ingreso de la Novia (con sus madres) / 7 Vueltas (Hakafot):',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'realizan_jupa_salon', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista para la entrada de la novia'
+        },
+        {
+          id: 'canto_im_eshkajej',
+          label: '¿Rompen la copa directo o hay canto previo de Im Eshkajej Yerushalayim?',
+          tipo: 'buttons',
+          opciones: ['Canto previo de Im Eshkajej (solemne)', 'Rompen la copa directo'],
+          requerido: false,
+          condicional: { pregunta: 'tipo_perfil', valor: 'Ortodoxo' },
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'detalle_im_eshkajej',
+          label: 'Detalle o pista para Im Eshkajej (previo a romper la copa):',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'canto_im_eshkajej', valor: 'Canto previo de Im Eshkajej (solemne)' },
+          placeholder: 'Indicar versión/pista si la reproduce el DJ o si canta el Jazán a capela. El Mazal Tov festivo se disparará al milisegundo exacto de escuchar el quiebre del vidrio.'
+        },
+        {
+          id: 'cancion_rompimiento_copa',
+          label: 'Canción para el Rompimiento de la Copa (Mazal Tov - Festejo inmediato):',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'realizan_jupa_salon', valor: 'Sí' },
+          placeholder: 'Canción de explosión festiva inmediata tras romper la copa'
+        },
+        {
+          id: 'baila_vals_novios',
+          label: '¿Realizan vals o baile lento de novios?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: false,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_vals_novios',
+          label: 'Canción para el vals o baile de novios:',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'baila_vals_novios', valor: 'Sí' },
+          placeholder: 'Nombre de la canción y artista'
+        },
+      ],
+    },
+    {
+      id: 4,
+      titulo: '🕯️ Ceremonia de Velas y Club',
+      descripcion: 'Detalles de la ceremonia de velas y pertenencia a instituciones o clubes comunitarios.',
+      subtipo: 'Bar / Bat Mitzvah',
+      preguntas: [
+        {
+          id: 'ceremonia_velas',
+          label: '¿Realizarán ceremonia de vela guía y encendido de velas?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: false,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'cancion_vela_guia',
+          label: 'Canción para la Vela Guía:',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' },
+          placeholder: 'Nombre de la canción para abrir el encendido de velas'
+        },
+        {
+          id: 'velas',
+          label: 'Velas y Homenajeados',
+          tipo: 'velas',
+          requerido: false,
+          condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' },
+          ayuda: 'Agregá cada vela que quieras incluir. Para cada una, indicá a quién está dedicada y qué canción querés que suene'
+        },
+        {
+          id: 'pertenece_club',
+          label: '¿El/la agasajado/a pertenece a algún club o institución (ej: Hacoaj, Macabi, CISSAB, Hebraica, etc.)?',
+          tipo: 'buttons',
+          opciones: ['Sí', 'No'],
+          requerido: false,
+          multiple: false,
+          permiteOtro: false
+        },
+        {
+          id: 'detalles_club',
+          label: 'Detalles del club (cantos, banderas, camisetas):',
+          tipo: 'textarea',
+          requerido: false,
+          condicional: { pregunta: 'pertenece_club', valor: 'Sí' },
+          placeholder: 'Mencioná qué club es y si tienen cantos o momentos especiales para incluir en la animación'
+        },
+      ],
+    },
+    {
+      id: 5,
       titulo: '🎵 Música de Recepción y Comidas',
       descripcion: 'La música ideal para acompañar la recepción y los momentos de comida. ¡Podés sugerir estilos o artistas!',
       preguntas: [
         {
           id: 'musica_recepcion_comidas',
-          label: '¿Qué tipo de música les gustaría?',
+          label: '¿Qué tipo de música les gustaría para la recepción y momentos de comida?',
           tipo: 'textarea',
           requerido: true,
-          placeholder: 'Ejemplo: Instrumental, Jazz, Klezmer tradicional, Pop suave, etc.'
+          placeholder: 'Ejemplo: Klezmer instrumental, Jazz, Acústico, Pop suave, etc.'
         },
         {
           id: 'artistas_favoritos',
@@ -673,7 +888,7 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 3,
+      id: 6,
       titulo: '💃 Pre-dancing',
       descripcion: 'El pre-dancing es un momento lleno de energía al inicio de la celebración. Contanos si lo realizarán y qué música prefieren.',
       preguntas: [
@@ -700,12 +915,12 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           tipo: 'textarea',
           requerido: false,
           condicional: { pregunta: 'realizan_predancing', valor: 'Sí' },
-          placeholder: 'Canción con la que cerramos el pre-dancing para dar paso al siguiente momento'
+          placeholder: 'Canción con la que cerramos el pre-dancing para dar paso a la comida'
         },
       ],
     },
     {
-      id: 4,
+      id: 7,
       titulo: '🚪 Ingreso al Salón',
       descripcion: 'Detalles y canciones para su gran entrada triunfal al salón.',
       preguntas: [
@@ -729,13 +944,13 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 5,
-      titulo: '🤝 Homenajes',
-      descripcion: 'Momentos dedicados a homenajear a personas especiales o familiares.',
+      id: 8,
+      titulo: '🤝 Homenajes y Brindis',
+      descripcion: 'Momentos dedicados a homenajear a familiares y compartir los deseos de la noche.',
       preguntas: [
         {
           id: 'realizan_homenajes',
-          label: '¿Realizarán homenajes?',
+          label: '¿Realizarán homenajes especiales?',
           tipo: 'buttons',
           opciones: ['Sí', 'No'],
           requerido: true,
@@ -750,45 +965,6 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
           condicional: { pregunta: 'realizan_homenajes', valor: 'Sí' },
           placeholder: 'Contanos brevemente quiénes reciben el homenaje y qué temas musicales acompañarán'
         },
-      ],
-    },
-    {
-      id: 6,
-      titulo: '🕯️ Ceremonia de Velas / Vela Guía',
-      descripcion: 'Ceremonia de encendido de velas para compartir y honrar a sus seres queridos.',
-      preguntas: [
-        {
-          id: 'ceremonia_velas',
-          label: '¿Realizarán ceremonia de vela guía o encendido de velas?',
-          tipo: 'buttons',
-          opciones: ['Sí', 'No'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
-          id: 'cancion_vela_guia',
-          label: 'Canción para la Vela Guía:',
-          tipo: 'textarea',
-          requerido: false,
-          condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' },
-          placeholder: 'Nombre de la canción para abrir el encendido'
-        },
-        {
-          id: 'velas',
-          label: 'Velas',
-          tipo: 'velas',
-          requerido: false,
-          condicional: { pregunta: 'ceremonia_velas', valor: 'Sí' },
-          ayuda: 'Agrega cada vela que quieras incluir. Para cada una, indica a quién está dedicada y qué canción quieres'
-        },
-      ],
-    },
-    {
-      id: 7,
-      titulo: '🥂 Brindis',
-      descripcion: 'El brindis y sus deseos para la celebración.',
-      preguntas: [
         {
           id: 'cancion_brindis',
           label: '¿Qué canción les gustaría para el brindis?',
@@ -802,13 +978,14 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 8,
-      titulo: '🎊 Ingreso a Carioca',
-      descripcion: 'El inicio de la gran fiesta carioca o cotillón para bailar.',
+      id: 9,
+      titulo: '🎊 Entrada en Carioca',
+      descripcion: 'El momento del cotillón y fiesta final.',
+      subtipo: 'Bar / Bat Mitzvah',
       preguntas: [
         {
           id: 'realizan_ingreso_carioca',
-          label: '¿Realizan ingreso en carioca?',
+          label: '¿Realizan ingreso especial en carioca (cotillón)?',
           tipo: 'buttons',
           opciones: ['Sí', 'No'],
           requerido: true,
@@ -826,57 +1003,44 @@ export const CLIENTE_FLUJOS_POR_TIPO = {
       ],
     },
     {
-      id: 9,
-      titulo: '🏆 Pertenencia a Club',
-      descripcion: 'Contanos si pertenecen a algún club o institución (ej. Hacoaj, Macabi, etc.) para tenerlo en cuenta en la animación.',
-      preguntas: [
-        {
-          id: 'pertenece_club',
-          label: '¿Pertenece a un club?',
-          tipo: 'buttons',
-          opciones: ['Sí', 'No'],
-          requerido: true,
-          multiple: false,
-          permiteOtro: false
-        },
-        {
-          id: 'detalles_club',
-          label: 'Detalles del club:',
-          tipo: 'textarea',
-          requerido: false,
-          condicional: { pregunta: 'pertenece_club', valor: 'Sí' },
-          placeholder: 'Mencioná qué club y detalles importantes si realizan cantos tradicionales del mismo'
-        },
-      ],
-    },
-    {
       id: 10,
-      titulo: '🎶 Tanda Sher',
-      descripcion: 'La tanda Sher es un baile tradicional judío. Contanos si les gustaría abrir el baile con este momento.',
+      titulo: '🎶 Tandas de Baile',
+      descripcion: 'Estructuración y diseño musical de las 4 tandas de baile del evento (incluyendo Tanda Tradicional / Rikudim, Cachengue, Pop, Retro, etc.).',
       preguntas: [
         {
-          id: 'abre_tanda_sher',
-          label: '¿Abrimos el momento de baile con una tanda Sher?',
-          tipo: 'buttons',
-          opciones: ['Sí', 'No'],
+          id: 'tanda_1',
+          label: 'Tanda 1 (ej: Tanda Tradicional / Rikudim / Cachengue de apertura):',
+          tipo: 'textarea',
           requerido: true,
-          multiple: false,
-          permiteOtro: false
+          placeholder: 'Detalles musicales, ritmos, artistas o momentos especiales para la primera tanda'
         },
         {
-          id: 'detalles_tanda_sher',
-          label: 'Detalles de la tanda Sher:',
+          id: 'tanda_2',
+          label: 'Tanda 2:',
           tipo: 'textarea',
-          requerido: false,
-          condicional: { pregunta: 'abre_tanda_sher', valor: 'Sí' },
-          placeholder: '¿Desean algún tema tradicional en particular o estilo de aceleración?'
+          requerido: true,
+          placeholder: 'Géneros, estilos y temas sugeridos'
+        },
+        {
+          id: 'tanda_3',
+          label: 'Tanda 3:',
+          tipo: 'textarea',
+          requerido: true,
+          placeholder: 'Géneros, estilos y temas sugeridos'
+        },
+        {
+          id: 'tanda_4',
+          label: 'Tanda 4 (Cierre / Final de fiesta):',
+          tipo: 'textarea',
+          requerido: true,
+          placeholder: 'Géneros, estilos y temas sugeridos para el cierre'
         },
       ],
     },
     {
       id: 99,
-      titulo: '🎧 Link de playlist',
-      descripcion: 'Te invitamos a armar y compartirnos el link de tu playlist de Spotify, Apple Music o YouTube con las canciones que más te gusten. Tené en cuenta que esta playlist servirá como referencia de tus gustos musicales; las canciones no deben seguir ningún orden en particular, simplemente compartinos los temas que te encantan para que nosotros (DJs) tengamos un espectro mucho más amplio de tus gustos y podamos hacer brillar tu noche.',
+      titulo: '🎧 Link de Playlist',
+      descripcion: 'Te invitamos a armar y compartirnos el link de tu playlist de Spotify, Apple Music o YouTube con las canciones que más te gusten. Tené en cuenta que esta playlist servirá como referencia de tus gustos musicales para que el DJ arme una noche inolvidable.',
       preguntas: [
         {
           id: 'link_playlist',

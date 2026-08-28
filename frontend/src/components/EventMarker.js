@@ -15,6 +15,7 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
     nombre_agasajado: '',
     telefono: '',
     tipo_evento: '',
+    subtipo_evento: '',
     codigo_evento: '',
   });
 
@@ -43,14 +44,22 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
 
       // 2. Automáticamente orquestar la Coordinación (Fase 2)
       const nombreCompleto = `${formData.nombre_cliente} ${formData.apellido_cliente}`.trim();
+      const finalTipoEvento = formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+        ? `Religioso - ${formData.subtipo_evento}`
+        : formData.tipo_evento;
+
+      const finalTitulo = formData.tipo_evento === 'Religioso' && formData.subtipo_evento
+        ? `Religioso - ${formData.subtipo_evento} de ${formData.nombre_agasajado || nombreCompleto}`
+        : `${formData.tipo_evento} - ${nombreCompleto}`;
+
       const coordPayload = {
-        titulo: `${formData.tipo_evento} - ${nombreCompleto}`,
+        titulo: finalTitulo,
         nombre_cliente: formData.nombre_cliente,
         apellido_cliente: formData.apellido_cliente,
         nombre_agasajado: formData.tipo_evento !== 'Corporativo' ? formData.nombre_agasajado : null,
         telefono: formData.telefono,
         fecha_evento: format(date, 'yyyy-MM-dd'),
-        tipo_evento: formData.tipo_evento,
+        tipo_evento: finalTipoEvento,
         codigo_evento: formData.codigo_evento,
         salon_id: parseInt(salonId, 10),
         dj_responsable_id: djId || undefined,
@@ -138,11 +147,24 @@ export default function EventMarker({ date, salonId, djId, onEventCreated, onClo
             <CustomSelect
               value={formData.tipo_evento}
               options={['XV', 'Casamiento', 'Corporativo', 'Religioso', 'Cumpleaños']}
-              onChange={(val) => setFormData({ ...formData, tipo_evento: val })}
+              onChange={(val) => setFormData({ ...formData, tipo_evento: val, subtipo_evento: '' })}
               required
               placeholder="Seleccionar tipo de evento"
             />
           </div>
+
+          {formData.tipo_evento === 'Religioso' && (
+            <div className={styles.formGroup}>
+              <label>Subtipo de Evento *</label>
+              <CustomSelect
+                value={formData.subtipo_evento}
+                options={['Bar / Bat Mitzvah', 'Boda Religiosa / Jupá']}
+                onChange={(val) => setFormData({ ...formData, subtipo_evento: val })}
+                required
+                placeholder="Seleccionar subtipo"
+              />
+            </div>
+          )}
 
           {formData.tipo_evento && formData.tipo_evento !== 'Corporativo' && (
             <div className={styles.formGroup}>
