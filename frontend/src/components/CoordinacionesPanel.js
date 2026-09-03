@@ -2075,6 +2075,12 @@ export default function CoordinacionesPanel() {
             setShowWhatsAppTemplates(false);
             setSelectedCoordForWhatsApp(null);
           }}
+          onContactadoUpdated={(coordId, newContactado) => {
+            setCoordinaciones(prev =>
+              prev.map(c => c.id === coordId ? { ...c, contactado: newContactado } : c)
+            );
+            showToast('Cliente marcado como Contactado ✅');
+          }}
         />
       )}
       {toastMessage && (

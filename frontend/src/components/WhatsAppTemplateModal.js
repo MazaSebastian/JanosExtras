@@ -23,7 +23,7 @@ const resolvePreCoordinacionUrl = (url) => {
  * WhatsAppTemplateModal — Selector de plantillas de mensaje pre-armadas.
  * Auto-genera el link de pre-coordinación si no existe al momento de enviar.
  */
-export default function WhatsAppTemplateModal({ coordinacion, event, onClose }) {
+export default function WhatsAppTemplateModal({ coordinacion, event, onClose, onContactadoUpdated }) {
     const [selectedId, setSelectedId] = useState(null);
     const [generating, setGenerating] = useState(false);
     const [livePreCoordUrl, setLivePreCoordUrl] = useState(resolvePreCoordinacionUrl(coordinacion?.pre_coordinacion_url) || null);
@@ -226,6 +226,20 @@ Si están trabados con alguna elección o necesitan recomendaciones de canciones
         const encodedText = encodeURIComponent(message);
         // Usar api.whatsapp.com nativo para esquivar la corrupción de emojis de wa.me
         window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`, '_blank');
+
+        // Si se envía la plantilla de Presentación Formal / Neutra y aún no está marcado como contactado,
+        // actualizar automáticamente el estado a contactado
+        if (template.id === 'presentacion' && coordinacion?.id && !coordinacion?.contactado) {
+            try {
+                await coordinacionesAPI.update(coordinacion.id, { contactado: true });
+                if (onContactadoUpdated) {
+                    onContactadoUpdated(coordinacion.id, true);
+                }
+            } catch (err) {
+                console.error('Error al actualizar estado contactado automáticamente:', err);
+            }
+        }
+
         onClose();
     };
 

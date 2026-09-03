@@ -426,6 +426,11 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     coordinacion={coordinacion}
                     event={event}
                     onClose={() => setShowWhatsAppTemplates(false)}
+                    onContactadoUpdated={(coordId, newContactado) => {
+                        setContactado(newContactado);
+                        setCoordinacion(prev => prev ? ({ ...prev, contactado: newContactado }) : prev);
+                        if (onRefresh) onRefresh();
+                    }}
                 />
             )}
 
