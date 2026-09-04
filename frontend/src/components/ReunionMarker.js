@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { coordinacionesAPI } from '@/services/api';
@@ -12,7 +12,8 @@ const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 export default function ReunionMarker({ date, salonId, djId, onEventCreated, onClose }) {
     const [loading, setLoading] = useState(false);
     const [fetchingEvents, setFetchingEvents] = useState(true);
-    const [availableEvents, setAvailableEvents] = useState([]);
+    const [allEvents, setAllEvents] = useState([]);
+    const [showCompleted, setShowCompleted] = useState(false);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         coordinacion_id: '',
@@ -36,22 +37,13 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
                     const isReunionTitulo = e.titulo && e.titulo.toLowerCase().includes('reuni');
                     if (isReunionTipo || isReunionTitulo) return false;
 
-                    // Para coordinaciones NO completadas, no debe tener reunión ya agendada (se reprograma desde la agenda)
-                    // Para coordinaciones completadas, permitimos volver a agendar videollamada de refuerzo/confirmación
-                    const estado = (e.estado || '').toLowerCase();
-                    const isCompletada = estado === 'completado' || estado === 'completada';
-                    if (!isCompletada && (e.videollamada_agendada || e.videollamada_fecha)) return false;
-
                     return true;
                 });
 
                 // Sort by date ascending
                 filtered.sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento));
 
-                setAvailableEvents(filtered);
-                if (filtered.length > 0) {
-                    setFormData(prev => ({ ...prev, coordinacion_id: filtered[0].id }));
-                }
+                setAllEvents(filtered);
             } catch (err) {
                 console.error("Error al obtener eventos del salón:", err);
                 setError('No se pudieron cargar los eventos disponibles.');
@@ -64,6 +56,50 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
             fetchEventsForSalon();
         }
     }, [salonId]);
+
+    // Identificar si una coordinación está completada o cargada (verde)
+    const isEventCompleted = (e) => {
+        const estado = (e.estado || '').toLowerCase();
+        return estado === 'completado' || estado === 'completada' || estado === 'cargado' || estado === 'cargada';
+    };
+
+    // Eventos disponibles según el filtro inteligente:
+    // Por defecto, se ocultan todas las coordinaciones ya cargadas/completadas (verdes)
+    // y las pendientes que ya tienen reunión agendada.
+    const availableEvents = useMemo(() => {
+        return allEvents.filter(e => {
+            const completada = isEventCompleted(e);
+
+            if (completada) {
+                // Solo incluir si el usuario activó explícitamente ver completadas
+                return showCompleted;
+            }
+
+            // Para coordinaciones pendientes/en proceso, no debe tener reunión ya agendada
+            if (e.videollamada_agendada || e.videollamada_fecha) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [allEvents, showCompleted]);
+
+    // Contar cuántas coordinaciones completadas existen para este salón
+    const completedCount = useMemo(() => {
+        return allEvents.filter(e => isEventCompleted(e)).length;
+    }, [allEvents]);
+
+    // Mantener la selección válida al cambiar la lista
+    useEffect(() => {
+        if (availableEvents.length > 0) {
+            const currentExists = availableEvents.some(e => e.id === formData.coordinacion_id);
+            if (!currentExists) {
+                setFormData(prev => ({ ...prev, coordinacion_id: availableEvents[0].id }));
+            }
+        } else {
+            setFormData(prev => ({ ...prev, coordinacion_id: '' }));
+        }
+    }, [availableEvents]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -104,10 +140,20 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
         const clientName = event.nombre_cliente ? `${event.nombre_cliente} ${event.apellido_cliente || ''}`.trim() : 'Sin Nombre';
         const title = event.titulo || event.tipo_evento || 'Evento';
         
+        const completada = isEventCompleted(event);
         const estado = (event.estado || '').toLowerCase();
-        const isCompletada = estado === 'completado' || estado === 'completada';
-        const statusLabel = isCompletada ? '🟢 Coordinación Completada' : '🔴 Coordinación Pendiente';
-        const textColor = isCompletada ? '#10B981' : '#EF4444';
+        const enProceso = estado === 'en_proceso' || Boolean(event.pre_coordinacion_completado_por_cliente);
+
+        let statusLabel = '🔴 Coordinación Pendiente';
+        let textColor = '#EF4444';
+
+        if (completada) {
+            statusLabel = '🟢 Coordinación Completada';
+            textColor = '#10B981';
+        } else if (enProceso) {
+            statusLabel = '🟡 Coordinación En Proceso';
+            textColor = '#F59E0B';
+        }
 
         return {
             value: event.id,
@@ -130,11 +176,59 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
 
                 <form onSubmit={handleSubmit}>
                     <div className={styles.formGroup}>
-                        <label>Evento a Vincular *</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <label style={{ margin: 0 }}>Evento a Vincular *</label>
+                            {completedCount > 0 && (
+                                <label style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '6px', 
+                                    fontSize: '12px', 
+                                    color: '#64748b', 
+                                    cursor: 'pointer',
+                                    fontWeight: 'normal',
+                                    userSelect: 'none'
+                                }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={showCompleted} 
+                                        onChange={(e) => setShowCompleted(e.target.checked)} 
+                                        style={{ width: 'auto', margin: 0, cursor: 'pointer' }}
+                                    />
+                                    Ver completadas ({completedCount})
+                                </label>
+                            )}
+                        </div>
+
                         {fetchingEvents ? (
                             <p style={{ color: '#666', fontSize: '14px', margin: '10px 0' }}>Cargando eventos del salón...</p>
                         ) : availableEvents.length === 0 ? (
-                            <p style={{ color: '#ef4444', fontSize: '14px', margin: '10px 0' }}>No hay eventos cargados para este salón.</p>
+                            <div style={{ padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', margin: '10px 0' }}>
+                                <p style={{ color: '#64748b', fontSize: '13px', margin: 0 }}>
+                                    {completedCount > 0 && !showCompleted
+                                        ? `No hay coordinaciones pendientes para vincular en este salón (${completedCount} ya completadas).`
+                                        : 'No hay eventos cargados para este salón.'}
+                                </p>
+                                {completedCount > 0 && !showCompleted && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCompleted(true)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: '#4285F4',
+                                            fontSize: '12px',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                            marginTop: '6px',
+                                            textDecoration: 'underline'
+                                        }}
+                                    >
+                                        Mostrar las {completedCount} completadas
+                                    </button>
+                                )}
+                            </div>
                         ) : (
                             <CustomSelect
                                 value={formData.coordinacion_id}
