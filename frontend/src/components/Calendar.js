@@ -144,9 +144,11 @@ export default function Calendar({
    */
   const getCoordStatus = (dateKey, salonIdTarget) => {
     const coordsForDate = coordsByDate.get(dateKey) || [];
-    // Find the coordination that matches this salon
+    // Find the coordination that matches this salon (o fallback para coordinaciones sin salón del DJ actual)
     const coord = coordsForDate.find(c =>
-      c.salon_id === salonIdTarget || !salonIdTarget
+      String(c.salon_id) === String(salonIdTarget) ||
+      !salonIdTarget ||
+      (!c.salon_id && (!currentUserId || String(c.dj_responsable_id) === String(currentUserId)))
     );
 
     if (!coord) {

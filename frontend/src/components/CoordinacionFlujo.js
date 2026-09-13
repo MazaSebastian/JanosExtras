@@ -7,6 +7,7 @@ import CustomSelect from '@/components/CustomSelect';
 import Loading from '@/components/Loading';
 import styles from '@/styles/CoordinacionFlujo.module.css';
 import { formatDateFromDB } from '@/utils/dateFormat';
+import { normalizarTipoEvento } from '@/utils/tipoEventoHelper';
 
 // Definición de pasos por tipo de evento
 export const FLUJOS_POR_TIPO = {
@@ -810,8 +811,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
 
           // Si estamos en modo soloPendientes, calcular las iniciales
           if (soloPendientes && data.tipo_evento) {
-            const tipoEvent = data.tipo_evento.trim();
-            const tipoKey = tipoEvent?.startsWith('Religioso') ? 'Religioso' : tipoEvent;
+            const tipoKey = normalizarTipoEvento(data.tipo_evento);
             const flujos = FLUJOS_POR_TIPO[tipoKey] || [];
             const pendientesIds = new Set();
             flujos.forEach(pasoIter => {
@@ -841,9 +841,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
   // Normalizar el tipo de evento (trim y verificar coincidencia)
   const tipoEventoNormalizado = useMemo(() => {
     if (!coordinacion?.tipo_evento) return null;
-    const tipo = coordinacion.tipo_evento.trim();
-    if (tipo.startsWith('Religioso')) return 'Religioso';
-    return tipo;
+    return normalizarTipoEvento(coordinacion.tipo_evento);
   }, [coordinacion?.tipo_evento]);
 
   const pasos = useMemo(() => {

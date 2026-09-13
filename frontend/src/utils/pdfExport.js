@@ -1,33 +1,42 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-const VALOR_PENDIENTE = '__PENDIENTE__';
-const esPendiente = (valor) => valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
+import { normalizarTipoEvento, normalizarRespuestasParaFlujo, esValorPendiente, evalCondicional } from '@/utils/tipoEventoHelper';
 
 export const exportarCoordinacionPDF = async (coordinacion, coordinacionesAPI, FLUJOS_POR_TIPO) => {
   const html2pdf = (await import('html2pdf.js')).default;
 
-  // Fetch details
+  // Fetch details con manejo seguro de error
   let flujo = null;
   try {
     const flujoResponse = await coordinacionesAPI.getFlujo(coordinacion.id);
-    flujo = flujoResponse.data || flujoResponse;
+    flujo = flujoResponse?.data || flujoResponse;
   } catch (e) {
     console.error("Error fetching flujo:", e);
+    throw new Error('No se pudo obtener la información de coordinación desde el servidor. Por favor verifica tu conexión e intenta nuevamente.');
   }
 
-  const tipoEvento = coordinacion.tipo_evento?.trim();
-  const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+  const tipoEvento = normalizarTipoEvento(coordinacion.tipo_evento);
+  const flujosOriginales = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
 
-  let respuestas = flujo?.respuestas || {};
-  if (typeof respuestas === 'string') {
-    try { respuestas = JSON.parse(respuestas); } catch (e) { }
+  let respuestas = normalizarRespuestasParaFlujo(flujo?.respuestas, tipoEvento);
+
+  // Determinar subtipo si es Religioso
+  let subtipoActual = respuestas.subtipo_religioso;
+  if (!subtipoActual && coordinacion.tipo_evento) {
+    if (coordinacion.tipo_evento.includes('Boda')) subtipoActual = 'Boda Religiosa / Jupá';
+    else if (coordinacion.tipo_evento.includes('Bar') || coordinacion.tipo_evento.includes('Bat')) subtipoActual = 'Bar / Bat Mitzvah';
   }
+
+  const pasos = flujosOriginales.filter(pasoIter => {
+    if (pasoIter.subtipo && subtipoActual) {
+      return pasoIter.subtipo === subtipoActual;
+    }
+    return true;
+  });
 
   let fechaStr = 'Fecha no definida';
   if (coordinacion.fecha_evento) {
-    // Evitar desfase de zona horaria parseando las partes o usando el componente base
-    const dateOnly = coordinacion.fecha_evento.split('T')[0]; // Extraer solo la fecha "YYYY-MM-DD"
+    const dateOnly = String(coordinacion.fecha_evento).split('T')[0];
     const parts = dateOnly.split(/[-/]/);
     if (parts.length === 3) {
       const year = parts[0].length === 4 ? parseInt(parts[0], 10) : parseInt(parts[2], 10);
@@ -56,13 +65,13 @@ export const exportarCoordinacionPDF = async (coordinacion, coordinacionesAPI, F
 
     paso.preguntas.forEach((pregunta) => {
       const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-      const debeMostrar = !esCondicional || (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+      const debeMostrar = !esCondicional || evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
       if (!debeMostrar) return;
 
       const valor = respuestas[pregunta.id];
 
-      if (esPendiente(valor)) {
+      if (esValorPendiente(valor)) {
         itemsPendientes.push({ paso: paso.titulo, pregunta: pregunta.label });
         pasoTieneRespuestas = true;
         pasoHtml += `
@@ -75,8 +84,8 @@ export const exportarCoordinacionPDF = async (coordinacion, coordinacionesAPI, F
         pasoTieneRespuestas = true;
         let velasHtml = valor.map(vela => `
           <div style="padding: 8px; border: 1px solid #ddd; margin-bottom: 8px; border-radius: 4px; background: #fff; page-break-inside: avoid;">
-            <strong>${vela.nombre}</strong> - ${vela.familiar}
-            <div style="color: #666; font-size: 14px;">🎵 ${vela.cancion}</div>
+            <strong>${vela.nombre || 'Sin nombre'}</strong> - ${vela.familiar || 'Sin familiar'}
+            <div style="color: #666; font-size: 14px;">🎵 ${vela.cancion || 'Sin canción'}</div>
           </div>
         `).join('');
 
@@ -88,7 +97,11 @@ export const exportarCoordinacionPDF = async (coordinacion, coordinacionesAPI, F
         `;
       } else if (valor !== undefined && valor !== null && valor !== '') {
         pasoTieneRespuestas = true;
-        const textValue = String(valor).replace(/\n/g, '<br/>');
+        let displayVal = valor;
+        if (Array.isArray(valor)) {
+          displayVal = valor.join(', ');
+        }
+        const textValue = String(displayVal).replace(/\n/g, '<br/>');
         pasoHtml += `
           <div class="avoid-break" style="margin-bottom: 12px; page-break-inside: avoid;">
             <span style="font-weight: 600; display: block;">${pregunta.label}:</span>

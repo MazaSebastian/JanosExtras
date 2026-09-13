@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { coordinacionesAPI, salonesAPI, authAPI } from '@/services/api';
+import { coordinacionesAPI, salonesAPI, authAPI, eventosAPI } from '@/services/api';
 import { getAuth } from '@/utils/auth';
 import { SkeletonCard } from '@/components/Loading';
 import CustomSelect from '@/components/CustomSelect';
@@ -15,6 +15,13 @@ import GoogleCalendarConnect from '@/components/GoogleCalendarConnect';
 import WhatsAppTemplateModal from '@/components/WhatsAppTemplateModal';
 import { exportarCoordinacionPDF } from '@/utils/pdfExport';
 import { parseNotasAdicionales } from '@/utils/notasParser';
+import {
+  normalizarTipoEvento,
+  normalizarRespuestasParaFlujo,
+  esValorPendiente,
+  evalCondicional,
+  VALOR_PENDIENTE
+} from '@/utils/tipoEventoHelper';
 
 // Helper to adapt URL for local development/testing
 const resolvePreCoordinacionUrl = (url) => {
@@ -248,6 +255,7 @@ export default function CoordinacionesPanel() {
           tipo_evento: finalTipoEvento || null,
           codigo_evento: formData.codigo_evento || null,
           fecha_evento: formData.fecha_evento || null,
+          salon_id: formData.salon_id ? parseInt(formData.salon_id, 10) : null,
           estado: formData.estado || 'pendiente',
           notas: formData.notas || null,
         };
@@ -274,7 +282,7 @@ export default function CoordinacionesPanel() {
           ...formData,
           tipo_evento: finalTipoEvento,
           titulo: finalTitulo,
-          salon_id: formData.salon_id || null,
+          salon_id: formData.salon_id ? parseInt(formData.salon_id, 10) : null,
         };
 
         // Solo incluir dj_responsable_id si el usuario es admin
@@ -283,6 +291,20 @@ export default function CoordinacionesPanel() {
         }
 
         await coordinacionesAPI.create(data);
+
+        // Si se especificó salon_id y fecha_evento, asegurar que exista el evento en el calendario interactivo
+        if (data.salon_id && data.fecha_evento) {
+          try {
+            await eventosAPI.create({
+              salon_id: data.salon_id,
+              fecha_evento: data.fecha_evento,
+              dj_id: user?.rol === 'admin' ? (data.dj_responsable_id ? parseInt(data.dj_responsable_id, 10) : user.id) : user.id,
+            });
+          } catch (eventErr) {
+            // No bloqueante si ya existía el evento en esa fecha/salón
+            console.log('Evento ya registrado en el calendario o advertencia no bloqueante:', eventErr?.message);
+          }
+        }
       }
       setShowForm(false);
       setEditingId(null);
@@ -551,12 +573,6 @@ export default function CoordinacionesPanel() {
     return colors[estado] || '#999';
   };
 
-  // Constante para identificar respuestas pendientes
-  const VALOR_PENDIENTE = '__PENDIENTE__';
-  const esPendiente = (valor) => {
-    return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
-  };
-
   // Función para obtener items pendientes de una coordinación
   const obtenerItemsPendientes = useCallback(async (coordinacion) => {
     // Si ya está en cache, devolverlo
@@ -578,33 +594,21 @@ export default function CoordinacionesPanel() {
         return { items: [], count: 0 };
       }
 
-      const tipoEvento = coordinacion.tipo_evento?.trim();
-      const baseTipoEvento = tipoEvento?.startsWith('Religioso') ? 'Religioso' : tipoEvento;
-      const pasos = baseTipoEvento ? FLUJOS_POR_TIPO[baseTipoEvento] || [] : [];
-
-      let respuestas = flujo.respuestas;
-
-      // Parsear respuestas si es string
-      if (typeof respuestas === 'string') {
-        try {
-          respuestas = JSON.parse(respuestas);
-        } catch (e) {
-          console.error('Error al parsear respuestas:', e);
-          respuestas = {};
-        }
-      }
+      const tipoEvento = normalizarTipoEvento(coordinacion.tipo_evento);
+      const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+      const respuestas = normalizarRespuestasParaFlujo(flujo.respuestas, tipoEvento);
 
       const itemsPendientes = [];
       pasos.forEach((paso) => {
         paso.preguntas.forEach((pregunta) => {
           const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
           const debeMostrar = !esCondicional ||
-            (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+            evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
           if (!debeMostrar) return;
 
           const valor = respuestas[pregunta.id];
-          if (esPendiente(valor)) {
+          if (esValorPendiente(valor)) {
             itemsPendientes.push({
               paso: paso.titulo,
               pregunta: pregunta.label
@@ -668,7 +672,7 @@ export default function CoordinacionesPanel() {
               descripcion: '',
               fecha_evento: '',
               hora_evento: '',
-              salon_id: '',
+              salon_id: user?.salon_id ? String(user.salon_id) : '',
               dj_responsable_id: '',
               estado: 'pendiente',
               prioridad: 'normal',
@@ -734,6 +738,18 @@ export default function CoordinacionesPanel() {
                   value={formData.fecha_evento}
                   onChange={(e) => setFormData({ ...formData, fecha_evento: e.target.value })}
                   required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Salón</label>
+                <CustomSelect
+                  value={formData.salon_id}
+                  options={[
+                    { label: '-- Seleccionar Salón --', value: '' },
+                    ...salones.map((s) => ({ label: s.nombre, value: String(s.id) }))
+                  ]}
+                  onChange={(val) => setFormData({ ...formData, salon_id: val })}
+                  placeholder="Seleccionar salón"
                 />
               </div>
               <div className={styles.formGroup}>
@@ -1501,7 +1517,7 @@ export default function CoordinacionesPanel() {
                     )}
                   </div>
 
-                  {/* Sección de Pre-Coordinación Completada */}
+                  {/* Badge / Aviso si el cliente completó la pre-coordinación */}
                   {resumenData.coordinacion?.pre_coordinacion_completado_por_cliente && (
                     <div className={styles.resumenSeccion} style={{
                       background: '#e8f5e9',
@@ -1510,519 +1526,194 @@ export default function CoordinacionesPanel() {
                       marginBottom: '1.5rem',
                       border: '2px solid #4caf50'
                     }}>
-                      <h3 className={styles.resumenSeccionTitulo} style={{ color: '#2e7d32' }}>
+                      <h3 className={styles.resumenSeccionTitulo} style={{ color: '#2e7d32', marginBottom: '0.25rem' }}>
                         ✅ Pre-Coordinación Completada por el Cliente
                       </h3>
-                      <p style={{ color: '#2e7d32', marginBottom: '1rem', fontSize: '0.95rem' }}>
+                      <p style={{ color: '#2e7d32', margin: 0, fontSize: '0.95rem' }}>
                         El cliente completó la pre-coordinación el{' '}
                         {resumenData.coordinacion.pre_coordinacion_fecha_completado
                           ? format(new Date(resumenData.coordinacion.pre_coordinacion_fecha_completado), "dd 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })
-                          : 'fecha no disponible'}
+                          : 'fecha no disponible'}.
                       </p>
-                      {resumenData.flujo && resumenData.flujo.respuestas && (
-                        <div style={{ marginTop: '1rem' }}>
-                          <h4 style={{ color: '#2e7d32', marginBottom: '0.75rem', fontSize: '1rem' }}>
-                            Respuestas del Cliente:
-                          </h4>
-                          {(() => {
-                            const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
-                            // Usar el flujo del cliente ya que las respuestas fueron guardadas con ese flujo
-                            const baseTipoEvento = tipoEvento?.startsWith('Religioso') ? 'Religioso' : tipoEvento;
-                            const pasos = baseTipoEvento ? CLIENTE_FLUJOS_POR_TIPO[baseTipoEvento] || [] : [];
-
-                            // Parsear respuestas correctamente
-                            let respuestas = resumenData.flujo.respuestas;
-
-                            // Si respuestas es null o undefined, intentar obtenerlas de otra forma
-                            if (!respuestas && resumenData.flujo) {
-                              respuestas = resumenData.flujo.respuestas || {};
-                            }
-
-                            if (typeof respuestas === 'string') {
-                              try {
-                                respuestas = JSON.parse(respuestas);
-                              } catch (e) {
-                                console.error('Error al parsear respuestas:', e);
-                                console.error('String que falló:', respuestas);
-                                respuestas = {};
-                              }
-                            }
-
-                            // Asegurar que velas sea siempre un array válido
-                            console.log('🔍 Parseando respuestas del cliente:', {
-                              tieneVelas: !!respuestas.velas,
-                              tipoVelas: typeof respuestas.velas,
-                              valorVelas: respuestas.velas
-                            });
-
-                            if (respuestas.velas) {
-                              if (typeof respuestas.velas === 'string') {
-                                try {
-                                  respuestas.velas = JSON.parse(respuestas.velas);
-                                  console.log('✅ Velas parseadas desde string:', respuestas.velas);
-                                } catch (e) {
-                                  console.error('Error al parsear velas desde string:', e);
-                                  respuestas.velas = [];
-                                }
-                              }
-                              if (!Array.isArray(respuestas.velas)) {
-                                console.warn('⚠️ velas no es un array, convirtiendo a array vacío:', respuestas.velas);
-                                respuestas.velas = [];
-                              } else {
-                                console.log('✅ Velas es un array con', respuestas.velas.length, 'elementos');
-                                // Filtrar solo objetos válidos
-                                const antesFiltro = respuestas.velas.length;
-                                respuestas.velas = respuestas.velas.filter(v => {
-                                  const esValido = v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion);
-                                  if (!esValido) {
-                                    console.warn('⚠️ Vela inválida filtrada:', v);
-                                  }
-                                  return esValido;
-                                });
-                                console.log(`✅ Velas válidas: ${respuestas.velas.length} de ${antesFiltro}`);
-                              }
-                            } else {
-                              console.warn('⚠️ No hay campo velas en respuestas');
-                              respuestas.velas = [];
-                            }
-
-                            // Si respuestas sigue siendo null/undefined, usar objeto vacío
-                            if (!respuestas || typeof respuestas !== 'object') {
-                              console.warn('Respuestas no válidas, usando objeto vacío:', respuestas);
-                              respuestas = {};
-                            }
-
-                            console.log('Tipo evento:', tipoEvento);
-                            console.log('Pasos disponibles:', pasos.length);
-                            console.log('Respuestas RAW:', resumenData.flujo?.respuestas);
-                            console.log('Respuestas parseadas:', respuestas);
-                            console.log('Total de respuestas:', Object.keys(respuestas).length);
-                            console.log('Keys de respuestas:', Object.keys(respuestas));
-
-                            if (!respuestas || Object.keys(respuestas).length === 0) {
-                              return <p style={{ color: '#666', fontStyle: 'italic' }}>No hay respuestas disponibles</p>;
-                            }
-
-                            // Replicar exactamente la lógica del cliente - mostrar todos los pasos con respuestas
-                            return pasos.map((paso) => {
-                              const preguntasRespondidas = paso.preguntas.filter(p => {
-                                const esCondicional = p.condicional && p.condicional.pregunta;
-                                let debeMostrar = true;
-
-                                if (esCondicional) {
-                                  const valorCondicional = respuestas[p.condicional.pregunta];
-                                  const valorEsperado = p.condicional.valor;
-
-                                  // Manejar tanto valores string como arrays (para botones)
-                                  if (Array.isArray(valorCondicional)) {
-                                    debeMostrar = valorCondicional.includes(valorEsperado);
-                                  } else if (typeof valorCondicional === 'string') {
-                                    debeMostrar = valorCondicional === valorEsperado;
-                                  } else {
-                                    debeMostrar = false;
-                                  }
-                                }
-
-                                if (!debeMostrar) return false;
-
-                                const valor = respuestas[p.id];
-                                if (p.tipo === 'velas') {
-                                  return Array.isArray(valor) && valor.length > 0;
-                                }
-                                if (p.tipo === 'buttons') {
-                                  // Manejar strings (después de conversión) y arrays
-                                  if (typeof valor === 'string') {
-                                    return valor.trim() !== '';
-                                  }
-                                  return Array.isArray(valor) && valor.length > 0;
-                                }
-                                return valor !== undefined && valor !== null && valor !== '';
-                              });
-
-                              if (preguntasRespondidas.length === 0) return null;
-
-                              return (
-                                <div key={paso.id} style={{ marginBottom: '1.5rem' }}>
-                                  <h5 style={{
-                                    color: '#2e7d32',
-                                    fontSize: '0.95rem',
-                                    fontWeight: 600,
-                                    marginBottom: '0.5rem',
-                                    paddingBottom: '0.5rem',
-                                    borderBottom: '1px solid #c8e6c9'
-                                  }}>
-                                    {paso.titulo}
-                                  </h5>
-                                  {paso.preguntas.map((pregunta) => {
-                                    const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-                                    let debeMostrar = true;
-
-                                    if (esCondicional) {
-                                      const valorCondicional = respuestas[pregunta.condicional.pregunta];
-                                      const valorEsperado = pregunta.condicional.valor;
-
-                                      // Manejar tanto valores string como arrays (para botones)
-                                      if (Array.isArray(valorCondicional)) {
-                                        debeMostrar = valorCondicional.includes(valorEsperado);
-                                      } else if (typeof valorCondicional === 'string') {
-                                        debeMostrar = valorCondicional === valorEsperado ||
-                                          valorCondicional.includes(valorEsperado);
-                                      } else {
-                                        debeMostrar = false;
-                                      }
-                                    }
-
-                                    if (!debeMostrar) return null;
-
-                                    const valor = respuestas[pregunta.id];
-
-                                    // Manejar velas específicamente - verificar tanto por tipo como por id
-                                    // IMPORTANTE: Verificar velas ANTES de la validación genérica
-                                    if ((pregunta.tipo === 'velas' || pregunta.id === 'velas')) {
-                                      // Para velas, permitir arrays vacíos pero no valores null/undefined
-                                      if (valor === undefined || valor === null) return null;
-                                      // Log para depuración
-                                      console.log('🔍 Detectando velas:', {
-                                        preguntaId: pregunta.id,
-                                        preguntaTipo: pregunta.tipo,
-                                        valor,
-                                        esArray: Array.isArray(valor),
-                                        tipoValor: typeof valor
-                                      });
-
-                                      // Si el valor es un string, intentar parsearlo
-                                      let valorVelas = valor;
-                                      if (typeof valor === 'string') {
-                                        try {
-                                          valorVelas = JSON.parse(valor);
-                                        } catch (e) {
-                                          console.error('Error al parsear velas desde string:', e);
-                                          return null;
-                                        }
-                                      }
-
-                                      // Verificar que sea un array
-                                      if (Array.isArray(valorVelas)) {
-                                        console.log('✅ valorVelas es un array con', valorVelas.length, 'elementos:', valorVelas);
-
-                                        // Asegurar que cada elemento del array sea un objeto válido
-                                        const velasValidas = valorVelas.filter(v => {
-                                          const esValido = v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion);
-                                          if (!esValido) {
-                                            console.warn('⚠️ Vela inválida en renderizado:', v);
-                                          }
-                                          return esValido;
-                                        });
-
-                                        console.log('✅ Velas válidas encontradas para renderizar:', velasValidas.length, velasValidas);
-
-                                        if (velasValidas.length > 0) {
-                                          return (
-                                            <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
-                                              <span className={styles.resumenLabel}>{pregunta.label}:</span>
-                                              <div className={styles.resumenValor}>
-                                                {velasValidas.map((vela, idx) => (
-                                                  <div key={vela.id || idx} style={{
-                                                    marginBottom: '0.5rem',
-                                                    padding: '0.5rem',
-                                                    background: '#f1f8f4',
-                                                    borderRadius: '4px'
-                                                  }}>
-                                                    <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
-                                                    <br />
-                                                    🎵 {vela.cancion || 'Sin canción'}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            </div>
-                                          );
-                                        }
-                                      } else {
-                                        console.warn('⚠️ Valor de velas no es un array:', valorVelas);
-                                        // Si no es un array válido, no renderizar nada
-                                        return null;
-                                      }
-                                    }
-
-                                    // Si llegamos aquí y es tipo velas pero no se renderizó, no mostrar nada más
-                                    if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
-                                      return null;
-                                    }
-
-                                    // Validación genérica para otros tipos de preguntas
-                                    if (valor === undefined || valor === null || valor === '') return null;
-
-                                    // Manejar valores que pueden ser strings o arrays
-                                    let valorParaMostrar = valor;
-                                    if (typeof valor === 'string' && pregunta.tipo === 'buttons') {
-                                      // Si es string y era un botón, puede estar separado por comas
-                                      valorParaMostrar = valor;
-                                    }
-
-                                    // Si el valor es un array pero no es velas, no renderizarlo como string
-                                    if (Array.isArray(valorParaMostrar)) {
-                                      // Si es un array de strings (como botones), unirlos con comas
-                                      if (valorParaMostrar.every(v => typeof v === 'string')) {
-                                        valorParaMostrar = valorParaMostrar.join(', ');
-                                      } else {
-                                        // Si es un array de objetos, no renderizarlo
-                                        return null;
-                                      }
-                                    }
-
-                                    return (
-                                      <div key={pregunta.id} className={styles.resumenCampo} style={{ marginBottom: '0.75rem' }}>
-                                        <span className={styles.resumenLabel}>{pregunta.label}:</span>
-                                        <span className={styles.resumenValor}>
-                                          {String(valorParaMostrar)
-                                            .split('\n')
-                                            .map((line, i) => (
-                                              <span key={i}>
-                                                {line}
-                                                {i < String(valorParaMostrar).split('\n').length - 1 && <br />}
-                                              </span>
-                                            ))}
-                                        </span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            }).filter(Boolean); // Filtrar valores null
-                          })()}
-                        </div>
-                      )}
                     </div>
                   )}
 
-                  {/* Solo mostrar el flujo del DJ si NO hay pre-coordinación completada por el cliente */}
-                  {resumenData.flujo && resumenData.flujo.respuestas && !resumenData.coordinacion?.pre_coordinacion_completado_por_cliente ? (
-                    (() => {
-                      const tipoEvento = resumenData.coordinacion?.tipo_evento?.trim();
-                      const baseTipoEvento = tipoEvento?.startsWith('Religioso') ? 'Religioso' : tipoEvento;
-                      const pasos = baseTipoEvento ? FLUJOS_POR_TIPO[baseTipoEvento] || [] : [];
-                      let respuestas = resumenData.flujo.respuestas;
+                  {/* Renderizado Unificado del Flujo de Coordinación (Tandas, Shows, Videos, Vals, etc.) */}
+                  {(() => {
+                    const tipoEvento = normalizarTipoEvento(resumenData.coordinacion?.tipo_evento);
+                    const pasos = tipoEvento ? FLUJOS_POR_TIPO[tipoEvento] || [] : [];
+                    const respuestas = normalizarRespuestasParaFlujo(resumenData.flujo?.respuestas, tipoEvento);
+                    const totalRespuestas = Object.keys(respuestas).length;
 
-                      // Constante para identificar respuestas pendientes
-                      const VALOR_PENDIENTE = '__PENDIENTE__';
-                      const esPendiente = (valor) => {
-                        return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
-                      };
-
-                      // Parsear respuestas si es string
-                      if (typeof respuestas === 'string') {
-                        try {
-                          respuestas = JSON.parse(respuestas);
-                        } catch (e) {
-                          console.error('Error al parsear respuestas del DJ:', e);
-                          respuestas = {};
-                        }
-                      }
-
-                      // Recopilar items pendientes
-                      const itemsPendientes = [];
-                      pasos.forEach((paso) => {
-                        paso.preguntas.forEach((pregunta) => {
-                          const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
-                          const debeMostrar = !esCondicional ||
-                            (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
-
-                          if (!debeMostrar) return;
-
-                          const valor = respuestas[pregunta.id];
-                          if (esPendiente(valor)) {
-                            itemsPendientes.push({
-                              paso: paso.titulo,
-                              pregunta: pregunta.label
-                            });
-                          }
-                        });
-                      });
-
-                      // Asegurar que velas sea siempre un array válido
-                      if (respuestas.velas) {
-                        if (typeof respuestas.velas === 'string') {
-                          try {
-                            respuestas.velas = JSON.parse(respuestas.velas);
-                          } catch (e) {
-                            console.error('Error al parsear velas del DJ desde string:', e);
-                            respuestas.velas = [];
-                          }
-                        }
-                        if (!Array.isArray(respuestas.velas)) {
-                          console.warn('velas del DJ no es un array, convirtiendo a array vacío:', respuestas.velas);
-                          respuestas.velas = [];
-                        }
-                        // Filtrar solo objetos válidos
-                        respuestas.velas = respuestas.velas.filter(v =>
-                          v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
-                        );
-                      } else {
-                        respuestas.velas = [];
-                      }
-
+                    if (!resumenData.flujo || totalRespuestas === 0) {
                       return (
-                        <>
-                          {/* Sección de Items Pendientes */}
-                          {itemsPendientes.length > 0 && (
-                            <div className={styles.resumenSeccion} style={{
-                              background: '#fff3e0',
-                              border: '2px solid #ff9800',
-                              borderRadius: '8px',
-                              padding: '1rem',
-                              marginBottom: '1.5rem'
-                            }}>
-                              <h3 className={styles.resumenSeccionTitulo} style={{ color: '#e65100' }}>
-                                ⏳ Items Pendientes ({itemsPendientes.length})
-                              </h3>
-                              <p style={{ color: '#e65100', marginBottom: '1rem', fontSize: '0.95rem' }}>
-                                Los siguientes items quedaron pendientes de confirmar. Recuerda contactar al cliente antes del evento.
-                              </p>
-                              <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-                                {itemsPendientes.map((item, idx) => (
-                                  <li key={idx} style={{ marginBottom: '0.5rem', color: '#e65100' }}>
-                                    <strong>{item.paso}:</strong> {item.pregunta}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                        <div className={styles.resumenSeccion}>
+                          <p style={{ color: '#666', fontStyle: 'italic' }}>
+                            Esta coordinación aún no tiene un flujo completado. Inicia la coordinación
+                            para comenzar a recopilar información.
+                          </p>
+                        </div>
+                      );
+                    }
 
-                          {pasos.map((paso) => {
-                            const tieneRespuestas = paso.preguntas.some((p) => {
-                              const esCondicional = p.condicional && p.condicional.pregunta;
-                              const debeMostrar =
-                                !esCondicional ||
-                                respuestas[p.condicional.pregunta] === p.condicional.valor;
-                              if (!debeMostrar) return false;
-                              const valor = respuestas[p.id];
-                              // Incluir pendientes en la verificación
-                              return (
-                                (valor !== undefined && valor !== null && valor !== '') || esPendiente(valor)
-                              ) && (
-                                  p.tipo !== 'velas' || (Array.isArray(valor) && valor.length > 0) || esPendiente(valor)
-                                );
-                            });
+                    // Recopilar items pendientes
+                    const itemsPendientes = [];
+                    pasos.forEach((paso) => {
+                      paso.preguntas.forEach((pregunta) => {
+                        const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                        const debeMostrar = !esCondicional ||
+                          evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
-                            if (!tieneRespuestas) return null;
+                        if (!debeMostrar) return;
 
-                            return (
-                              <div key={paso.id} className={styles.resumenSeccion}>
-                                <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
-                                {paso.preguntas.map((pregunta) => {
-                                  const esCondicional =
-                                    pregunta.condicional && pregunta.condicional.pregunta;
-                                  const debeMostrar =
-                                    !esCondicional ||
-                                    respuestas[pregunta.condicional.pregunta] ===
-                                    pregunta.condicional.valor;
+                        const valor = respuestas[pregunta.id];
+                        if (esValorPendiente(valor)) {
+                          itemsPendientes.push({
+                            paso: paso.titulo,
+                            pregunta: pregunta.label
+                          });
+                        }
+                      });
+                    });
 
-                                  if (!debeMostrar) return null;
+                    return (
+                      <>
+                        {/* Sección de Items Pendientes */}
+                        {itemsPendientes.length > 0 && (
+                          <div className={styles.resumenSeccion} style={{
+                            background: '#fff3e0',
+                            border: '2px solid #ff9800',
+                            borderRadius: '8px',
+                            padding: '1rem',
+                            marginBottom: '1.5rem'
+                          }}>
+                            <h3 className={styles.resumenSeccionTitulo} style={{ color: '#e65100' }}>
+                              ⏳ Items Pendientes ({itemsPendientes.length})
+                            </h3>
+                            <p style={{ color: '#e65100', marginBottom: '1rem', fontSize: '0.95rem' }}>
+                              Los siguientes items quedaron pendientes de confirmar. Recuerda contactar al cliente antes del evento.
+                            </p>
+                            <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                              {itemsPendientes.map((item, idx) => (
+                                <li key={idx} style={{ marginBottom: '0.5rem', color: '#e65100' }}>
+                                  <strong>{item.paso}:</strong> {item.pregunta}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
 
-                                  const valor = respuestas[pregunta.id];
+                        {/* Pasos del evento con respuestas */}
+                        {pasos.map((paso) => {
+                          const tieneRespuestas = paso.preguntas.some((p) => {
+                            const esCondicional = p.condicional && p.condicional.pregunta;
+                            const debeMostrar = !esCondicional ||
+                              evalCondicional(respuestas[p.condicional.pregunta], p.condicional.valor);
+                            if (!debeMostrar) return false;
 
-                                  // Si está pendiente, mostrar como pendiente
-                                  if (esPendiente(valor)) {
-                                    return (
-                                      <div key={pregunta.id} className={styles.resumenCampo} style={{
-                                        background: '#fff3e0',
-                                        padding: '0.75rem',
-                                        borderRadius: '6px',
-                                        border: '1px solid #ff9800',
-                                        marginBottom: '0.5rem'
-                                      }}>
-                                        <span className={styles.resumenLabel} style={{ color: '#e65100', fontWeight: 600 }}>
-                                          {pregunta.label}: <span style={{ fontSize: '0.9rem' }}>⏳ PENDIENTE</span>
-                                        </span>
-                                      </div>
-                                    );
-                                  }
+                            const valor = respuestas[p.id];
+                            if (esValorPendiente(valor)) return true;
+                            if (p.tipo === 'velas' || p.id === 'velas') {
+                              return Array.isArray(valor) && valor.length > 0;
+                            }
+                            if (Array.isArray(valor)) {
+                              return valor.length > 0;
+                            }
+                            return valor !== undefined && valor !== null && String(valor).trim() !== '';
+                          });
 
-                                  // Manejar velas específicamente
-                                  if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
-                                    let valorVelas = valor;
+                          if (!tieneRespuestas) return null;
 
-                                    // Si el valor es un string, intentar parsearlo
-                                    if (typeof valorVelas === 'string') {
-                                      try {
-                                        valorVelas = JSON.parse(valorVelas);
-                                      } catch (e) {
-                                        console.error('Error al parsear velas desde string en flujo DJ:', e);
-                                        return null;
-                                      }
-                                    }
+                          return (
+                            <div key={paso.id} className={styles.resumenSeccion}>
+                              <h3 className={styles.resumenSeccionTitulo}>{paso.titulo}</h3>
+                              {paso.preguntas.map((pregunta) => {
+                                const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
+                                const debeMostrar = !esCondicional ||
+                                  evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
-                                    // Verificar que sea un array válido
-                                    if (Array.isArray(valorVelas) && valorVelas.length > 0) {
-                                      // Filtrar solo objetos válidos
-                                      const velasValidas = valorVelas.filter(v =>
-                                        v && typeof v === 'object' && (v.nombre || v.familiar || v.cancion)
-                                      );
+                                if (!debeMostrar) return null;
 
-                                      if (velasValidas.length > 0) {
-                                        return (
-                                          <div key={pregunta.id} className={styles.resumenCampo}>
-                                            <span className={styles.resumenLabel}>
-                                              {pregunta.label}:
-                                            </span>
-                                            <div className={styles.resumenVelas}>
-                                              {velasValidas.map((vela, idx) => (
-                                                <div key={vela.id || idx} className={styles.resumenVelaItem}>
-                                                  <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
-                                                  <div className={styles.resumenVelaCancion}>
-                                                    🎵 {vela.cancion || 'Sin canción'}
-                                                  </div>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        );
-                                      }
-                                    }
-                                    return null;
-                                  }
+                                const valor = respuestas[pregunta.id];
 
-                                  // Si el valor es un array pero no es velas, no renderizarlo como string
-                                  if (Array.isArray(valor)) {
-                                    return null;
-                                  }
+                                // Si está pendiente
+                                if (esValorPendiente(valor)) {
+                                  return (
+                                    <div key={pregunta.id} className={styles.resumenCampo} style={{
+                                      background: '#fff3e0',
+                                      padding: '0.75rem',
+                                      borderRadius: '6px',
+                                      border: '1px solid #ff9800',
+                                      marginBottom: '0.5rem'
+                                    }}>
+                                      <span className={styles.resumenLabel} style={{ color: '#e65100', fontWeight: 600 }}>
+                                        {pregunta.label}: <span style={{ fontSize: '0.9rem' }}>⏳ PENDIENTE</span>
+                                      </span>
+                                    </div>
+                                  );
+                                }
 
-                                  if (valor !== undefined && valor !== null && valor !== '') {
+                                // Manejo de velas
+                                if (pregunta.tipo === 'velas' || pregunta.id === 'velas') {
+                                  const velasValidas = Array.isArray(valor) ? valor : [];
+                                  if (velasValidas.length > 0) {
                                     return (
                                       <div key={pregunta.id} className={styles.resumenCampo}>
                                         <span className={styles.resumenLabel}>
                                           {pregunta.label}:
                                         </span>
-                                        <span className={styles.resumenValor}>
-                                          {String(valor)
-                                            .split('\n')
-                                            .map((line, i) => (
-                                              <span key={i}>
-                                                {line}
-                                                <br />
-                                              </span>
-                                            ))}
-                                        </span>
+                                        <div className={styles.resumenVelas}>
+                                          {velasValidas.map((vela, idx) => (
+                                            <div key={vela.id || idx} className={styles.resumenVelaItem}>
+                                              <strong>{vela.nombre || 'Sin nombre'}</strong> - {vela.familiar || 'Sin familiar'}
+                                              <div className={styles.resumenVelaCancion}>
+                                                🎵 {vela.cancion || 'Sin canción'}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
                                     );
                                   }
-
                                   return null;
-                                })}
-                              </div>
-                            );
-                          })}
-                        </>
-                      );
-                    })()
-                  ) : (
-                    <div className={styles.resumenSeccion}>
-                      <p style={{ color: '#666', fontStyle: 'italic' }}>
-                        Esta coordinación aún no tiene un flujo completado. Inicia la coordinación
-                        para comenzar a recopilar información.
-                      </p>
-                    </div>
-                  )}
+                                }
+
+                                // Manejo genérico de valores (strings, arrays de botones, etc.)
+                                if (valor === undefined || valor === null || valor === '') return null;
+
+                                let valorParaMostrar = valor;
+                                if (Array.isArray(valor)) {
+                                  if (valor.every(v => typeof v === 'string' || typeof v === 'number')) {
+                                    valorParaMostrar = valor.join(', ');
+                                  } else {
+                                    return null;
+                                  }
+                                }
+
+                                return (
+                                  <div key={pregunta.id} className={styles.resumenCampo}>
+                                    <span className={styles.resumenLabel}>
+                                      {pregunta.label}:
+                                    </span>
+                                    <span className={styles.resumenValor}>
+                                      {String(valorParaMostrar)
+                                        .split('\n')
+                                        .map((line, i) => (
+                                          <span key={i}>
+                                            {line}
+                                            {i < String(valorParaMostrar).split('\n').length - 1 && <br />}
+                                          </span>
+                                        ))}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div style={{ textAlign: 'center', padding: '2rem' }}>

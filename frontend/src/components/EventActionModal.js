@@ -40,10 +40,32 @@ export default function EventActionModal({ event, onClose, onRefresh }) {
                     searchDate = rawDate.toISOString().split('T')[0];
                 }
 
-                const matching = res.data?.find((c) => {
+                // 1. Match exacto por salon_id y fecha
+                let matching = res.data?.find((c) => {
                     const cDate = typeof c.fecha_evento === 'string' ? c.fecha_evento.split('T')[0] : '';
                     return String(c.salon_id) === String(event.salon_id) && cDate === searchDate;
                 });
+
+                // 2. Fallback inteligente: si no hubo match exacto por salón, buscar coordinación en la misma fecha
+                // perteneciente al mismo DJ o sin salón asignado
+                if (!matching) {
+                    matching = res.data?.find((c) => {
+                        const cDate = typeof c.fecha_evento === 'string' ? c.fecha_evento.split('T')[0] : '';
+                        const sameDate = cDate === searchDate;
+                        const sameDj = !event.dj_id || !c.dj_responsable_id || String(c.dj_responsable_id) === String(event.dj_id);
+                        return sameDate && (!c.salon_id || String(c.salon_id) === String(event.salon_id)) && sameDj;
+                    });
+
+                    // Autoreparación silenciosa: si la coordinación no tenía salon_id, se lo asignamos
+                    if (matching && !matching.salon_id && event.salon_id) {
+                        try {
+                            await coordinacionesAPI.update(matching.id, { salon_id: event.salon_id });
+                            matching.salon_id = event.salon_id;
+                        } catch (repairErr) {
+                            console.warn('Error no bloqueante al autoreparar salon_id en coordinación:', repairErr);
+                        }
+                    }
+                }
 
                 if (matching) {
                     setCoordinacion(matching);
