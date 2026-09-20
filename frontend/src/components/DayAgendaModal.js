@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { coordinacionesAPI } from '@/services/api';
+import { coordinacionesAPI, disponibilidadBloquesAPI } from '@/services/api';
 import styles from '@/styles/DayAgendaModal.module.css';
 import EditCoordinationModal from './EditCoordinationModal';
+import GestionBloquesModal from './GestionBloquesModal';
 
 export default function DayAgendaModal({
     date,
@@ -16,6 +17,28 @@ export default function DayAgendaModal({
 }) {
     const [deletingId, setDeletingId] = useState(null);
     const [editingVideocall, setEditingVideocall] = useState(null);
+    const [bloques, setBloques] = useState([]);
+    const [loadingBloques, setLoadingBloques] = useState(false);
+    const [showGestionBloques, setShowGestionBloques] = useState(false);
+
+    const dateStr = date ? format(date, 'yyyy-MM-dd') : '';
+
+    const fetchBloques = useCallback(async () => {
+        if (!dateStr) return;
+        try {
+            setLoadingBloques(true);
+            const res = await disponibilidadBloquesAPI.getByFecha(dateStr);
+            setBloques(res.data?.bloques || []);
+        } catch (err) {
+            console.error('Error al cargar bloques en DayAgendaModal:', err);
+        } finally {
+            setLoadingBloques(false);
+        }
+    }, [dateStr]);
+
+    useEffect(() => {
+        fetchBloques();
+    }, [fetchBloques]);
 
     const handleDeleteVideocall = async (colId) => {
         if (!confirm('¿Estás seguro de que deseas quitar esta reunión? La coordinación y los datos del evento se mantendrán intactos.')) {
@@ -150,19 +173,57 @@ export default function DayAgendaModal({
                         </div>
                     )}
 
-                    {events.length === 0 && videocalls.length === 0 && (
+                    {/* Sección de Bloques de Horarios Disponibles */}
+                    <div className={styles.blocksSection}>
+                        <div className={styles.blocksHeader}>
+                            <h4 className={styles.sectionTitle} style={{ margin: 0, fontSize: '0.9rem' }}>
+                                ⏰ Bloques de Horarios ({bloques.filter(b => b.estado === 'disponible').length} libres)
+                            </h4>
+                            <button
+                                className={styles.configLinkBtn}
+                                onClick={() => setShowGestionBloques(true)}
+                            >
+                                {bloques.length === 0 ? '+ Crear bloques' : '⚙️ Configurar'}
+                            </button>
+                        </div>
+                        {bloques.length === 0 ? (
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
+                                No hay bloques creados para este día.
+                            </p>
+                        ) : (
+                            <div className={styles.blocksChipsList}>
+                                {bloques.map(b => (
+                                    <span
+                                        key={b.id}
+                                        className={b.estado === 'disponible' ? styles.freeChip : styles.occupiedChip}
+                                        title={b.estado === 'disponible' ? 'Disponible para agendar' : `Asignado a ${b.nombre_cliente || 'cliente'}`}
+                                    >
+                                        {b.estado === 'disponible' ? '🟢' : '🔒'} {b.hora_inicio} hs
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {events.length === 0 && videocalls.length === 0 && bloques.length === 0 && (
                         <div className={styles.emptyState}>
-                            No hay nada agendado para este día.
+                            No hay nada agendado ni horarios configurados para este día.
                         </div>
                     )}
                 </div>
 
                 <div className={styles.footerActions}>
+                    <button
+                        className={styles.manageBlocksBtn}
+                        onClick={() => setShowGestionBloques(true)}
+                    >
+                        ⚙️ Gestionar Horarios Disponibles del Día
+                    </button>
                     <button className={styles.addButton} onClick={() => {
                         onClose();
                         onAddClick();
                     }}>
-                        + Agendar nueva disponibilidad
+                        + Agendar nueva reunión o evento
                     </button>
                     <button className={styles.cancelButton} onClick={onClose}>
                         Cerrar
@@ -170,12 +231,25 @@ export default function DayAgendaModal({
                 </div>
             </div>
 
+            {showGestionBloques && (
+                <GestionBloquesModal
+                    date={date}
+                    isOpen={showGestionBloques}
+                    onClose={() => setShowGestionBloques(false)}
+                    onUpdated={() => {
+                        fetchBloques();
+                        if (onRefresh) onRefresh();
+                    }}
+                />
+            )}
+
             {editingVideocall && (
                 <EditCoordinationModal
                     coordinacion={editingVideocall}
                     onClose={() => setEditingVideocall(null)}
                     onSave={() => {
                         setEditingVideocall(null);
+                        fetchBloques();
                         if (onRefresh) onRefresh();
                     }}
                 />

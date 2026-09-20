@@ -36,11 +36,12 @@ export default function DJLayout({ user, children }) {
   const menuItems = [
     { path: '/dashboard', label: 'Home', icon: '🏠', pageTitle: 'Home' },
     { path: '/dashboard/eventos', label: 'Eventos y Extras', icon: '📊', pageTitle: 'Eventos y Extras' },
+    { path: '/dashboard/reuniones', label: 'Reuniones', icon: '🤝', pageTitle: 'Reuniones' },
+    { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋', pageTitle: 'Coordinaciones' },
     { path: '/dashboard/fichadas', label: 'Fichadas', icon: '⏱️', pageTitle: 'Fichadas' },
     { path: '/dashboard/software', label: 'Software', icon: '💻', pageTitle: 'Software' },
     { path: '/dashboard/shows', label: 'Shows', icon: '🎤', pageTitle: 'Shows' },
     { path: '/dashboard/contenido', label: 'Contenido', icon: '📦', pageTitle: 'Contenido' },
-    { path: '/dashboard/coordinaciones', label: 'Coordinaciones', icon: '📋', pageTitle: 'Coordinaciones' },
     { path: '/dashboard/janos-sync', label: "Jano's Sync", icon: '🔄', pageTitle: "Jano's Sync" },
     { path: '/dashboard/fechas-libres', label: 'Fechas Libres', icon: '📅', pageTitle: 'Fechas Libres' },
     { path: '/dashboard/check-in-tecnico', label: 'Check-In Técnico', icon: '🔧', pageTitle: 'Check-In Técnico' },

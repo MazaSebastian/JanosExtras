@@ -1,5 +1,6 @@
 import { authenticateToken } from '@/lib/auth.js';
 import { Coordinacion } from '@/lib/models/Coordinacion.js';
+import DisponibilidadBloque from '@/lib/models/DisponibilidadBloque.js';
 import installScriptHandler from './install-script.js';
 
 export default async function handler(req, res) {
@@ -128,6 +129,45 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Coordinación no encontrada' });
       }
 
+      // Sincronizar bloques de disponibilidad
+      const coordId = parseInt(id, 10);
+      const { bloque_id } = req.body;
+
+      if (bloque_id) {
+        try {
+          await DisponibilidadBloque.assignToCoordination(bloque_id, coordId);
+        } catch (e) {
+          console.error('Error asignando bloque específico:', e);
+        }
+      } else if (videollamada_agendada === false || videollamada_fecha === null) {
+        try {
+          await DisponibilidadBloque.releaseByCoordination(coordId);
+        } catch (e) {
+          console.error('Error liberando bloque:', e);
+        }
+      } else if (videollamada_fecha && videollamada_agendada) {
+        try {
+          const dateObj = new Date(videollamada_fecha);
+          const fechaStr = String(videollamada_fecha).includes('T')
+            ? String(videollamada_fecha).split('T')[0]
+            : dateObj.toISOString().split('T')[0];
+          const horaStr = String(videollamada_fecha).includes('T')
+            ? String(videollamada_fecha).split('T')[1].substring(0, 5)
+            : `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+          
+          const bloquesDia = await DisponibilidadBloque.findByDjAndDate(
+            coordinacion.dj_responsable_id || auth.user.id,
+            fechaStr
+          );
+          const matchBloque = bloquesDia.find(b => b.hora_inicio === horaStr && (b.estado === 'disponible' || b.coordinacion_id === coordId));
+          if (matchBloque) {
+            await DisponibilidadBloque.assignToCoordination(matchBloque.id, coordId);
+          }
+        } catch (e) {
+          console.error('Error auto-vinculando bloque por fecha/hora:', e);
+        }
+      }
+
       return res.json(coordinacion);
     } catch (error) {
       console.error('Error al actualizar coordinación:', error);
@@ -154,6 +194,13 @@ export default async function handler(req, res) {
       // Si es DJ (no admin), solo puede eliminar sus propias coordinaciones
       if (auth.user.rol !== 'admin' && coordinacion.dj_responsable_id !== auth.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para eliminar esta coordinación' });
+      }
+
+      // Liberar cualquier bloque que estuviera asociado
+      try {
+        await DisponibilidadBloque.releaseByCoordination(parseInt(id, 10));
+      } catch (e) {
+        console.error('Error liberando bloque al eliminar coordinación:', e);
       }
 
       const resultado = await Coordinacion.delete(parseInt(id, 10));

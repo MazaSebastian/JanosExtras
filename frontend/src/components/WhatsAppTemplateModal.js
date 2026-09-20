@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { coordinacionesAPI } from '@/services/api';
+import { coordinacionesAPI, disponibilidadBloquesAPI } from '@/services/api';
 import { FLUJOS_POR_TIPO } from './CoordinacionFlujo';
 import styles from '@/styles/WhatsAppTemplateModal.module.css';
 
@@ -28,6 +28,34 @@ export default function WhatsAppTemplateModal({ coordinacion, event, onClose, on
     const [generating, setGenerating] = useState(false);
     const [livePreCoordUrl, setLivePreCoordUrl] = useState(resolvePreCoordinacionUrl(coordinacion?.pre_coordinacion_url) || null);
     const [missingItems, setMissingItems] = useState([]);
+    const [selectedDia, setSelectedDia] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1); // Mañana por defecto
+        return format(d, 'yyyy-MM-dd');
+    });
+    const [diaBloques, setDiaBloques] = useState([]);
+    const [loadingDiaBloques, setLoadingDiaBloques] = useState(false);
+
+    useEffect(() => {
+        const fetchBloquesDia = async () => {
+            if (!selectedDia) return;
+            try {
+                setLoadingDiaBloques(true);
+                const res = await disponibilidadBloquesAPI.getByFecha(selectedDia, {
+                    salon_id: coordinacion?.salon_id
+                });
+                setDiaBloques(res.data?.bloques || []);
+            } catch (err) {
+                console.error('Error al cargar bloques para plantilla:', err);
+            } finally {
+                setLoadingDiaBloques(false);
+            }
+        };
+
+        if (selectedId === 'horarios-disponibles') {
+            fetchBloquesDia();
+        }
+    }, [selectedDia, selectedId, coordinacion?.salon_id]);
 
     useEffect(() => {
         const fetchFlujoStatus = async () => {
@@ -130,6 +158,21 @@ export default function WhatsAppTemplateModal({ coordinacion, event, onClose, on
         }
     };
 
+    const freeBloques = useMemo(() => {
+        return diaBloques.filter(b => b.estado === 'disponible');
+    }, [diaBloques]);
+
+    const getFormattedDiaSeleccionado = () => {
+        if (!selectedDia) return 'el día seleccionado';
+        try {
+            const [y, m, d] = selectedDia.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d);
+            return format(dateObj, "EEEE d 'de' MMMM", { locale: es });
+        } catch {
+            return selectedDia;
+        }
+    };
+
     // ── Build message text (uses the live URL, not the stale one) ──
     const buildMessage = (templateId, url) => {
         switch (templateId) {
@@ -157,6 +200,22 @@ Una vez que lo envíes, te invito a que coordinemos una videollamada, o bien una
 Me gustaría ver la posibilidad de coordinar una reunión presencial o videollamada para repasar todos los detalles técnicos de nuestro evento con fecha ${fechaEvento}.
 
 ¿Qué días y en qué horarios te quedaría mejor así lo vamos coordinando?`;
+
+            case 'horarios-disponibles': {
+                const diaTexto = getFormattedDiaSeleccionado();
+                const listaHorarios = freeBloques.length > 0
+                    ? freeBloques.map(b => `• ${b.hora_inicio} hs`).join('\n')
+                    : '• (No hay horarios disponibles cargados para este día)';
+
+                return `¡Hola ${nombreCliente}! Acá ${nombreDj}, DJ y técnico de ${salonNombre} para tu evento del ${fechaEvento}. 🎵
+
+Me gustaría coordinar una reunión presencial o videollamada para repasar todos los detalles técnicos y musicales.
+
+Para el día ${diaTexto}, tengo disponibles los siguientes horarios:
+${listaHorarios}
+
+¿Cuál de estos te queda mejor para agendar? ¡Quedo a tu disposición!`;
+            }
 
             case 'recordar':
                 const listaItems = missingItems.length > 0
@@ -193,6 +252,14 @@ Si están trabados con alguna elección o necesitan recomendaciones de canciones
             description: 'Genera y envía el formulario de pre-coordinación al cliente',
         },
         {
+            id: 'horarios-disponibles',
+            icon: '🗓️',
+            title: 'Horarios Disponibles de un Día',
+            needsUrl: false,
+            needsDatePicker: true,
+            description: 'Envía al cliente los horarios libres que tienes en una fecha específica',
+        },
+        {
             id: 'agendar',
             icon: '📅',
             title: 'Agendar Videollamada / Reunión',
@@ -219,6 +286,11 @@ Si están trabados con alguna elección o necesitan recomendaciones de canciones
                 alert('No se pudo generar el link de pre-coordinación. Intentá de nuevo.');
                 return;
             }
+        }
+
+        if (template.id === 'horarios-disponibles' && freeBloques.length === 0) {
+            alert('No tienes horarios disponibles cargados para el día seleccionado. Por favor elige otra fecha o crea bloques en la agenda.');
+            return;
         }
 
         const message = buildMessage(template.id, url);
@@ -274,12 +346,48 @@ Si están trabados con alguna elección o necesitan recomendaciones de canciones
 
                             {selectedId === t.id && (
                                 <div className={styles.previewSection}>
+                                    {t.needsDatePicker && (
+                                        <div className={styles.datePickerContainer} onClick={(e) => e.stopPropagation()}>
+                                            <label className={styles.datePickerLabel}>
+                                                📅 Elegí el día a ofrecer:
+                                            </label>
+                                            <input
+                                                type="date"
+                                                className={styles.datePickerInput}
+                                                value={selectedDia}
+                                                onChange={(e) => setSelectedDia(e.target.value)}
+                                            />
+                                            <div className={styles.slotsStatusRow}>
+                                                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                                                    {loadingDiaBloques ? 'Consultando horarios...' : getFormattedDiaSeleccionado()}
+                                                </span>
+                                                {!loadingDiaBloques && (
+                                                    freeBloques.length > 0 ? (
+                                                        <span className={styles.slotsCountBadge}>
+                                                            🟢 {freeBloques.length} {freeBloques.length === 1 ? 'horario libre' : 'horarios libres'}
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{ fontSize: '12px', color: '#ef4444', fontWeight: '600' }}>
+                                                            0 horarios libres
+                                                        </span>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {t.needsDatePicker && !loadingDiaBloques && freeBloques.length === 0 && (
+                                        <div className={styles.noSlotsWarning}>
+                                            ⚠️ No tienes horarios libres configurados para este día. Selecciona otra fecha o gestiona tus bloques en el calendario.
+                                        </div>
+                                    )}
+
                                     <div className={styles.messagePreview}>
                                         {getPreview(t.id)}
                                     </div>
                                     <button
                                         className={styles.sendButton}
-                                        disabled={generating}
+                                        disabled={generating || (t.needsDatePicker && freeBloques.length === 0)}
                                         onClick={(e) => { e.stopPropagation(); handleSend(t); }}
                                     >
                                         {generating ? (

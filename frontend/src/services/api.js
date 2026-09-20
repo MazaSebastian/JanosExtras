@@ -145,6 +145,18 @@ export const coordinacionesAPI = {
   generarPreCoordinacion: (id) => api.post(`/coordinaciones/${id}/generar-pre-coordinacion`),
 };
 
+// Disponibilidad de Bloques API
+export const disponibilidadBloquesAPI = {
+  getByFecha: (fecha, params = {}) =>
+    api.get('/disponibilidad/bloques', { params: { fecha, ...params } }),
+  create: (data) => api.post('/disponibilidad/bloques', data),
+  delete: (id) => api.delete('/disponibilidad/bloques', { params: { id } }),
+  clearFreeByFecha: (fecha) =>
+    api.delete('/disponibilidad/bloques', { params: { fecha, clear_free: true } }),
+  importarHabituales: (fecha, salon_id = null) =>
+    api.post('/disponibilidad/bloques', { fecha, action: 'importar_habituales', salon_id }),
+};
+
 // Pre-Coordinación API (pública, sin autenticación)
 export const preCoordinacionAPI = {
   getByToken: (token) => {

@@ -49,7 +49,9 @@ let db = {
     { id: 20, nombre: 'Vicente López', direccion: '', activo: true, fecha_creacion: new Date().toISOString() },
     { id: 21, nombre: 'Recoleta', direccion: '', activo: true, fecha_creacion: new Date().toISOString() }
   ],
-  eventos: []
+  eventos: [],
+  disponibilidad_bloques: [],
+  coordinaciones: []
 };
 
 // Cargar base de datos desde archivo
@@ -57,6 +59,8 @@ if (fs.existsSync(DB_FILE)) {
   try {
     const data = fs.readFileSync(DB_FILE, 'utf8');
     db = JSON.parse(data);
+    db.disponibilidad_bloques = db.disponibilidad_bloques || [];
+    db.coordinaciones = db.coordinaciones || [];
   } catch (err) {
     console.log('Error al cargar base de datos, usando datos por defecto');
   }
@@ -214,10 +218,55 @@ export default {
           return { rows: evento ? [{ id: evento.id, dj_id: evento.dj_id }] : [] };
         }
       }
+
+      // Disponibilidad Bloques
+      if (query.includes('FROM DISPONIBILIDAD_BLOQUES')) {
+        const fecha = params[0];
+        const djId = params[1] ? parseInt(params[1]) : null;
+        let bloques = (db.disponibilidad_bloques || []).filter(b => {
+          const matchFecha = String(b.fecha) === String(fecha);
+          const matchDj = !djId || b.dj_id === djId;
+          return matchFecha && matchDj;
+        });
+        bloques = bloques.map(b => {
+          const coord = b.coordinacion_id ? (db.coordinaciones || []).find(c => c.id === b.coordinacion_id) : null;
+          return {
+            ...b,
+            nombre_cliente: coord?.nombre_cliente || null,
+            apellido_cliente: coord?.apellido_cliente || null,
+            nombre_agasajado: coord?.nombre_agasajado || null,
+            tipo_evento: coord?.tipo_evento || null,
+            coordinacion_titulo: coord?.titulo || null,
+            cliente_telefono: coord?.telefono || null,
+            videollamada_completada: coord?.videollamada_completada || false
+          };
+        });
+        return { rows: bloques };
+      }
     }
     
     // INSERT queries
     if (query.startsWith('INSERT')) {
+      if (query.includes('INTO DISPONIBILIDAD_BLOQUES')) {
+        db.disponibilidad_bloques = db.disponibilidad_bloques || [];
+        const newId = db.disponibilidad_bloques.length > 0 ? Math.max(...db.disponibilidad_bloques.map(b => b.id)) + 1 : 1;
+        const newBlock = {
+          id: newId,
+          dj_id: parseInt(params[0]),
+          salon_id: params[1] ? parseInt(params[1]) : null,
+          fecha: params[2],
+          hora_inicio: params[3],
+          hora_fin: params[4] || null,
+          estado: params[5] || 'disponible',
+          coordinacion_id: params[6] ? parseInt(params[6]) : null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        db.disponibilidad_bloques.push(newBlock);
+        saveDB();
+        return { rows: [newBlock] };
+      }
+
       if (query.includes('INTO DJS')) {
         const newId = db.djs.length > 0 ? Math.max(...db.djs.map(d => d.id)) + 1 : 1;
         const newDJ = {
@@ -286,9 +335,72 @@ export default {
         return { rows: [newEvent] };
       }
     }
+
+    // UPDATE queries
+    if (query.startsWith('UPDATE')) {
+      if (query.includes('UPDATE DISPONIBILIDAD_BLOQUES')) {
+        db.disponibilidad_bloques = db.disponibilidad_bloques || [];
+        if (query.includes("ESTADO = 'OCUPADO'")) {
+          const coordId = parseInt(params[0]);
+          const bloqueId = parseInt(params[1]);
+          const b = db.disponibilidad_bloques.find(item => item.id === bloqueId);
+          if (b) {
+            b.estado = 'ocupado';
+            b.coordinacion_id = coordId;
+            b.updated_at = new Date().toISOString();
+            saveDB();
+            return { rows: [b] };
+          }
+        }
+        if (query.includes("ESTADO = 'DISPONIBLE'")) {
+          const coordId = parseInt(params[0]);
+          const updated = [];
+          db.disponibilidad_bloques.forEach(b => {
+            if (b.coordinacion_id === coordId) {
+              b.estado = 'disponible';
+              b.coordinacion_id = null;
+              b.updated_at = new Date().toISOString();
+              updated.push(b);
+            }
+          });
+          saveDB();
+          return { rows: updated };
+        }
+      }
+    }
     
     // DELETE queries
     if (query.startsWith('DELETE')) {
+      if (query.includes('FROM DISPONIBILIDAD_BLOQUES')) {
+        db.disponibilidad_bloques = db.disponibilidad_bloques || [];
+        if (query.includes('WHERE ID = $1')) {
+          const bloqueId = parseInt(params[0]);
+          const idx = db.disponibilidad_bloques.findIndex(b => b.id === bloqueId);
+          if (idx !== -1) {
+            const del = db.disponibilidad_bloques.splice(idx, 1)[0];
+            saveDB();
+            return { rows: [del] };
+          }
+        }
+        if (query.includes("ESTADO = 'DISPONIBLE'")) {
+          const djId = parseInt(params[0]);
+          const fecha = params[1];
+          const remaining = [];
+          const deleted = [];
+          db.disponibilidad_bloques.forEach(b => {
+            if (b.dj_id === djId && String(b.fecha) === String(fecha) && b.estado === 'disponible') {
+              deleted.push(b);
+            } else {
+              remaining.push(b);
+            }
+          });
+          db.disponibilidad_bloques = remaining;
+          saveDB();
+          return { rows: deleted };
+        }
+        return { rows: [] };
+      }
+
       if (query.includes('FROM EVENTOS')) {
         const eventId = parseInt(params[0]);
         const djId = parseInt(params[1]);

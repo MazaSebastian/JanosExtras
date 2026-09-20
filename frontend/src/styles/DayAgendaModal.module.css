@@ -194,6 +194,85 @@
     color: white;
 }
 
+.manageBlocksBtn {
+    background: rgba(255, 213, 79, 0.12);
+    color: #ffd54f;
+    border: 1px solid rgba(255, 213, 79, 0.3);
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.manageBlocksBtn:hover {
+    background: rgba(255, 213, 79, 0.22);
+    border-color: #ffd54f;
+    transform: translateY(-1px);
+}
+
+.blocksSection {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+}
+
+.blocksHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.blocksChipsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.freeChip {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.occupiedChip {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.75;
+}
+
+.configLinkBtn {
+    background: none;
+    border: none;
+    color: #ffd54f;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

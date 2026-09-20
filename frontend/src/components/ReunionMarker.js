@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { coordinacionesAPI } from '@/services/api';
+import { coordinacionesAPI, disponibilidadBloquesAPI } from '@/services/api';
 import { LoadingButton } from '@/components/Loading';
 import CustomSelect from '@/components/CustomSelect';
 import styles from '@/styles/EventMarker.module.css';
@@ -15,6 +15,9 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
     const [allEvents, setAllEvents] = useState([]);
     const [showCompleted, setShowCompleted] = useState(false);
     const [error, setError] = useState('');
+    const [bloques, setBloques] = useState([]);
+    const [loadingBloques, setLoadingBloques] = useState(false);
+    const [selectedBloqueId, setSelectedBloqueId] = useState(null);
     const [formData, setFormData] = useState({
         coordinacion_id: '',
         hora: '15:00',
@@ -101,6 +104,32 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
         }
     }, [availableEvents]);
 
+    const dateStr = date ? format(date, 'yyyy-MM-dd') : '';
+
+    useEffect(() => {
+        const fetchBloques = async () => {
+            if (!dateStr) return;
+            try {
+                setLoadingBloques(true);
+                const res = await disponibilidadBloquesAPI.getByFecha(dateStr, { salon_id: salonId });
+                const bList = res.data?.bloques || [];
+                setBloques(bList);
+                // Si hay bloques libres, auto-seleccionar el primero disponible
+                const primerLibre = bList.find(b => b.estado === 'disponible');
+                if (primerLibre) {
+                    setSelectedBloqueId(primerLibre.id);
+                    setFormData(prev => ({ ...prev, hora: primerLibre.hora_inicio }));
+                }
+            } catch (err) {
+                console.error('Error cargando bloques para el día en ReunionMarker:', err);
+            } finally {
+                setLoadingBloques(false);
+            }
+        };
+
+        fetchBloques();
+    }, [dateStr, salonId]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.coordinacion_id) {
@@ -118,7 +147,8 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
             await coordinacionesAPI.update(formData.coordinacion_id, {
                 videollamada_agendada: true,
                 videollamada_fecha: combinedDate,
-                videollamada_completada: false
+                videollamada_completada: false,
+                bloque_id: selectedBloqueId || undefined
             });
 
             if (onEventCreated) {
@@ -240,8 +270,65 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
                         )}
                     </div>
 
+                    {/* Bloques de Disponibilidad para este día */}
                     <div className={styles.formGroup}>
-                        <label>Horario (Formato 24hs) *</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <label style={{ margin: 0, fontWeight: '600' }}>
+                                Bloques de Horarios Disponibles
+                            </label>
+                            {loadingBloques && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Cargando...</span>}
+                        </div>
+
+                        {bloques.length > 0 ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                                {bloques.map((b) => {
+                                    const isOcupado = b.estado === 'ocupado';
+                                    const isSelected = selectedBloqueId === b.id;
+                                    return (
+                                        <button
+                                            key={b.id}
+                                            type="button"
+                                            disabled={isOcupado}
+                                            onClick={() => {
+                                                setSelectedBloqueId(b.id);
+                                                setFormData(prev => ({ ...prev, hora: b.hora_inicio }));
+                                            }}
+                                            style={{
+                                                padding: '8px 12px',
+                                                borderRadius: '8px',
+                                                border: isSelected ? '2px solid #4285F4' : '1px solid #cbd5e1',
+                                                background: isOcupado 
+                                                    ? '#fee2e2' 
+                                                    : isSelected 
+                                                    ? '#eff6ff' 
+                                                    : '#ffffff',
+                                                color: isOcupado ? '#991b1b' : isSelected ? '#1d4ed8' : '#334155',
+                                                fontWeight: isSelected ? '700' : '500',
+                                                cursor: isOcupado ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                fontSize: '0.88rem',
+                                                transition: 'all 0.15s'
+                                            }}
+                                            title={isOcupado ? `Horario ocupado por ${b.nombre_cliente || 'otro cliente'}` : 'Seleccionar este bloque de horario'}
+                                        >
+                                            <span>{isOcupado ? '🔒' : isSelected ? '✅' : '🟢'}</span>
+                                            <span>{b.hora_inicio} hs</span>
+                                            {isOcupado && <span style={{ fontSize: '0.75rem' }}>(Ocupado)</span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p style={{ margin: '0 0 10px 0', fontSize: '0.82rem', color: '#64748b', fontStyle: 'italic' }}>
+                                ℹ️ No hay bloques pre-configurados para este día. Puedes elegir la hora abajo directamente.
+                            </p>
+                        )}
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label>Horario Seleccionado (Formato 24hs) *</label>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                             <div style={{ flex: 1 }}>
                                 <CustomSelect
@@ -249,6 +336,7 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
                                     options={HOURS}
                                     onChange={(h) => {
                                         const mins = formData.hora.split(':')[1] || '00';
+                                        setSelectedBloqueId(null);
                                         setFormData({ ...formData, hora: `${h}:${mins}` });
                                     }}
                                     placeholder="HH"
@@ -261,6 +349,7 @@ export default function ReunionMarker({ date, salonId, djId, onEventCreated, onC
                                     options={MINUTES}
                                     onChange={(m) => {
                                         const hrs = formData.hora.split(':')[0] || '15';
+                                        setSelectedBloqueId(null);
                                         setFormData({ ...formData, hora: `${hrs}:${m}` });
                                     }}
                                     placeholder="MM"

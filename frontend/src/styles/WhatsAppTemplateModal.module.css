@@ -248,3 +248,67 @@
 .closeButton:hover {
     background: #ddd;
 }
+
+/* ── Date Picker for Disponibilidad Template ── */
+.datePickerContainer {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.datePickerLabel {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.datePickerInput {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #1e293b;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.datePickerInput:focus {
+    border-color: #25d366;
+    box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+}
+
+.slotsStatusRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.slotsCountBadge {
+    font-size: 12px;
+    font-weight: 600;
+    color: #15803d;
+    background: #dcfce7;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.noSlotsWarning {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    color: #991b1b;
+    font-size: 12px;
+    line-height: 1.5;
+}
