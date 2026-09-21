@@ -6,6 +6,13 @@ import styles from '@/styles/GestionBloquesModal.module.css';
 
 const PRESET_HOURS = ['14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
 
+// Lista de horarios en formato 24hs (intervalos de 15 minutos de 00:00 a 23:45)
+const TIME_OPTIONS = Array.from({ length: 24 * 4 }, (_, i) => {
+    const h = Math.floor(i / 4);
+    const m = (i % 4) * 15;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+});
+
 export default function GestionBloquesModal({
     date,
     salonId,
@@ -158,12 +165,17 @@ export default function GestionBloquesModal({
                     </button>
 
                     <div className={styles.addBlockRow}>
-                        <input
-                            type="time"
+                        <select
                             className={styles.timeSelect}
                             value={selectedHour}
                             onChange={(e) => setSelectedHour(e.target.value)}
-                        />
+                        >
+                            {TIME_OPTIONS.map((time) => (
+                                <option key={time} value={time}>
+                                    {time} hs
+                                </option>
+                            ))}
+                        </select>
                         <button
                             className={styles.addBtn}
                             onClick={() => handleAddBlock()}

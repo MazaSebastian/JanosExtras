@@ -121,8 +121,11 @@
     padding: 9px 12px;
     border-radius: 8px;
     font-size: 0.95rem;
+    font-weight: 500;
     outline: none;
-    transition: border-color 0.2s;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 42px;
 }
 
 .timeSelect:focus {
