@@ -7,7 +7,7 @@ import CustomSelect from '@/components/CustomSelect';
 import Loading from '@/components/Loading';
 import styles from '@/styles/CoordinacionFlujo.module.css';
 import { formatDateFromDB } from '@/utils/dateFormat';
-import { normalizarTipoEvento } from '@/utils/tipoEventoHelper';
+import { normalizarTipoEvento, esValorPendiente, evalCondicional, VALOR_PENDIENTE } from '@/utils/tipoEventoHelper';
 
 // Definición de pasos por tipo de evento
 export const FLUJOS_POR_TIPO = {
@@ -817,11 +817,28 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
             flujos.forEach(pasoIter => {
                pasoIter.preguntas.forEach(p => {
                   const valor = respuestasExistentes[p.id];
-                  if (valor === '__PENDIENTE__') {
+                  if (esValorPendiente(valor)) {
                      pendientesIds.add(p.id);
                   }
                });
             });
+
+            // Expandir pendientesIds para incluir preguntas condicionales dependientes de preguntas pendientes
+            let hayCambios = true;
+            while (hayCambios) {
+              hayCambios = false;
+              flujos.forEach(pasoIter => {
+                pasoIter.preguntas.forEach(p => {
+                  if (p.condicional && p.condicional.pregunta && pendientesIds.has(p.condicional.pregunta)) {
+                    if (!pendientesIds.has(p.id)) {
+                      pendientesIds.add(p.id);
+                      hayCambios = true;
+                    }
+                  }
+                });
+              });
+            }
+
             setPreguntasPendientesIniciales(pendientesIds);
           }
         }
@@ -864,7 +881,13 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
     if (!soloPendientes || !preguntasPendientesIniciales) return flujosFiltradosPorSubtipo;
     
     return flujosFiltradosPorSubtipo.map(pasoIter => {
-      const preguntasFiltradas = pasoIter.preguntas.filter(p => preguntasPendientesIniciales.has(p.id));
+      const preguntasFiltradas = pasoIter.preguntas.filter(p => {
+        if (preguntasPendientesIniciales.has(p.id)) return true;
+        if (p.condicional && p.condicional.pregunta && preguntasPendientesIniciales.has(p.condicional.pregunta)) {
+          return true;
+        }
+        return false;
+      });
       if (preguntasFiltradas.length > 0) {
         return { ...pasoIter, preguntas: preguntasFiltradas };
       }
@@ -940,11 +963,8 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
     });
   };
 
-  // Constante para identificar respuestas pendientes
-  const VALOR_PENDIENTE = '__PENDIENTE__';
-
   const esPendiente = (valor) => {
-    return valor === VALOR_PENDIENTE || valor === '__PENDIENTE__';
+    return esValorPendiente(valor);
   };
 
   const validarPaso = () => {
@@ -955,7 +975,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
     const preguntasRequeridas = pasoActualObj.preguntas.filter(p => {
       // Si es condicional, verificar si debe mostrarse
       if (p.condicional && p.condicional.pregunta) {
-        const debeMostrar = respuestas[p.condicional.pregunta] === p.condicional.valor;
+        const debeMostrar = evalCondicional(respuestas[p.condicional.pregunta], p.condicional.valor);
         return p.requerido && debeMostrar;
       }
       return p.requerido;
@@ -1308,7 +1328,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
               paso.preguntas.forEach((pregunta) => {
                 const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
                 const debeMostrar = !esCondicional ||
-                  (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                  evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
                 if (!debeMostrar) return;
 
@@ -1354,7 +1374,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
             const tieneRespuestas = paso.preguntas.some((p) => {
               const esCondicional = p.condicional && p.condicional.pregunta;
               const debeMostrar = !esCondicional ||
-                (respuestas[p.condicional.pregunta] === p.condicional.valor);
+                evalCondicional(respuestas[p.condicional.pregunta], p.condicional.valor);
               if (!debeMostrar) return false;
               const valor = respuestas[p.id];
               // Incluir pendientes en la verificación
@@ -1369,7 +1389,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
                 {paso.preguntas.map((pregunta) => {
                   const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
                   const debeMostrar = !esCondicional ||
-                    (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                    evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
                   if (!debeMostrar) return null;
 
@@ -1478,7 +1498,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
               // Verificar si la pregunta es condicional
               const esCondicional = pregunta.condicional && pregunta.condicional.pregunta;
               const debeMostrar = !esCondicional ||
-                (respuestas[pregunta.condicional.pregunta] === pregunta.condicional.valor);
+                evalCondicional(respuestas[pregunta.condicional.pregunta], pregunta.condicional.valor);
 
               // Si es condicional y no debe mostrarse, no renderizar
               if (esCondicional && !debeMostrar) {
@@ -1608,6 +1628,7 @@ export default function CoordinacionFlujo({ coordinacionId, soloPendientes = fal
                         required={pregunta.requerido && !estaPendiente}
                         disabled={estaPendiente}
                         style={estaPendiente ? { opacity: 0.5, backgroundColor: '#fff3e0' } : {}}
+                        placeholder={pregunta.placeholder || ''}
                       />
                       <button
                         type="button"
